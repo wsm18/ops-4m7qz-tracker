@@ -364,6 +364,9 @@
   .recovery-card h3{font-size:13.5px;color:var(--ember);letter-spacing:.04em;margin-bottom:7px;display:flex;align-items:center;gap:7px}
   .recovery-line{font-size:13px;color:var(--ink-dim);line-height:1.55;padding:3px 0}
   .recovery-line b{color:var(--ember)}
+  .recovery-card.balance{background:linear-gradient(180deg,rgba(124,147,168,.1),transparent);border-color:var(--violet)}
+  .recovery-card.balance h3{color:var(--violet)}
+  .recovery-card.balance .recovery-line b{color:var(--violet)}
 
   /* ---- Skills ---- */
   .sk-form-title{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:10px}
@@ -412,8 +415,25 @@
   .sk-fade-note.warn{color:var(--ember)}
   .sk-card-del{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;flex:none}
   .sk-card-del:hover{color:var(--blood)}
-  .sk-cat-hd{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--violet);margin:18px 2px 10px;padding-bottom:5px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
-  .sk-cat-hd span{color:var(--ink-faint);font-weight:400}
+  .sk-cat-hd{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--violet);margin:18px 2px 10px;padding-bottom:5px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .sk-cat-lvl{color:var(--gold);font-weight:700;letter-spacing:.04em;background:rgba(184,160,106,.12);border:1px solid var(--gold);padding:2px 10px;border-radius:20px}
+  /* group (parent) skill */
+  .sk-group{border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:11px;padding:12px 13px;margin-bottom:11px;background:rgba(184,160,106,.04)}
+  .sk-group-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .sk-group-name{font-size:15px;font-weight:700;flex:1}
+  .sk-group-sub{font-size:11px;color:var(--ink-faint);font-weight:400}
+  .sk-level-badge.group{color:var(--gold-bright);border-color:var(--gold)}
+  .sk-subs{display:flex;flex-direction:column;gap:8px;padding-left:6px;border-left:1px dashed var(--line);margin-left:3px}
+  .sk-card.sk-sub{background:var(--panel);border-radius:9px}
+  .sk-auto{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--jade);border:1px solid #3c5230;border-radius:10px;padding:1px 6px;margin-left:6px;vertical-align:middle}
+  /* right-side category jump bar (skills tab only) */
+  .sk-jumpbar{position:fixed;right:10px;top:50%;transform:translateY(-50%);z-index:40;display:none;flex-direction:column;gap:6px}
+  .sk-jumpbar.show{display:flex}
+  .sk-jumpbar button{background:var(--panel);border:1px solid var(--line);color:var(--ink-dim);width:38px;height:38px;border-radius:10px;font-family:inherit;font-size:16px;cursor:pointer;display:grid;place-items:center;transition:.15s}
+  .sk-jumpbar button:hover{border-color:var(--violet);color:var(--violet);transform:scale(1.08)}
+  .sk-jumpbar button .jb-tip{position:absolute;right:46px;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);padding:4px 9px;border-radius:7px;font-size:12px;white-space:nowrap;opacity:0;pointer-events:none;transition:.15s}
+  .sk-jumpbar button:hover .jb-tip{opacity:1}
+  @media(max-width:680px){.sk-jumpbar{right:4px}.sk-jumpbar button{width:32px;height:32px;font-size:14px}}
   .sk-card-edit{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;flex:none}
   .sk-card-edit:hover{color:var(--gold)}
 
@@ -797,6 +817,7 @@
 
   <!-- SKILLS -->
   <section class="view" id="view-skills">
+    <div class="sk-jumpbar" id="skJumpbar"></div>
     <div class="sec-h"><h2>Skills</h2><span class="hint">level up · keep sharp</span></div>
     <div class="plan-intro">Track skills you're building. Each has <b>levels that build on each other</b> — every level is a concrete ability you must prove with a promotion test. Set how fast a skill fades; if you don't do a maintenance quest in time, it drops a level until you re-prove it. Active quests appear automatically below.</div>
 
@@ -820,6 +841,8 @@
           <option value="180">Fades in 6 months</option>
         </select>
       </div>
+      <label class="lg-label" style="margin-top:9px">Make this a sub-skill of (optional)</label>
+      <select id="skParent"><option value="">— top-level skill —</option></select>
       <div class="sk-levels-help">Define each level as an ability you can test (level 1 first). Add as many as you want.</div>
       <div id="skLevelInputs"></div>
       <button class="sk-addlevel" id="skAddLevel">+ add a level</button>
@@ -836,6 +859,7 @@
   <!-- PLAN -->
   <section class="view" id="view-plan">
     <div class="sec-h"><h2>FM — Training</h2><span class="hint">AFT field manual</span></div>
+    <div id="skillBalance"></div>
     <div id="recoveryAdvisory"></div>
     <div id="adaptiveTargets"></div>
     <div class="plan-intro">
@@ -1268,6 +1292,10 @@ function load(){
     merged.volunteer=r.volunteer||[];
     merged.lifeSkills=r.lifeSkills||[];
     merged._seeded=r._seeded||false;
+    // migration: if skills exist but lack hierarchy fields, they're the old flat set — reseed fresh
+    if(merged.lifeSkills.length && merged.lifeSkills.every(s=>s.group===undefined && s.parent===undefined)){
+      merged.lifeSkills=[]; merged._seeded=false;
+    }
     merged.navLabels=r.navLabels!==undefined?r.navLabels:true;
     return merged;
   }catch(e){return structuredClone(DEFAULT)}
@@ -1376,8 +1404,9 @@ function render(){
   if(typeof renderAft==="function") renderAft();
   if(typeof renderLog==="function") renderLog();
   if(typeof renderPT==="function") renderPT();
+  if(typeof renderSkillBalance==="function") renderSkillBalance();
   if(typeof renderRecoveryAdvisory==="function") renderRecoveryAdvisory();
-  if(typeof renderSkills==="function") renderSkills();
+  if(typeof renderSkillsTab==="function") renderSkillsTab();
   if(typeof renderAdaptiveTargets==="function") renderAdaptiveTargets();
   if(typeof renderBaseline==="function") renderBaseline();
   if(typeof renderBoard==="function") renderBoard();
@@ -1467,6 +1496,7 @@ document.querySelectorAll("nav.tabs button[data-tab]").forEach(b=>b.onclick=()=>
   document.querySelectorAll(".view").forEach(x=>x.classList.remove("on"));
   b.classList.add("on");
   document.getElementById("view-"+b.dataset.tab).classList.add("on");
+  const jb=document.getElementById("skJumpbar"); if(jb) jb.classList.toggle("show", b.dataset.tab==="skills");
   window.scrollTo(0,0);
 });
 // side-rail label toggle (desktop)
@@ -2111,6 +2141,39 @@ function renderAdaptiveTargets(){
 }
 
 const AREA_LABEL={legs:"legs",push:"push (chest/shoulders)",pull:"pull (back)",core:"core",cardio:"cardio/running"};
+// Reads every Physical leaf skill, finds laggards vs strengths, and builds whole-body guidance.
+function renderSkillBalance(){
+  const el=document.getElementById("skillBalance"); if(!el) return;
+  if(!S.lifeSkills||!S.lifeSkills.length){ el.innerHTML=""; return; }
+  // every physical leaf skill (sub-skills + standalone physical skills), excluding group containers
+  const leaves=S.lifeSkills.filter(s=>s.cat==="physical" && !s.group && s.levels && s.levels.length);
+  if(leaves.length<2){ el.innerHTML=""; return; }
+  const lvl=s=>skEffectiveLevel(s);
+  const avg=leaves.reduce((a,s)=>a+lvl(s),0)/leaves.length;
+  const withLvl=leaves.map(s=>({name:s.name, parent:s.parent, l:lvl(s), max:s.levels.length})).sort((a,b)=>a.l-b.l);
+  // laggards: clearly below your average (and not already maxed); strengths: at/above avg
+  const lag=withLvl.filter(s=>s.l < avg-0.5 || s.l===0);
+  const strong=withLvl.filter(s=>s.l>=avg && s.l>0).slice(-3).reverse();
+  const overall=fmtLvl(catRolledLevel("physical"));
+  let lines=`<div class="recovery-line">Overall physical level: <b>${overall}</b> (average across every physical skill). The way up is to raise your lowest areas while holding your best.</div>`;
+  if(lag.length){
+    const names=lag.slice(0,5).map(s=>`${esc(s.name)} (Lv ${fmtLvl(s.l)})`);
+    lines+=`<div class="recovery-line">🎯 <b>Prioritize these</b> — they're dragging your whole-body level down: ${names.join(", ")}. Put extra volume here.</div>`;
+  } else {
+    lines+=`<div class="recovery-line">✅ Your physical skills are well-balanced — no single area is lagging. Push the whole set up together.</div>`;
+  }
+  if(strong.length){
+    lines+=`<div class="recovery-line">💪 <b>Keep pushing your strengths</b> too: ${strong.map(s=>esc(s.name)+" (Lv "+fmtLvl(s.l)+")").join(", ")} — maintain and keep climbing, don't coast.</div>`;
+  }
+  // make sure mobility/swimming aren't forgotten on the road to "elite"
+  const neglected=leaves.filter(s=>["Flexibility & mobility","Swimming"].includes(s.name) && lvl(s) < Math.max(1, avg-1));
+  if(neglected.length){
+    lines+=`<div class="recovery-line">🧘 Don't skip <b>${neglected.map(s=>esc(s.name)).join(" & ")}</b> — true all-around fitness needs these, not just the AFT lifts.</div>`;
+  }
+  lines+=`<div class="recovery-line" style="color:var(--ink-faint);font-style:italic">Train laggards first in each session, keep one maintenance set for strengths, and log it so the skills update.</div>`;
+  el.innerHTML=`<div class="recovery-card balance"><h3>📊 Whole-body balance (from your skill levels)</h3>${lines}</div>`;
+}
+
 function renderRecoveryAdvisory(){
   const el=document.getElementById("recoveryAdvisory"); if(!el) return;
   const load=recoveryLoad();
@@ -2481,6 +2544,7 @@ document.body.addEventListener("click",e=>{
   const evedit=e.target.closest("[data-evedit]"); if(evedit){ evEdit(evedit.dataset.evedit); return; }
   const mbedit=e.target.closest("[data-mbedit]"); if(mbedit){ mbEdit(mbedit.dataset.mbedit); return; }
   const skedit=e.target.closest("[data-skedit]"); if(skedit){ skEdit(skedit.dataset.skedit); return; }
+  const skjump=e.target.closest("[data-skjump]"); if(skjump){ const t=document.getElementById("skcat-"+skjump.dataset.skjump); if(t) t.scrollIntoView({behavior:"smooth",block:"start"}); return; }
 });
 const _ptSave=document.getElementById("ptSave"); if(_ptSave) _ptSave.onclick=savePT;
 const _ptText=document.getElementById("ptText"); if(_ptText) _ptText.addEventListener("input",ptOnText);
@@ -2732,56 +2796,136 @@ const SK_CAT={tactical:"Tactical/field",physical:"Physical",technical:"Technical
 const SK_CAT_ORDER=["tactical","physical","technical","leadership","academic","personal"];
 // Seed skills — editable starters across every category, each with a level ladder.
 // fadeDays = how long a level lasts without a maintenance/practice quest.
+/* Hierarchical skill tree:
+   - cat (category): Physical, Tactical, etc. — level = avg of its top-level skills
+   - skill: a group (group:true) whose level = avg of its sub-skills, OR a leaf with its own ladder
+   - sub-skill: parent:"Skill Name" — each its own independent ladder you level directly
+   Each leaf has `levels` (ability ladder). Group skills omit `levels`. */
 const SEED_SKILLS=[
-  // ---- Tactical / field ----
+  // ================= TACTICAL =================
   {name:"Land navigation", cat:"tactical", fadeDays:60, levels:[
     "Read a military map: grid coordinates, terrain features, marginal data",
     "Plot a point and shoot an azimuth with a lensatic compass",
     "Complete a 3-point day land-nav course unassisted",
     "Complete a night land-nav course unassisted",
-    "Navigate cross-country over 5+ km with map & compass only"]},
+    "Navigate cross-country over 5+ km with map & compass only",
+    "Self-locate and re-orient after going off course, no GPS",
+    "Plan and lead a squad nav route over varied terrain"]},
   {name:"Marksmanship (M4)", cat:"tactical", fadeDays:90, levels:[
     "Clear, assemble, and perform a function check safely",
     "Zero your weapon and explain BRM fundamentals",
+    "Group within standard at 25m",
     "Qualify (hit standard) on a known-distance/scored range",
     "Engage targets from multiple firing positions under time",
+    "Hit consistently at extended range / low light",
     "Coach another shooter to qualification"]},
   {name:"Tactical movement", cat:"tactical", fadeDays:60, levels:[
     "Demonstrate the 3-5 second rush and high/low crawl",
     "Move as part of a buddy team with bounding overwatch",
+    "Use cover, concealment, and terrain while moving",
     "Lead a team through a movement formation switch",
-    "React to contact as a team leader"]},
+    "React to contact as a team leader",
+    "Coordinate movement of multiple teams"]},
   {name:"Troop leading procedures", cat:"tactical", fadeDays:90, levels:[
     "Recite the 8 TLPs in order",
     "Receive a mission and issue a warning order",
+    "Conduct a map recon and build a tentative plan",
     "Build and brief an OPORD (5 paragraphs)",
-    "Lead a squad through a planned mission start-to-finish"]},
-  // ---- Physical (transferred from the old Fitness track) ----
-  {name:"Physical fitness (AFT)", cat:"physical", fadeDays:30, levels:[
-    "Pass every AFT event at the minimum standard",
-    "Score 70+ in every event",
-    "Score 80+ in every event",
-    "Score 90+ in every event",
-    "Max (100) at least one event and 90+ in the rest"]},
-  {name:"Running / endurance", cat:"physical", fadeDays:21, levels:[
-    "Run 2 miles without stopping",
-    "Run a sub-18:00 2-mile",
-    "Run a sub-16:00 2-mile",
-    "Complete a 4-mile ruck (35 lb) under time",
-    "Complete a 12-mile ruck (35 lb) under 3 hours"]},
-  {name:"Strength", cat:"physical", fadeDays:30, levels:[
-    "Do 30 hand-release push-ups in 2 min",
-    "Deadlift 1.5x bodyweight with form",
+    "Lead a squad through a planned mission start-to-finish",
+    "Adjust the plan under changing conditions and re-brief"]},
+  {name:"Fieldcraft & survival", cat:"tactical", fadeDays:120, levels:[
+    "Pack and wear your kit correctly for a field problem",
+    "Build a poncho hooch and stay dry overnight",
+    "Purify water and manage rations in the field",
+    "Navigate and operate for 24h in the field self-sufficiently",
+    "Lead a team through a multi-day field problem"]},
+
+  // ================= PHYSICAL (exercise sub-skills under parent groups) =================
+  // -- Strength (group of lifts/calisthenics) --
+  {name:"Strength", cat:"physical", group:true, fadeDays:45},
+  {name:"Push-ups", parent:"Strength", cat:"physical", fadeDays:30, auto:"ex:pushups", levels:[
+    "Do 10 hand-release push-ups unbroken",
+    "Do 20 in 2 minutes",
+    "Do 30 in 2 minutes",
+    "Do 45 in 2 minutes",
+    "Do 60 in 2 minutes",
+    "Do 75+ in 2 minutes"]},
+  {name:"Deadlift", parent:"Strength", cat:"physical", fadeDays:45, auto:"ex:deadlift", levels:[
+    "Deadlift with correct form (bodyweight)",
+    "Deadlift 1.25x bodyweight",
+    "Deadlift 1.5x bodyweight",
+    "Deadlift 1.75x bodyweight",
+    "Deadlift 2x bodyweight",
+    "Deadlift 2.25x+ bodyweight"]},
+  {name:"Pull-ups", parent:"Strength", cat:"physical", fadeDays:30, auto:"ex:pullups", levels:[
+    "Do 1 strict dead-hang pull-up",
+    "Do 5 strict pull-ups",
     "Do 10 strict pull-ups",
-    "Deadlift 2x bodyweight with form"]},
-  {name:"Swimming", cat:"physical", fadeDays:90, levels:[
+    "Do 15 strict pull-ups",
+    "Do 20 strict pull-ups",
+    "Do weighted pull-ups (+25 lb x5)"]},
+  {name:"Squat", parent:"Strength", cat:"physical", fadeDays:45, auto:"ex:squat", levels:[
+    "Bodyweight squat with full depth & form",
+    "Back squat 1x bodyweight",
+    "Back squat 1.5x bodyweight",
+    "Back squat 2x bodyweight",
+    "Pistol squat (each leg)"]},
+  // -- Endurance (group) --
+  {name:"Endurance", cat:"physical", group:true, fadeDays:30},
+  {name:"Run (2-mile)", parent:"Endurance", cat:"physical", fadeDays:30, auto:"ex:run", levels:[
+    "Run 2 miles without stopping",
+    "Sub-20:00 2-mile",
+    "Sub-18:00 2-mile",
+    "Sub-16:00 2-mile",
+    "Sub-14:00 2-mile",
+    "Sub-13:00 2-mile"]},
+  {name:"Ruck", parent:"Endurance", cat:"physical", fadeDays:45, auto:"ex:ruck", levels:[
+    "Ruck 2 miles with 35 lb",
+    "Ruck 4 miles with 35 lb under time",
+    "Ruck 6 miles with 35 lb under time",
+    "Ruck 12 miles with 35 lb under 3 hours",
+    "Ruck 12 miles with 45+ lb under 3 hours"]},
+  {name:"Sprint-Drag-Carry", parent:"Endurance", cat:"physical", fadeDays:30, auto:"ex:sdc", levels:[
+    "Complete the SDC unbroken",
+    "SDC under 2:30",
+    "SDC under 2:00",
+    "SDC under 1:45",
+    "SDC under 1:33"]},
+  // -- Core (group) --
+  {name:"Core", cat:"physical", group:true, fadeDays:30},
+  {name:"Plank", parent:"Core", cat:"physical", fadeDays:30, auto:"ex:plank", levels:[
+    "Hold a plank 1:00",
+    "Hold a plank 1:30",
+    "Hold a plank 2:30",
+    "Hold a plank 3:00",
+    "Hold a plank 3:40+"]},
+  {name:"Loaded carries", parent:"Core", cat:"physical", fadeDays:45, auto:"ex:carry", levels:[
+    "Farmer's carry bodyweight total for 50 ft",
+    "Carry for 100 ft without setting down",
+    "Heavy jug/sandbag carry for distance",
+    "Carry under time as part of a circuit"]},
+  {name:"Lunges", parent:"Core", cat:"physical", fadeDays:30, auto:"ex:lunges", levels:[
+    "20 walking lunges with good form",
+    "40 walking lunges unbroken",
+    "Weighted walking lunges (25 lb)",
+    "Weighted lunges for distance (50+ yd)"]},
+  // -- Other physical --
+  {name:"Swimming", cat:"physical", fadeDays:120, levels:[
     "Tread water 5 minutes",
     "Swim 100m continuously",
     "Swim 100m in uniform",
-    "Complete the Combat Water Survival Test"]},
-  // ---- Technical / cyber ----
+    "Complete the Combat Water Survival Test",
+    "Swim 500m continuously"]},
+  {name:"Flexibility & mobility", cat:"physical", fadeDays:30, levels:[
+    "Touch your toes / full hamstring reach",
+    "Full deep squat hold 1:00",
+    "Maintain a daily mobility routine",
+    "Pain-free full range in all major joints"]},
+
+  // ================= TECHNICAL =================
   {name:"Linux / command line", cat:"technical", fadeDays:60, levels:[
     "Navigate the filesystem and manage files from the shell",
+    "Use pipes, redirects, grep, and find",
     "Write a basic bash script with variables and loops",
     "Manage processes, permissions, and users",
     "Configure networking and services on a Linux host",
@@ -2791,23 +2935,28 @@ const SEED_SKILLS=[
     "Subnet IPv4 by hand",
     "Configure a router/switch (VLANs, routing)",
     "Capture and analyze traffic with Wireshark",
+    "Diagnose a broken connection end-to-end",
     "Design a small secure network"]},
   {name:"Programming (Python)", cat:"technical", fadeDays:45, levels:[
     "Write scripts with functions, loops, and conditionals",
     "Work with files, APIs, and libraries",
     "Build a small CLI tool end-to-end",
-    "Write tested, modular code in a project structure"]},
+    "Write tested, modular code in a project structure",
+    "Build a full app with external dependencies"]},
   {name:"Cybersecurity fundamentals", cat:"technical", fadeDays:90, levels:[
     "Explain the CIA triad and common attack types",
     "Use basic recon tools (nmap, etc.) in a lab",
     "Complete a guided CTF / lab exercise",
-    "Explain DCO vs OCO and the cyber kill chain"]},
-  // ---- Leadership ----
+    "Explain DCO vs OCO and the cyber kill chain",
+    "Complete an unguided CTF challenge"]},
+
+  // ================= LEADERSHIP =================
   {name:"Public speaking", cat:"leadership", fadeDays:60, levels:[
     "Deliver a 2-minute briefing without notes",
     "Brief a plan to a small team clearly",
     "Present to a room of 20+ and handle questions",
-    "Deliver an impromptu speech confidently"]},
+    "Deliver an impromptu speech confidently",
+    "Keynote / brief senior leaders under pressure"]},
   {name:"Drill & ceremony", cat:"leadership", fadeDays:90, levels:[
     "Execute all stationary drill movements",
     "Call a squad through marching movements",
@@ -2823,7 +2972,8 @@ const SEED_SKILLS=[
     "Run a quick risk assessment before acting",
     "Lead a team through an unexpected change of plan",
     "Stay calm and direct others in a real crisis"]},
-  // ---- Academic ----
+
+  // ================= ACADEMIC =================
   {name:"Military history", cat:"academic", fadeDays:120, levels:[
     "Know the Army's founding and major eras",
     "Explain 3 battles and their leadership lessons",
@@ -2833,16 +2983,18 @@ const SEED_SKILLS=[
     "Write a clear paragraph with one main idea",
     "Write a structured essay with a thesis",
     "Write a concise military memo (1 page)",
-    "Edit others' writing for clarity and concision"]},
+    "Edit others' writing for clarity and concision",
+    "Produce a polished long-form piece (OPORD, paper, article)"]},
   {name:"Study & retention", cat:"academic", fadeDays:30, levels:[
     "Use active recall on a set of facts",
     "Build and follow a spaced-repetition routine",
     "Teach a topic from memory (the Feynman test)",
     "Maintain a 3.5+ term GPA while training"]},
-  // ---- Personal / life ----
+
+  // ================= PERSONAL =================
   {name:"Cooking", cat:"personal", fadeDays:45, levels:[
     "Cook 3 simple meals safely (eggs, rice, pasta)",
-    "Cook a balanced meal with a protein, starch, and vegetable",
+    "Cook a balanced meal with protein, starch, and vegetable",
     "Meal-prep a week of food on a budget",
     "Cook a multi-dish meal for guests from scratch",
     "Improvise a good meal from whatever's on hand"]},
@@ -2850,7 +3002,8 @@ const SEED_SKILLS=[
     "Track a monthly budget",
     "Build a starter emergency fund",
     "Understand and use a TSP/retirement account",
-    "Invest with a basic long-term plan"]},
+    "Invest with a basic long-term plan",
+    "Run a full budget with savings, investing, and goals"]},
   {name:"First aid", cat:"personal", fadeDays:90, levels:[
     "Apply a tourniquet and pressure dressing correctly",
     "Perform the MARCH assessment",
@@ -2876,11 +3029,67 @@ function seedSkillsIfEmpty(){
   if(S.lifeSkills && S.lifeSkills.length) return;
   if(S._seeded) return;
   S.lifeSkills=SEED_SKILLS.map(s=>({
-    id:id(), name:s.name, cat:s.cat, fadeDays:s.fadeDays,
+    id:id(), name:s.name, cat:s.cat, parent:s.parent||null, group:!!s.group,
+    fadeDays:s.fadeDays, auto:s.auto||null,
     currentLevel:0, lastQuestTs:Date.now(),
-    levels:s.levels.map((ability,i)=>({n:i+1,ability})), history:[], seeded:true
+    levels:(s.levels||[]).map((ability,i)=>({n:i+1,ability})), history:[], seeded:true
   }));
   S._seeded=true; save();
+}
+
+// Auto-update skills from real activity in other sections.
+// Returns true if anything changed (so render can re-save).
+function aftLevelFromScores(scores){
+  if(!scores) return 0;
+  const vals=[scores.dl,scores.hrp,scores.sdc,scores.plank,scores.run].map(v=>v||0);
+  const min=Math.min(...vals), max=Math.max(...vals);
+  if(min<60) return 0;                 // not all events passed
+  if(min>=90 && max>=100) return 5;    // a max + 90s everywhere
+  if(min>=90) return 4;
+  if(min>=80) return 3;
+  if(min>=70) return 2;
+  return 1;                            // all passed (>=60)
+}
+// map a single AFT event score (0-100) to a sub-skill level (1-6 ladder)
+function eventScoreToLevel(score, maxLevels){
+  if(score==null||score<60) return 0;
+  if(score>=100) return maxLevels;            // maxed event = top of ladder
+  if(score>=90) return Math.min(maxLevels,5);
+  if(score>=80) return Math.min(maxLevels,4);
+  if(score>=70) return Math.min(maxLevels,3);
+  return Math.min(maxLevels,2);               // passed (60-69)
+}
+function syncSkillsFromActivity(){
+  if(!S.lifeSkills||!S.lifeSkills.length) return false;
+  let changed=false;
+  const now=Date.now();
+  const last=(S.aft||[])[S.aft.length-1];
+  // recent workout text (for timer refresh of practiced exercises)
+  const recentWk=(S.workouts||[]).filter(w=>now-(w.ts||0)<7*864e5);
+  const recentText=JSON.stringify(recentWk.map(w=>[w.session,w.exercises])).toLowerCase();
+  const recentPT=(S.ptLog||[]).filter(p=>now-(p.ts||0)<7*864e5);
+  const ptText=JSON.stringify(recentPT.map(p=>[p.areas,p.text||""])).toLowerCase();
+  // which auto-exercise keys were practiced recently (refresh their fade timer)
+  const practiced=k=>{
+    const map={pushups:["push-up","hand-release","hrp","push"],deadlift:["deadlift","hinge","dl"],pullups:["pull-up","pullup","row","pull"],squat:["squat"],run:["run","2-mile","sprint","interval","cardio"],ruck:["ruck","march"],sdc:["sprint-drag","sdc","drag","carry"],plank:["plank","core","hollow"],carry:["carry","carries","farmer","jug","sandbag"],lunges:["lunge"]};
+    const terms=map[k]||[k];
+    return terms.some(t=>recentText.includes(t)||ptText.includes(t));
+  };
+  S.lifeSkills.forEach(sk=>{
+    if(!sk.auto || !sk.auto.startsWith("ex:")) return;
+    const key=sk.auto.slice(3);
+    const maxLevels=sk.levels.length;
+    // AFT events directly set a floor level from the latest test
+    const aftMap={pushups:"hrp",deadlift:"dl",run:"run",sdc:"sdc",plank:"plank"};
+    if(last && aftMap[key]){
+      const lvl=eventScoreToLevel(last.scores[aftMap[key]], maxLevels);
+      if(lvl>sk.currentLevel){ sk.currentLevel=lvl; sk.lastQuestTs=now; sk.history.push({ts:now,type:"auto-aft",level:lvl}); changed=true; }
+      else if(lvl>0 && lvl>=sk.currentLevel && sk.lastQuestTs<now-864e5){ sk.lastQuestTs=now; changed=true; }
+    }
+    // practice in Log/PT refreshes the fade timer so it doesn't decay
+    if(sk.currentLevel>0 && practiced(key) && sk.lastQuestTs<now-864e5){ sk.lastQuestTs=now; changed=true; }
+  });
+  return changed;
 }
 let _skLevels=["",""];  // draft level abilities being entered (start with 2 blanks)
 function renderSkLevelInputs(){
@@ -2896,19 +3105,20 @@ function skCreate(){
   const name=document.getElementById("skName").value.trim(); if(!name){toast("Name the skill first");return;}
   const cat=document.getElementById("skCat").value;
   const fadeDays=parseInt(document.getElementById("skFade").value)||30;
+  const parent=document.getElementById("skParent").value||null;
   const levels=_skLevels.map(s=>s.trim()).filter(Boolean).map((ability,i)=>({n:i+1,ability}));
   if(!levels.length){toast("Define at least one level (an ability)");return;}
   if(_skEditId){
     const sk=S.lifeSkills.find(x=>x.id===_skEditId);
-    if(sk){ sk.name=name; sk.cat=cat; sk.fadeDays=fadeDays; sk.levels=levels;
-      if(sk.currentLevel>levels.length) sk.currentLevel=levels.length; } // clamp if levels removed
+    if(sk){ sk.name=name; sk.cat=cat; sk.fadeDays=fadeDays; sk.levels=levels; sk.parent=parent;
+      if(sk.currentLevel>levels.length) sk.currentLevel=levels.length; }
     _skEditId=null; document.getElementById("skSave").textContent="Create skill"; toast("✎ Skill updated");
   } else {
-    S.lifeSkills.push({id:id(),name,cat,fadeDays,currentLevel:0,lastQuestTs:Date.now(),levels,history:[]});
-    toast("🧠 Skill added — your first promotion quest is ready");
+    S.lifeSkills.push({id:id(),name,cat,parent,group:false,fadeDays,currentLevel:0,lastQuestTs:Date.now(),levels,history:[]});
+    toast("🧠 Skill added");
   }
   _skLevels=["",""];
-  document.getElementById("skName").value="";
+  document.getElementById("skName").value=""; document.getElementById("skParent").value="";
   save();render();
 }
 function skEdit(skId){
@@ -2923,6 +3133,27 @@ function skEdit(skId){
   document.getElementById("skName").scrollIntoView({behavior:"smooth",block:"center"}); document.getElementById("skName").focus();
 }
 // effective level after decay: drop 1 level per fade interval missed
+// ----- hierarchy helpers -----
+function skSubsOf(sk){ return S.lifeSkills.filter(x=>x.parent===sk.name && x.cat===sk.cat); }
+function skTopLevelInCat(cat){ return S.lifeSkills.filter(x=>x.cat===cat && !x.parent); }
+// rolled-up *effective* level as a decimal. Leaf = its own effective level.
+// Group skill = average of its sub-skills' rolled levels. (recursive)
+function skRolledLevel(sk){
+  const subs=skSubsOf(sk);
+  if(subs.length){
+    const avg=subs.reduce((s,x)=>s+skRolledLevel(x),0)/subs.length;
+    return avg;
+  }
+  return skEffectiveLevel(sk);
+}
+// a category's rolled level = average of its top-level skills' rolled levels
+function catRolledLevel(cat){
+  const tops=skTopLevelInCat(cat);
+  if(!tops.length) return 0;
+  return tops.reduce((s,x)=>s+skRolledLevel(x),0)/tops.length;
+}
+function fmtLvl(n){ return (Math.round(n*10)/10).toFixed(1); }
+
 function skEffectiveLevel(sk){
   if(sk.currentLevel<=0) return 0;
   const elapsed=Date.now()-(sk.lastQuestTs||Date.now());
@@ -2972,21 +3203,32 @@ function skSkip(skId){
   // skipping a maintenance just dismisses it until next interval; decay still applies naturally
   toast("Left for later — the skill will keep fading until you prove it");
 }
-function renderSkills(){
+function renderSkillsTab(){
   const listEl=document.getElementById("skList"); if(!listEl) return;
+  if(syncSkillsFromActivity()) save();
   renderSkLevelInputs();
-  // active quests
+  // populate parent dropdown (top-level, non-group OR group skills can be parents; offer all non-sub skills)
+  const psel=document.getElementById("skParent");
+  if(psel){
+    const cur=psel.value;
+    const candidates=S.lifeSkills.filter(s=>!s.parent); // can nest under any top-level skill
+    psel.innerHTML='<option value="">— top-level skill —</option>'+candidates.map(s=>`<option value="${esc(s.name)}">${esc(s.name)} (${SK_CAT[s.cat]||s.cat})</option>`).join("");
+    psel.value=cur;
+  }
+  // active quests — only LEAF skills (groups roll up, no ladder of their own)
   const qEl=document.getElementById("skQuests");
-  const quests=S.lifeSkills.map(sk=>({sk,q:skQuest(sk)})).filter(x=>x.q);
+  const leaves=S.lifeSkills.filter(s=>!s.group && s.levels && s.levels.length);
+  const quests=leaves.map(sk=>({sk,q:skQuest(sk)})).filter(x=>x.q);
   document.getElementById("skQuestCount").textContent=quests.length?quests.length+" active":"";
   qEl.innerHTML=quests.length?quests.map(({sk,q})=>`<div class="sk-quest ${q.type}">
-    <div class="sk-quest-top"><span class="sk-quest-name">${esc(sk.name)}</span><span class="sk-quest-tag ${q.type==='decay'?'decay':q.type==='promote'?'promote':'maintain'}">${q.label} · L${q.level}</span></div>
+    <div class="sk-quest-top"><span class="sk-quest-name">${esc(sk.name)}${sk.parent?` <span style="color:var(--ink-faint);font-weight:400">· ${esc(sk.parent)}</span>`:''}</span><span class="sk-quest-tag ${q.type==='decay'?'decay':q.type==='promote'?'promote':'maintain'}">${q.label} · L${q.level}</span></div>
     <div class="sk-quest-ability">${q.type==='promote'?'Prove you can: ':q.type==='decay'?'You slipped — re-prove: ':'Stay sharp: '}<b>${esc(q.ability)}</b></div>
     <div class="sk-quest-btns"><button class="sk-pass" data-skpass="${sk.id}">${q.type==='maintain'?'Did it':'Passed — I can do this'}</button><button class="sk-skip" data-skskip="${sk.id}">Later</button></div>
   </div>`).join(""):`<div class="aw-empty"><span class="big">🧠</span>No active skill quests. Add a skill above, or you're all caught up and sharp.</div>`;
-  // skill list — grouped by category subsection
+  // skill list — category → top-level skill (group shows subs) → leaf
   if(!S.lifeSkills.length){ listEl.innerHTML=`<div class="aw-empty"><span class="big">🧠</span>No skills yet. Add one above to start tracking levels.</div>`; return; }
-  const skCard=sk=>{
+
+  const leafCard=(sk,isSub)=>{
     const eff=skEffectiveLevel(sk), maxed=sk.currentLevel>=sk.levels.length && eff>=sk.levels.length;
     const days=skDaysLeft(sk);
     const ladder=sk.levels.map(l=>{
@@ -2996,12 +3238,12 @@ function renderSkills(){
     let fadeNote="";
     if(sk.currentLevel>0){
       if(eff<sk.currentLevel) fadeNote=`<div class="sk-fade-note warn">⚠️ Slipped from L${sk.currentLevel} to L${eff} — do the quest above to reclaim it.</div>`;
-      else if(days!==null) fadeNote=`<div class="sk-fade-note ${days<=Math.ceil(sk.fadeDays*0.34)?'warn':''}">Fades in ${days} day${days!==1?'s':''} without practice (every ${sk.fadeDays}d).</div>`;
+      else if(days!==null) fadeNote=`<div class="sk-fade-note ${days<=Math.ceil(sk.fadeDays*0.34)?'warn':''}">Fades in ${days} day${days!==1?'s':''} (every ${sk.fadeDays}d).</div>`;
     }
-    return `<div class="sk-card">
+    return `<div class="sk-card ${isSub?'sk-sub':''}">
       <div class="sk-card-top">
-        <div><div class="sk-card-name">${esc(sk.name)}</div><div class="sk-card-cat">${SK_CAT[sk.cat]||sk.cat}</div></div>
-        <span class="sk-level-badge ${maxed?'maxed':''}">${eff>0?'Level '+eff:'Unproven'}${maxed?' · MAX':''}</span>
+        <div><div class="sk-card-name">${esc(sk.name)}${sk.auto?' <span class="sk-auto">auto</span>':''}</div></div>
+        <span class="sk-level-badge ${maxed?'maxed':''}">${eff>0?'Lv '+eff:'Unproven'}${maxed?' · MAX':''}</span>
         <button class="sk-card-edit" data-skedit="${sk.id}">✎</button>
         <button class="sk-card-del" data-skdel="${sk.id}">✕</button>
       </div>
@@ -3009,14 +3251,35 @@ function renderSkills(){
       ${fadeNote}
     </div>`;
   };
+  const groupCard=sk=>{
+    const subs=skSubsOf(sk);
+    const rolled=skRolledLevel(sk);
+    return `<div class="sk-group">
+      <div class="sk-group-top">
+        <div class="sk-group-name">${esc(sk.name)} <span class="sk-group-sub">${subs.length} sub-skill${subs.length!==1?'s':''}</span></div>
+        <span class="sk-level-badge group">Lv ${fmtLvl(rolled)}</span>
+        <button class="sk-card-edit" data-skedit="${sk.id}">✎</button>
+        <button class="sk-card-del" data-skdel="${sk.id}">✕</button>
+      </div>
+      <div class="sk-subs">${subs.map(s=>leafCard(s,true)).join("")}</div>
+    </div>`;
+  };
   let html="";
   SK_CAT_ORDER.forEach(cat=>{
-    const inCat=S.lifeSkills.filter(s=>s.cat===cat);
-    if(!inCat.length) return;
-    html+=`<div class="sk-cat-hd">${SK_CAT[cat]} <span>${inCat.length}</span></div>`;
-    html+=inCat.map(skCard).join("");
+    const tops=skTopLevelInCat(cat);
+    if(!tops.length) return;
+    const catLvl=catRolledLevel(cat);
+    html+=`<div class="sk-cat-hd" id="skcat-${cat}"><span class="sk-cat-name">${SK_CAT[cat]}</span><span class="sk-cat-lvl">Lv ${fmtLvl(catLvl)}</span></div>`;
+    tops.forEach(sk=>{ html += sk.group ? groupCard(sk) : leafCard(sk,false); });
   });
   listEl.innerHTML=html;
+  // populate the right-side category jump bar (only cats that have skills)
+  const jb=document.getElementById("skJumpbar");
+  if(jb){
+    const icons={tactical:"🎖️",physical:"💪",technical:"💻",leadership:"⭐",academic:"📚",personal:"🌱"};
+    jb.innerHTML=SK_CAT_ORDER.filter(c=>skTopLevelInCat(c).length).map(c=>
+      `<button data-skjump="${c}">${icons[c]||"•"}<span class="jb-tip">${SK_CAT[c]}</span></button>`).join("");
+  }
 }
 
 /* ---------------- Service worker (offline) ---------------- */
