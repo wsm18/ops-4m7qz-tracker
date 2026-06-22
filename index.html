@@ -340,6 +340,47 @@
   .board-item.done .c-name{text-decoration:line-through;color:var(--ink-faint)}
   /* ---- PT logger ---- */
   .pt-intro{font-size:12.5px;color:var(--ink-faint);line-height:1.5;margin-bottom:11px}
+  .bl-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  @media(max-width:420px){.bl-grid{grid-template-columns:1fr}}
+  .bl-grid label{display:flex;flex-direction:column;font-size:11.5px;color:var(--ink-faint);gap:4px}
+  .bl-grid input,.bl-grid select{background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:10px;border-radius:8px;font-family:inherit;font-size:15px}
+  .bl-grid input:focus,.bl-grid select:focus{outline:none;border-color:var(--gold)}
+  .bl-sub{font-size:11.5px;color:var(--ink-faint);letter-spacing:.04em;margin:12px 0 7px;text-transform:uppercase}
+  .bl-readout{margin-top:11px;font-size:12.5px;color:var(--jade);line-height:1.6}
+  .bl-readout .r-row{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:4px 0}
+  .bl-readout b{color:var(--gold)}
+  /* AFT standard card */
+  .std-card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 15px;margin-bottom:12px}
+  .std-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .std-label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim);font-weight:700}
+  .std-toggle{display:flex;gap:6px}
+  .std-toggle button{background:#0e0f09;border:1px solid var(--line);color:var(--ink-dim);padding:7px 12px;border-radius:8px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+  .std-toggle button.on{background:rgba(184,160,106,.16);border-color:var(--gold);color:var(--gold-bright)}
+  .std-ctx{font-size:12.5px;color:var(--violet);margin-top:9px;font-weight:600}
+  .std-pass{margin-top:9px;font-size:13.5px;font-weight:700;padding:8px 11px;border-radius:8px}
+  .std-pass.ok{background:rgba(111,158,84,.14);border:1px solid var(--jade);color:var(--jade)}
+  .std-pass.no{background:rgba(156,74,52,.14);border:1px solid var(--blood);color:#d98a72}
+  .std-note{font-size:11px;color:var(--ink-faint);margin-top:9px;line-height:1.5;font-style:italic}
+  /* Emergency card */
+  .emerg-card{background:linear-gradient(180deg,rgba(156,74,52,.12),var(--panel));border:1.5px solid var(--blood);border-radius:12px;padding:14px 16px}
+  .emerg-h{font-size:13px;letter-spacing:.14em;font-weight:800;color:#d98a72;margin-bottom:10px}
+  .emerg-row{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid rgba(156,74,52,.2);font-size:13.5px}
+  .emerg-row span{color:var(--ink-dim)}
+  .emerg-row b{color:var(--ink);text-align:right}
+  .emerg-foot{font-size:10.5px;color:var(--ink-faint);margin-top:9px;letter-spacing:.05em;text-transform:uppercase}
+  /* Blood donation */
+  .blood-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px;text-align:center}
+  .blood-type-big{font-size:38px;font-weight:800;color:#d98a72;line-height:1}
+  .blood-compat{display:flex;gap:10px;margin:14px 0 4px;text-align:left}
+  .blood-compat>div{flex:1;background:#0e0f09;border:1px solid var(--line);border-radius:9px;padding:10px}
+  .blood-compat span{display:block;font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+  .blood-compat b{font-size:13px;color:var(--jade)}
+  .blood-note{font-size:12.5px;color:var(--gold);margin-top:10px;font-style:italic}
+  .blood-elig{margin-top:11px;font-size:13px;font-weight:600;padding:9px;border-radius:8px}
+  .bl-elig{margin-top:11px;font-size:13px;font-weight:600;padding:9px 11px;border-radius:8px}
+  .bl-elig.ok{background:rgba(111,158,84,.14);border:1px solid var(--jade);color:var(--jade)}
+  .bl-elig.wait{background:rgba(124,147,168,.12);border:1px solid var(--violet);color:var(--violet)}
+  .blood-count{margin-top:10px;font-size:12.5px;color:var(--ink-dim)}
   #ptText{width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:11px;border-radius:8px;font-family:inherit;font-size:15px;resize:vertical;line-height:1.4}
   #ptText:focus{outline:none;border-color:var(--jade)}
   .pt-detected{margin:9px 0 4px;display:flex;flex-wrap:wrap;gap:6px}
@@ -645,6 +686,7 @@
   <nav class="tabs" id="sideNav">
     <button class="nav-toggle" id="navToggle" title="Toggle labels"><span class="ic">≡</span><span class="lbl">Menu</span></button>
     <button data-tab="quests" class="on"><span class="ic">🎯</span><span class="lbl">Missions</span></button>
+    <button data-tab="profile"><span class="ic">🪪</span><span class="lbl">Profile</span></button>
     <button data-tab="dailies"><span class="ic">📋</span><span class="lbl">Orders</span></button>
     <button data-tab="quizzes"><span class="ic">📚</span><span class="lbl">Quiz</span></button>
     <button data-tab="aft"><span class="ic">💪</span><span class="lbl">AFT</span></button>
@@ -761,6 +803,7 @@
   <!-- AFT -->
   <section class="view" id="view-aft">
     <div class="sec-h"><h2>AFT Scorecard</h2><span class="hint">input scores, auto-tune plan</span></div>
+    <div id="aftStandardBar"></div>
     <div class="adder">
       <p style="font-size:13px;color:var(--ink-dim);margin-bottom:10px">Enter your latest AFT raw results. The plan re-weights to attack your weakest event.</p>
       <div class="aft-grid">
@@ -778,6 +821,62 @@
   </section>
 
   <!-- WORKOUT LOG -->
+  <!-- PROFILE -->
+  <section class="view" id="view-profile">
+    <div class="sec-h"><h2>Profile</h2><span class="hint">your record & dimensions</span></div>
+    <div class="adder">
+      <div class="sk-form-title">Identity</div>
+      <div class="bl-grid">
+        <label>Name<input id="pfName" type="text" maxlength="40" placeholder="Your name"></label>
+        <label>MS year / rank<input id="pfRank" type="text" maxlength="40" placeholder="e.g. MS2 Cadet"></label>
+        <label>Leadership role<input id="pfPos" type="text" maxlength="40" placeholder="e.g. Squad Leader"></label>
+        <label>Branch goal<input id="pfBranch" type="text" maxlength="40" placeholder="e.g. Cyber (17-series)"></label>
+      </div>
+      <div class="bl-grid" style="margin-top:9px">
+        <label>Birthdate<input id="pfDob" type="date"></label>
+        <label>Age<input id="pfAgeOut" type="text" disabled placeholder="—"></label>
+        <label>Sex<select id="pfSex"><option value="">—</option><option value="m">Male</option><option value="f">Female</option></select></label>
+        <label>Blood type<select id="pfBlood"><option value="">—</option><option>O+</option><option>O−</option><option>A+</option><option>A−</option><option>B+</option><option>B−</option><option>AB+</option><option>AB−</option></select></label>
+      </div>
+
+      <div class="sk-form-title" style="margin-top:16px">Measurements</div>
+      <div class="bl-grid">
+        <label>Height (in)<input id="pfHt" type="number" min="0" step="0.5" placeholder="e.g. 70"></label>
+        <label>Height measured<input id="pfHtDate" type="date"></label>
+        <label>Weight (lb)<input id="pfWt" type="number" min="0" step="0.5" placeholder="e.g. 175"></label>
+        <label>Weight measured<input id="pfWtDate" type="date"></label>
+      </div>
+
+      <div class="sk-form-title" style="margin-top:16px">Best lifts <span style="font-weight:400;text-transform:none;color:var(--ink-faint)">— one solid rep, good form</span></div>
+      <div class="bl-grid">
+        <label>Deadlift (lb)<input id="pfDl" type="number" min="0" step="5" placeholder="e.g. 315"></label>
+        <label>Back squat (lb)<input id="pfSq" type="number" min="0" step="5" placeholder="e.g. 275"></label>
+        <label>Bench (lb)<input id="pfBn" type="number" min="0" step="5" placeholder="optional"></label>
+        <label>Lifts measured<input id="pfLiftDate" type="date"></label>
+      </div>
+
+      <label class="lg-label" style="margin-top:12px;display:block">Notes (allergies, medical, anything to remember)</label>
+      <textarea id="pfNotes" rows="2" maxlength="300" style="width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:10px;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical"></textarea>
+
+      <button class="btn-add" id="pfSave" style="margin-top:12px">Save profile</button>
+    </div>
+    <div class="sec-h" style="margin-top:18px"><h2>Readout</h2><span class="hint">computed</span></div>
+    <div id="pfReadout" class="bl-readout"></div>
+
+    <div class="sec-h" style="margin-top:18px"><h2>Emergency Info</h2><span class="hint">screen-grab this</span></div>
+    <div id="pfEmergency"></div>
+
+    <div class="sec-h" style="margin-top:18px"><h2>Blood Donation</h2><span class="hint">real compatibility & eligibility</span></div>
+    <div id="pfBloodCard"></div>
+    <div class="adder" style="margin-top:10px">
+      <div class="row" style="gap:9px">
+        <input id="donDate" type="date" style="flex:1">
+        <button class="btn-add" id="donAdd" style="flex:0 0 auto;width:auto;padding:11px 16px;margin:0">Log donation</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOG -->
   <section class="view" id="view-log">
     <div id="baselinePrompt"></div>
     <div class="sec-h"><h2>Log Cadre PT</h2><span class="hint">recovery-aware</span></div>
@@ -1118,6 +1217,11 @@ const DEFAULT = {
   lifeSkills:[],     // {id, name, cat, fadeDays, currentLevel, lastQuestTs, levels:[{n, ability}], history:[]}
   ptLog:[],          // cadre PT sessions: {id, ts, date, areas:[...], intensity}
   navLabels:true,    // side rail shows labels (true) or icons only (false)
+  profile:{ birthdate:null, heightIn:null, heightDate:null, weightLb:null, weightDate:null, sex:null, bloodType:null, units:"imperial", notes:"" },
+  lifts:{ deadliftLb:null, squatLb:null, benchLb:null, liftDate:null },  // best lifts for bodyweight-relative skills
+  aftStandard:"general",  // "general" (sex+age normed, 300 min) or "combat" (sex-neutral, 350 min)
+  donations:[],           // blood donations: [{id, date, type}]
+  weightLog:[],           // weight history for trend: [{date, lb}]
   _seeded:false,     // whether starter skills have been seeded
   boardTasks:[
     {id:id(), name:"Create / verify your CC IMS (Cadet Command) & TBB account", done:false},
@@ -1297,6 +1401,11 @@ function load(){
       merged.lifeSkills=[]; merged._seeded=false;
     }
     merged.navLabels=r.navLabels!==undefined?r.navLabels:true;
+    merged.profile=Object.assign({birthdate:null,heightIn:null,heightDate:null,weightLb:null,weightDate:null,sex:null,bloodType:null,units:"imperial",notes:""}, r.profile||{});
+    merged.lifts=Object.assign({deadliftLb:null,squatLb:null,benchLb:null,liftDate:null}, r.lifts||{});
+    merged.aftStandard=r.aftStandard||"general";
+    merged.donations=r.donations||[];
+    merged.weightLog=r.weightLog||[];
     return merged;
   }catch(e){return structuredClone(DEFAULT)}
 }
@@ -1403,6 +1512,8 @@ function render(){
   if(typeof renderQuizzes==="function") renderQuizzes();
   if(typeof renderAft==="function") renderAft();
   if(typeof renderLog==="function") renderLog();
+  if(typeof renderProfile==="function") renderProfile();
+  if(typeof renderEmergencyAndBlood==="function") renderEmergencyAndBlood();
   if(typeof renderPT==="function") renderPT();
   if(typeof renderSkillBalance==="function") renderSkillBalance();
   if(typeof renderRecoveryAdvisory==="function") renderRecoveryAdvisory();
@@ -1703,21 +1814,141 @@ function parseTime(str){ // "m:ss" or "mm:ss" -> seconds
   if(p.length===2 && !isNaN(p[0]) && !isNaN(p[1])) return p[0]*60+p[1];
   return null;
 }
-function score_dl(lbs){ if(lbs==null)return null; // 60pt~140, 100pt~340 (approx)
-  return clampScore(60 + (lbs-140)/(340-140)*40);}
-function score_hrp(reps){ if(reps==null)return null; // 60pt~10, 100pt~57
-  return clampScore(60 + (reps-10)/(57-10)*40);}
-function score_sdc(sec){ if(sec==null)return null; // lower better; 60pt~180s, 100pt~108s
-  return clampScore(60 + (180-sec)/(180-108)*40);}
-function score_plank(sec){ if(sec==null)return null; // 60pt~85s(1:25), 100pt~225s(3:45)
-  return clampScore(60 + (sec-85)/(225-85)*40);}
-function score_run(sec){ if(sec==null)return null; // lower better; 60pt~1365s(22:45), 100pt~795s(13:15)
-  return clampScore(60 + (1365-sec)/(1365-795)*40);}
+// ===== AFT scoring — OFFICIAL tables (HQDA EXORD 218-25 Annex B, eff 1 Jun 2025) =====
+// Anchor points transcribed from the official Army AFT score tables; lookup interpolates
+// linearly between printed anchors. Self-tested against the chart (DL/HRP/SDC/PLK/2MR).
+const _SEC=(m,s)=>m*60+s;
+const AFT_TABLES={
+ mdl:{
+  "17-21":{M:[[340,100],[300,92],[280,87],[250,81],[230,77],[200,70],[180,67],[150,60],[80,0]],C:[[220,100],[200,97],[180,91],[160,84],[140,75],[120,60],[60,0]],F:[[220,100],[200,95],[180,91],[160,87],[140,83],[120,60],[60,0]]},
+  "22-26":{M:[[350,100],[300,91],[280,87],[250,81],[230,77],[200,71],[180,68],[150,60],[80,0]],C:[[230,100],[200,95],[180,90],[160,87],[140,83],[130,80],[60,0]],F:[[230,100],[200,95],[180,91],[160,86],[140,82],[130,80],[60,0]]},
+  "27-31":{M:[[350,100],[290,89],[270,85],[250,81],[230,78],[200,71],[180,67],[150,60],[80,0]],C:[[240,100],[200,95],[180,90],[160,87],[140,83],[130,80],[60,0]],F:[[240,100],[210,95],[190,91],[170,86],[150,82],[140,80],[60,0]]},
+  "32-36":{M:[[350,100],[290,87],[270,83],[250,80],[230,77],[200,71],[180,67],[150,62],[140,60],[80,0]],C:[[230,100],[200,95],[180,90],[160,87],[140,83],[130,80],[60,0]],F:[[230,100],[200,92],[180,87],[160,83],[140,75],[130,73],[120,60],[60,0]]},
+  "37-41":{M:[[350,100],[290,90],[270,87],[250,83],[230,79],[200,74],[180,70],[150,62],[140,60],[80,0]],C:[[220,100],[200,95],[180,91],[160,86],[140,83],[130,80],[60,0]],F:[[220,100],[200,95],[180,91],[160,87],[140,83],[130,80],[60,0]]},
+  "42-46":{M:[[350,100],[290,90],[270,87],[250,83],[230,79],[200,73],[180,70],[150,65],[130,60],[70,0]],C:[[210,100],[190,95],[170,91],[150,87],[130,80],[120,60],[60,0]],F:[[210,100],[190,95],[170,91],[150,87],[130,83],[120,60],[60,0]]},
+  "47-51":{M:[[340,100],[290,91],[270,87],[250,83],[230,79],[200,73],[180,70],[150,64],[130,60],[70,0]],C:[[200,100],[180,95],[160,90],[140,83],[130,80],[120,60],[60,0]],F:[[200,100],[180,95],[160,90],[140,83],[130,80],[120,60],[60,0]]},
+  "52-56":{M:[[330,100],[290,91],[270,87],[250,83],[230,79],[200,73],[180,70],[150,63],[130,60],[70,0]],C:[[190,100],[170,95],[150,85],[130,75],[120,60],[60,0]],F:[[190,100],[170,95],[150,85],[130,75],[120,60],[60,0]]},
+  "57-61":{M:[[250,100],[230,93],[210,84],[190,76],[170,72],[150,70],[140,60],[80,0]],C:[[170,100],[150,90],[130,72],[120,60],[60,0]],F:[[170,100],[150,90],[130,72],[120,60],[60,0]]},
+  "62+":{M:[[230,100],[210,93],[190,82],[170,77],[150,72],[140,70],[130,60],[80,10]],C:[[170,100],[150,90],[130,72],[120,60],[60,0]],F:[[170,100],[150,90],[130,72],[120,60],[60,0]]}
+ },
+ hrp:{
+  "17-21":{M:[[58,100],[46,90],[37,80],[28,70],[15,60],[9,50],[4,0]],C:[[53,100],[32,90],[23,80],[18,70],[11,60],[9,50],[4,0]],F:[[53,100],[32,90],[23,80],[16,70],[11,60],[9,50],[4,0]]},
+  "22-26":{M:[[61,100],[48,90],[37,80],[26,70],[14,60],[9,50],[4,0]],C:[[50,100],[33,90],[23,80],[16,70],[11,60],[9,50],[4,0]],F:[[61,100],[33,90],[23,80],[16,70],[11,60],[9,50],[4,0]]},
+  "27-31":{M:[[62,100],[48,90],[37,80],[26,70],[14,60],[9,50],[4,0]],C:[[48,100],[33,90],[23,80],[16,70],[11,60],[9,50],[4,0]],F:[[62,100],[33,90],[22,80],[16,70],[11,60],[9,50],[4,0]]},
+  "32-36":{M:[[60,100],[47,90],[36,80],[26,70],[13,60],[9,50],[4,0]],C:[[47,100],[32,90],[23,80],[16,70],[11,60],[9,50],[4,0]],F:[[60,100],[32,90],[23,80],[16,70],[11,60],[9,50],[4,0]]},
+  "37-41":{M:[[59,100],[46,90],[35,80],[24,70],[12,60],[9,50],[4,0]],C:[[43,100],[30,90],[22,80],[15,70],[11,60],[9,50],[4,0]],F:[[59,100],[30,90],[22,80],[15,70],[11,60],[9,50],[4,0]]},
+  "42-46":{M:[[57,100],[44,90],[34,80],[23,70],[11,60],[9,50],[4,0]],C:[[40,100],[29,90],[21,80],[15,70],[10,60],[9,50],[4,0]],F:[[57,100],[29,90],[21,80],[15,70],[10,60],[9,50],[4,0]]},
+  "47-51":{M:[[55,100],[42,90],[32,80],[22,70],[11,60],[9,50],[4,0]],C:[[38,100],[27,90],[20,80],[14,70],[10,60],[9,50],[4,0]],F:[[55,100],[27,90],[20,80],[14,70],[10,60],[9,50],[4,0]]},
+  "52-56":{M:[[51,100],[40,90],[30,80],[21,70],[10,60],[9,50],[4,0]],C:[[36,100],[26,90],[19,80],[14,70],[10,60],[9,50],[4,0]],F:[[51,100],[26,90],[19,80],[14,70],[10,60],[9,50],[4,0]]},
+  "57-61":{M:[[46,100],[29,90],[18,80],[12,70],[10,60],[9,50],[4,0]],C:[[24,100],[15,90],[12,77],[10,60],[9,50],[4,0]],F:[[46,100],[15,90],[12,77],[10,60],[9,50],[4,0]]},
+  "62+":{M:[[43,100],[26,90],[17,80],[12,71],[10,60],[9,50],[4,0]],C:[[24,100],[15,90],[12,77],[10,60],[9,50],[4,0]],F:[[43,100],[15,90],[12,77],[10,60],[9,50],[4,0]]}
+ },
+ sdc:{
+  "17-21":{M:[[_SEC(1,29),100],[_SEC(1,43),90],[_SEC(1,53),80],[_SEC(2,3),70],[_SEC(2,28),60],[_SEC(3,28),0]],C:[[_SEC(1,55),100],[_SEC(2,16),90],[_SEC(2,28),80],[_SEC(2,41),70],[_SEC(3,15),60],[_SEC(4,15),0]],F:[[_SEC(1,55),100],[_SEC(2,16),90],[_SEC(2,28),80],[_SEC(2,41),70],[_SEC(3,15),60],[_SEC(4,15),0]]},
+  "22-26":{M:[[_SEC(1,30),100],[_SEC(1,43),90],[_SEC(1,53),80],[_SEC(2,5),70],[_SEC(2,31),60],[_SEC(3,31),0]],C:[[_SEC(1,55),100],[_SEC(2,15),90],[_SEC(2,29),80],[_SEC(2,43),70],[_SEC(3,15),60],[_SEC(4,15),0]],F:[[_SEC(1,55),100],[_SEC(2,15),90],[_SEC(2,29),80],[_SEC(2,43),70],[_SEC(3,15),60],[_SEC(4,15),0]]},
+  "27-31":{M:[[_SEC(1,30),100],[_SEC(1,45),90],[_SEC(1,55),80],[_SEC(2,6),70],[_SEC(2,32),60],[_SEC(3,32),0]],C:[[_SEC(1,55),100],[_SEC(2,16),90],[_SEC(2,29),80],[_SEC(2,43),70],[_SEC(3,15),60],[_SEC(4,15),0]],F:[[_SEC(1,55),100],[_SEC(2,16),90],[_SEC(2,29),80],[_SEC(2,43),70],[_SEC(3,15),60],[_SEC(4,15),0]]},
+  "32-36":{M:[[_SEC(1,33),100],[_SEC(1,48),90],[_SEC(1,58),80],[_SEC(2,10),70],[_SEC(2,36),60],[_SEC(3,36),0]],C:[[_SEC(1,59),100],[_SEC(2,20),90],[_SEC(2,34),80],[_SEC(2,47),70],[_SEC(3,22),60],[_SEC(4,22),0]],F:[[_SEC(1,59),100],[_SEC(2,20),90],[_SEC(2,34),80],[_SEC(2,47),70],[_SEC(3,22),60],[_SEC(4,22),0]]},
+  "37-41":{M:[[_SEC(1,36),100],[_SEC(1,52),90],[_SEC(2,2),80],[_SEC(2,14),70],[_SEC(2,41),60],[_SEC(3,41),0]],C:[[_SEC(2,2),100],[_SEC(2,25),90],[_SEC(2,38),80],[_SEC(2,52),70],[_SEC(3,27),60],[_SEC(4,27),0]],F:[[_SEC(2,2),100],[_SEC(2,25),90],[_SEC(2,38),80],[_SEC(2,52),70],[_SEC(3,27),60],[_SEC(4,27),0]]},
+  "42-46":{M:[[_SEC(1,40),100],[_SEC(1,56),90],[_SEC(2,7),80],[_SEC(2,20),70],[_SEC(2,45),60],[_SEC(3,45),0]],C:[[_SEC(2,9),100],[_SEC(2,30),90],[_SEC(2,44),80],[_SEC(2,58),70],[_SEC(3,42),60],[_SEC(4,42),0]],F:[[_SEC(2,9),100],[_SEC(2,30),90],[_SEC(2,44),80],[_SEC(2,58),70],[_SEC(3,42),60],[_SEC(4,42),0]]},
+  "47-51":{M:[[_SEC(1,45),100],[_SEC(2,2),90],[_SEC(2,14),80],[_SEC(2,27),70],[_SEC(2,53),60],[_SEC(3,53),0]],C:[[_SEC(2,11),100],[_SEC(2,37),90],[_SEC(2,50),80],[_SEC(3,5),70],[_SEC(3,51),60],[_SEC(4,51),0]],F:[[_SEC(2,11),100],[_SEC(2,37),90],[_SEC(2,50),80],[_SEC(3,5),70],[_SEC(3,51),60],[_SEC(4,51),0]]},
+  "52-56":{M:[[_SEC(1,52),100],[_SEC(2,10),90],[_SEC(2,23),80],[_SEC(2,35),70],[_SEC(3,0),60],[_SEC(4,0),0]],C:[[_SEC(2,18),100],[_SEC(2,44),90],[_SEC(2,58),80],[_SEC(3,19),70],[_SEC(4,3),60],[_SEC(5,3),0]],F:[[_SEC(2,18),100],[_SEC(2,44),90],[_SEC(2,58),80],[_SEC(3,19),70],[_SEC(4,3),60],[_SEC(5,3),0]]},
+  "57-61":{M:[[_SEC(1,58),100],[_SEC(2,17),90],[_SEC(2,29),80],[_SEC(2,43),70],[_SEC(3,12),60],[_SEC(4,12),0]],C:[[_SEC(2,26),100],[_SEC(2,54),90],[_SEC(3,7),80],[_SEC(3,36),70],[_SEC(4,48),60],[_SEC(5,48),0]],F:[[_SEC(2,26),100],[_SEC(2,54),90],[_SEC(3,7),80],[_SEC(3,36),70],[_SEC(4,48),60],[_SEC(5,48),0]]},
+  "62+":{M:[[_SEC(2,9),100],[_SEC(2,17),90],[_SEC(2,32),80],[_SEC(2,49),70],[_SEC(3,16),60],[_SEC(4,16),0]],C:[[_SEC(2,26),100],[_SEC(2,54),90],[_SEC(3,7),80],[_SEC(3,36),70],[_SEC(4,48),60],[_SEC(5,48),0]],F:[[_SEC(2,26),100],[_SEC(2,54),90],[_SEC(3,7),80],[_SEC(3,36),70],[_SEC(4,48),60],[_SEC(5,48),0]]}
+ },
+ plk:{
+  "17-21":{M:[[_SEC(3,40),100],[_SEC(3,8),90],[_SEC(2,35),80],[_SEC(2,2),70],[_SEC(1,30),60],[_SEC(1,0),0]]},
+  "22-26":{M:[[_SEC(3,35),100],[_SEC(3,3),90],[_SEC(2,30),80],[_SEC(1,58),70],[_SEC(1,25),60],[_SEC(0,55),0]]},
+  "27-31":{M:[[_SEC(3,30),100],[_SEC(2,58),90],[_SEC(2,25),80],[_SEC(1,52),70],[_SEC(1,20),60],[_SEC(0,50),0]]},
+  "32-36":{M:[[_SEC(3,25),100],[_SEC(2,53),90],[_SEC(2,20),80],[_SEC(1,47),70],[_SEC(1,15),60],[_SEC(0,45),0]]},
+  "37-41":{M:[[_SEC(3,20),100],[_SEC(2,47),90],[_SEC(2,15),80],[_SEC(1,42),70],[_SEC(1,10),60],[_SEC(0,40),0]]},
+  "42-46":{M:[[_SEC(3,20),100],[_SEC(2,47),90],[_SEC(2,15),80],[_SEC(1,42),70],[_SEC(1,10),60],[_SEC(0,40),0]]},
+  "47-51":{M:[[_SEC(3,20),100],[_SEC(2,47),90],[_SEC(2,15),80],[_SEC(1,42),70],[_SEC(1,10),60],[_SEC(0,40),0]]},
+  "52-56":{M:[[_SEC(3,20),100],[_SEC(2,47),90],[_SEC(2,15),80],[_SEC(1,42),70],[_SEC(1,10),60],[_SEC(0,40),0]]},
+  "57-61":{M:[[_SEC(3,20),100],[_SEC(2,47),90],[_SEC(2,15),80],[_SEC(1,42),70],[_SEC(1,10),60],[_SEC(0,40),0]]},
+  "62+":{M:[[_SEC(3,20),100],[_SEC(2,47),90],[_SEC(2,15),80],[_SEC(1,42),70],[_SEC(1,10),60],[_SEC(0,40),0]]}
+ },
+ run:{
+  "17-21":{M:[[_SEC(13,22),100],[_SEC(15,39),90],[_SEC(17,13),80],[_SEC(18,35),70],[_SEC(19,57),60],[_SEC(22,45),0]],C:[[_SEC(16,0),100],[_SEC(17,55),90],[_SEC(19,30),80],[_SEC(21,6),70],[_SEC(22,55),60],[_SEC(25,50),0]],F:[[_SEC(16,0),100],[_SEC(17,55),90],[_SEC(19,30),80],[_SEC(21,6),70],[_SEC(22,55),60],[_SEC(25,50),0]]},
+  "22-26":{M:[[_SEC(13,25),100],[_SEC(15,38),90],[_SEC(17,18),80],[_SEC(18,23),70],[_SEC(19,45),60],[_SEC(22,33),0]],C:[[_SEC(15,30),100],[_SEC(17,44),90],[_SEC(19,25),80],[_SEC(21,0),70],[_SEC(22,45),60],[_SEC(25,40),0]],F:[[_SEC(15,30),100],[_SEC(17,44),90],[_SEC(19,25),80],[_SEC(21,0),70],[_SEC(22,45),60],[_SEC(25,40),0]]},
+  "27-31":{M:[[_SEC(13,25),100],[_SEC(15,38),90],[_SEC(17,21),80],[_SEC(18,23),70],[_SEC(19,45),60],[_SEC(22,33),0]],C:[[_SEC(15,30),100],[_SEC(17,44),90],[_SEC(19,25),80],[_SEC(21,0),70],[_SEC(22,45),60],[_SEC(25,40),0]],F:[[_SEC(15,30),100],[_SEC(17,44),90],[_SEC(19,25),80],[_SEC(21,0),70],[_SEC(22,45),60],[_SEC(25,40),0]]},
+  "32-36":{M:[[_SEC(13,42),100],[_SEC(15,50),90],[_SEC(17,16),80],[_SEC(18,30),70],[_SEC(20,44),60],[_SEC(23,32),0]],C:[[_SEC(15,48),100],[_SEC(18,21),90],[_SEC(19,53),80],[_SEC(21,13),70],[_SEC(22,50),60],[_SEC(25,45),0]],F:[[_SEC(15,48),100],[_SEC(18,21),90],[_SEC(19,53),80],[_SEC(21,13),70],[_SEC(22,50),60],[_SEC(25,45),0]]},
+  "37-41":{M:[[_SEC(13,42),100],[_SEC(16,1),90],[_SEC(17,33),80],[_SEC(18,35),70],[_SEC(20,44),60],[_SEC(23,32),0]],C:[[_SEC(15,51),100],[_SEC(18,25),90],[_SEC(19,57),80],[_SEC(21,16),70],[_SEC(22,59),60],[_SEC(25,54),0]],F:[[_SEC(15,51),100],[_SEC(18,25),90],[_SEC(19,57),80],[_SEC(21,16),70],[_SEC(22,59),60],[_SEC(25,54),0]]},
+  "42-46":{M:[[_SEC(14,5),100],[_SEC(16,15),90],[_SEC(17,47),80],[_SEC(18,55),70],[_SEC(22,4),60],[_SEC(24,52),0]],C:[[_SEC(16,0),100],[_SEC(18,37),90],[_SEC(20,10),80],[_SEC(21,30),70],[_SEC(23,15),60],[_SEC(26,10),0]],F:[[_SEC(16,0),100],[_SEC(18,37),90],[_SEC(20,10),80],[_SEC(21,30),70],[_SEC(23,15),60],[_SEC(26,10),0]]},
+  "47-51":{M:[[_SEC(14,30),100],[_SEC(16,39),90],[_SEC(18,12),80],[_SEC(19,30),70],[_SEC(22,4),60],[_SEC(24,52),0]],C:[[_SEC(16,30),100],[_SEC(19,3),90],[_SEC(20,34),80],[_SEC(21,40),70],[_SEC(23,30),60],[_SEC(26,25),0]],F:[[_SEC(16,30),100],[_SEC(19,3),90],[_SEC(20,34),80],[_SEC(21,40),70],[_SEC(23,30),60],[_SEC(26,25),0]]},
+  "52-56":{M:[[_SEC(15,9),100],[_SEC(17,26),90],[_SEC(19,0),80],[_SEC(20,20),70],[_SEC(22,50),60],[_SEC(25,38),0]],C:[[_SEC(16,59),100],[_SEC(19,47),90],[_SEC(21,19),80],[_SEC(22,38),70],[_SEC(24,0),60],[_SEC(26,55),0]],F:[[_SEC(16,59),100],[_SEC(19,47),90],[_SEC(21,19),80],[_SEC(22,38),70],[_SEC(24,0),60],[_SEC(26,55),0]]},
+  "57-61":{M:[[_SEC(15,28),100],[_SEC(18,17),90],[_SEC(19,45),80],[_SEC(21,0),70],[_SEC(23,36),60],[_SEC(26,24),0]],C:[[_SEC(17,18),100],[_SEC(18,59),90],[_SEC(20,22),80],[_SEC(21,40),70],[_SEC(24,48),60],[_SEC(27,43),0]],F:[[_SEC(17,18),100],[_SEC(18,59),90],[_SEC(20,22),80],[_SEC(21,40),70],[_SEC(24,48),60],[_SEC(27,43),0]]},
+  "62+":{M:[[_SEC(15,28),100],[_SEC(18,17),90],[_SEC(19,45),80],[_SEC(21,0),70],[_SEC(23,36),60],[_SEC(26,24),0]],C:[[_SEC(17,18),100],[_SEC(18,59),90],[_SEC(20,22),80],[_SEC(21,40),70],[_SEC(25,0),60],[_SEC(27,55),0]],F:[[_SEC(17,18),100],[_SEC(18,59),90],[_SEC(20,22),80],[_SEC(21,40),70],[_SEC(25,0),60],[_SEC(27,55),0]]}
+ }
+};
+function aftAgeBracket(age){
+  if(age==null) return "17-21";
+  if(age<=21) return "17-21"; if(age<=26) return "22-26"; if(age<=31) return "27-31";
+  if(age<=36) return "32-36"; if(age<=41) return "37-41"; if(age<=46) return "42-46";
+  if(age<=51) return "47-51"; if(age<=56) return "52-56"; if(age<=61) return "57-61"; return "62+";
+}
+function aftCtx(){
+  const age=ageFromDob(S.profile&&S.profile.birthdate);
+  const sex=(S.profile&&S.profile.sex)||null;
+  const standard=S.aftStandard||"general";
+  return {age, sex, standard, band:aftAgeBracket(age)};
+}
+// pick which scale column applies: combat standard = sex-neutral "C"; general = M or F by sex
+function aftScale(c){ return c.standard==="combat" ? "C" : (c.sex==="f" ? "F" : "M"); }
+function aftLookup(event, band, scale, raw){
+  const tbl=AFT_TABLES[event]; if(!tbl) return null;
+  const col=(tbl[band]&&tbl[band][scale]) || (tbl[band]&&tbl[band].M) || null;
+  if(!col) return null;
+  const higherBetter=(event==="mdl"||event==="hrp"||event==="plk");
+  for(let i=0;i<col.length;i++){
+    const r=col[i][0], p=col[i][1];
+    const better = higherBetter ? raw>=r : raw<=r;
+    if(better){
+      if(i===0) return p;
+      const r0=col[i-1][0], p0=col[i-1][1];
+      const frac=(r0-r)===0?0:(raw-r)/(r0-r);
+      return clampScore(Math.round(p + frac*(p0-p)));
+    }
+  }
+  return 0;
+}
+function score_dl(lbs){ if(lbs==null)return null; const c=aftCtx(); return aftLookup("mdl",c.band,aftScale(c),lbs); }
+function score_hrp(reps){ if(reps==null)return null; const c=aftCtx(); return aftLookup("hrp",c.band,aftScale(c),reps); }
+function score_sdc(sec){ if(sec==null)return null; const c=aftCtx(); return aftLookup("sdc",c.band,aftScale(c),sec); }
+function score_plank(sec){ if(sec==null)return null; const c=aftCtx(); return aftLookup("plk",c.band,"M",sec); } // plank identical M/F/C
+function score_run(sec){ if(sec==null)return null; const c=aftCtx(); return aftLookup("run",c.band,aftScale(c),sec); }
 function clampScore(x){return Math.max(0,Math.min(100,Math.round(x)));}
 
+function renderAftStandardBar(){
+  const el=document.getElementById("aftStandardBar"); if(!el) return;
+  const c=aftCtx();
+  const minTotal=c.standard==="combat"?350:300;
+  const last=S.aft[S.aft.length-1];
+  const ageStr = c.age!=null ? `age ${c.age} · band ${aftAgeBracket(c.age)}` : `<span style="color:var(--ember)">set birthdate in Profile</span>`;
+  const sexStr = c.standard==="combat" ? "sex-neutral" : (c.sex==="f"?"female-normed":c.sex==="m"?"male-normed":"set sex in Profile");
+  let passLine="";
+  if(last){
+    const sc=last.scores; const vals=[sc.dl,sc.hrp,sc.sdc,sc.plank,sc.run].filter(v=>v!=null);
+    const anyFail=vals.some(v=>v<60); const total=last.total;
+    const pass = !anyFail && total>=minTotal;
+    passLine=`<div class="std-pass ${pass?'ok':'no'}">${pass?'✅ Meets':'❌ Below'} ${c.standard==="combat"?"Combat":"General"} standard — ${total}/${minTotal} total${anyFail?", an event is under 60":""}</div>`;
+  }
+  el.innerHTML=`<div class="std-card">
+    <div class="std-row">
+      <span class="std-label">Standard</span>
+      <div class="std-toggle">
+        <button data-aftstd="general" class="${c.standard==='general'?'on':''}">General · 300</button>
+        <button data-aftstd="combat" class="${c.standard==='combat'?'on':''}">Combat · 350</button>
+      </div>
+    </div>
+    <div class="std-ctx">${ageStr} · ${sexStr}</div>
+    ${passLine}
+    <div class="std-note">Scored from the official AFT tables (HQDA EXORD 218-25, Annex B, eff 1 Jun 2025). Cyber (17-series) is general/enabling, so General is the default; switch to Combat if your role requires it.</div>
+  </div>`;
+}
 function renderAft(){
   const hist=document.getElementById("aftHistory");
   if(!hist) return;
+  renderAftStandardBar();
   if(!S.aft.length){hist.innerHTML=`<div class="empty"><span class="big">💪</span>No AFT logged yet. Enter your scores above.</div>`;}
   else{
     const rev=S.aft.slice().reverse();
@@ -2171,6 +2402,30 @@ function renderSkillBalance(){
     lines+=`<div class="recovery-line">🧘 Don't skip <b>${neglected.map(s=>esc(s.name)).join(" & ")}</b> — true all-around fitness needs these, not just the AFT lifts.</div>`;
   }
   lines+=`<div class="recovery-line" style="color:var(--ink-faint);font-style:italic">Train laggards first in each session, keep one maintenance set for strengths, and log it so the skills update.</div>`;
+  // profile-driven context: age pacing, height/stride, weight trend
+  const p=S.profile||{};
+  const age=ageFromDob(p.birthdate);
+  let ctx="";
+  if(age!=null){
+    const rec = age<25?"You recover fast at your age — you can train hard most days, but still alternate heavy/easy."
+      : age<35?"Recovery is solid — keep one full rest day and avoid two heavy days back-to-back."
+      : "Build in extra recovery — leave 48h between heavy sessions for the same area and prioritize sleep/mobility.";
+    ctx+=`<div class="recovery-line">⏱️ <b>Pacing (age ${age}):</b> ${rec}</div>`;
+  }
+  if(p.heightIn>0){
+    const stride = p.heightIn>=72?"Your height gives you a long stride for running and reach for the deadlift bar — use a slightly wider stance and own your turnover on the run."
+      : p.heightIn<=66?"Your shorter levers are an advantage in the deadlift and push-ups — leverage that strength; focus run gains on cadence."
+      : "Average levers — balanced for all events; technique is your biggest lever.";
+    ctx+=`<div class="recovery-line">📏 <b>Build:</b> ${stride}</div>`;
+  }
+  // weight trend from logged weight history
+  if(S.weightLog && S.weightLog.length>=2){
+    const sorted=S.weightLog.slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
+    const first=sorted[0], lastw=sorted[sorted.length-1];
+    const d=(lastw.lb-first.lb);
+    if(Math.abs(d)>=1) ctx+=`<div class="recovery-line">⚖️ <b>Weight trend:</b> ${d>0?"+":""}${d.toFixed(1)} lb since ${new Date(first.date).toLocaleDateString()} — ${d>0?"if this is muscle, your strength ratios will follow; watch the run":"lighter bodyweight raises your strength-to-weight ratios"}.</div>`;
+  }
+  if(ctx) lines+=ctx;
   el.innerHTML=`<div class="recovery-card balance"><h3>📊 Whole-body balance (from your skill levels)</h3>${lines}</div>`;
 }
 
@@ -2545,8 +2800,140 @@ document.body.addEventListener("click",e=>{
   const mbedit=e.target.closest("[data-mbedit]"); if(mbedit){ mbEdit(mbedit.dataset.mbedit); return; }
   const skedit=e.target.closest("[data-skedit]"); if(skedit){ skEdit(skedit.dataset.skedit); return; }
   const skjump=e.target.closest("[data-skjump]"); if(skjump){ const t=document.getElementById("skcat-"+skjump.dataset.skjump); if(t) t.scrollIntoView({behavior:"smooth",block:"start"}); return; }
+  const aftstd=e.target.closest("[data-aftstd]"); if(aftstd){ S.aftStandard=aftstd.dataset.aftstd; save(); render(); return; }
 });
 const _ptSave=document.getElementById("ptSave"); if(_ptSave) _ptSave.onclick=savePT;
+// Body & Lifts profile
+function ageFromDob(dob){
+  if(!dob) return null;
+  const d=new Date(dob); if(isNaN(d)) return null;
+  const now=new Date(); let a=now.getFullYear()-d.getFullYear();
+  const m=now.getMonth()-d.getMonth();
+  if(m<0||(m===0&&now.getDate()<d.getDate())) a--;
+  return a>=0&&a<130?a:null;
+}
+function fmtMeasDate(ds){
+  if(!ds) return "";
+  const d=new Date(ds); if(isNaN(d)) return "";
+  const days=Math.floor((Date.now()-d)/864e5);
+  const ago = days<=0?"today" : days===1?"1 day ago" : days<60?days+" days ago" : Math.round(days/30)+" months ago";
+  return d.toLocaleDateString()+" ("+ago+")";
+}
+function renderProfile(){
+  if(!document.getElementById("pfWt")) return;
+  const p=S.profile||{}, l=S.lifts||{};
+  const setv=(id,v)=>{const el=document.getElementById(id); if(el&&document.activeElement!==el) el.value=(v??"");};
+  setv("pfName",S.name); setv("pfRank",S.rank); setv("pfPos",S.position); setv("pfBranch",S.branchGoal);
+  setv("pfDob",p.birthdate||""); setv("pfSex",p.sex||""); setv("pfBlood",p.bloodType||"");
+  setv("pfHt",p.heightIn); setv("pfHtDate",p.heightDate||""); setv("pfWt",p.weightLb); setv("pfWtDate",p.weightDate||"");
+  setv("pfDl",l.deadliftLb); setv("pfSq",l.squatLb); setv("pfBn",l.benchLb); setv("pfLiftDate",l.liftDate||"");
+  setv("pfNotes",p.notes||"");
+  const age=ageFromDob(p.birthdate);
+  const ageEl=document.getElementById("pfAgeOut"); if(ageEl) ageEl.value=age!=null?age+" yrs":"—";
+  const ro=document.getElementById("pfReadout"); if(!ro) return;
+  const rows=[];
+  if(age!=null) rows.push(`<div class="r-row"><span>Age</span><b>${age}</b></div>`);
+  if(p.heightIn>0 && p.weightLb>0){ const bmi=(p.weightLb/(p.heightIn*p.heightIn))*703; rows.push(`<div class="r-row"><span>BMI</span><b>${bmi.toFixed(1)}</b></div>`); }
+  if(p.weightLb>0 && l.deadliftLb) rows.push(`<div class="r-row"><span>Deadlift</span><b>${(l.deadliftLb/p.weightLb).toFixed(2)}× bodyweight</b></div>`);
+  if(p.weightLb>0 && l.squatLb) rows.push(`<div class="r-row"><span>Squat</span><b>${(l.squatLb/p.weightLb).toFixed(2)}× bodyweight</b></div>`);
+  if(p.weightLb>0 && l.benchLb) rows.push(`<div class="r-row"><span>Bench</span><b>${(l.benchLb/p.weightLb).toFixed(2)}× bodyweight</b></div>`);
+  if(p.weightDate) rows.push(`<div class="r-row"><span>Weight measured</span><b>${fmtMeasDate(p.weightDate)}</b></div>`);
+  if(p.heightDate) rows.push(`<div class="r-row"><span>Height measured</span><b>${fmtMeasDate(p.heightDate)}</b></div>`);
+  ro.innerHTML=rows.length?(rows.join("")+`<div style="margin-top:8px;color:var(--ink-faint);font-style:italic">Your bodyweight drives the Deadlift & Squat skills automatically.</div>`):`<div style="color:var(--ink-faint)">Fill in your profile above to see computed stats and power the strength skills.</div>`;
+}
+const _pfSave=document.getElementById("pfSave");
+if(_pfSave) _pfSave.onclick=()=>{
+  const num=id=>{const v=parseFloat(document.getElementById(id).value); return isNaN(v)?null:v;};
+  const str=id=>{const v=document.getElementById(id).value.trim(); return v||null;};
+  // identity (also updates header)
+  const nm=str("pfName"); if(nm) S.name=nm;
+  const rk=str("pfRank"); if(rk) S.rank=rk;
+  S.position=str("pfPos")||"No leadership role";
+  const br=str("pfBranch"); if(br) S.branchGoal=br;
+  // dimensions
+  S.profile.birthdate=document.getElementById("pfDob").value||null;
+  S.profile.sex=document.getElementById("pfSex").value||null;
+  S.profile.bloodType=document.getElementById("pfBlood").value||null;
+  S.profile.heightIn=num("pfHt"); S.profile.heightDate=document.getElementById("pfHtDate").value||null;
+  S.profile.weightLb=num("pfWt"); S.profile.weightDate=document.getElementById("pfWtDate").value||null;
+  // record weight to trend log (dedupe by date)
+  if(S.profile.weightLb>0){
+    const wd=S.profile.weightDate||new Date().toISOString().slice(0,10);
+    if(!S.weightLog) S.weightLog=[];
+    const existing=S.weightLog.find(w=>w.date===wd);
+    if(existing) existing.lb=S.profile.weightLb;
+    else S.weightLog.push({date:wd, lb:S.profile.weightLb});
+  }
+  S.profile.notes=document.getElementById("pfNotes").value.trim();
+  S.lifts.deadliftLb=num("pfDl"); S.lifts.squatLb=num("pfSq"); S.lifts.benchLb=num("pfBn");
+  S.lifts.liftDate=document.getElementById("pfLiftDate").value||null;
+  save(); render();
+  toast("🪪 Profile saved — strength skills updated");
+};
+
+// ===== Blood type: emergency card + scientifically-valid donation facts =====
+// Compatibility is real transfusion science (ABO/Rh), not invented.
+const BLOOD_FACTS={
+  "O−":{donateTo:"everyone (universal red-cell donor)", receiveFrom:"O−", note:"Universal red-cell donor — your blood is in highest demand for emergencies."},
+  "O+":{donateTo:"O+, A+, B+, AB+", receiveFrom:"O+, O−", note:"Most common type; O+ red cells are heavily used."},
+  "A−":{donateTo:"A−, A+, AB−, AB+", receiveFrom:"A−, O−", note:""},
+  "A+":{donateTo:"A+, AB+", receiveFrom:"A+, A−, O+, O−", note:""},
+  "B−":{donateTo:"B−, B+, AB−, AB+", receiveFrom:"B−, O−", note:""},
+  "B+":{donateTo:"B+, AB+", receiveFrom:"B+, B−, O+, O−", note:""},
+  "AB−":{donateTo:"AB−, AB+", receiveFrom:"AB−, A−, B−, O−", note:""},
+  "AB+":{donateTo:"AB+ only", receiveFrom:"everyone (universal red-cell recipient)", note:"Universal plasma donor — and you can receive red cells from any type."}
+};
+const WHOLE_BLOOD_DAYS=56; // real Red Cross eligibility interval for whole blood
+function renderEmergencyAndBlood(){
+  const p=S.profile||{};
+  // Emergency card
+  const eg=document.getElementById("pfEmergency");
+  if(eg){
+    const age=ageFromDob(p.birthdate);
+    const rows=[
+      ["Name", S.name||"—"],
+      ["Blood type", p.bloodType||"— (set above)"],
+      ["Age", age!=null?age:"—"],
+      ["Allergies / medical", (p.notes&&p.notes.trim())?esc(p.notes):"none recorded"],
+    ];
+    eg.innerHTML=`<div class="emerg-card"><div class="emerg-h">⚕️ EMERGENCY INFO</div>${rows.map(r=>`<div class="emerg-row"><span>${r[0]}</span><b>${r[1]}</b></div>`).join("")}<div class="emerg-foot">Hold to screenshot · keep current</div></div>`;
+  }
+  // Blood donation
+  const bd=document.getElementById("pfBloodCard"); if(!bd) return;
+  if(!p.bloodType){ bd.innerHTML=`<div class="bl-readout" style="color:var(--ink-faint)">Set your blood type above to see who you can donate to/receive from and track donation eligibility.</div>`; return; }
+  const f=BLOOD_FACTS[p.bloodType]||{};
+  const last=(S.donations||[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+  let elig="";
+  if(last){
+    const next=new Date(last.date); next.setDate(next.getDate()+WHOLE_BLOOD_DAYS);
+    const daysLeft=Math.ceil((next-Date.now())/864e5);
+    elig = daysLeft<=0
+      ? `<div class="bl-elig ok">✅ Eligible to donate whole blood again (last: ${new Date(last.date).toLocaleDateString()})</div>`
+      : `<div class="bl-elig wait">⏳ Next eligible in ${daysLeft} day${daysLeft!==1?'s':''} — ${next.toLocaleDateString()} (${WHOLE_BLOOD_DAYS}-day interval)</div>`;
+  } else {
+    elig=`<div class="bl-elig ok">No donations logged yet. Whole blood can be given every ${WHOLE_BLOOD_DAYS} days.</div>`;
+  }
+  const count=(S.donations||[]).length;
+  bd.innerHTML=`<div class="blood-card">
+    <div class="blood-type-big">${esc(p.bloodType)}</div>
+    <div class="blood-compat">
+      <div><span>Can donate to</span><b>${f.donateTo||"—"}</b></div>
+      <div><span>Can receive from</span><b>${f.receiveFrom||"—"}</b></div>
+    </div>
+    ${f.note?`<div class="blood-note">${f.note}</div>`:""}
+    ${elig}
+    ${count?`<div class="blood-count">🩸 ${count} donation${count!==1?'s':''} logged${count>=1?` · ~${count*0.5} lives potentially helped`:''}</div>`:""}
+  </div>`;
+}
+const _donAdd=document.getElementById("donAdd");
+if(_donAdd) _donAdd.onclick=()=>{
+  const d=document.getElementById("donDate").value || new Date().toISOString().slice(0,10);
+  S.donations.push({id:id(), date:d, type:S.profile.bloodType||null});
+  document.getElementById("donDate").value="";
+  save(); render();
+  toast("🩸 Donation logged — thank you");
+};
+
 const _ptText=document.getElementById("ptText"); if(_ptText) _ptText.addEventListener("input",ptOnText);
 // skills: capture level-ability typing, add-level, create
 document.addEventListener("input",e=>{ const i=e.target.dataset.skl; if(i!=null){ _skLevels[+i]=e.target.value; } });
@@ -3081,8 +3468,25 @@ function syncSkillsFromActivity(){
     if(!sk.auto || !sk.auto.startsWith("ex:")) return;
     const key=sk.auto.slice(3);
     const maxLevels=sk.levels.length;
+    // bodyweight-relative strength: compute level from actual lift ÷ bodyweight
+    const bw=S.profile&&S.profile.weightLb;
+    if(bw && bw>0){
+      let ratioLvl=null;
+      if(key==="deadlift" && S.lifts.deadliftLb){
+        const r=S.lifts.deadliftLb/bw;
+        ratioLvl = r>=2.25?6 : r>=2?5 : r>=1.75?4 : r>=1.5?3 : r>=1.25?2 : r>=1?1 : 0;
+      } else if(key==="squat" && S.lifts.squatLb){
+        const r=S.lifts.squatLb/bw;
+        ratioLvl = r>=2?4 : r>=1.5?3 : r>=1?2 : 1;  // L5 (pistol) stays manual
+      }
+      if(ratioLvl!==null){
+        ratioLvl=Math.min(ratioLvl,maxLevels);
+        if(ratioLvl>sk.currentLevel){ sk.currentLevel=ratioLvl; sk.lastQuestTs=now; sk.history.push({ts:now,type:"auto-lift",level:ratioLvl}); changed=true; }
+        else if(ratioLvl>0 && ratioLvl>=sk.currentLevel && sk.lastQuestTs<now-864e5){ sk.lastQuestTs=now; changed=true; }
+      }
+    }
     // AFT events directly set a floor level from the latest test
-    const aftMap={pushups:"hrp",deadlift:"dl",run:"run",sdc:"sdc",plank:"plank"};
+    const aftMap={pushups:"hrp",run:"run",sdc:"sdc",plank:"plank"};  // deadlift handled by ratio above
     if(last && aftMap[key]){
       const lvl=eventScoreToLevel(last.scores[aftMap[key]], maxLevels);
       if(lvl>sk.currentLevel){ sk.currentLevel=lvl; sk.lastQuestTs=now; sk.history.push({ts:now,type:"auto-aft",level:lvl}); changed=true; }
