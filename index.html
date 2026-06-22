@@ -445,6 +445,187 @@
   .sk-card-cat{font-size:11px;color:var(--ink-faint);letter-spacing:.05em;text-transform:uppercase}
   .sk-level-badge{font-size:12px;font-weight:700;color:var(--violet);background:rgba(124,147,168,.12);border:1px solid #5a4d72;padding:3px 10px;border-radius:20px;flex:none}
   .sk-level-badge.maxed{color:var(--gold);border-color:var(--gold)}
+  .sk-fade-note.reclaim{color:var(--gold)}
+  .vt-tag{font-size:10px;letter-spacing:.04em;padding:1px 7px;border-radius:10px;border:1px solid;margin-left:5px;font-weight:600}
+  .vt-tag.ok{color:var(--jade);border-color:#3c5230}
+  .vt-tag.warn{color:var(--ember);border-color:#7a5e2a}
+  .vt-tag.bad{color:#d98a72;border-color:var(--blood)}
+  /* Habits */
+  .habit-add-wrap{margin-top:12px;border:1px dashed var(--line);border-radius:10px;padding:10px 13px}
+  .habit-add-wrap summary{cursor:pointer;font-size:13px;color:var(--ink-dim);font-weight:600}
+  .habit-add-wrap summary:hover{color:var(--gold)}
+  .habit-starter{margin-top:12px}
+  .habit-starter-label{font-size:11.5px;color:var(--ink-faint);margin-bottom:7px}
+  .hb-starter-btn{display:inline-block;background:#0e0f09;border:1px solid var(--line);color:var(--ink-dim);padding:6px 10px;border-radius:16px;font-family:inherit;font-size:12px;cursor:pointer;margin:0 5px 5px 0}
+  .hb-starter-btn:hover{border-color:var(--jade);color:var(--jade)}
+  .hb-card{display:flex;align-items:center;gap:11px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:8px}
+  .hb-card.done{opacity:.62;border-color:#3c5230}
+  .hb-check{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid var(--line);background:transparent;color:#14160f;font-weight:800;cursor:pointer;font-size:15px;display:grid;place-items:center;transition:.15s}
+  .hb-check:hover{border-color:var(--jade)}
+  .hb-check.on{background:var(--jade);border-color:var(--jade)}
+  .hb-body{flex:1;min-width:0}
+  .hb-name{font-size:14px;font-weight:600}
+  .hb-note{font-size:11.5px;color:var(--ink-faint);margin-top:2px}
+  .hb-note.warn{color:var(--ember)}
+  .hb-streak{flex:none;font-size:12.5px;font-weight:700;color:var(--ember);background:rgba(200,119,46,.12);border:1px solid #7a5e2a;padding:3px 9px;border-radius:20px}
+  .hb-streak.done{color:var(--jade);border-color:#3c5230;background:rgba(111,158,84,.12)}
+  .hb-streak.broken{color:var(--ink-faint);border-color:var(--line);background:transparent}
+  .hb-del{flex:none;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px}
+  .hb-del:hover{color:var(--blood)}
+  /* Test tab */
+  .test-card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px;margin-bottom:12px}
+  .test-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .test-title{font-size:15px;font-weight:700;color:var(--ink)}
+  .test-lvl{font-size:12px;font-weight:700;color:var(--violet);background:rgba(124,147,168,.12);border:1px solid #5a4d72;padding:2px 9px;border-radius:14px}
+  .test-stats{font-size:12px;color:var(--ink-faint);margin-top:5px}
+  .test-stats b{color:var(--ink-dim)}
+  .test-info{margin-top:9px}
+  .test-info summary{cursor:pointer;font-size:12.5px;color:var(--violet);font-weight:600}
+  .test-why{font-size:12.5px;color:var(--ink-dim);line-height:1.55;margin-top:7px;padding:9px 11px;background:#0e0f09;border-radius:8px}
+  .test-why p{margin:0 0 6px}
+  .test-why b{color:var(--gold)}
+  .test-stage{margin-top:11px}
+  .test-stage:empty{display:none}
+  .test-start{margin-top:11px}
+  /* reaction */
+  .rx{height:130px;border-radius:10px;display:grid;place-items:center;cursor:pointer;font-size:18px;font-weight:700;user-select:none;text-align:center;padding:0 12px}
+  .rx.wait{background:#5a2d28;color:#e8c9c0}
+  .rx.go{background:var(--jade);color:#0e1108}
+  .rx.early{background:#7a5e2a;color:#f0e2c8;font-size:14px}
+  .rx.result,.ds.result,.ty.result{background:#0e0f09;height:auto;padding:14px}
+  /* digit span */
+  .ds{min-height:110px;display:grid;place-items:center;background:#0e0f09;border-radius:10px;padding:14px;text-align:center}
+  .ds-digit{font-size:54px;font-weight:800;color:var(--gold);min-height:64px;line-height:64px}
+  .ds-input{font-size:20px;letter-spacing:.2em;text-align:center;width:100%;max-width:240px;background:#14160f;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px}
+  .ds-ask,.ds-ok{font-size:14px;color:var(--ink-dim)}
+  .ds-ok{color:var(--jade)}
+  /* typing */
+  .ty-text{font-size:14px;line-height:1.6;color:var(--gold-bright);background:#0e0f09;padding:11px;border-radius:8px;margin-bottom:9px}
+  .ty-input{width:100%;background:#14160f;border:1px solid var(--line);color:var(--ink);padding:10px;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical}
+  .ty-live{font-size:11.5px;color:var(--ink-faint);margin-top:5px}
+  /* shared result */
+  .test-result{text-align:center}
+  .test-result .big{font-size:34px;font-weight:800;color:var(--gold)}
+  .test-result .leveled{color:var(--jade);font-weight:700;margin-top:7px}
+  .test-result .sugg{font-size:12.5px;color:var(--ink-dim);margin-top:9px;line-height:1.5;font-style:italic}
+  /* n-back */
+  .nb-levels{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .nb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;max-width:240px;margin:0 auto 10px}
+  .nb-cell{aspect-ratio:1;background:#0e0f09;border:1px solid var(--line);border-radius:8px;transition:.1s}
+  .nb-cell.on{background:var(--violet);border-color:var(--violet)}
+  .nb-status{text-align:center;font-size:13px;color:var(--ink-faint);margin-bottom:8px}
+  #nbMatch.good{background:var(--jade)} #nbMatch.bad{background:var(--blood)}
+  /* go-no-go */
+  .gg-zone{height:140px;border-radius:10px;display:grid;place-items:center;font-size:54px;cursor:pointer;user-select:none;background:#0e0f09;border:1px solid var(--line)}
+  .gg-zone.wait{background:#0e0f09} .gg-zone.go{background:rgba(111,158,84,.18);color:var(--jade)}
+  .gg-zone.nogo{background:rgba(156,74,52,.18);color:#d98a72} .gg-zone.hit{background:var(--jade);color:#0e1108}
+  .gg-zone.miss{background:var(--blood);color:#fff}
+  .gg-status{text-align:center;font-size:12px;color:var(--ink-faint);margin-top:8px}
+  /* processing speed */
+  .ps-keyrow{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-bottom:11px}
+  .ps-key{background:#0e0f09;border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:13px}
+  .ps-key b{color:var(--gold);margin-right:3px;font-size:15px}
+  .ps-prompt{text-align:center;font-size:15px;margin-bottom:10px}
+  .ps-symbol{font-size:30px;color:var(--gold);vertical-align:middle}
+  .ps-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;max-width:230px;margin:0 auto}
+  .ps-num{aspect-ratio:1.4;background:#0e0f09;border:1px solid var(--line);color:var(--ink);font-size:18px;font-weight:700;border-radius:8px;cursor:pointer}
+  .ps-num.good{background:var(--jade);color:#0e1108} .ps-num.bad{background:var(--blood);color:#fff}
+  .ps-status{text-align:center;font-size:13px;color:var(--ember);margin-top:10px;font-weight:700}
+  /* math sprint */
+  .mm-q{text-align:center;font-size:34px;font-weight:800;color:var(--gold);margin-bottom:12px}
+  /* Memory track */
+  .mem-block{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px;margin-bottom:13px}
+  .mem-h{font-size:15px;font-weight:700;color:var(--gold-bright);margin-bottom:5px}
+  .mem-desc{font-size:12.5px;color:var(--ink-faint);line-height:1.5;margin-bottom:11px}
+  .srs-deck,.palace{background:#0e0f09;border:1px solid var(--line);border-radius:9px;padding:11px;margin-bottom:8px}
+  .srs-deck{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .srs-deck-info b{font-size:14px} .srs-deck-info span{display:block;font-size:11.5px;color:var(--ink-faint);margin-top:2px}
+  .srs-deck-btns{display:flex;gap:5px;flex-wrap:wrap}
+  .srs-newdeck{margin-top:10px}
+  .srs-newdeck input,.palace-add input{width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px;margin-bottom:6px}
+  .srs-card{text-align:center;padding:14px;background:#0e0f09;border-radius:10px}
+  .srs-front{font-size:17px;font-weight:600;margin-bottom:11px}
+  .srs-back{font-size:15px;color:var(--jade);padding:11px 0;border-top:1px solid var(--line);margin-bottom:11px}
+  .srs-grade{font-size:12.5px;color:var(--ink-faint)}
+  .srs-grade-btns{display:flex;gap:6px;margin-top:8px;justify-content:center}
+  .srs-g{flex:1;max-width:90px;padding:9px;border-radius:8px;border:1px solid var(--line);background:#14160f;color:var(--ink);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+  .srs-g.again{border-color:var(--blood);color:#d98a72} .srs-g.hard{border-color:#7a5e2a;color:var(--ember)}
+  .srs-g.good{border-color:#3c5230;color:var(--jade)} .srs-g.easy{border-color:var(--violet);color:var(--violet)}
+  .srs-done{text-align:center;font-size:14px;color:var(--jade);padding:16px}
+  .palace-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px}
+  .palace-top b{font-size:14px} .palace-top span{font-size:11.5px;color:var(--ink-faint)}
+  .palace-loci{margin:0 0 9px;padding-left:20px;font-size:13px;color:var(--ink-dim)}
+  .palace-loci li{margin-bottom:3px}
+  .loc-place{color:var(--violet)} .loc-item{color:var(--gold)}
+  /* Work on this */
+  .sk-work{margin-top:9px;background:rgba(184,160,106,.1);border:1px solid #5a4d33;color:var(--gold);padding:7px 12px;border-radius:8px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;width:100%}
+  .sk-work:hover{background:rgba(184,160,106,.18)}
+  .sk-work-panel:not(:empty){margin-top:8px}
+  .sk-work-body{font-size:12.5px;color:var(--ink-dim);line-height:1.55;background:#0e0f09;border-radius:8px;padding:11px}
+  .sk-work-body b{color:var(--gold)}
+  .sk-work-go{display:inline-block;margin-top:8px;margin-right:6px;background:var(--violet);border:none;color:#0e0f09;padding:6px 11px;border-radius:7px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}
+  .sk-info{margin-top:8px}
+  .sk-info summary{cursor:pointer;font-size:12px;color:var(--violet);font-weight:600}
+  .sk-info-body{font-size:12px;color:var(--ink-dim);line-height:1.55;background:#0e0f09;border-radius:8px;padding:10px;margin-top:6px}
+  .sk-info-body p{margin:0 0 6px} .sk-info-body p:last-child{margin-bottom:0}
+  .sk-info-body b{color:var(--gold)}
+  .sk-info-body .sk-safety{color:var(--ember);font-style:italic}
+  /* Today / dashboard */
+  .td-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  @media(max-width:640px){.td-grid{grid-template-columns:1fr}}
+  .td-card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px}
+  .td-h{font-size:13px;font-weight:700;color:var(--gold);margin-bottom:9px;display:flex;align-items:center;gap:7px}
+  .td-count{margin-left:auto;font-size:11.5px;color:var(--ink-faint);font-weight:600}
+  .td-row{display:flex;align-items:center;gap:9px;font-size:13px;padding:4px 0;color:var(--ink-dim)}
+  .td-row .hb-check{width:22px;height:22px;font-size:12px;flex:none}
+  .td-bullet{color:var(--violet);flex:none;font-weight:700}
+  .td-bullet.warn{color:var(--ember)}
+  .td-streak{margin-left:auto;font-size:11.5px;color:var(--ember);font-weight:700}
+  .td-done{font-size:12.5px;color:var(--jade);padding:3px 0}
+  .td-more{font-size:11.5px;color:var(--ink-faint);margin-top:4px;font-style:italic}
+  .td-go{margin-top:9px;background:rgba(124,147,168,.12);border:1px solid #5a4d72;color:var(--violet);padding:6px 11px;border-radius:7px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;width:100%}
+  .td-go:hover{background:rgba(124,147,168,.2)}
+  /* History */
+  .hist-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  @media(max-width:640px){.hist-grid{grid-template-columns:1fr}}
+  .hist-block{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+  .hist-h{font-size:12.5px;color:var(--ink-dim);margin-bottom:7px}
+  .hist-h b{color:var(--gold);font-size:16px;margin-left:5px}
+  .hist-meta{font-size:11px;color:var(--ink-faint);margin-top:6px}
+  .hist-nodata{font-size:11.5px;color:var(--ink-faint);padding:14px 0;text-align:center}
+  .hist-bar{height:8px;background:#1c1e15;border-radius:4px;overflow:hidden}
+  .hist-bar-fill{height:100%;background:var(--jade)}
+  /* Counseling */
+  .cn-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:8px}
+  .cn-top{display:flex;align-items:center;gap:9px}
+  .cn-type{font-size:11px;font-weight:700;color:var(--violet);background:rgba(124,147,168,.12);padding:2px 9px;border-radius:12px}
+  .cn-date{font-size:11.5px;color:var(--ink-faint)} .cn-top .hb-del{margin-left:auto}
+  .cn-people{font-size:12.5px;color:var(--gold);margin-top:6px}
+  .cn-summary{font-size:13px;color:var(--ink-dim);margin-top:5px;line-height:1.5}
+  .cn-plan{font-size:12.5px;color:var(--ink-faint);margin-top:5px} .cn-plan b{color:var(--jade)}
+  /* Checklists */
+  .cl-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:8px}
+  .cl-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .cl-top b{font-size:14px} .cl-count{font-size:11.5px;color:var(--ink-faint)} .cl-top .hb-del{margin-left:auto}
+  .cl-item{display:flex;align-items:center;gap:9px;padding:4px 0;font-size:13px}
+  .cl-item.done{opacity:.55} .cl-item.done span{text-decoration:line-through}
+  .cl-item .hb-check{width:22px;height:22px;font-size:12px;flex:none}
+  .cl-item span{flex:1}
+  .cl-itemdel{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:12px}
+  .cl-newitem{width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:8px;border-radius:7px;font-family:inherit;font-size:13px;margin-top:6px}
+  /* Study plans */
+  .study-plan{background:#0e0f09;border:1px solid var(--line);border-radius:9px;padding:12px;margin-bottom:9px}
+  .study-top{display:flex;justify-content:space-between;align-items:center}
+  .study-top b{font-size:14px}
+  .study-meta{font-size:11.5px;color:var(--ink-faint);margin:3px 0 7px}
+  .study-prog{height:6px;background:#1c1e15;border-radius:3px;overflow:hidden}
+  .study-prog-fill{height:100%;background:var(--jade)}
+  .study-today{margin-top:9px}
+  .study-task{display:flex;align-items:center;gap:9px;padding:5px 0;font-size:13px}
+  .study-task.done{opacity:.6}
+  .study-rest{font-size:12px;color:var(--ink-faint);font-style:italic}
+  .study-topics{display:flex;flex-direction:column;gap:5px;max-height:160px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;padding:9px}
+  .study-topic{font-size:13px;display:flex;align-items:center;gap:8px;cursor:pointer}
   .sk-ladder{margin-top:10px;display:flex;flex-direction:column;gap:5px}
   .sk-rung{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;padding:4px 0}
   .sk-rung .dot{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line);flex:none;display:grid;place-items:center;font-size:10px;margin-top:1px}
@@ -685,8 +866,10 @@
   <div class="main-row">
   <nav class="tabs" id="sideNav">
     <button class="nav-toggle" id="navToggle" title="Toggle labels"><span class="ic">≡</span><span class="lbl">Menu</span></button>
-    <button data-tab="quests" class="on"><span class="ic">🎯</span><span class="lbl">Missions</span></button>
+    <button data-tab="today" class="on"><span class="ic">🧭</span><span class="lbl">Today</span></button>
+    <button data-tab="quests"><span class="ic">🎯</span><span class="lbl">Missions</span></button>
     <button data-tab="profile"><span class="ic">🪪</span><span class="lbl">Profile</span></button>
+    <button data-tab="test"><span class="ic">🧪</span><span class="lbl">Test</span></button>
     <button data-tab="dailies"><span class="ic">📋</span><span class="lbl">Orders</span></button>
     <button data-tab="quizzes"><span class="ic">📚</span><span class="lbl">Quiz</span></button>
     <button data-tab="aft"><span class="ic">💪</span><span class="lbl">AFT</span></button>
@@ -697,12 +880,19 @@
     <button data-tab="plan"><span class="ic">📕</span><span class="lbl">FM</span></button>
     <button data-tab="shop"><span class="ic">🏅</span><span class="lbl">R&amp;R</span></button>
     <button data-tab="awards"><span class="ic">🏆</span><span class="lbl">The Wall</span></button>
+    <button data-tab="records"><span class="ic">📊</span><span class="lbl">Records</span></button>
     <button data-tab="weight"><span class="ic">⚖️</span><span class="lbl">Weight</span></button>
   </nav>
   <div class="content-col">
 
   <!-- MISSIONS -->
-  <section class="view on" id="view-quests">
+  <!-- TODAY / DASHBOARD -->
+  <section class="view on" id="view-today">
+    <div class="sec-h"><h2 id="todayGreeting">Today</h2><span class="hint" id="todayDate"></span></div>
+    <div id="todayDash"></div>
+  </section>
+
+  <section class="view" id="view-quests">
     <div class="adder">
       <input id="qName" placeholder="New mission — e.g. Finish history essay" maxlength="80">
       <div class="row">
@@ -720,6 +910,24 @@
 
   <!-- ORDERS -->
   <section class="view" id="view-dailies">
+    <div class="sec-h"><h2>Daily Habits</h2><span class="hint" id="habitStreakHint">build the routine</span></div>
+    <div class="plan-intro">Habits are recurring daily quests with their own streaks. Completing one feeds its linked skill (refreshes its fade timer). Miss a day and your streak uses a one-time <b>grace day</b> before it resets — so a single slip doesn't erase months.</div>
+    <div id="habitQuests"></div>
+    <details class="habit-add-wrap">
+      <summary>+ Add a habit</summary>
+      <div class="adder" style="margin-top:10px">
+        <input id="hbName" placeholder="Habit — e.g. Read 20 minutes" maxlength="60">
+        <label class="lg-label" style="margin-top:9px;display:block">Feeds skill (optional)</label>
+        <select id="hbSkill"><option value="">— none —</option></select>
+        <button class="btn-add" id="hbAdd" style="margin-top:10px">Add habit</button>
+      </div>
+      <div class="habit-starter">
+        <div class="habit-starter-label">Or add a proven starter habit:</div>
+        <div id="hbStarters"></div>
+      </div>
+    </details>
+
+    <div class="sec-h" style="margin-top:20px"><h2>Daily Orders</h2><span class="hint">one-off tasks · reset 0600</span></div>
     <div class="adder">
       <input id="dName" placeholder="New daily order — e.g. 30 min workout" maxlength="80">
       <div class="row">
@@ -731,7 +939,6 @@
       </div>
       <button class="btn-add" id="dAdd">Add Order</button>
     </div>
-    <div class="sec-h"><h2>Daily Orders</h2><span class="hint">resets at 0600 daily</span></div>
     <ul class="list" id="dList"></ul>
   </section>
 
@@ -798,6 +1005,11 @@
     <div class="plan-intro" id="quizIntro">Pass a quiz to earn merit points and convert it into a daily review order — that's how knowledge sticks. Passing all of them secures the Knowledge objective.
       <br><span style="color:var(--ember);font-size:12.5px">⚠️ Study aid only — verify every answer against your own ROTC materials and cadre before trusting it.</span></div>
     <div id="quizList"></div>
+
+    <div class="sec-h" style="margin-top:22px"><h2>Study Plans</h2><span class="hint">spaced schedule → daily quests</span></div>
+    <div class="plan-intro">Have a graded test coming up? Generate a study plan and the app schedules <b>spaced</b> review across the days until your test (spacing beats cramming — it's the single biggest study lever). Each day's review shows up as a daily order.</div>
+    <div id="studyArea"></div>
+
   </section>
 
   <!-- AFT -->
@@ -874,6 +1086,46 @@
         <button class="btn-add" id="donAdd" style="flex:0 0 auto;width:auto;padding:11px 16px;margin:0">Log donation</button>
       </div>
     </div>
+
+    <div class="sec-h" style="margin-top:18px"><h2>Vitals</h2><span class="hint">pulse · BP · hemoglobin</span></div>
+    <div id="pfVitals"></div>
+    <div class="adder" style="margin-top:10px">
+      <div class="pt-intro">Log readings from your Apple Watch or blood donation. The app trends them; it can't measure them itself. <b>Informational only — not medical advice. See a clinician for anything concerning.</b></div>
+      <div class="bl-grid">
+        <label>Date<input id="vtDate" type="date"></label>
+        <label>Resting pulse (bpm)<input id="vtPulse" type="number" min="20" max="220" placeholder="e.g. 58"></label>
+        <label>BP systolic<input id="vtSys" type="number" min="60" max="260" placeholder="e.g. 118"></label>
+        <label>BP diastolic<input id="vtDia" type="number" min="30" max="160" placeholder="e.g. 76"></label>
+        <label>Hemoglobin (g/dL)<input id="vtHgb" type="number" min="5" max="25" step="0.1" placeholder="e.g. 14.5"></label>
+        <label>Note<input id="vtNote" type="text" maxlength="60" placeholder="optional"></label>
+      </div>
+      <button class="btn-add" id="vtAdd" style="margin-top:11px">Log vitals</button>
+      <div class="bl-sub" style="margin-top:16px">Apple Health import</div>
+      <div class="pt-intro">A web app can't read your Apple Watch directly. Later you'll be able to export your Apple Health data and import the file here. <i>(Importer coming in a future update — the button below is a placeholder.)</i></div>
+      <button class="sk-addlevel" id="vtImport">Import from Apple Health export (coming soon)</button>
+    </div>
+  </section>
+
+  <!-- TEST -->
+  <section class="view" id="view-test">
+    <div class="sec-h"><h2>Test &amp; Train</h2><span class="hint">measure → level up</span></div>
+    <div class="plan-intro">Each test measures a cognitive skill, updates that skill's level, and gives improvement suggestions. <b>Honest note:</b> these run in your browser, so device and input lag affect them — treat them as <i>relative</i> progress trackers, not clinical or IQ measurements. Tap "ℹ️ Why &amp; how" on any test before your first run.</div>
+    <div id="testList"></div>
+
+    <div class="sec-h" style="margin-top:22px"><h2>Memory Track</h2><span class="hint">memorize anything</span></div>
+    <div class="plan-intro">The real method stack memory champions use. <b>Honest framing:</b> this trains <i>deliberate</i> memorization to a very high level — it won't make unrelated remembering effortless, but with these techniques you can reliably memorize anything you put through the system.</div>
+
+    <div class="mem-block">
+      <div class="mem-h">📚 Spaced Repetition (SRS)</div>
+      <div class="mem-desc">The most evidence-backed way to remember long-term. You forget on a predictable curve; reviewing right before you'd forget resets it and stretches the gap each time. Make cards, review what's due daily.</div>
+      <div id="srsArea"></div>
+    </div>
+
+    <div class="mem-block">
+      <div class="mem-h">🏛️ Memory Palace</div>
+      <div class="mem-desc">Your brain remembers places and vivid images far better than abstract lists. Pick a place you know, walk a fixed route, and place a wild mental image of each item at each spot. To recall, walk the route again.</div>
+      <div id="palaceArea"></div>
+    </div>
   </section>
 
   <!-- LOG -->
@@ -927,6 +1179,8 @@
         <select id="skCat" style="flex:1">
           <option value="tactical">Tactical / field</option>
           <option value="physical">Physical</option>
+          <option value="cognitive">Cognitive</option>
+          <option value="physiological">Physiological</option>
           <option value="technical">Technical / cyber</option>
           <option value="leadership">Leadership</option>
           <option value="academic">Academic</option>
@@ -1132,6 +1386,47 @@
   </section>
 
   <!-- THE WEIGHT — read-only mirror of the standalone Weight app -->
+  <!-- RECORDS: history, counseling log, checklists -->
+  <section class="view" id="view-records">
+    <div class="sec-h"><h2>History &amp; Trends</h2><span class="hint">the long arc</span></div>
+    <div id="historyArea"></div>
+
+    <div class="sec-h" style="margin-top:20px"><h2>Counseling Log</h2><span class="hint">leadership events (4856-style)</span></div>
+    <div class="plan-intro">A private running record of counselings received and given — real fuel for OML/branch boards and self-reflection. Stays on your device.</div>
+    <div id="counselArea"></div>
+    <details class="habit-add-wrap"><summary>+ Log a counseling/event</summary>
+      <div class="adder" style="margin-top:10px">
+        <input id="cnDate" type="date">
+        <select id="cnType" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit"><option value="event">Event</option><option value="monthly">Monthly counseling</option><option value="developmental">Developmental</option><option value="received">Counseling received</option><option value="given">Counseling given</option></select>
+        <input id="cnPeople" placeholder="People involved" maxlength="60" style="margin-top:7px">
+        <textarea id="cnSummary" placeholder="What happened (summary)" rows="2" maxlength="400" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
+        <textarea id="cnPlan" placeholder="Plan of action / follow-up" rows="2" maxlength="300" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
+        <button class="btn-add" id="cnAdd" style="margin-top:9px">Save entry</button>
+      </div>
+    </details>
+
+    <div class="sec-h" style="margin-top:20px"><h2>Packing &amp; Gear Checklists</h2><span class="hint">reusable templates</span></div>
+    <div id="checklistArea"></div>
+    <details class="habit-add-wrap"><summary>+ New checklist</summary>
+      <div class="adder" style="margin-top:10px">
+        <input id="clName" placeholder="Checklist name — e.g. Ruck march, FTX, Lab" maxlength="40">
+        <button class="btn-add" id="clAdd" style="margin-top:9px">Create checklist</button>
+        <div class="habit-starter"><div class="habit-starter-label">Or start from a template:</div>
+          <div>${''}<button class="hb-starter-btn" data-cltemplate="ruck">Ruck march</button><button class="hb-starter-btn" data-cltemplate="ftx">FTX</button><button class="hb-starter-btn" data-cltemplate="lab">Lab day</button></div>
+        </div>
+      </div>
+    </details>
+
+    <div class="sec-h" style="margin-top:20px"><h2>Export Data</h2><span class="hint">CSV / printable</span></div>
+    <div class="plan-intro">Export your records as CSV for cadre, an official file, or your own backup (this is in addition to the full JSON backup at the bottom of the app).</div>
+    <div class="row" style="gap:8px;flex-wrap:wrap">
+      <button class="hb-starter-btn" data-export="aft">AFT history</button>
+      <button class="hb-starter-btn" data-export="awards">Awards</button>
+      <button class="hb-starter-btn" data-export="volunteer">Volunteer hours</button>
+      <button class="hb-starter-btn" data-export="counseling">Counseling log</button>
+    </div>
+  </section>
+
   <section class="view" id="view-weight">
     <div class="weight-head">
       <div class="weight-title">THE WEIGHT</div>
@@ -1222,6 +1517,15 @@ const DEFAULT = {
   aftStandard:"general",  // "general" (sex+age normed, 300 min) or "combat" (sex-neutral, 350 min)
   donations:[],           // blood donations: [{id, date, type}]
   weightLog:[],           // weight history for trend: [{date, lb}]
+  vitals:[],              // health readings: [{id, date, pulse, bpSys, bpDia, hemoglobin, note}]
+  healthImport:{lastImport:null},  // Apple Health export import stub
+  habits:[],              // {id, name, linkedSkill, streak, bestStreak, lastDone, graceUsed, history:[]}
+  tests:[],               // test results: [{id, type, date, score, raw, linkedSkill}]
+  srsDecks:[],            // [{id, name, cards:[{id, front, back, due, interval, ease, reps}]}]
+  palaces:[],             // memory palaces: [{id, name, loci:[{place, item}]}]
+  studyPlans:[],          // [{id, title, testDate, topics:[], created, done:[]}]
+  counseling:[],          // DA 4856-style: [{id, date, type, people, summary, plan, followUp}]
+  checklists:[],          // packing/gear: [{id, name, items:[{text,done}], template}]
   _seeded:false,     // whether starter skills have been seeded
   boardTasks:[
     {id:id(), name:"Create / verify your CC IMS (Cadet Command) & TBB account", done:false},
@@ -1400,12 +1704,23 @@ function load(){
     if(merged.lifeSkills.length && merged.lifeSkills.every(s=>s.group===undefined && s.parent===undefined)){
       merged.lifeSkills=[]; merged._seeded=false;
     }
+    // backfill peakLevel (all-time high) for any skill missing it
+    merged.lifeSkills.forEach(s=>{ s.peakLevel=Math.max(s.peakLevel||0, s.currentLevel||0); });
     merged.navLabels=r.navLabels!==undefined?r.navLabels:true;
     merged.profile=Object.assign({birthdate:null,heightIn:null,heightDate:null,weightLb:null,weightDate:null,sex:null,bloodType:null,units:"imperial",notes:""}, r.profile||{});
     merged.lifts=Object.assign({deadliftLb:null,squatLb:null,benchLb:null,liftDate:null}, r.lifts||{});
     merged.aftStandard=r.aftStandard||"general";
     merged.donations=r.donations||[];
     merged.weightLog=r.weightLog||[];
+    merged.vitals=r.vitals||[];
+    merged.healthImport=Object.assign({lastImport:null}, r.healthImport||{});
+    merged.habits=r.habits||[];
+    merged.tests=r.tests||[];
+    merged.srsDecks=r.srsDecks||[];
+    merged.palaces=r.palaces||[];
+    merged.studyPlans=r.studyPlans||[];
+    merged.counseling=r.counseling||[];
+    merged.checklists=r.checklists||[];
     return merged;
   }catch(e){return structuredClone(DEFAULT)}
 }
@@ -1514,6 +1829,16 @@ function render(){
   if(typeof renderLog==="function") renderLog();
   if(typeof renderProfile==="function") renderProfile();
   if(typeof renderEmergencyAndBlood==="function") renderEmergencyAndBlood();
+  if(typeof renderVitals==="function") renderVitals();
+  if(typeof renderHabits==="function") renderHabits();
+  if(typeof renderTests==="function") renderTests();
+  if(typeof renderSRS==="function") renderSRS();
+  if(typeof renderPalace==="function") renderPalace();
+  if(typeof renderStudy==="function") renderStudy();
+  if(typeof renderToday==="function") renderToday();
+  if(typeof renderHistory==="function") renderHistory();
+  if(typeof renderCounsel==="function") renderCounsel();
+  if(typeof renderChecklists==="function") renderChecklists();
   if(typeof renderPT==="function") renderPT();
   if(typeof renderSkillBalance==="function") renderSkillBalance();
   if(typeof renderRecoveryAdvisory==="function") renderRecoveryAdvisory();
@@ -1960,6 +2285,13 @@ function renderAft(){
     }).join("");
   }
   if(S.aft.length){ showAftResult(S.aft[S.aft.length-1]); }
+}
+function fmFocusLine(){
+  const a=(S.aft||[])[S.aft.length-1]; if(!a) return null;
+  const events=[{k:"dl",label:"Deadlift",s:a.scores.dl},{k:"hrp",label:"push-ups",s:a.scores.hrp},{k:"sdc",label:"Sprint-Drag-Carry",s:a.scores.sdc},{k:"plank",label:"plank/core",s:a.scores.plank},{k:"run",label:"2-mile run",s:a.scores.run}].filter(e=>e.s!=null);
+  if(!events.length) return null;
+  const weakest=events.reduce((m,e)=>e.s<m.s?e:m,events[0]);
+  return `Prioritize your ${weakest.label} (${weakest.s} pts) — it's your weakest AFT event right now.`;
 }
 function showAftResult(a){
   const el=document.getElementById("aftResult");
@@ -2795,6 +3127,28 @@ document.body.addEventListener("click",e=>{
   const mbrrm=e.target.closest("[data-mbrrm]"); if(mbrrm){ _mbRoles.splice(+mbrrm.dataset.mbrrm,1); renderMbRoleInputs(); return; }
   const evdel=e.target.closest("[data-evdel]"); if(evdel){ if(confirm("Remove this event?")){ S.events=S.events.filter(x=>x.id!==evdel.dataset.evdel); save(); render(); } return; }
   const voldel=e.target.closest("[data-voldel]"); if(voldel){ S.volunteer=S.volunteer.filter(v=>v.id!==voldel.dataset.voldel); save(); render(); return; }
+  const hbdo=e.target.closest("[data-hbdo]"); if(hbdo){ habitDo(hbdo.dataset.hbdo); return; }
+  const hbdel=e.target.closest("[data-hbdel]"); if(hbdel){ if(confirm("Delete this habit? Its streak history will be lost.")){ S.habits=S.habits.filter(h=>h.id!==hbdel.dataset.hbdel); save(); render(); } return; }
+  const hbstart=e.target.closest("[data-hbstart]"); if(hbstart){ const st=HABIT_STARTERS.find(x=>x.name===hbstart.dataset.hbstart); if(st && !S.habits.some(h=>h.name===st.name)){ S.habits.push({id:id(),name:st.name,linkedSkill:st.skill,streak:0,bestStreak:0,lastDone:null,graceUsed:false,history:[]}); save(); render(); toast("📋 Added: "+st.name); } return; }
+  const teststart=e.target.closest("[data-teststart]"); if(teststart){ const tid=teststart.dataset.teststart; if(tid==="reaction")startReaction(); else if(tid==="digitspan")startDigitSpan(); else if(tid==="typing")startTyping(); else if(tid==="nback")startNback(); else if(tid==="gonogo")startGoNoGo(); else if(tid==="procspeed")startProcSpeed(); else if(tid==="mathsprint")startMathSprint(); return; }
+  const srsReview=e.target.closest("[data-srsreview]"); if(srsReview){ startSrsReview(srsReview.dataset.srsreview); return; }
+  const srsGradeBtn=e.target.closest("[data-srsgrade]"); if(srsGradeBtn){ srsGrade(parseInt(srsGradeBtn.dataset.srsgrade)); return; }
+  const srsAdd=e.target.closest("[data-srsadd]"); if(srsAdd){ const d=S.srsDecks.find(x=>x.id===srsAdd.dataset.srsadd); if(d){ const front=(prompt("Front of card (question/prompt):")||"").trim(); if(!front)return; const back=(prompt("Back of card (answer):")||"").trim(); if(!back)return; d.cards.push({id:id(),front,back,due:0,interval:0,ease:2.5,reps:0}); save(); render(); } return; }
+  const srsDel=e.target.closest("[data-srsdel]"); if(srsDel){ if(confirm("Delete this deck and all its cards?")){ S.srsDecks=S.srsDecks.filter(x=>x.id!==srsDel.dataset.srsdel); save(); render(); } return; }
+  const palAdd=e.target.closest("[data-paladd]"); if(palAdd){ const p=S.palaces.find(x=>x.id===palAdd.dataset.paladd); if(p){ const card=palAdd.closest(".palace"); const place=card.querySelector(".pal-place").value.trim(); const item=card.querySelector(".pal-item").value.trim(); if(!place||!item){toast("Enter both a place and an item");return;} p.loci.push({place,item}); save(); render(); } return; }
+  const palTest=e.target.closest("[data-paltest]"); if(palTest){ palaceTest(palTest.dataset.paltest); return; }
+  const palDel=e.target.closest("[data-paldel]"); if(palDel){ if(confirm("Delete this palace?")){ S.palaces=S.palaces.filter(x=>x.id!==palDel.dataset.paldel); save(); render(); } return; }
+  const studyDone=e.target.closest("[data-studydone]"); if(studyDone){ const [pid,...rest]=studyDone.dataset.studydone.split("|"); const key=rest.join("|"); const pl=S.studyPlans.find(x=>x.id===pid); if(pl){ pl.done=pl.done||[]; if(!pl.done.includes(key)){ pl.done.push(key); const qsk=S.lifeSkills.find(s=>s.name==="Study & retention"); if(qsk&&qsk.currentLevel>0) qsk.lastQuestTs=Date.now(); save(); render(); toast("✅ Review done"); } } return; }
+  const studyDel=e.target.closest("[data-studydel]"); if(studyDel){ if(confirm("Delete this study plan?")){ S.studyPlans=S.studyPlans.filter(x=>x.id!==studyDel.dataset.studydel); save(); render(); } return; }
+  const skwork=e.target.closest("[data-skwork]"); if(skwork){ const panel=document.getElementById("skwork-"+skwork.dataset.skwork); if(panel){ if(panel.innerHTML){ panel.innerHTML=""; } else { panel.innerHTML=skWorkGuidance(S.lifeSkills.find(s=>s.id===skwork.dataset.skwork)); } } return; }
+  const goTab=e.target.closest("[data-gototab]"); if(goTab){ const tb=document.querySelector(`#sideNav button[data-tab="${goTab.dataset.gototab}"]`); if(tb) tb.click(); return; }
+  const cndel=e.target.closest("[data-cndel]"); if(cndel){ if(confirm("Delete this entry?")){ S.counseling=S.counseling.filter(c=>c.id!==cndel.dataset.cndel); save(); render(); } return; }
+  const cltemplate=e.target.closest("[data-cltemplate]"); if(cltemplate){ const t=cltemplate.dataset.cltemplate; const names={ruck:"Ruck march",ftx:"FTX",lab:"Lab day"}; S.checklists.push({id:id(),name:names[t],items:CHECKLIST_TEMPLATES[t].map(text=>({text,done:false})),template:true}); save(); render(); toast("✅ Checklist created"); return; }
+  const cltoggle=e.target.closest("[data-cltoggle]"); if(cltoggle){ const [cid,i]=cltoggle.dataset.cltoggle.split("|"); const cl=S.checklists.find(x=>x.id===cid); if(cl&&cl.items[+i]){ cl.items[+i].done=!cl.items[+i].done; save(); render(); } return; }
+  const clreset=e.target.closest("[data-clreset]"); if(clreset){ const cl=S.checklists.find(x=>x.id===clreset.dataset.clreset); if(cl){ cl.items.forEach(it=>it.done=false); save(); render(); } return; }
+  const cldel=e.target.closest("[data-cldel]"); if(cldel){ if(confirm("Delete this checklist?")){ S.checklists=S.checklists.filter(x=>x.id!==cldel.dataset.cldel); save(); render(); } return; }
+  const clitemdel=e.target.closest("[data-clitemdel]"); if(clitemdel){ const [cid,i]=clitemdel.dataset.clitemdel.split("|"); const cl=S.checklists.find(x=>x.id===cid); if(cl){ cl.items.splice(+i,1); save(); render(); } return; }
+  const exp=e.target.closest("[data-export]"); if(exp){ exportData(exp.dataset.export); return; }
   const awedit=e.target.closest("[data-awedit]"); if(awedit){ awEdit(awedit.dataset.awedit); return; }
   const evedit=e.target.closest("[data-evedit]"); if(evedit){ evEdit(evedit.dataset.evedit); return; }
   const mbedit=e.target.closest("[data-mbedit]"); if(mbedit){ mbEdit(mbedit.dataset.mbedit); return; }
@@ -2934,11 +3288,922 @@ if(_donAdd) _donAdd.onclick=()=>{
   toast("🩸 Donation logged — thank you");
 };
 
-const _ptText=document.getElementById("ptText"); if(_ptText) _ptText.addEventListener("input",ptOnText);
-// skills: capture level-ability typing, add-level, create
+// ===== Vitals (manual; informational only) =====
+function bpClass(sys,dia){
+  if(sys==null||dia==null) return null;
+  if(sys<120 && dia<80) return {label:"Normal", cls:"ok"};
+  if(sys<130 && dia<80) return {label:"Elevated", cls:"warn"};
+  if(sys<140 || dia<90) return {label:"High (Stage 1)", cls:"warn"};
+  if(sys<180 || dia<120) return {label:"High (Stage 2)", cls:"bad"};
+  return {label:"Very high — seek care", cls:"bad"};
+}
+function spark(vals){ // tiny inline sparkline from numbers
+  const nums=vals.filter(v=>v!=null); if(nums.length<2) return "";
+  const min=Math.min(...nums), max=Math.max(...nums), rng=(max-min)||1, w=90, h=22, step=w/(nums.length-1);
+  const pts=nums.map((v,i)=>`${(i*step).toFixed(1)},${(h-((v-min)/rng)*h).toFixed(1)}`).join(" ");
+  return `<svg width="${w}" height="${h}" style="vertical-align:middle"><polyline points="${pts}" fill="none" stroke="var(--jade)" stroke-width="1.5"/></svg>`;
+}
+function renderVitals(){
+  const el=document.getElementById("pfVitals"); if(!el) return;
+  const v=(S.vitals||[]).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
+  if(!v.length){ el.innerHTML=`<div class="bl-readout" style="color:var(--ink-faint)">No vitals logged yet. Add a reading below.</div>`; return; }
+  const last=v[v.length-1];
+  const rows=[];
+  if(last.pulse!=null) rows.push(`<div class="r-row"><span>Resting pulse ${spark(v.map(x=>x.pulse))}</span><b>${last.pulse} bpm</b></div>`);
+  if(last.bpSys!=null&&last.bpDia!=null){ const c=bpClass(last.bpSys,last.bpDia); rows.push(`<div class="r-row"><span>Blood pressure</span><b>${last.bpSys}/${last.bpDia} <span class="vt-tag ${c.cls}">${c.label}</span></b></div>`); }
+  if(last.hemoglobin!=null){
+    const hgb=last.hemoglobin; const lowDonate = (S.profile.sex==="f"? hgb<12.5 : hgb<13.0);
+    rows.push(`<div class="r-row"><span>Hemoglobin ${spark(v.map(x=>x.hemoglobin))}</span><b>${hgb} g/dL${lowDonate?' <span class="vt-tag warn">donation may be deferred</span>':''}</b></div>`);
+  }
+  rows.push(`<div class="r-row"><span>Readings logged</span><b>${v.length}</b></div>`);
+  el.innerHTML=`<div class="bl-readout">${rows.join("")}<div style="margin-top:8px;color:var(--ink-faint);font-style:italic">Latest reading shown; sparkline is your trend. Informational only.</div></div>`;
+}
+const _vtAdd=document.getElementById("vtAdd");
+if(_vtAdd) _vtAdd.onclick=()=>{
+  const num=id=>{const x=parseFloat(document.getElementById(id).value); return isNaN(x)?null:x;};
+  const date=document.getElementById("vtDate").value || new Date().toISOString().slice(0,10);
+  const entry={id:id(), date, pulse:num("vtPulse"), bpSys:num("vtSys"), bpDia:num("vtDia"), hemoglobin:num("vtHgb"), note:document.getElementById("vtNote").value.trim()};
+  if(entry.pulse==null&&entry.bpSys==null&&entry.hemoglobin==null){ toast("Enter at least one reading"); return; }
+  S.vitals.push(entry);
+  ["vtPulse","vtSys","vtDia","vtHgb","vtNote","vtDate"].forEach(x=>document.getElementById(x).value="");
+  save(); render();
+  toast("📈 Vitals logged");
+};
+const _vtImport=document.getElementById("vtImport");
+if(_vtImport) _vtImport.onclick=()=>{ toast("Apple Health import is coming in a future update — for now, log readings manually."); };
+
+// ===== Habits (daily quests, per-habit streaks, skill feed, grace day) =====
+const HABIT_STARTERS=[
+  {name:"Sleep 7+ hours", skill:null},
+  {name:"Drink water (hydrate)", skill:null},
+  {name:"Daily mobility / stretch", skill:"Flexibility & mobility"},
+  {name:"Read 20 minutes", skill:"Study & retention"},
+  {name:"Spaced-repetition review", skill:"Study & retention"},
+  {name:"Journal / reflect", skill:null},
+  {name:"Meditate / box-breathing", skill:null},
+  {name:"No phone first hour", skill:null},
+  {name:"Practice a skill", skill:null},
+  {name:"Balance practice", skill:"Balance"},
+];
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function dayDiff(aStr,bStr){ return Math.round((new Date(bStr)-new Date(aStr))/864e5); }
+function habitDoneToday(h){ return h.lastDone===todayStr(); }
+function habitDo(hid){
+  const h=S.habits.find(x=>x.id===hid); if(!h||habitDoneToday(h)) return;
+  const today=todayStr();
+  if(h.lastDone){
+    const gap=dayDiff(h.lastDone, today);
+    if(gap===1){ h.streak=(h.streak||0)+1; }                 // consecutive
+    else if(gap===2 && !h.graceUsed){ h.streak=(h.streak||0)+1; h.graceUsed=true; } // one miss, grace covers it
+    else { h.streak=1; h.graceUsed=false; }                  // streak broke
+  } else { h.streak=1; h.graceUsed=false; }
+  h.lastDone=today;
+  if(h.streak>(h.bestStreak||0)) h.bestStreak=h.streak;
+  h.history=h.history||[]; h.history.push(today); if(h.history.length>400) h.history=h.history.slice(-400);
+  // feed linked skill: refresh its fade timer (practiced today)
+  if(h.linkedSkill){
+    const sk=S.lifeSkills.find(s=>s.name===h.linkedSkill);
+    if(sk && sk.currentLevel>0){ sk.lastQuestTs=Date.now(); }
+  }
+  // light global momentum (habits count toward the day's effort)
+  S.gold=(S.gold||0)+3;
+  save(); render();
+  toast(`✅ ${esc(h.name)} — ${h.streak} day streak${h.graceUsed&&dayDiff(h.lastDone,today)===0?'':''}`);
+}
+function habitReset(){ /* streaks are computed lazily via gap on next complete; nothing scheduled needed */ }
+// effective streak display: if more than 1 day missed and not done today, streak is stale → show at risk
+function habitStreakState(h){
+  if(!h.lastDone) return {streak:0, state:"new"};
+  const gap=dayDiff(h.lastDone, todayStr());
+  if(gap===0) return {streak:h.streak, state:"done"};
+  if(gap===1) return {streak:h.streak, state:"due"};       // due today, streak intact if done now
+  if(gap===2 && !h.graceUsed) return {streak:h.streak, state:"grace"}; // grace available
+  return {streak:h.streak, state:"broken"};                // will reset
+}
+function renderHabits(){
+  const wrap=document.getElementById("habitQuests"); if(!wrap) return;
+  // populate skill dropdown + starters (once per render is fine)
+  const sel=document.getElementById("hbSkill");
+  if(sel){ const cur=sel.value; sel.innerHTML='<option value="">— none —</option>'+S.lifeSkills.filter(s=>!s.group).map(s=>`<option value="${esc(s.name)}">${esc(s.name)}</option>`).join(""); sel.value=cur; }
+  const starters=document.getElementById("hbStarters");
+  if(starters){ starters.innerHTML=HABIT_STARTERS.filter(st=>!S.habits.some(h=>h.name===st.name)).map(st=>`<button class="hb-starter-btn" data-hbstart="${esc(st.name)}">+ ${esc(st.name)}</button>`).join("")||'<span style="color:var(--ink-faint);font-size:12px">All starters added.</span>'; }
+  if(!S.habits.length){ wrap.innerHTML=`<div class="aw-empty"><span class="big">📋</span>No habits yet. Add one below to start building a daily routine.</div>`; return; }
+  // count done today for the hint
+  const doneCount=S.habits.filter(habitDoneToday).length;
+  const hint=document.getElementById("habitStreakHint"); if(hint) hint.textContent=`${doneCount}/${S.habits.length} done today`;
+  wrap.innerHTML=S.habits.map(h=>{
+    const st=habitStreakState(h);
+    const done=st.state==="done";
+    const streakBadge = st.streak>0 ? `<span class="hb-streak ${st.state}">🔥 ${st.streak}</span>` : "";
+    let note="";
+    if(st.state==="grace") note=`<div class="hb-note warn">Missed yesterday — complete today to use your grace day and keep the streak.</div>`;
+    else if(st.state==="broken" && h.streak>0) note=`<div class="hb-note warn">Streak will reset — that's okay, just start again today.</div>`;
+    else if(h.linkedSkill) note=`<div class="hb-note">Feeds: ${esc(h.linkedSkill)}</div>`;
+    return `<div class="hb-card ${done?'done':''}">
+      <button class="hb-check ${done?'on':''}" data-hbdo="${h.id}" ${done?'disabled':''}>${done?'✓':''}</button>
+      <div class="hb-body"><div class="hb-name">${esc(h.name)}</div>${note}</div>
+      ${streakBadge}
+      <button class="hb-del" data-hbdel="${h.id}">✕</button>
+    </div>`;
+  }).join("");
+}
+const _hbAdd=document.getElementById("hbAdd");
+if(_hbAdd) _hbAdd.onclick=()=>{
+  const name=document.getElementById("hbName").value.trim(); if(!name){toast("Name the habit");return;}
+  const linkedSkill=document.getElementById("hbSkill").value||null;
+  S.habits.push({id:id(),name,linkedSkill,streak:0,bestStreak:0,lastDone:null,graceUsed:false,history:[]});
+  document.getElementById("hbName").value="";
+  save(); render();
+  toast("📋 Habit added");
+};
+
+// ===== TEST tab: cognitive tests/trainers =====
+// Each test: id, name, the skill it feeds, and scoreToLevel(raw)->1..N.
+const TESTS=[
+  {id:"reaction", name:"Reaction time", skill:"Reaction speed", unit:"ms (lower better)",
+   scoreToLevel:ms=> ms<=220?5: ms<=250?4: ms<=280?3: ms<=320?2: ms<=400?1: 0},
+  {id:"digitspan", name:"Memory span (digit span)", skill:"Memory span", unit:"digits",
+   scoreToLevel:span=> span>=9?4: span>=7?3: span>=6?2: span>=5?1: 0},
+  {id:"typing", name:"Typing speed & accuracy", skill:"Typing speed & accuracy", unit:"WPM",
+   scoreToLevel:wpm=> wpm>=90?4: wpm>=70?3: wpm>=50?2: wpm>=30?1: 0},
+  {id:"nback", name:"N-back (working memory)", skill:"Working memory (n-back)", unit:"highest n passed",
+   scoreToLevel:n=> n>=4?4: n>=3?3: n>=2?2: n>=1?1: 0},
+  {id:"gonogo", name:"Go / No-Go (attention)", skill:"Attention / sustained focus", unit:"accuracy %",
+   scoreToLevel:acc=> acc>=97?4: acc>=92?3: acc>=85?2: acc>=70?1: 0},
+  {id:"procspeed", name:"Processing speed", skill:"Cognitive / processing speed", unit:"matches/min",
+   scoreToLevel:mpm=> mpm>=45?4: mpm>=35?3: mpm>=25?2: mpm>=15?1: 0},
+  {id:"mathsprint", name:"Mental math sprint", skill:"Mental math", unit:"correct/min",
+   scoreToLevel:cpm=> cpm>=30?4: cpm>=22?3: cpm>=15?2: cpm>=8?1: 0},
+];
+function testSkillOf(t){ return S.lifeSkills.find(s=>s.name===t.skill); }
+function lastTest(typeId){ const r=(S.tests||[]).filter(x=>x.type===typeId).sort((a,b)=>new Date(b.date)-new Date(a.date)); return r[0]||null; }
+function bestTest(typeId){
+  const r=(S.tests||[]).filter(x=>x.type===typeId); if(!r.length) return null;
+  const t=TESTS.find(x=>x.id===typeId);
+  if(typeId==="reaction") return r.reduce((a,b)=>b.raw<a.raw?b:a);
+  return r.reduce((a,b)=>b.raw>a.raw?b:a);
+}
+// record a result, level the linked skill if improved, return a suggestion string
+function recordTest(typeId, raw, extra){
+  const t=TESTS.find(x=>x.id===typeId); if(!t) return;
+  const lvl=t.scoreToLevel(raw);
+  S.tests.push({id:id(), type:typeId, date:new Date().toISOString(), raw, score:lvl, linkedSkill:t.skill});
+  const sk=testSkillOf(t);
+  let leveled=false;
+  if(sk){
+    const capped=Math.min(lvl, sk.levels.length);
+    if(capped>sk.currentLevel){ sk.currentLevel=capped; skUpdatePeak(sk); sk.history.push({ts:Date.now(),type:"auto-test",level:capped}); leveled=true; }
+    else { sk.lastQuestTs=Date.now(); } // practiced — refresh fade timer even if no new level
+  }
+  save();
+  return {lvl, leveled, sk};
+}
+function testSuggestion(typeId, raw){
+  if(typeId==="reaction"){
+    if(raw>320) return "Over ~320ms — make sure you're focused and not anticipating. Short daily reps and good sleep help; reaction is very fatigue-sensitive.";
+    if(raw>250) return "Solid. To push under 250ms, stay relaxed and react to the change rather than predicting it.";
+    return "Fast — around or below 250ms is genuinely quick. Maintain with short regular sessions.";
+  }
+  if(typeId==="digitspan"){
+    if(raw<6) return "Most people reach ~7. Try 'chunking' — group digits (like a phone number) instead of memorizing singles.";
+    if(raw<9) return "Good span. Push higher by chunking into 3s and rehearsing the groups as you go.";
+    return "Excellent span. This is the raw material for the memory-palace techniques in the Memory skill.";
+  }
+  if(typeId==="typing"){
+    if(raw<40) return "Focus on accuracy first — errors cost more than speed. Keep your fingers on the home row and don't look down.";
+    if(raw<70) return "Good pace. Speed comes from accuracy + not looking at the keyboard; practice common words to build muscle memory.";
+    return "Strong typing — a real asset for a Cyber track. Maintain it; try harder texts to keep improving.";
+  }
+  if(typeId==="nback"){
+    if(raw<2) return "1-back is just 'did it repeat?' — get comfortable there first. Say the position out loud as it appears to anchor it.";
+    if(raw<3) return "2-back passed — that's a real working-memory workout. Push to 3-back by holding a rolling mental list of the last 3.";
+    return "Strong. 3-back and up is genuinely hard; keep sessions short and frequent rather than long and tiring.";
+  }
+  if(typeId==="gonogo"){
+    if(raw<85) return "Watch the false taps — the Go signal lulls you into auto-tapping. Slow down a hair and stay deliberate.";
+    if(raw<97) return "Good control. The skill is resisting the easy tap on No-Go; keep a light, ready finger rather than a heavy one.";
+    return "Excellent inhibition — that's real trigger-discipline and focus. Maintain with short sessions.";
+  }
+  if(typeId==="procspeed"){
+    if(raw<25) return "Build familiarity with the key so you're not searching for it. Speed comes from automaticity, not rushing.";
+    if(raw<45) return "Solid throughput. Keep your eyes moving and trust the pattern; accuracy still counts.";
+    return "Fast processing. This tracks closely with sleep and fatigue — use it as a daily readiness check.";
+  }
+  if(typeId==="mathsprint"){
+    if(raw<15) return "Drill your times tables to automatic. Most speed comes from not having to think about single facts.";
+    if(raw<30) return "Good pace. Learn a couple of tricks (×11, doubling/halving) to speed multi-step problems.";
+    return "Fast mental math — genuinely useful for land nav and logistics. Push difficulty to keep growing.";
+  }
+  return "";
+}
+function testUnit(typeId, raw){
+  return raw + ({reaction:'ms', typing:' WPM', nback:'-back', gonogo:'%', procspeed:'/min', mathsprint:'/min'}[typeId]||'');
+}
+function renderTests(){
+  const wrap=document.getElementById("testList"); if(!wrap) return;
+  wrap.innerHTML=TESTS.map(t=>{
+    const sk=testSkillOf(t);
+    const best=bestTest(t.id), last=lastTest(t.id);
+    const lvl = sk ? skEffectiveLevel(sk) : 0;
+    const bestStr = best ? testUnit(t.id, best.raw) : "—";
+    const lastStr = last ? testUnit(t.id, last.raw) : "—";
+    return `<div class="test-card" id="test-${t.id}">
+      <div class="test-head">
+        <div class="test-title">${esc(t.name)}</div>
+        <span class="test-lvl">${sk?('Lv '+lvl):''}</span>
+      </div>
+      <div class="test-stats">Best: <b>${bestStr}</b> · Last: <b>${lastStr}</b> · feeds <b>${esc(t.skill)}</b></div>
+      <details class="test-info"><summary>ℹ️ Why &amp; how</summary>
+        <div class="test-why">${sk&&sk.why?`<p><b>Why:</b> ${esc(sk.why)}</p>`:''}${sk&&sk.whatYouDo?`<p><b>What you do:</b> ${esc(sk.whatYouDo)}</p>`:''}</div>
+      </details>
+      <div class="test-stage" id="stage-${t.id}"></div>
+      <button class="btn-add test-start" data-teststart="${t.id}">Start ${esc(t.name)}</button>
+    </div>`;
+  }).join("");
+}
+
+// ---- Reaction time test ----
+let _rxState=null;
+function startReaction(){
+  const stage=document.getElementById("stage-reaction"); if(!stage) return;
+  _rxState={trials:[], n:0, max:5, waiting:false, ready:false, t0:0, timer:null};
+  rxNext();
+  function rxNext(){
+    if(_rxState.n>=_rxState.max){ rxDone(); return; }
+    stage.className="test-stage rx wait"; stage.textContent="Wait for green…"; _rxState.ready=false;
+    const delay=900+Math.random()*2200;
+    _rxState.timer=setTimeout(()=>{ stage.className="test-stage rx go"; stage.textContent="TAP!"; _rxState.ready=true; _rxState.t0=performance.now(); }, delay);
+  }
+  stage.onclick=()=>{
+    if(!_rxState) return;
+    if(!_rxState.ready){ // tapped too early
+      clearTimeout(_rxState.timer);
+      stage.className="test-stage rx early"; stage.textContent="Too early — wait for green. Tap to restart.";
+      stage.onclick=()=>{ startReaction(); };
+      return;
+    }
+    const ms=Math.round(performance.now()-_rxState.t0);
+    _rxState.trials.push(ms); _rxState.n++;
+    stage.className="test-stage rx"; stage.textContent=`${ms}ms — tap for next (${_rxState.n}/${_rxState.max})`;
+    stage.onclick=()=>{ rxNext(); };
+  };
+  function rxDone(){
+    const avg=Math.round(_rxState.trials.reduce((a,b)=>a+b,0)/_rxState.trials.length);
+    const res=recordTest("reaction", avg);
+    stage.className="test-stage rx result";
+    stage.innerHTML=`<div class="test-result"><div class="big">${avg}ms</div><div>average over ${_rxState.trials.length} (${_rxState.trials.join(", ")})</div>${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}<div class="sugg">${testSuggestion("reaction",avg)}</div></div>`;
+    stage.onclick=null; _rxState=null; render();
+  }
+}
+
+// ---- Digit span test ----
+let _dsState=null;
+function startDigitSpan(){
+  const stage=document.getElementById("stage-digitspan"); if(!stage) return;
+  _dsState={len:4, seq:[], failed:false, best:0};
+  dsShow();
+  function dsShow(){
+    _dsState.seq=Array.from({length:_dsState.len},()=>Math.floor(Math.random()*10));
+    stage.className="test-stage ds"; stage.innerHTML=`<div class="ds-digit"></div>`;
+    const dEl=stage.querySelector(".ds-digit");
+    let i=0;
+    const show=()=>{
+      if(i<_dsState.seq.length){ dEl.textContent=_dsState.seq[i]; i++; setTimeout(()=>{dEl.textContent="";setTimeout(show,250);},650); }
+      else { dsAsk(); }
+    };
+    setTimeout(show, 400);
+  }
+  function dsAsk(){
+    stage.innerHTML=`<div class="ds-ask">Type the ${_dsState.seq.length} digits in order:<br><input id="dsInput" inputmode="numeric" autocomplete="off" class="ds-input"><button class="btn-add" id="dsSubmit" style="margin-top:8px">Submit</button></div>`;
+    const inp=stage.querySelector("#dsInput"); inp.focus();
+    const submit=()=>{
+      const ans=inp.value.replace(/\D/g,"");
+      if(ans===_dsState.seq.join("")){
+        _dsState.best=_dsState.len; _dsState.len++;
+        stage.innerHTML=`<div class="ds-ok">✓ Correct — span ${_dsState.best}. Next: ${_dsState.len} digits. Tap to continue.</div>`;
+        stage.onclick=()=>{ stage.onclick=null; dsShow(); };
+      } else {
+        dsDone();
+      }
+    };
+    stage.querySelector("#dsSubmit").onclick=submit;
+    inp.onkeydown=e=>{ if(e.key==="Enter") submit(); };
+  }
+  function dsDone(){
+    const span=_dsState.best;
+    if(span<4){ stage.className="test-stage ds result"; stage.innerHTML=`<div class="test-result"><div class="big">${span}</div><div>Give it another go — watch the digits, then chunk them.</div></div>`; _dsState=null; return; }
+    const res=recordTest("digitspan", span);
+    stage.className="test-stage ds result";
+    stage.innerHTML=`<div class="test-result"><div class="big">${span} digits</div><div>your forward span</div>${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}<div class="sugg">${testSuggestion("digitspan",span)}</div></div>`;
+    _dsState=null; render();
+  }
+}
+
+// ---- Typing speed test ----
+const TYPING_TEXTS=[
+  "The mission depends on clear communication and steady hands under pressure.",
+  "Discipline is choosing what you want most over what you want right now.",
+  "A good plan executed now beats a perfect plan executed too late.",
+  "Train hard, stay humble, and take care of the soldiers on your left and right."
+];
+let _tyState=null;
+function startTyping(){
+  const stage=document.getElementById("stage-typing"); if(!stage) return;
+  const text=TYPING_TEXTS[Math.floor(Math.random()*TYPING_TEXTS.length)];
+  _tyState={text, started:null};
+  stage.className="test-stage ty";
+  stage.innerHTML=`<div class="ty-text">${esc(text)}</div><textarea id="tyInput" class="ty-input" rows="3" placeholder="Start typing — timer begins on first keystroke"></textarea><div class="ty-live" id="tyLive"></div>`;
+  const inp=stage.querySelector("#tyInput"); inp.focus();
+  inp.oninput=()=>{
+    if(!_tyState.started) _tyState.started=performance.now();
+    const typed=inp.value;
+    const live=document.getElementById("tyLive");
+    if(typed===text || (typed.length>=text.length)){
+      const secs=Math.max(0.5,(performance.now()-_tyState.started)/1000); // guard against instant paste
+      const words=text.split(/\s+/).length;
+      let correct=0; for(let i=0;i<text.length;i++){ if(typed[i]===text[i]) correct++; }
+      const acc=correct/text.length;
+      const grossWpm=(words/secs)*60;
+      const wpm=Math.max(0, Math.min(250, Math.round(grossWpm*acc))); // cap at a sane ceiling
+      const res=recordTest("typing", wpm);
+      stage.className="test-stage ty result";
+      stage.innerHTML=`<div class="test-result"><div class="big">${wpm} WPM</div><div>${Math.round(acc*100)}% accuracy over ${secs.toFixed(1)}s</div>${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}<div class="sugg">${testSuggestion("typing",wpm)}</div></div>`;
+      _tyState=null; render();
+    } else {
+      // live accuracy hint
+      let correct=0; for(let i=0;i<typed.length;i++){ if(typed[i]===text[i]) correct++; }
+      live.textContent=`${typed.length}/${text.length} chars`;
+    }
+  };
+}
+
+// ---- N-back working memory trainer ----
+let _nbState=null;
+function startNback(){
+  const stage=document.getElementById("stage-nback"); if(!stage) return;
+  stage.innerHTML=`<div class="nb-setup">Choose level:
+    <div class="nb-levels">${[1,2,3,4].map(n=>`<button class="hb-starter-btn" data-nbn="${n}">${n}-back</button>`).join("")}</div>
+    <div class="nb-hint" style="font-size:12px;color:var(--ink-faint);margin-top:6px">In N-back, tap MATCH when the current square is in the same spot as the one N steps back. Start at 1.</div></div>`;
+  stage.querySelectorAll("[data-nbn]").forEach(btn=>btn.onclick=()=>nbRun(parseInt(btn.dataset.nbn)));
+  function nbRun(n){
+    const trials=20+n*2, seq=[];
+    for(let i=0;i<trials;i++){
+      if(i>=n && Math.random()<0.3) seq.push(seq[i-n]);
+      else { let p; do{p=Math.floor(Math.random()*9);}while(i>=n && p===seq[i-n] && Math.random()<0.5); seq.push(p); }
+    }
+    _nbState={n, seq, i:-1, hits:0, misses:0, fa:0, correctRej:0, responded:false};
+    stage.innerHTML=`<div class="nb-grid">${Array.from({length:9},(_,k)=>`<div class="nb-cell" data-cell="${k}"></div>`).join("")}</div>
+      <div class="nb-status" id="nbStatus">Watch…</div>
+      <button class="btn-add" id="nbMatch" disabled>MATCH (${n}-back)</button>`;
+    const cells=stage.querySelectorAll(".nb-cell");
+    const matchBtn=stage.querySelector("#nbMatch");
+    const status=stage.querySelector("#nbStatus");
+    matchBtn.onclick=()=>{
+      if(_nbState.i<_nbState.n || _nbState.responded) return;
+      _nbState.responded=true;
+      const isMatch=_nbState.seq[_nbState.i]===_nbState.seq[_nbState.i-_nbState.n];
+      if(isMatch){ _nbState.hits++; matchBtn.classList.add("good"); } else { _nbState.fa++; matchBtn.classList.add("bad"); }
+    };
+    let step=()=>{
+      if(_nbState.i>=_nbState.n && !_nbState.responded){
+        const wasMatch=_nbState.seq[_nbState.i]===_nbState.seq[_nbState.i-_nbState.n];
+        if(wasMatch) _nbState.misses++; else _nbState.correctRej++;
+      }
+      _nbState.i++;
+      if(_nbState.i>=_nbState.seq.length){ nbDone(); return; }
+      _nbState.responded=false;
+      matchBtn.disabled=_nbState.i<_nbState.n;
+      matchBtn.classList.remove("good","bad");
+      cells.forEach(c=>c.classList.remove("on"));
+      cells[_nbState.seq[_nbState.i]].classList.add("on");
+      status.textContent=`${_nbState.i+1}/${_nbState.seq.length}`;
+      setTimeout(()=>{ cells.forEach(c=>c.classList.remove("on")); }, 700);
+      setTimeout(step, 2200);
+    };
+    setTimeout(step, 800);
+    function nbDone(){
+      const matches=_nbState.hits+_nbState.misses;
+      const correct=_nbState.hits+_nbState.correctRej;
+      const total=_nbState.seq.length-_nbState.n;
+      const acc=total>0?Math.round((correct/total)*100):0;
+      const passed = acc>=80 && _nbState.hits>=Math.ceil(matches*0.6);
+      let res=null;
+      if(passed) res=recordTest("nback", _nbState.n);
+      stage.className="test-stage result";
+      stage.innerHTML=`<div class="test-result"><div class="big">${passed?_nbState.n+'-back ✓':'Keep practicing'}</div>
+        <div>${acc}% accuracy · caught ${_nbState.hits}/${matches} matches · ${_nbState.fa} false alarms</div>
+        ${res&&res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}
+        <div class="sugg">${testSuggestion("nback", passed?_nbState.n:0)}</div></div>`;
+      _nbState=null; render();
+    }
+  }
+}
+
+// ---- Go / No-Go attention test ----
+let _ggState=null;
+function startGoNoGo(){
+  const stage=document.getElementById("stage-gonogo"); if(!stage) return;
+  _ggState={i:0, max:25, correct:0, total:0, showing:false, isGo:false, t2:null};
+  stage.innerHTML=`<div class="gg-zone wait" id="ggZone">Get ready…</div><div class="gg-status" id="ggStatus">Tap GREEN ● circles. Do NOT tap red ■ squares.</div>`;
+  const zone=stage.querySelector("#ggZone");
+  const status=stage.querySelector("#ggStatus");
+  zone.onclick=()=>{
+    if(!_ggState.showing) return;
+    _ggState.showing=false; clearTimeout(_ggState.t2);
+    if(_ggState.isGo){ _ggState.correct++; zone.className="gg-zone hit"; }
+    else { zone.className="gg-zone miss"; }
+    _ggState.total++;
+    setTimeout(next, 350);
+  };
+  let next=()=>{
+    if(_ggState.i>=_ggState.max){ ggDone(); return; }
+    _ggState.i++;
+    _ggState.isGo=Math.random()<0.72;
+    zone.className="gg-zone wait"; zone.textContent="";
+    setTimeout(()=>{
+      _ggState.showing=true;
+      zone.className="gg-zone "+(_ggState.isGo?"go":"nogo");
+      zone.textContent=_ggState.isGo?"●":"■";
+      status.textContent=`${_ggState.i}/${_ggState.max}`;
+      _ggState.t2=setTimeout(()=>{
+        if(_ggState.showing){
+          _ggState.showing=false;
+          if(!_ggState.isGo){ _ggState.correct++; }
+          _ggState.total++;
+          next();
+        }
+      }, 900);
+    }, 500+Math.random()*900);
+  };
+  setTimeout(next, 700);
+  function ggDone(){
+    const acc=Math.round((_ggState.correct/_ggState.max)*100);
+    const res=recordTest("gonogo", acc);
+    stage.className="test-stage result";
+    stage.innerHTML=`<div class="test-result"><div class="big">${acc}%</div><div>accuracy over ${_ggState.max} signals</div>
+      ${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}
+      <div class="sugg">${testSuggestion("gonogo", acc)}</div></div>`;
+    _ggState=null; render();
+  }
+}
+
+// ---- Processing speed (symbol-digit matching) ----
+let _psState=null;
+function startProcSpeed(){
+  const stage=document.getElementById("stage-procspeed"); if(!stage) return;
+  const symbols=["◆","●","■","▲","★","✦","♦","◐","✚"];
+  const key=symbols.map((s,i)=>({s,n:i+1}));
+  _psState={correct:0, attempts:0, endsAt:Date.now()+60000, cur:null};
+  const keyHtml=key.map(k=>`<span class="ps-key"><b>${k.s}</b>${k.n}</span>`).join("");
+  function nextItem(){
+    _psState.cur=key[Math.floor(Math.random()*key.length)];
+    const sym=stage.querySelector("#psSymbol"); if(sym) sym.textContent=_psState.cur.s;
+    stage.querySelectorAll(".ps-num").forEach(b=>b.classList.remove("good","bad"));
+  }
+  stage.innerHTML=`<div class="ps-keyrow">${keyHtml}</div>
+    <div class="ps-prompt">What number is <span id="psSymbol" class="ps-symbol"></span>?</div>
+    <div class="ps-pad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button class="ps-num" data-psn="${n}">${n}</button>`).join("")}</div>
+    <div class="ps-status" id="psStatus">60s</div>`;
+  stage.querySelectorAll("[data-psn]").forEach(btn=>btn.onclick=()=>{
+    if(Date.now()>=_psState.endsAt) return;
+    _psState.attempts++;
+    if(parseInt(btn.dataset.psn)===_psState.cur.n){ _psState.correct++; btn.classList.add("good"); }
+    else btn.classList.add("bad");
+    setTimeout(nextItem, 110);
+  });
+  nextItem();
+  const tick=setInterval(()=>{
+    const left=Math.max(0,Math.ceil((_psState.endsAt-Date.now())/1000));
+    const st=stage.querySelector("#psStatus"); if(st) st.textContent=left+"s";
+    if(left<=0){ clearInterval(tick); psDone(); }
+  }, 250);
+  function psDone(){
+    const mpm=_psState.correct;
+    const res=recordTest("procspeed", mpm);
+    stage.className="test-stage result";
+    stage.innerHTML=`<div class="test-result"><div class="big">${mpm}/min</div><div>${_psState.correct} correct of ${_psState.attempts}</div>
+      ${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}
+      <div class="sugg">${testSuggestion("procspeed", mpm)}</div></div>`;
+    _psState=null; render();
+  }
+}
+
+// ---- Mental math sprint ----
+let _mmState=null;
+function startMathSprint(){
+  const stage=document.getElementById("stage-mathsprint"); if(!stage) return;
+  _mmState={correct:0, attempts:0, endsAt:Date.now()+60000, ans:0};
+  function gen(){
+    const op=["+","−","×"][Math.floor(Math.random()*3)];
+    let a,b,ans;
+    if(op==="+"){ a=2+Math.floor(Math.random()*98); b=2+Math.floor(Math.random()*98); ans=a+b; }
+    else if(op==="−"){ a=10+Math.floor(Math.random()*90); b=1+Math.floor(Math.random()*a); ans=a-b; }
+    else { a=2+Math.floor(Math.random()*11); b=2+Math.floor(Math.random()*11); ans=a*b; }
+    _mmState.ans=ans;
+    const q=stage.querySelector("#mmQ"); if(q) q.textContent=`${a} ${op} ${b} =`;
+    const inp=stage.querySelector("#mmA"); if(inp){ inp.value=""; inp.focus(); }
+  }
+  stage.innerHTML=`<div class="mm-q" id="mmQ"></div>
+    <input id="mmA" inputmode="numeric" class="ds-input" autocomplete="off">
+    <div class="ps-status" id="mmStatus">60s</div>`;
+  const inp=stage.querySelector("#mmA");
+  inp.oninput=()=>{
+    if(Date.now()>=_mmState.endsAt) return;
+    const v=inp.value.replace(/[^\d-]/g,"");
+    if(v!=="" && parseInt(v)===_mmState.ans){ _mmState.correct++; _mmState.attempts++; gen(); }
+  };
+  gen();
+  const tick=setInterval(()=>{
+    const left=Math.max(0,Math.ceil((_mmState.endsAt-Date.now())/1000));
+    const st=stage.querySelector("#mmStatus"); if(st) st.textContent=left+"s";
+    if(left<=0){ clearInterval(tick); mmDone(); }
+  }, 250);
+  function mmDone(){
+    const cpm=_mmState.correct;
+    const res=recordTest("mathsprint", cpm);
+    stage.className="test-stage result";
+    stage.innerHTML=`<div class="test-result"><div class="big">${cpm}/min</div><div>correct answers in 60s</div>
+      ${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}
+      <div class="sugg">${testSuggestion("mathsprint", cpm)}</div></div>`;
+    _mmState=null; render();
+  }
+}
+
+// ===== Memory Track: Spaced Repetition (SM-2-lite) + Memory Palace =====
+function srsDue(deck){ const now=Date.now(); return deck.cards.filter(c=>!c.due || c.due<=now); }
+function srsTotalDue(){ return (S.srsDecks||[]).reduce((n,d)=>n+srsDue(d).length,0); }
+function feedMemorySkill(){ // reviewing/practicing refreshes the Memory technique skill timer
+  const sk=S.lifeSkills.find(s=>s.name==="Memory technique");
+  if(sk && sk.currentLevel>0) sk.lastQuestTs=Date.now();
+}
+let _srsSession=null;
+function renderSRS(){
+  const area=document.getElementById("srsArea"); if(!area) return;
+  if(_srsSession){ renderSrsCard(); return; }
+  const decks=S.srsDecks||[];
+  const list=decks.map(d=>{
+    const due=srsDue(d).length;
+    return `<div class="srs-deck">
+      <div class="srs-deck-info"><b>${esc(d.name)}</b><span>${d.cards.length} cards · ${due} due</span></div>
+      <div class="srs-deck-btns">
+        ${due>0?`<button class="hb-starter-btn" data-srsreview="${d.id}">Review ${due}</button>`:'<span style="font-size:11px;color:var(--ink-faint)">all done</span>'}
+        <button class="hb-starter-btn" data-srsadd="${d.id}">+ card</button>
+        <button class="hb-starter-btn" data-srsdel="${d.id}">✕</button>
+      </div>
+    </div>`;
+  }).join("");
+  area.innerHTML=`${list||'<div style="font-size:12.5px;color:var(--ink-faint)">No decks yet. Create one to start.</div>'}
+    <div class="srs-newdeck"><input id="srsNewName" placeholder="New deck name — e.g. Branch knowledge" maxlength="40"><button class="btn-add" id="srsNewBtn" style="margin-top:8px">Create deck</button></div>`;
+  const nb=document.getElementById("srsNewBtn");
+  if(nb) nb.onclick=()=>{ const n=document.getElementById("srsNewName").value.trim(); if(!n)return; S.srsDecks.push({id:id(),name:n,cards:[]}); save(); render(); };
+}
+function renderSrsCard(){
+  const area=document.getElementById("srsArea"); if(!area) return;
+  const s=_srsSession;
+  if(s.idx>=s.queue.length){ // session done
+    area.innerHTML=`<div class="srs-done">✓ Reviewed ${s.queue.length} card${s.queue.length!==1?'s':''}. ${srsTotalDue()} still due across decks.</div>`;
+    _srsSession=null; feedMemorySkill(); save();
+    setTimeout(()=>render(),1400); return;
+  }
+  const card=s.queue[s.idx];
+  area.innerHTML=`<div class="srs-card">
+    <div class="srs-front">${esc(card.front)}</div>
+    ${s.revealed?`<div class="srs-back">${esc(card.back)}</div>
+      <div class="srs-grade">How well did you know it?
+        <div class="srs-grade-btns">
+          <button class="srs-g again" data-srsgrade="0">Again</button>
+          <button class="srs-g hard" data-srsgrade="3">Hard</button>
+          <button class="srs-g good" data-srsgrade="4">Good</button>
+          <button class="srs-g easy" data-srsgrade="5">Easy</button>
+        </div></div>`
+    :`<button class="btn-add" id="srsReveal">Show answer</button>`}
+  </div>`;
+  if(!s.revealed){ const rv=document.getElementById("srsReveal"); if(rv) rv.onclick=()=>{ s.revealed=true; renderSrsCard(); }; }
+}
+function srsGrade(q){
+  const s=_srsSession; if(!s) return;
+  const card=s.queue[s.idx];
+  // SM-2-lite: ease starts 2.5, interval grows; "Again" resets
+  card.ease=card.ease||2.5; card.reps=card.reps||0;
+  if(q<3){ card.reps=0; card.interval=0; card.ease=Math.max(1.3,card.ease-0.2); }
+  else {
+    card.ease=Math.max(1.3, card.ease + (0.1-(5-q)*(0.08+(5-q)*0.02)));
+    card.reps++;
+    if(card.reps===1) card.interval=1;
+    else if(card.reps===2) card.interval=3;
+    else card.interval=Math.round((card.interval||1)*card.ease);
+  }
+  card.due=Date.now()+(card.interval||0)*864e5;
+  s.idx++; s.revealed=false; save(); renderSrsCard();
+}
+function startSrsReview(deckId){
+  const d=S.srsDecks.find(x=>x.id===deckId); if(!d) return;
+  const due=srsDue(d); if(!due.length){ toast("Nothing due in this deck"); return; }
+  _srsSession={deckId, queue:due.slice(), idx:0, revealed:false};
+  renderSrsCard();
+}
+
+// ---- Memory palace ----
+function renderPalace(){
+  const area=document.getElementById("palaceArea"); if(!area) return;
+  const palaces=S.palaces||[];
+  const list=palaces.map(p=>{
+    const loci=p.loci||[];
+    return `<div class="palace">
+      <div class="palace-top"><b>${esc(p.name)}</b><span>${loci.length} stops</span>
+        <button class="hb-starter-btn" data-paltest="${p.id}">Test recall</button>
+        <button class="hb-starter-btn" data-paldel="${p.id}">✕</button></div>
+      <ol class="palace-loci">${loci.map((l,i)=>`<li><span class="loc-place">${esc(l.place)}</span> → <span class="loc-item">${esc(l.item)}</span></li>`).join("")}</ol>
+      <div class="palace-add"><input class="pal-place" data-palplace="${p.id}" placeholder="place (e.g. front door)" maxlength="40"><input class="pal-item" data-palitem="${p.id}" placeholder="item to remember" maxlength="40"><button class="hb-starter-btn" data-paladd="${p.id}">+ place item</button></div>
+    </div>`;
+  }).join("");
+  area.innerHTML=`${list||'<div style="font-size:12.5px;color:var(--ink-faint)">No palaces yet. Build one from a place you know well.</div>'}
+    <div class="srs-newdeck"><input id="palNewName" placeholder="New palace — e.g. My apartment" maxlength="40"><button class="btn-add" id="palNewBtn" style="margin-top:8px">Build palace</button></div>`;
+  const nb=document.getElementById("palNewBtn");
+  if(nb) nb.onclick=()=>{ const n=document.getElementById("palNewName").value.trim(); if(!n)return; S.palaces.push({id:id(),name:n,loci:[]}); save(); render(); };
+}
+function palaceTest(pid){
+  const p=S.palaces.find(x=>x.id===pid); if(!p||!p.loci.length){ toast("Add some stops first"); return; }
+  const area=document.getElementById("palaceArea");
+  let i=0, correct=0;
+  const ask=()=>{
+    if(i>=p.loci.length){
+      area.innerHTML=`<div class="srs-done">✓ Walked all ${p.loci.length} stops. How many did you recall? Be honest — the practice is what counts.</div>`;
+      feedMemorySkill(); save(); setTimeout(()=>render(),1800); return;
+    }
+    const l=p.loci[i];
+    area.innerHTML=`<div class="srs-card"><div class="srs-front">At: <b>${esc(l.place)}</b><br><span style="font-size:13px;color:var(--ink-faint)">what did you place here?</span></div>
+      <button class="btn-add" id="palShow">Reveal</button></div>`;
+    document.getElementById("palShow").onclick=()=>{
+      area.innerHTML=`<div class="srs-card"><div class="srs-front">At: <b>${esc(l.place)}</b></div><div class="srs-back">${esc(l.item)}</div>
+        <button class="hb-starter-btn" id="palNext">Next stop →</button></div>`;
+      document.getElementById("palNext").onclick=()=>{ i++; ask(); };
+    };
+  };
+  ask();
+}
+
+// ===== Study Plans (spaced schedule for a graded test) =====
+function renderStudy(){
+  const area=document.getElementById("studyArea"); if(!area) return;
+  const bank=window.QUIZ_BANK||{};
+  const topicOpts=Object.keys(bank).map(k=>`<label class="study-topic"><input type="checkbox" data-studytopic="${k}"> ${esc(bank[k].name||k)}</label>`).join("");
+  const plans=(S.studyPlans||[]).map(pl=>{
+    const days=studyDaysLeft(pl);
+    const total=pl.schedule?pl.schedule.length:0;
+    const done=(pl.done||[]).length;
+    return `<div class="study-plan">
+      <div class="study-top"><b>${esc(pl.title)}</b><button class="hb-starter-btn" data-studydel="${pl.id}">✕</button></div>
+      <div class="study-meta">Test ${days>=0?`in ${days} day${days!==1?'s':''}`:'date passed'} · ${done}/${total} reviews done</div>
+      <div class="study-prog"><div class="study-prog-fill" style="width:${total?Math.round(done/total*100):0}%"></div></div>
+      <div class="study-today" id="studytoday-${pl.id}"></div>
+    </div>`;
+  }).join("");
+  area.innerHTML=`${plans}
+    <details class="habit-add-wrap"><summary>+ New study plan</summary>
+      <div class="adder" style="margin-top:10px">
+        <input id="studyTitle" placeholder="Test name — e.g. Land Nav written exam" maxlength="50">
+        <label class="lg-label" style="margin-top:9px;display:block">Test date</label>
+        <input id="studyDate" type="date">
+        <label class="lg-label" style="margin-top:9px;display:block">Topics to review (pick the quiz banks it covers)</label>
+        <div class="study-topics">${topicOpts}</div>
+        <button class="btn-add" id="studyGen" style="margin-top:10px">Generate spaced plan</button>
+      </div>
+    </details>`;
+  const gen=document.getElementById("studyGen");
+  if(gen) gen.onclick=()=>{
+    const title=document.getElementById("studyTitle").value.trim();
+    const date=document.getElementById("studyDate").value;
+    if(!title||!date){ toast("Name the test and pick a date"); return; }
+    const topics=[...area.querySelectorAll("[data-studytopic]:checked")].map(c=>c.dataset.studytopic);
+    if(!topics.length){ toast("Pick at least one topic"); return; }
+    S.studyPlans.push(makeStudyPlan(title,date,topics));
+    save(); render();
+    toast("📅 Study plan generated");
+  };
+  // render today's tasks per plan
+  (S.studyPlans||[]).forEach(pl=>{
+    const el=document.getElementById("studytoday-"+pl.id); if(!el) return;
+    const today=todayStr();
+    const todays=(pl.schedule||[]).filter(s=>s.date===today);
+    if(!todays.length){ el.innerHTML=`<div class="study-rest">No review scheduled today — spacing means rest days count too.</div>`; return; }
+    el.innerHTML=todays.map(s=>{
+      const key=s.date+"|"+s.topic;
+      const isDone=(pl.done||[]).includes(key);
+      const bank=window.QUIZ_BANK||{};
+      return `<div class="study-task ${isDone?'done':''}">
+        <button class="hb-check ${isDone?'on':''}" data-studydone="${pl.id}|${key}" ${isDone?'disabled':''}>${isDone?'✓':''}</button>
+        <span>Review: <b>${esc(bank[s.topic]?bank[s.topic].name:s.topic)}</b></span>
+      </div>`;
+    }).join("");
+  });
+}
+function studyDaysLeft(pl){ return Math.ceil((new Date(pl.testDate)-Date.now())/864e5); }
+// ===== History / Trends =====
+function trendLine(vals, w, h, color, lowerBetter){
+  const nums=vals.filter(v=>v!=null); if(nums.length<2) return `<div class="hist-nodata">Need 2+ data points</div>`;
+  const min=Math.min(...nums), max=Math.max(...nums), rng=(max-min)||1, step=w/(nums.length-1);
+  const pts=nums.map((v,i)=>`${(i*step).toFixed(1)},${(h-((v-min)/rng)*h).toFixed(1)}`).join(" ");
+  return `<svg width="100%" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2"/></svg>`;
+}
+function renderHistory(){
+  const el=document.getElementById("historyArea"); if(!el) return;
+  const blocks=[];
+  // AFT total over time
+  if((S.aft||[]).length){
+    const totals=S.aft.map(a=>a.total);
+    blocks.push(`<div class="hist-block"><div class="hist-h">AFT total <b>${totals[totals.length-1]}</b></div>${trendLine(totals,300,46,'var(--gold)')}<div class="hist-meta">${S.aft.length} test${S.aft.length!==1?'s':''} · range ${Math.min(...totals)}–${Math.max(...totals)}</div></div>`);
+  }
+  // weight
+  if((S.weightLog||[]).length){
+    const w=S.weightLog.slice().sort((a,b)=>new Date(a.date)-new Date(b.date)).map(x=>x.lb);
+    blocks.push(`<div class="hist-block"><div class="hist-h">Body weight <b>${w[w.length-1]} lb</b></div>${trendLine(w,300,46,'var(--jade)')}<div class="hist-meta">${w.length} readings</div></div>`);
+  }
+  // vitals: resting pulse
+  const pulses=(S.vitals||[]).filter(v=>v.pulse!=null);
+  if(pulses.length){
+    const pv=pulses.map(v=>v.pulse);
+    blocks.push(`<div class="hist-block"><div class="hist-h">Resting pulse <b>${pv[pv.length-1]} bpm</b></div>${trendLine(pv,300,46,'var(--violet)')}<div class="hist-meta">${pv.length} readings</div></div>`);
+  }
+  // skills leveled
+  const started=(S.lifeSkills||[]).filter(s=>!s.group && s.currentLevel>0).length;
+  const totalLeaf=(S.lifeSkills||[]).filter(s=>!s.group).length;
+  blocks.push(`<div class="hist-block"><div class="hist-h">Skills developed <b>${started}/${totalLeaf}</b></div><div class="hist-bar"><div class="hist-bar-fill" style="width:${totalLeaf?Math.round(started/totalLeaf*100):0}%"></div></div><div class="hist-meta">leaf skills with at least Level 1</div></div>`);
+  // donations + quizzes passed
+  const don=(S.donations||[]).length;
+  const quizzes=Object.values(S.quizzes||{}).filter(x=>x.passed).length;
+  blocks.push(`<div class="hist-block"><div class="hist-h">Milestones</div><div class="hist-meta">🩸 ${don} donation${don!==1?'s':''} · 📚 ${quizzes}/16 quiz banks passed · 🧪 ${(S.tests||[]).length} cognitive tests taken</div></div>`);
+  el.innerHTML=`<div class="hist-grid">${blocks.join("")}</div>`;
+}
+// ===== Counseling log =====
+function renderCounsel(){
+  const el=document.getElementById("counselArea"); if(!el) return;
+  const items=(S.counseling||[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(!items.length){ el.innerHTML=`<div style="font-size:12.5px;color:var(--ink-faint)">No entries yet.</div>`; return; }
+  const typeLabel={event:"Event",monthly:"Monthly",developmental:"Developmental",received:"Received",given:"Given"};
+  el.innerHTML=items.map(c=>`<div class="cn-card">
+    <div class="cn-top"><span class="cn-type">${typeLabel[c.type]||c.type}</span><span class="cn-date">${new Date(c.date).toLocaleDateString()}</span><button class="hb-del" data-cndel="${c.id}">✕</button></div>
+    ${c.people?`<div class="cn-people">${esc(c.people)}</div>`:''}
+    ${c.summary?`<div class="cn-summary">${esc(c.summary)}</div>`:''}
+    ${c.plan?`<div class="cn-plan"><b>Plan:</b> ${esc(c.plan)}</div>`:''}
+  </div>`).join("");
+}
+// ===== Checklists =====
+const CHECKLIST_TEMPLATES={
+  ruck:["Rucksack + frame","Water (full)","Boots broken in","Socks (extra pairs)","Reflective belt","Weather layers","Snacks/fuel","ID + meds","Foot care / moleskin","Headlamp"],
+  ftx:["Sleep system","Poncho + liner","Eye pro + ear pro","Weapon + cleaning kit","MREs","Canteen/CamelBak","Cold/wet weather gear","Notebook + pen","Hygiene kit","Map + protractor + compass"],
+  lab:["Uniform serviceable","Boots polished","Reflective belt","Notebook","Water","Knowledge to study","Phone charged","Arrive early"]
+};
+function renderChecklists(){
+  const el=document.getElementById("checklistArea"); if(!el) return;
+  const lists=S.checklists||[];
+  if(!lists.length){ el.innerHTML=`<div style="font-size:12.5px;color:var(--ink-faint)">No checklists yet. Create one or use a template.</div>`; return; }
+  el.innerHTML=lists.map(cl=>{
+    const done=cl.items.filter(i=>i.done).length;
+    return `<div class="cl-card"><div class="cl-top"><b>${esc(cl.name)}</b><span class="cl-count">${done}/${cl.items.length}</span>
+      <button class="hb-starter-btn" data-clreset="${cl.id}">uncheck all</button><button class="hb-del" data-cldel="${cl.id}">✕</button></div>
+      ${cl.items.map((it,i)=>`<div class="cl-item ${it.done?'done':''}"><button class="hb-check ${it.done?'on':''}" data-cltoggle="${cl.id}|${i}">${it.done?'✓':''}</button><span>${esc(it.text)}</span><button class="cl-itemdel" data-clitemdel="${cl.id}|${i}">✕</button></div>`).join("")}
+      <div class="cl-additem"><input class="cl-newitem" data-clnewitem="${cl.id}" placeholder="+ add item" maxlength="50"></div>
+    </div>`;
+  }).join("");
+}
+// ===== CSV export =====
+function downloadCSV(filename, rows){
+  const csv=rows.map(r=>r.map(c=>`"${String(c==null?"":c).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob=new Blob([csv],{type:"text/csv"}); const url=URL.createObjectURL(blob);
+  const a=document.createElement("a"); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url);
+}
+function exportData(kind){
+  if(kind==="aft"){ const rows=[["Date","Deadlift","Push-ups","SDC","Plank","Run","Total"]]; (S.aft||[]).forEach(a=>rows.push([new Date(a.date).toLocaleDateString(),a.scores.dl,a.scores.hrp,a.scores.sdc,a.scores.plank,a.scores.run,a.total])); downloadCSV("aft-history.csv",rows); }
+  else if(kind==="awards"){ const rows=[["Title","Org","Year"]]; (S.awards||[]).forEach(a=>rows.push([a.title||a.name,a.org||"",a.year||""])); downloadCSV("awards.csv",rows); }
+  else if(kind==="volunteer"){ const rows=[["Date","Activity","Hours"]]; (S.volunteer||[]).forEach(v=>rows.push([v.date||"",v.name||v.activity||"",v.hours||""])); downloadCSV("volunteer-hours.csv",rows); }
+  else if(kind==="counseling"){ const rows=[["Date","Type","People","Summary","Plan"]]; (S.counseling||[]).forEach(c=>rows.push([new Date(c.date).toLocaleDateString(),c.type,c.people,c.summary,c.plan])); downloadCSV("counseling-log.csv",rows); }
+  toast("📄 CSV exported");
+}
+
+
+// ===== Today / Dashboard — aggregates everything actionable today =====
+function renderToday(){
+  const el=document.getElementById("todayDash"); if(!el) return;
+  const hour=new Date().getHours();
+  const greet = hour<12?"Good morning":hour<17?"Good afternoon":"Good evening";
+  const g=document.getElementById("todayGreeting"); if(g) g.textContent=`${greet}, ${esc((S.name||"Cadet").split(" ").slice(-1)[0])}`;
+  const dd=document.getElementById("todayDate"); if(dd) dd.textContent=new Date().toLocaleDateString(undefined,{weekday:"long",month:"short",day:"numeric"});
+  const cards=[];
+
+  // 1) Habits due today
+  const habitsDue=(S.habits||[]).filter(h=>!habitDoneToday(h));
+  const habitsDone=(S.habits||[]).length-habitsDue.length;
+  if((S.habits||[]).length){
+    cards.push(`<div class="td-card"><div class="td-h">📋 Habits <span class="td-count">${habitsDone}/${S.habits.length}</span></div>
+      ${habitsDue.length?habitsDue.slice(0,6).map(h=>`<div class="td-row"><button class="hb-check" data-hbdo="${h.id}"></button><span>${esc(h.name)}</span>${h.streak>0?`<span class="td-streak">🔥${h.streak}</span>`:''}</div>`).join(""):'<div class="td-done">✓ All habits done today</div>'}
+      ${habitsDue.length>6?`<div class="td-more">+${habitsDue.length-6} more on the Orders tab</div>`:''}</div>`);
+  }
+
+  // 2) Daily orders remaining
+  const ordersLeft=(S.dailies||[]).filter(d=>!d.done);
+  if((S.dailies||[]).length){
+    cards.push(`<div class="td-card"><div class="td-h">🎯 Daily Orders <span class="td-count">${(S.dailies.length-ordersLeft.length)}/${S.dailies.length}</span></div>
+      ${ordersLeft.length?ordersLeft.slice(0,5).map(d=>`<div class="td-row"><span class="td-bullet">•</span><span>${esc(d.name)}</span></div>`).join(""):'<div class="td-done">✓ All orders complete</div>'}
+      ${ordersLeft.length>5?`<div class="td-more">+${ordersLeft.length-5} more</div>`:''}
+      <button class="td-go" data-gototab="dailies">Open Orders →</button></div>`);
+  }
+
+  // 3) Skill quests due (decayed or fading soon)
+  const skillsDue=(S.lifeSkills||[]).filter(s=>!s.group).map(s=>({s,q:skQuest(s)})).filter(x=>x.q && (x.q.type==="decay"||x.q.type==="maintain")).slice(0,5);
+  if(skillsDue.length){
+    cards.push(`<div class="td-card"><div class="td-h">🧠 Skills needing attention</div>
+      ${skillsDue.map(x=>`<div class="td-row"><span class="td-bullet ${x.q.type==='decay'?'warn':''}">${x.q.type==='decay'?'↓':'•'}</span><span>${esc(x.s.name)} — ${x.q.type==='decay'?'reclaim L'+x.q.level:'maintain L'+x.q.level}</span></div>`).join("")}
+      <button class="td-go" data-gototab="skills">Open Skills →</button></div>`);
+  }
+
+  // 4) Spaced-repetition due
+  const srsDue=srsTotalDue();
+  if(srsDue>0){
+    cards.push(`<div class="td-card"><div class="td-h">📚 Spaced repetition</div>
+      <div class="td-row"><span>${srsDue} card${srsDue!==1?'s':''} due for review</span></div>
+      <button class="td-go" data-gototab="test">Review now →</button></div>`);
+  }
+
+  // 5) Study plan reviews due today
+  const today=todayStr();
+  const studyToday=[];
+  (S.studyPlans||[]).forEach(pl=>{ (pl.schedule||[]).filter(s=>s.date===today && !(pl.done||[]).includes(s.date+"|"+s.topic)).forEach(s=>studyToday.push({pl,s})); });
+  if(studyToday.length){
+    const bank=window.QUIZ_BANK||{};
+    cards.push(`<div class="td-card"><div class="td-h">📅 Study reviews due</div>
+      ${studyToday.slice(0,5).map(x=>`<div class="td-row"><span class="td-bullet">•</span><span>${esc(x.pl.title)}: ${esc(bank[x.s.topic]?bank[x.s.topic].name:x.s.topic)}</span></div>`).join("")}
+      <button class="td-go" data-gototab="quizzes">Open study plans →</button></div>`);
+  }
+
+  // 6) FM training advisory (what to train)
+  if(typeof fmFocusLine==="function"){ const fl=fmFocusLine(); if(fl) cards.push(`<div class="td-card"><div class="td-h">💪 Training focus</div><div class="td-row"><span>${esc(fl)}</span></div><button class="td-go" data-gototab="plan">Open FM →</button></div>`); }
+
+  // 7) Reminders: AFT status, donation eligibility, stale weight/vitals
+  const reminders=[];
+  // AFT
+  const lastAft=(S.aft||[])[S.aft.length-1];
+  if(lastAft){ const c=aftCtx(); const minT=c.standard==="combat"?350:300; const pass=lastAft.total>=minT && [lastAft.scores.dl,lastAft.scores.hrp,lastAft.scores.sdc,lastAft.scores.plank,lastAft.scores.run].every(v=>v==null||v>=60); reminders.push(`AFT: ${lastAft.total} (${pass?'passing':'below'} ${c.standard==='combat'?'Combat':'General'})`); }
+  else reminders.push("No AFT logged yet — set a baseline in the AFT tab.");
+  // donation
+  if(S.profile && S.profile.bloodType){
+    const last=(S.donations||[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+    if(last){ const next=new Date(last.date); next.setDate(next.getDate()+56); const d=Math.ceil((next-Date.now())/864e5); reminders.push(d<=0?"Blood donation: eligible now":`Blood donation: eligible in ${d} day${d!==1?'s':''}`); }
+  }
+  // stale weight
+  if(S.profile && S.profile.weightDate){ const wd=Math.floor((Date.now()-new Date(S.profile.weightDate))/864e5); if(wd>30) reminders.push(`Weight last logged ${wd} days ago — update it in Profile.`); }
+  if(reminders.length) cards.push(`<div class="td-card"><div class="td-h">📌 Status &amp; reminders</div>${reminders.map(r=>`<div class="td-row"><span class="td-bullet">›</span><span>${esc(r)}</span></div>`).join("")}</div>`);
+
+  el.innerHTML = cards.length ? `<div class="td-grid">${cards.join("")}</div>`
+    : `<div class="aw-empty"><span class="big">🧭</span>Nothing queued yet. Add habits and daily orders, log an AFT, and this becomes your daily command center.</div>`;
+}
+
+function makeStudyPlan(title,testDate,topics){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const test=new Date(testDate); test.setHours(0,0,0,0);
+  const totalDays=Math.max(1, Math.round((test-today)/864e5));
+  // spaced schedule: review each topic on an expanding cadence (day 1,2,4,7,... up to test)
+  const offsets=[0,1,3,6,10,14,20,27].filter(o=>o<=totalDays);
+  if(!offsets.includes(totalDays-0) && totalDays>0) offsets.push(Math.max(0,totalDays-1)); // a final review day before test
+  const schedule=[];
+  topics.forEach((topic,ti)=>{
+    offsets.forEach(o=>{
+      const d=new Date(today); d.setDate(d.getDate()+o);
+      schedule.push({date:d.toISOString().slice(0,10), topic});
+    });
+  });
+  return {id:id(), title, testDate, topics, created:Date.now(), schedule, done:[]};
+}
+
+// skills: capture level-ability typing as it's entered
 document.addEventListener("input",e=>{ const i=e.target.dataset.skl; if(i!=null){ _skLevels[+i]=e.target.value; } });
 const _skAddLevel=document.getElementById("skAddLevel"); if(_skAddLevel) _skAddLevel.onclick=()=>{ _skLevels.push(""); renderSkLevelInputs(); };
 const _skSave=document.getElementById("skSave"); if(_skSave) _skSave.onclick=skCreate;
+// Records: counseling + checklists
+const _cnAdd=document.getElementById("cnAdd");
+if(_cnAdd) _cnAdd.onclick=()=>{
+  const date=document.getElementById("cnDate").value||new Date().toISOString().slice(0,10);
+  const entry={id:id(),date,type:document.getElementById("cnType").value,people:document.getElementById("cnPeople").value.trim(),summary:document.getElementById("cnSummary").value.trim(),plan:document.getElementById("cnPlan").value.trim(),followUp:""};
+  if(!entry.summary){ toast("Add a summary at least"); return; }
+  S.counseling.push(entry);
+  ["cnPeople","cnSummary","cnPlan","cnDate"].forEach(x=>document.getElementById(x).value="");
+  save(); render(); toast("📝 Entry saved");
+};
+const _clAdd=document.getElementById("clAdd");
+if(_clAdd) _clAdd.onclick=()=>{
+  const n=document.getElementById("clName").value.trim(); if(!n){toast("Name the checklist");return;}
+  S.checklists.push({id:id(),name:n,items:[],template:false});
+  document.getElementById("clName").value="";
+  save(); render(); toast("✅ Checklist created");
+};
+// checklist add-item on Enter
+document.addEventListener("keydown",e=>{
+  if(e.key==="Enter" && e.target.dataset && e.target.dataset.clnewitem){
+    const cl=S.checklists.find(x=>x.id===e.target.dataset.clnewitem);
+    const v=e.target.value.trim();
+    if(cl&&v){ cl.items.push({text:v,done:false}); save(); render(); }
+  }
+});
 // Open the Weight app (portal link)
 const _wmOpen=document.getElementById("wmOpen");
 if(_wmOpen) _wmOpen.onclick=()=>{
@@ -3179,8 +4444,8 @@ if(_cloudBtn) _cloudBtn.onclick=()=>{ if(fileHandle){ if(confirm("Unlink this cl
 cloudInit();
 
 /* ================= SKILLS (levels, decay, promotion quests) ================= */
-const SK_CAT={tactical:"Tactical/field",physical:"Physical",technical:"Technical/cyber",leadership:"Leadership",academic:"Academic",personal:"Personal"};
-const SK_CAT_ORDER=["tactical","physical","technical","leadership","academic","personal"];
+const SK_CAT={tactical:"Tactical/field",physical:"Physical",cognitive:"Cognitive",physiological:"Physiological",technical:"Technical/cyber",leadership:"Leadership",academic:"Academic",personal:"Personal"};
+const SK_CAT_ORDER=["tactical","physical","cognitive","physiological","technical","leadership","academic","personal"];
 // Seed skills — editable starters across every category, each with a level ladder.
 // fadeDays = how long a level lasts without a maintenance/practice quest.
 /* Hierarchical skill tree:
@@ -3230,28 +4495,44 @@ const SEED_SKILLS=[
   // ================= PHYSICAL (exercise sub-skills under parent groups) =================
   // -- Strength (group of lifts/calisthenics) --
   {name:"Strength", cat:"physical", group:true, fadeDays:45},
-  {name:"Push-ups", parent:"Strength", cat:"physical", fadeDays:30, auto:"ex:pushups", levels:[
+  {name:"Push-ups", parent:"Strength", cat:"physical", fadeDays:30, auto:"ex:pushups",
+    why:"Upper-body pushing endurance — an AFT event and the base for most pressing strength.",
+    howTo:"Hands under shoulders, body a straight line head to heels. Lower until your chest touches; for hand-release, lift your hands off the floor at the bottom, then press back up. Keep your hips from sagging or piking.",
+    safety:"This describes the movement — have a coach or cadre watch your form, since text can't see your hips dropping or elbows flaring.",
+    levels:[
     "Do 10 hand-release push-ups unbroken",
     "Do 20 in 2 minutes",
     "Do 30 in 2 minutes",
     "Do 45 in 2 minutes",
     "Do 60 in 2 minutes",
     "Do 75+ in 2 minutes"]},
-  {name:"Deadlift", parent:"Strength", cat:"physical", fadeDays:45, auto:"ex:deadlift", levels:[
+  {name:"Deadlift", parent:"Strength", cat:"physical", fadeDays:45, auto:"ex:deadlift",
+    why:"Total-body strength — it carries directly to lifting anything heavy safely, and it's an AFT event (3-rep max).",
+    howTo:"Bar over mid-foot. Hinge at the hips with a flat back and grip the bar. Drive the floor away and stand tall, keeping the bar close to your legs. Never round your lower back. Lower under control.",
+    safety:"Heavy lifting with a rounded back injures the spine. Learn this with a coach watching before going heavy — the app tracks your numbers, it can't correct your form.",
+    levels:[
     "Deadlift with correct form (bodyweight)",
     "Deadlift 1.25x bodyweight",
     "Deadlift 1.5x bodyweight",
     "Deadlift 1.75x bodyweight",
     "Deadlift 2x bodyweight",
     "Deadlift 2.25x+ bodyweight"]},
-  {name:"Pull-ups", parent:"Strength", cat:"physical", fadeDays:30, auto:"ex:pullups", levels:[
+  {name:"Pull-ups", parent:"Strength", cat:"physical", fadeDays:30, auto:"ex:pullups",
+    why:"Pulling strength — hard to fake, and a strong marker of relative strength (strength vs. bodyweight).",
+    howTo:"Hang from a bar with a full grip, arms straight. Pull until your chin clears the bar, keeping the movement controlled (no big kipping swing for strict reps). Lower all the way down each rep.",
+    safety:"Build up gradually — jumping into high volume strains elbows and shoulders. A coach can check your shoulder position.",
+    levels:[
     "Do 1 strict dead-hang pull-up",
     "Do 5 strict pull-ups",
     "Do 10 strict pull-ups",
     "Do 15 strict pull-ups",
     "Do 20 strict pull-ups",
     "Do weighted pull-ups (+25 lb x5)"]},
-  {name:"Squat", parent:"Strength", cat:"physical", fadeDays:45, auto:"ex:squat", levels:[
+  {name:"Squat", parent:"Strength", cat:"physical", fadeDays:45, auto:"ex:squat",
+    why:"Leg strength and the base for almost all athletic movement, rucking, and load carriage.",
+    howTo:"Feet about shoulder-width. Sit your hips back and down like into a chair, knees tracking over your toes, chest up and back flat. Go to at least parallel, then stand tall. Keep your heels down.",
+    safety:"Knees caving in or a rounding back under load causes injury. Learn with a coach before loading heavy.",
+    levels:[
     "Bodyweight squat with full depth & form",
     "Back squat 1x bodyweight",
     "Back squat 1.5x bodyweight",
@@ -3259,7 +4540,11 @@ const SEED_SKILLS=[
     "Pistol squat (each leg)"]},
   // -- Endurance (group) --
   {name:"Endurance", cat:"physical", group:true, fadeDays:30},
-  {name:"Run (2-mile)", parent:"Endurance", cat:"physical", fadeDays:30, auto:"ex:run", levels:[
+  {name:"Run (2-mile)", parent:"Endurance", cat:"physical", fadeDays:30, auto:"ex:run",
+    why:"Aerobic endurance — the AFT 2-mile run, and the engine behind rucking and recovery.",
+    howTo:"Build a base with easy-paced runs first, then add one faster session a week (intervals). Don't increase weekly mileage by more than ~10% at a time. Land midfoot under your hips, relaxed and tall.",
+    safety:"Ramp mileage slowly — shin splints and knee pain come from doing too much too soon.",
+    levels:[
     "Run 2 miles without stopping",
     "Sub-20:00 2-mile",
     "Sub-18:00 2-mile",
@@ -3280,7 +4565,11 @@ const SEED_SKILLS=[
     "SDC under 1:33"]},
   // -- Core (group) --
   {name:"Core", cat:"physical", group:true, fadeDays:30},
-  {name:"Plank", parent:"Core", cat:"physical", fadeDays:30, auto:"ex:plank", levels:[
+  {name:"Plank", parent:"Core", cat:"physical", fadeDays:30, auto:"ex:plank",
+    why:"Trunk and core stability — it protects your spine under load and is an AFT event.",
+    howTo:"Forearms on the ground under your shoulders, body in a straight line from head to heels. Squeeze your glutes and brace your abs. Don't let your hips sag down or pike up. Breathe normally and hold.",
+    safety:"If your lower back sags you'll feel it there instead of your abs — drop to your knees and rebuild rather than holding a bad position.",
+    levels:[
     "Hold a plank 1:00",
     "Hold a plank 1:30",
     "Hold a plank 2:30",
@@ -3303,11 +4592,77 @@ const SEED_SKILLS=[
     "Swim 100m in uniform",
     "Complete the Combat Water Survival Test",
     "Swim 500m continuously"]},
-  {name:"Flexibility & mobility", cat:"physical", fadeDays:30, levels:[
+  {name:"Flexibility & mobility", cat:"physical", fadeDays:30,
+    why:"Flexible joints move through a full range — that means more power, fewer injuries, and faster recovery. It's the most-skipped, highest-return thing most people neglect.",
+    howTo:"WARM-UP (before training, dynamic/moving): 5 min easy cardio, then leg swings, arm circles, bodyweight squats, lunges with a twist, inchworms. COOL-DOWN (after, held stretches 20–30s, no bouncing): hamstrings, quads, calves, chest/shoulders, hip flexors, lower back. FLEXIBILITY DAY (own session): held stretches for the big muscle groups 30–60s each, plus mobility drills — hip openers, thoracic rotations, ankle work, band shoulder dislocates.",
+    safety:"Stretch to mild tension, never sharp pain. Warm up before deep stretching — stretching cold muscles can strain them.",
+    levels:[
     "Touch your toes / full hamstring reach",
     "Full deep squat hold 1:00",
     "Maintain a daily mobility routine",
     "Pain-free full range in all major joints"]},
+
+  // -- Balance (physiological-style but lives under physical for training) --
+  {name:"Balance training", parent:"Core", cat:"physical", fadeDays:30,
+    why:"Balance (proprioception — your sense of where your body is) underlies agility, injury prevention for ankles and knees, and carrying loads over rough ground. It trains fast and fades fast.",
+    howTo:"Single-leg stand, building up: (1) 30s eyes open, (2) eyes closed, (3) on an unstable surface like a pillow, (4) with a load or while reaching. Do it barefoot, near a wall to catch yourself.",
+    safety:"Practice near something you can grab. The eyes-closed and loaded versions are genuinely harder — progress only when the prior step is solid.",
+    levels:[
+    "Single-leg stand 30 seconds each leg",
+    "Eyes-closed single-leg 20 seconds",
+    "Single-leg on an unstable surface",
+    "Single-leg, eyes closed, with a load"]},
+
+  // ================= CLOSE-QUARTERS COMBAT (concept-tracking only) =================
+  {name:"Close-Quarters Combat", cat:"physical", group:true, fadeDays:30},
+  {name:"Stance & footwork", parent:"Close-Quarters Combat", cat:"physical", fadeDays:30,
+    why:"Every strike fails without balance and positioning. Footwork is the foundation — it's what lets you hit hard, avoid being hit, and stay on your feet.",
+    howTo:"Hands up by your chin, elbows in, chin slightly down. Weight balanced on the balls of your feet, knees soft. Move by stepping with the lead foot and following with the rear — never cross your feet or get them tangled.",
+    safety:"The app describes the concept so you can track practice. You cannot learn to fight safely from text — train with a qualified instructor (combatives/MACP, boxing, or a martial arts gym). The app tracks; the coach teaches.",
+    levels:["Hold a balanced fighting stance","Move in all directions without crossing feet","Maintain stance while striking","Move and strike fluidly under pressure"]},
+  {name:"Punch", parent:"Close-Quarters Combat", cat:"physical", fadeDays:30,
+    why:"The fastest, most-used strike and the foundation of hand combat.",
+    howTo:"From your stance, extend the fist in a straight line (jab/cross) turning the hip and shoulder into it, or in an arc (hook/uppercut). Snap it out and bring the hand straight back to guard. Never drop the other hand.",
+    safety:"Concept-tracking only. Punching wrong injures your wrist and hand. Learn with an instructor who can wrap your hands and check your form.",
+    levels:["Throw a jab and cross with correct form","Add hook and uppercut","Combine 3+ punches in combination","Strike with power and accuracy on a bag/pads under guidance"]},
+  {name:"Elbow", parent:"Close-Quarters Combat", cat:"physical", fadeDays:30,
+    why:"A short-range, very hard strike — strong in a clinch where punches are too long.",
+    howTo:"At close range, drive the point of the elbow across or upward into the target, rotating your body behind it. Keep the other hand protecting your head.",
+    safety:"Concept-tracking only. Elbows are powerful and easy to misuse — learn hands-on with an instructor.",
+    levels:["Throw a horizontal elbow with body rotation","Add upward and downward elbows","Use elbows from the clinch","Chain elbows with other strikes under guidance"]},
+  {name:"Knee", parent:"Close-Quarters Combat", cat:"physical", fadeDays:30,
+    why:"A powerful close-range strike, especially strong in the clinch.",
+    howTo:"Drive the knee up and forward into the target, pulling the target down to meet it if you have a clinch. Point the toe down and strike with the kneecap area. Keep your balance on the support leg.",
+    safety:"Concept-tracking only. Learn the clinch and knee with an instructor — balance and timing matter and can't be learned from text.",
+    levels:["Throw a straight knee with balance","Knee from a clinch","Combine knees with grips","Knee under realistic pressure with guidance"]},
+  {name:"Kick", parent:"Close-Quarters Combat", cat:"physical", fadeDays:30,
+    why:"The longest-range strike — keeps distance and can hit very hard.",
+    howTo:"Check distance first. For a front/push kick, drive the ball of the foot forward. For a round kick, pivot the support foot and swing the shin into the target. Always recover back to your stance — a caught kick means you're off balance.",
+    safety:"Concept-tracking only. Kicking off-balance gets you taken down; learn timing and recovery with an instructor.",
+    levels:["Throw a front/push kick keeping balance","Throw a round kick with shin","Kick at varied heights and recover stance","Kick fluidly in combination under guidance"]},
+
+  // ================= PHYSICAL CONTROL (grappling/restraint — concept-tracking only) =================
+  {name:"Physical Control", cat:"physical", group:true, fadeDays:30},
+  {name:"Clinch / control position", parent:"Physical Control", cat:"physical", fadeDays:30,
+    why:"Controlling someone up close without striking — the start of most control and restraint.",
+    howTo:"Close the distance and establish a grip on the head/neck and arm (or body lock), keeping your posture and hips in. The goal is to control their posture so they can't strike or escape easily.",
+    safety:"Concept-tracking only. Clinch work must be drilled with a partner and an instructor — leverage and timing can't be learned from text.",
+    levels:["Establish a basic clinch grip","Control a partner's posture in the clinch","Maintain control against resistance","Transition between control positions under guidance"]},
+  {name:"Takedown", parent:"Physical Control", cat:"physical", fadeDays:30,
+    why:"Putting an opponent on the ground on your terms, where you can control them.",
+    howTo:"Change levels (bend the knees, not the back), drive in to off-balance them, and finish the takedown while keeping your head up. Specific techniques (single-leg, double-leg, hip throw) are taught hands-on.",
+    safety:"Concept-tracking only. Takedowns injure people when done wrong — learn on mats with an instructor and a willing partner.",
+    levels:["Perform a basic takedown on a drilling partner","Finish a takedown against light resistance","Chain takedown attempts","Take down a resisting partner safely under guidance"]},
+  {name:"Ground control", parent:"Physical Control", cat:"physical", fadeDays:30,
+    why:"Staying on top and in control once the fight is on the ground.",
+    howTo:"Keep a low, wide base and put your weight on the opponent. Learn the common top positions (mount, side control) and how to keep them — taught hands-on, since feel matters more than description.",
+    safety:"Concept-tracking only. Ground work is safe only when drilled with a partner who can tap out, under an instructor.",
+    levels:["Hold a basic top position on a drilling partner","Maintain position against movement","Transition between top positions","Control a resisting partner under guidance"]},
+  {name:"Restraint / detain", parent:"Physical Control", cat:"physical", fadeDays:30,
+    why:"Controlling a person without injuring them — relevant to MP, leadership, and law-enforcement-style scenarios.",
+    howTo:"Use leverage-based control (joint control, body positioning) to immobilize without strikes. Specific holds and cuffing procedures are taught hands-on and are governed by rules of force.",
+    safety:"Concept-tracking only, and use-of-force is governed by law and policy. Learn these techniques and the rules around them from qualified instructors and your chain of command.",
+    levels:["Apply a basic leverage-based control on a partner","Control a compliant partner to the ground","Maintain a restraint position","Apply restraint under realistic, supervised conditions"]},
 
   // ================= TECHNICAL =================
   {name:"Linux / command line", cat:"technical", fadeDays:60, levels:[
@@ -3377,6 +4732,10 @@ const SEED_SKILLS=[
     "Build and follow a spaced-repetition routine",
     "Teach a topic from memory (the Feynman test)",
     "Maintain a 3.5+ term GPA while training"]},
+  {name:"ROTC knowledge (quizzes)", cat:"academic", fadeDays:45, auto:"quiz",
+   why:"The body of knowledge a cadet is expected to master — values, customs, tactics, weapons, land nav, first aid, branches, regulations, and more. Passing the in-app quiz banks proves you've learned each area, and the level reflects how broadly you've mastered the material.",
+   whatYouDo:"Go to the Quiz tab and pass quiz banks (score the required % to pass). Each bank you pass raises this skill. Retake them periodically — the knowledge fades if you don't review, just like the real thing.",
+   levels:["Pass 3 quiz banks","Pass 6 quiz banks","Pass 10 quiz banks","Pass 13 quiz banks","Pass all 16 quiz banks"]},
 
   // ================= PERSONAL =================
   {name:"Cooking", cat:"personal", fadeDays:45, levels:[
@@ -3411,19 +4770,104 @@ const SEED_SKILLS=[
     "Drive at night and in rain safely",
     "Change a tire and check fluids",
     "Drive a manual / larger vehicle"]},
+
+  // ================= COGNITIVE =================
+  {name:"Reaction speed", cat:"cognitive", fadeDays:30, auto:"test:reaction",
+   why:"How fast your brain turns 'I see it' into 'I moved' matters for driving, shooting, sports, and safety. Measuring it shows real improvement and warns you when fatigue is slowing you down.",
+   whatYouDo:"In the Test tab: stare at the box, and the instant it changes, tap as fast as you can. Don't tap early. It averages several tries. Lower ms is better — ~250ms is normal, under 200ms is fast.",
+   levels:["React under 400ms average","React under 320ms","React under 280ms","React under 250ms","React under 220ms"]},
+  {name:"Cognitive / processing speed", cat:"cognitive", fadeDays:30, auto:"test:procspeed",
+   why:"How quickly you take in and act on simple information — a big part of feeling sharp, and it dips with poor sleep, so it doubles as a readiness check.",
+   whatYouDo:"In the Test tab: match symbols to numbers using a key, as many as you can before the clock runs out. Speed plus accuracy.",
+   levels:["Complete a basic round","Above-average matches per minute","Strong matches per minute","Fast and near-perfect accuracy"]},
+  {name:"Working memory (n-back)", cat:"cognitive", fadeDays:21, auto:"test:nback",
+   why:"Working memory is your mental scratchpad for info you're actively using. N-back is the most-studied trainer for it. Honest note: it reliably improves n-back and similar tasks — it is NOT proven to raise general IQ. Training, not a magic pill.",
+   whatYouDo:"In the Test tab: squares appear one at a time in a grid. In '2-back', say whether the current one matches the one from 2 steps ago. Start at 1-back; 2-back is hard at first — that's normal.",
+   levels:["Hold 1-back reliably","Pass 2-back","Pass 3-back","Pass 4-back"]},
+  {name:"Memory span", cat:"cognitive", fadeDays:30, auto:"test:digitspan",
+   why:"Measures how much you can hold in mind at once — the raw material for mental math, following instructions, and the memory-palace techniques.",
+   whatYouDo:"In the Test tab: numbers flash one at a time, then you type them back. Forward = same order; backward = reversed (harder). Your longest correct sequence is your span. ~7 forward is typical.",
+   levels:["Forward span of 5","Forward span of 7","Backward span of 5","Forward span of 9 / backward 7"]},
+  {name:"Attention / sustained focus", cat:"cognitive", fadeDays:30, auto:"test:gonogo",
+   why:"Measures sustained focus and your mental brake — the ability to NOT act on impulse. Useful for discipline, trigger control, and noticing when boredom makes you sloppy.",
+   whatYouDo:"In the Test tab (Go/No-Go): tap fast for the common 'Go' signal, but freeze for the rare 'No-Go'. The Go signal lulls you into auto-tapping; the score is whether you can stop in time.",
+   levels:["Complete a round with few errors","Low error rate sustained","High accuracy under speed","Near-perfect inhibition"]},
+  {name:"Memory technique", cat:"cognitive", fadeDays:30,
+   why:"The real, trainable skill behind 'memorize anything.' Your brain remembers vivid places and images far better than abstract lists — this is how memory champions memorize decks of cards. Honest framing: this trains DELIBERATE memorization to a very high level; it won't make unrelated remembering effortless.",
+   whatYouDo:"Build a memory palace (a route through a place you know), turn items into vivid images, and place them along the route. Practice encode/recall in the Test tab. Progressive challenges: 10-item list → card deck → 50-digit string → a speech.",
+   levels:["Memorize a 10-item list via a palace","Memorize a 20-item list","Memorize a shuffled deck of cards","Memorize a 50-digit number","Memorize a short speech verbatim"]},
+  {name:"Mental math", cat:"cognitive", fadeDays:30, auto:"test:mathsprint",
+   why:"Fast estimation is genuinely useful (land nav, logistics, range cards) and it strengthens working memory because you hold numbers while operating on them.",
+   whatYouDo:"In the Test tab: solve as many simple problems as you can in the time limit. Difficulty scales as you improve.",
+   levels:["Solid on add/subtract under time","Fast multiplication","Fast mixed operations","Rapid multi-step mental math"]},
+  {name:"Pattern recognition", cat:"cognitive", fadeDays:45, auto:"test:patterns",
+   why:"Spotting the rule behind a sequence is the core of problem-solving and most aptitude testing.",
+   whatYouDo:"In the Test tab: find what comes next in a sequence of shapes or numbers. The app explains the rule afterward so you learn the pattern types.",
+   levels:["Solve simple sequences","Solve moderate sequences","Solve complex sequences","Solve under time pressure"]},
+  {name:"Typing speed & accuracy", cat:"cognitive", fadeDays:30, auto:"test:typing",
+   why:"For a Cyber/17-series track, fast accurate typing is a real job skill — and a clean measure of combined motor and cognitive output.",
+   whatYouDo:"In the Test tab: type the shown text. Score is words-per-minute with an accuracy penalty for errors. Accuracy first, then speed.",
+   levels:["Type 30 WPM accurately","Type 50 WPM","Type 70 WPM","Type 90+ WPM clean"]},
+
+  // ================= PHYSIOLOGICAL (measured, not trained directly) =================
+  {name:"Resting heart rate", cat:"physiological", fadeDays:60, auto:"vital:rhr",
+   why:"A lower resting heart rate generally reflects better cardiovascular fitness and recovery. Tracked from your Vitals log, it's an honest fitness signal over time.",
+   whatYouDo:"Log your resting pulse in Profile → Vitals (from your Apple Watch, ideally measured first thing in the morning). The app trends it; lower over months = fitter.",
+   levels:["Logged a baseline","Resting HR under 70","Resting HR under 60","Resting HR under 50 (athlete range)"]},
+  {name:"Balance", cat:"physiological", fadeDays:30,
+   why:"Balance (proprioception — your sense of where your body is) underlies agility, injury prevention for ankles and knees, and carrying loads over rough ground. It trains fast and fades fast, so it's worth tracking.",
+   whatYouDo:"Practice and self-test: stand on one leg and time it. Progress through eyes-open → eyes-closed → unstable surface → with a load. No equipment needed.",
+   levels:["Single-leg stand 30 seconds","Eyes-closed single-leg 20s","Single-leg on an unstable surface","Single-leg, eyes closed, with a load"]},
+  {name:"Grip strength", cat:"physiological", fadeDays:45,
+   why:"Grip strength predicts overall strength and is a known marker of general health and durability — plus it carries directly to rucking, climbing, and combatives.",
+   whatYouDo:"Measure with a hand dynamometer if you have one (log the reading), or self-test with a dead hang for time. Improve with carries, hangs, and heavy holds.",
+   levels:["Dead hang 30 seconds","Dead hang 60 seconds","Dead hang 90 seconds","Dead hang 2 minutes / strong dynamometer reading"]},
 ];
 function seedSkillsIfEmpty(){
-  // If any hierarchical skills exist, leave them alone.
-  if(S.lifeSkills && S.lifeSkills.some(s=>s.group||s.parent!==undefined)) return;
+  // If any hierarchical skills exist, leave them alone — but still add any NEW seed
+  // skills that didn't exist before (so updates introduce new skills without wiping progress).
+  if(S.lifeSkills && S.lifeSkills.some(s=>s.group||s.parent!==undefined)){
+    mergeNewSeedSkills();
+    return;
+  }
   // Old flat skills (no hierarchy fields) -> replace with the new tree.
   // Empty list (even if _seeded was set by an old version) -> seed fresh.
   S.lifeSkills=SEED_SKILLS.map(s=>({
     id:id(), name:s.name, cat:s.cat, parent:s.parent||null, group:!!s.group,
     fadeDays:s.fadeDays, auto:s.auto||null,
-    currentLevel:0, lastQuestTs:Date.now(),
+    why:s.why||null, whatYouDo:s.whatYouDo||null, howTo:s.howTo||null, safety:s.safety||null,
+    currentLevel:0, lastQuestTs:Date.now(), peakLevel:0,
     levels:(s.levels||[]).map((ability,i)=>({n:i+1,ability})), history:[], seeded:true
   }));
   S._seeded=true; save();
+}
+// Add seed skills the user doesn't have yet (by name), and backfill transparency copy
+// onto existing seeded skills. Never touches level/history/peak.
+function mergeNewSeedSkills(){
+  let changed=false;
+  const have=new Set(S.lifeSkills.map(s=>s.name));
+  SEED_SKILLS.forEach(s=>{
+    if(!have.has(s.name)){
+      S.lifeSkills.push({
+        id:id(), name:s.name, cat:s.cat, parent:s.parent||null, group:!!s.group,
+        fadeDays:s.fadeDays, auto:s.auto||null,
+        why:s.why||null, whatYouDo:s.whatYouDo||null, howTo:s.howTo||null, safety:s.safety||null,
+        currentLevel:0, lastQuestTs:Date.now(), peakLevel:0,
+        levels:(s.levels||[]).map((ability,i)=>({n:i+1,ability})), history:[], seeded:true
+      });
+      changed=true;
+    } else if(s.why||s.whatYouDo||s.howTo||s.safety){
+      // backfill transparency copy onto an existing skill that lacks it
+      const ex=S.lifeSkills.find(x=>x.name===s.name);
+      if(ex){
+        if((ex.why==null) && s.why){ ex.why=s.why; changed=true; }
+        if((ex.whatYouDo==null) && s.whatYouDo){ ex.whatYouDo=s.whatYouDo; changed=true; }
+        if((ex.howTo==null) && s.howTo){ ex.howTo=s.howTo; changed=true; }
+        if((ex.safety==null) && s.safety){ ex.safety=s.safety; changed=true; }
+      }
+    }
+  });
+  if(changed) save();
 }
 
 // Auto-update skills from real activity in other sections.
@@ -3481,7 +4925,7 @@ function syncSkillsFromActivity(){
       }
       if(ratioLvl!==null){
         ratioLvl=Math.min(ratioLvl,maxLevels);
-        if(ratioLvl>sk.currentLevel){ sk.currentLevel=ratioLvl; sk.lastQuestTs=now; sk.history.push({ts:now,type:"auto-lift",level:ratioLvl}); changed=true; }
+        if(ratioLvl>sk.currentLevel){ sk.currentLevel=ratioLvl; skUpdatePeak(sk); sk.lastQuestTs=now; sk.history.push({ts:now,type:"auto-lift",level:ratioLvl}); changed=true; }
         else if(ratioLvl>0 && ratioLvl>=sk.currentLevel && sk.lastQuestTs<now-864e5){ sk.lastQuestTs=now; changed=true; }
       }
     }
@@ -3489,12 +4933,20 @@ function syncSkillsFromActivity(){
     const aftMap={pushups:"hrp",run:"run",sdc:"sdc",plank:"plank"};  // deadlift handled by ratio above
     if(last && aftMap[key]){
       const lvl=eventScoreToLevel(last.scores[aftMap[key]], maxLevels);
-      if(lvl>sk.currentLevel){ sk.currentLevel=lvl; sk.lastQuestTs=now; sk.history.push({ts:now,type:"auto-aft",level:lvl}); changed=true; }
+      if(lvl>sk.currentLevel){ sk.currentLevel=lvl; skUpdatePeak(sk); sk.lastQuestTs=now; sk.history.push({ts:now,type:"auto-aft",level:lvl}); changed=true; }
       else if(lvl>0 && lvl>=sk.currentLevel && sk.lastQuestTs<now-864e5){ sk.lastQuestTs=now; changed=true; }
     }
     // practice in Log/PT refreshes the fade timer so it doesn't decay
     if(sk.currentLevel>0 && practiced(key) && sk.lastQuestTs<now-864e5){ sk.lastQuestTs=now; changed=true; }
   });
+  // ROTC knowledge skill: level from number of quiz banks passed
+  const qsk=S.lifeSkills.find(s=>s.auto==="quiz");
+  if(qsk){
+    const passed=Object.values(S.quizzes||{}).filter(x=>x.passed).length;
+    const lvl = passed>=16?5 : passed>=13?4 : passed>=10?3 : passed>=6?2 : passed>=3?1 : 0;
+    const capped=Math.min(lvl, qsk.levels.length);
+    if(capped>qsk.currentLevel){ qsk.currentLevel=capped; skUpdatePeak(qsk); qsk.lastQuestTs=now; qsk.history.push({ts:now,type:"auto-quiz",level:capped}); changed=true; }
+  }
   return changed;
 }
 let _skLevels=["",""];  // draft level abilities being entered (start with 2 blanks)
@@ -3520,7 +4972,7 @@ function skCreate(){
       if(sk.currentLevel>levels.length) sk.currentLevel=levels.length; }
     _skEditId=null; document.getElementById("skSave").textContent="Create skill"; toast("✎ Skill updated");
   } else {
-    S.lifeSkills.push({id:id(),name,cat,parent,group:false,fadeDays,currentLevel:0,lastQuestTs:Date.now(),levels,history:[]});
+    S.lifeSkills.push({id:id(),name,cat,parent,group:false,fadeDays,currentLevel:0,lastQuestTs:Date.now(),peakLevel:0,levels,history:[]});
     toast("🧠 Skill added");
   }
   _skLevels=["",""];
@@ -3564,7 +5016,14 @@ function skEffectiveLevel(sk){
   if(sk.currentLevel<=0) return 0;
   const elapsed=Date.now()-(sk.lastQuestTs||Date.now());
   const intervals=Math.floor(elapsed/(sk.fadeDays*864e5));
-  return Math.max(0, sk.currentLevel - intervals);
+  // a started skill never decays below level 1 — it can be reverted but never lost
+  return Math.max(1, sk.currentLevel - intervals);
+}
+// keep peakLevel = highest level ever held (current or effective, whichever is higher seen)
+function skUpdatePeak(sk){
+  if(sk.peakLevel===undefined) sk.peakLevel=0;
+  if(sk.currentLevel>sk.peakLevel) sk.peakLevel=sk.currentLevel;
+  return sk.peakLevel;
 }
 function skDaysLeft(sk){
   if(sk.currentLevel<=0) return null;
@@ -3596,6 +5055,7 @@ function skPass(skId){
   const eff=skEffectiveLevel(sk);
   if(q.type==="decay"){ sk.currentLevel=eff+1; }
   else if(q.type==="promote"){ sk.currentLevel=Math.min(sk.levels.length, sk.currentLevel+1); }
+  skUpdatePeak(sk);
   // maintain just refreshes the timer
   sk.lastQuestTs=Date.now();
   sk.history.push({ts:Date.now(),type:q.type,level:q.level});
@@ -3608,6 +5068,25 @@ function skSkip(skId){
   const sk=S.lifeSkills.find(x=>x.id===skId); if(!sk) return;
   // skipping a maintenance just dismisses it until next interval; decay still applies naturally
   toast("Left for later — the skill will keep fading until you prove it");
+}
+// "Work on this" — route a skill to the right trainer/plan/protocol
+function skWorkGuidance(sk){
+  if(!sk) return "";
+  const go=(tab,label)=>`<button class="sk-work-go" data-gototab="${tab}">${label} →</button>`;
+  // cognitive skills with a test trainer
+  const testMap={"Reaction speed":"reaction","Cognitive / processing speed":"procspeed","Working memory (n-back)":"nback","Memory span":"digitspan","Attention / sustained focus":"gonogo","Mental math":"mathsprint","Pattern recognition":"patterns","Typing speed & accuracy":"typing"};
+  if(testMap[sk.name]) return `<div class="sk-work-body">Train this directly in the Test tab — run the <b>${esc(sk.name)}</b> test, and your level updates from the result.${go("test","Open Test tab")}</div>`;
+  if(sk.name==="Memory technique") return `<div class="sk-work-body">Use the <b>Memory Track</b> in the Test tab: build a memory palace and run spaced-repetition decks. Practicing either keeps this skill sharp.${go("test","Open Memory Track")}</div>`;
+  if(sk.name==="ROTC knowledge (quizzes)") return `<div class="sk-work-body">Pass quiz banks in the Quiz tab — each one you pass raises this skill. Build a study plan there for any graded test.${go("quizzes","Open Quiz tab")}</div>`;
+  if(sk.cat==="academic") return `<div class="sk-work-body">Study with active recall and spacing: make a spaced-repetition deck in the Test tab's Memory Track, and build a study plan in the Quiz tab if you have a graded test coming.${go("test","Memory Track")} ${go("quizzes","Study plans")}</div>`;
+  if(sk.cat==="cognitive") return `<div class="sk-work-body">Practice in the Test tab — pick the closest trainer and run it regularly.${go("test","Open Test tab")}</div>`;
+  if(sk.cat==="physiological"){
+    if(sk.name==="Resting heart rate") return `<div class="sk-work-body">This improves with cardio over time. Log your resting pulse in Profile → Vitals to track it; lower over months = fitter.${go("profile","Log vitals")}</div>`;
+    return `<div class="sk-work-body">${esc(sk.whatYouDo||"Practice the self-test described above regularly and log your progress.")}</div>`;
+  }
+  if(sk.cat==="physical") return `<div class="sk-work-body">Train this in your PT sessions — the FM tab tells you what to prioritize, and logging workouts in the Log tab keeps the skill from fading.${go("plan","Open FM plan")} ${go("log","Log a workout")}</div>`;
+  // generic practice protocol
+  return `<div class="sk-work-body"><b>Practice protocol:</b> ${esc(sk.whatYouDo||"Find a real situation to practice the next level's ability, do it deliberately, then mark the quest passed when you can do it reliably.")} When you can perform the next level reliably, pass its quest above to level up.</div>`;
 }
 function renderSkillsTab(){
   const listEl=document.getElementById("skList"); if(!listEl) return;
@@ -3646,15 +5125,25 @@ function renderSkillsTab(){
       if(eff<sk.currentLevel) fadeNote=`<div class="sk-fade-note warn">⚠️ Slipped from L${sk.currentLevel} to L${eff} — do the quest above to reclaim it.</div>`;
       else if(days!==null) fadeNote=`<div class="sk-fade-note ${days<=Math.ceil(sk.fadeDays*0.34)?'warn':''}">Fades in ${days} day${days!==1?'s':''} (every ${sk.fadeDays}d).</div>`;
     }
+    const peak=sk.peakLevel||0;
+    const peakStr = (peak>0 && peak>eff) ? ` · peak L${peak}` : "";
+    let reclaimNote="";
+    if(peak>eff && peak>0){
+      reclaimNote=`<div class="sk-fade-note reclaim">🏔️ You've held Level ${peak} before — reclaiming it should come faster than learning it new.</div>`;
+    }
     return `<div class="sk-card ${isSub?'sk-sub':''}">
       <div class="sk-card-top">
         <div><div class="sk-card-name">${esc(sk.name)}${sk.auto?' <span class="sk-auto">auto</span>':''}</div></div>
-        <span class="sk-level-badge ${maxed?'maxed':''}">${eff>0?'Lv '+eff:'Unproven'}${maxed?' · MAX':''}</span>
+        <span class="sk-level-badge ${maxed?'maxed':''}">${eff>0?'Lv '+eff:'Unproven'}${maxed?' · MAX':peakStr}</span>
         <button class="sk-card-edit" data-skedit="${sk.id}">✎</button>
         <button class="sk-card-del" data-skdel="${sk.id}">✕</button>
       </div>
       <div class="sk-ladder">${ladder}</div>
       ${fadeNote}
+      ${reclaimNote}
+      ${(sk.why||sk.whatYouDo||sk.howTo||sk.safety)?`<details class="sk-info"><summary>ℹ️ Why &amp; how</summary><div class="sk-info-body">${sk.why?`<p><b>Why:</b> ${esc(sk.why)}</p>`:''}${sk.whatYouDo?`<p><b>What you do:</b> ${esc(sk.whatYouDo)}</p>`:''}${sk.howTo?`<p><b>How:</b> ${esc(sk.howTo)}</p>`:''}${sk.safety?`<p class="sk-safety">⚠️ ${esc(sk.safety)}</p>`:''}</div></details>`:''}
+      <button class="sk-work" data-skwork="${sk.id}">▶ Work on this</button>
+      <div class="sk-work-panel" id="skwork-${sk.id}"></div>
     </div>`;
   };
   const groupCard=sk=>{
@@ -3682,7 +5171,7 @@ function renderSkillsTab(){
   // populate the right-side category jump bar (only cats that have skills)
   const jb=document.getElementById("skJumpbar");
   if(jb){
-    const icons={tactical:"🎖️",physical:"💪",technical:"💻",leadership:"⭐",academic:"📚",personal:"🌱"};
+    const icons={tactical:"🎖️",physical:"💪",cognitive:"🧠",physiological:"❤️",technical:"💻",leadership:"⭐",academic:"📚",personal:"🌱"};
     jb.innerHTML=SK_CAT_ORDER.filter(c=>skTopLevelInCat(c).length).map(c=>
       `<button data-skjump="${c}">${icons[c]||"•"}<span class="jb-tip">${SK_CAT[c]}</span></button>`).join("");
   }
