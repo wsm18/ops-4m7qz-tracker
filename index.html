@@ -2028,7 +2028,21 @@ document.getElementById("exportBtn").onclick=()=>{
 document.getElementById("importBtn").onclick=()=>document.getElementById("importFile").click();
 document.getElementById("importFile").onchange=e=>{
   const f=e.target.files[0];if(!f)return;const rd=new FileReader();
-  rd.onload=()=>{try{S=Object.assign(structuredClone(DEFAULT),JSON.parse(rd.result));save();render();toast("Backup restored");}catch(x){toast("Could not read that file");}};
+  rd.onload=()=>{
+    try{
+      const parsed=JSON.parse(rd.result);
+      if(!parsed||typeof parsed!=="object") throw new Error("bad");
+      // Route the backup through the SAME path as normal startup: write to storage,
+      // re-run load() (which merges in any new DEFAULT fields), then run the skill
+      // migration so a backup from an older version GAINS the new skills instead of
+      // reverting to its old set. Nothing the user had is lost.
+      localStorage.setItem(KEY, JSON.stringify(parsed));
+      S=load();
+      seedSkillsIfEmpty();   // adds any new seed skills (cognitive, CQC, etc.) without wiping progress
+      save(); render();
+      toast("Backup restored");
+    }catch(x){ toast("Could not read that file"); }
+  };
   rd.readAsText(f);
 };
 document.getElementById("resetBtn").onclick=()=>{if(confirm("Erase all progress and start over? This cannot be undone.")){localStorage.removeItem(KEY);S=structuredClone(DEFAULT);save();render();}};
@@ -4468,7 +4482,7 @@ async function linkCloudFile(){
       // read it in and adopt that data
       if(await verifyPerm(handle,false)){
         const f=await handle.getFile(); const txt=await f.text();
-        if(txt.trim()){ try{ const data=JSON.parse(txt); S=data; localStorage.setItem(KEY,JSON.stringify(S)); }catch(_){} }
+        if(txt.trim()){ try{ const data=JSON.parse(txt); if(data&&typeof data==="object"){ localStorage.setItem(KEY,JSON.stringify(data)); S=load(); seedSkillsIfEmpty(); } }catch(_){} }
       }
     } else {
       handle=await window.showSaveFilePicker({suggestedName:"operations-data.json",types:[{description:"Operations data",accept:{"application/json":[".json"]}}]});
@@ -4501,7 +4515,7 @@ async function cloudInit(){
       fileHandle=h;
       if(await verifyPerm(h,false)){
         const f=await h.getFile(); const txt=await f.text();
-        if(txt.trim()){ try{ const data=JSON.parse(txt); if(data&&typeof data==="object"){ S=data; localStorage.setItem(KEY,JSON.stringify(S)); render(); } }catch(_){} }
+        if(txt.trim()){ try{ const data=JSON.parse(txt); if(data&&typeof data==="object"){ localStorage.setItem(KEY,JSON.stringify(data)); S=load(); seedSkillsIfEmpty(); render(); } }catch(_){} }
       }
     }
   }catch(e){}
