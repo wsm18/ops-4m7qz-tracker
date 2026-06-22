@@ -450,6 +450,12 @@
   .vt-tag.ok{color:var(--jade);border-color:#3c5230}
   .vt-tag.warn{color:var(--ember);border-color:#7a5e2a}
   .vt-tag.bad{color:#d98a72;border-color:var(--blood)}
+  .vt-import-status{font-size:12.5px;color:var(--jade);margin-top:8px;min-height:0}
+  .ah-summary{margin-top:10px;background:#0e0f09;border:1px solid var(--line);border-radius:9px;padding:11px}
+  .ah-h{font-size:12px;font-weight:700;color:var(--gold);margin-bottom:7px}
+  .ah-row{display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;color:var(--ink-dim)}
+  .ah-row b{color:var(--ink)}
+  .ah-note{font-size:11px;color:var(--ink-faint);margin-top:8px;font-style:italic;line-height:1.5}
   /* Habits */
   .habit-add-wrap{margin-top:12px;border:1px dashed var(--line);border-radius:10px;padding:10px 13px}
   .habit-add-wrap summary{cursor:pointer;font-size:13px;color:var(--ink-dim);font-weight:600}
@@ -1102,8 +1108,11 @@
       </div>
       <button class="btn-add" id="vtAdd" style="margin-top:11px">Log vitals</button>
       <div class="bl-sub" style="margin-top:16px">Apple Health import</div>
-      <div class="pt-intro">A web app can't read your Apple Watch directly. Later you'll be able to export your Apple Health data and import the file here. <i>(Importer coming in a future update — the button below is a placeholder.)</i></div>
-      <button class="sk-addlevel" id="vtImport">Import from Apple Health export (coming soon)</button>
+      <div class="pt-intro">Import readings your Apple Watch recorded. On your iPhone: Health app → tap your photo → <b>Export All Health Data</b> → save the zip, unzip it, and pick the <b>export.xml</b> inside. The file can be large (hundreds of MB+); it's read on your device and <b>never uploaded</b> — only the latest value of each metric is kept, and the raw file is discarded after reading.</div>
+      <button class="btn-add" id="vtImport" style="margin-top:4px">Import from Apple Health export (export.xml)</button>
+      <input type="file" id="vtImportFile" accept=".xml,text/xml,application/xml" style="display:none">
+      <div id="vtImportStatus" class="vt-import-status"></div>
+      <div id="vtImportSummary"></div>
     </div>
   </section>
 
@@ -3333,7 +3342,19 @@ function spark(vals){ // tiny inline sparkline from numbers
 function renderVitals(){
   const el=document.getElementById("pfVitals"); if(!el) return;
   const v=(S.vitals||[]).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
-  if(!v.length){ el.innerHTML=`<div class="bl-readout" style="color:var(--ink-faint)">No vitals logged yet. Add a reading below.</div>`; return; }
+  // Apple Health extras block (VO2 max, HRV, etc.) — shows whenever an import has run
+  let ahBlock="";
+  const hi=S.healthImport||{};
+  if(hi.latest && Object.keys(hi.latest).length){
+    const labelFor=k=>{ const t=Object.keys(AH_METRICS).find(t=>AH_METRICS[t].key===k); return t?AH_METRICS[t]:null; };
+    const rows=Object.keys(hi.latest).map(k=>{ const d=labelFor(k); if(!d) return ""; return `<div class="r-row"><span>${esc(d.label)}</span><b>${hi.latest[k].value}${d.u?' '+d.u:''}</b></div>`; }).join("");
+    const when=hi.lastImport?new Date(hi.lastImport).toLocaleDateString():"";
+    ahBlock=`<div class="bl-readout" style="margin-top:10px"><div style="font-size:11.5px;color:var(--gold);font-weight:600;margin-bottom:6px"> Apple Health (imported ${when})</div>${rows}</div>`;
+  }
+  if(!v.length){
+    el.innerHTML=(ahBlock||`<div class="bl-readout" style="color:var(--ink-faint)">No vitals logged yet. Add a reading below.</div>`);
+    return;
+  }
   const last=v[v.length-1];
   const rows=[];
   if(last.pulse!=null) rows.push(`<div class="r-row"><span>Resting pulse ${spark(v.map(x=>x.pulse))}</span><b>${last.pulse} bpm</b></div>`);
@@ -3343,7 +3364,7 @@ function renderVitals(){
     rows.push(`<div class="r-row"><span>Hemoglobin ${spark(v.map(x=>x.hemoglobin))}</span><b>${hgb} g/dL${lowDonate?' <span class="vt-tag warn">donation may be deferred</span>':''}</b></div>`);
   }
   rows.push(`<div class="r-row"><span>Readings logged</span><b>${v.length}</b></div>`);
-  el.innerHTML=`<div class="bl-readout">${rows.join("")}<div style="margin-top:8px;color:var(--ink-faint);font-style:italic">Latest reading shown; sparkline is your trend. Informational only.</div></div>`;
+  el.innerHTML=`<div class="bl-readout">${rows.join("")}<div style="margin-top:8px;color:var(--ink-faint);font-style:italic">Latest reading shown; sparkline is your trend. Informational only.</div></div>`+ahBlock;
 }
 const _vtAdd=document.getElementById("vtAdd");
 if(_vtAdd) _vtAdd.onclick=()=>{
@@ -3357,7 +3378,169 @@ if(_vtAdd) _vtAdd.onclick=()=>{
   toast("📈 Vitals logged");
 };
 const _vtImport=document.getElementById("vtImport");
-if(_vtImport) _vtImport.onclick=()=>{ toast("Apple Health import is coming in a future update — for now, log readings manually."); };
+if(_vtImport) _vtImport.onclick=()=>{ const f=document.getElementById("vtImportFile"); if(f) f.click(); };
+const _vtImportFile=document.getElementById("vtImportFile");
+if(_vtImportFile) _vtImportFile.onchange=e=>{ const f=e.target.files[0]; if(f) parseAppleHealth(f); e.target.value=""; };
+
+// ---- Apple Health export.xml streaming parser ----
+// The file can be hundreds of MB to several GB, so we stream it in chunks and keep ONLY
+// the latest reading of each metric we care about — the raw file is never held or stored.
+// Map: Apple HealthKit type -> {field, unit-handling}. We store the most-recent value.
+const AH_METRICS={
+  // vitals (go into S.vitals + healthImport.latest)
+  "HKQuantityTypeIdentifierRestingHeartRate":       {key:"restingHR", label:"Resting heart rate", u:"bpm", round:0},
+  "HKQuantityTypeIdentifierHeartRate":              {key:"heartRate", label:"Heart rate (last)", u:"bpm", round:0},
+  "HKQuantityTypeIdentifierWalkingHeartRateAverage":{key:"walkHR", label:"Walking heart rate avg", u:"bpm", round:0},
+  "HKQuantityTypeIdentifierHeartRateVariabilitySDNN":{key:"hrv", label:"HRV (SDNN)", u:"ms", round:0},
+  "HKQuantityTypeIdentifierHeartRateRecoveryOneMinute":{key:"hrRecovery", label:"Heart-rate recovery (1 min)", u:"bpm", round:0},
+  "HKQuantityTypeIdentifierVO2Max":                 {key:"vo2max", label:"VO₂ max", u:"mL/kg·min", round:1},
+  "HKQuantityTypeIdentifierBloodPressureSystolic":  {key:"bpSys", label:"BP systolic", u:"mmHg", round:0},
+  "HKQuantityTypeIdentifierBloodPressureDiastolic": {key:"bpDia", label:"BP diastolic", u:"mmHg", round:0},
+  "HKQuantityTypeIdentifierBodyMass":               {key:"weightLb", label:"Body weight", u:"lb", round:1, conv:"mass"},
+  "HKQuantityTypeIdentifierLeanBodyMass":           {key:"leanMass", label:"Lean body mass", u:"lb", round:1, conv:"mass"},
+  "HKQuantityTypeIdentifierHeight":                 {key:"heightIn", label:"Height", u:"in", round:1, conv:"len"},
+  "HKQuantityTypeIdentifierOxygenSaturation":       {key:"spo2", label:"Blood oxygen", u:"%", round:0, pct:true},
+  "HKQuantityTypeIdentifierRespiratoryRate":        {key:"respRate", label:"Respiratory rate", u:"br/min", round:0},
+  "HKQuantityTypeIdentifierAppleSleepingWristTemperature":{key:"wristTemp", label:"Sleeping wrist temp", u:"°F", round:1, conv:"temp"},
+  "HKQuantityTypeIdentifierBodyMassIndex":          {key:"bmi", label:"BMI", u:"", round:1},
+  "HKQuantityTypeIdentifierBodyFatPercentage":      {key:"bodyFat", label:"Body fat", u:"%", round:1, pct:true},
+  "HKQuantityTypeIdentifierAppleWalkingSteadiness": {key:"steadiness", label:"Walking steadiness", u:"%", round:0, pct:true},
+  "HKQuantityTypeIdentifierSixMinuteWalkTestDistance":{key:"sixMinWalk", label:"6-minute walk distance", u:"m", round:0},
+  // activity (Apple-only extras)
+  "HKQuantityTypeIdentifierStepCount":              {key:"steps", label:"Steps (last entry)", u:"", round:0},
+  "HKQuantityTypeIdentifierFlightsClimbed":         {key:"flights", label:"Flights climbed (last)", u:"", round:0},
+  "HKQuantityTypeIdentifierActiveEnergyBurned":     {key:"activeKcal", label:"Active energy (last)", u:"kcal", round:0},
+  "HKQuantityTypeIdentifierAppleExerciseTime":      {key:"exerciseMin", label:"Exercise time (last)", u:"min", round:0},
+  "HKQuantityTypeIdentifierDistanceWalkingRunning": {key:"distWalkRun", label:"Walk/run distance (last)", u:"mi", round:2, conv:"dist"},
+};
+// unit conversions, driven by each record's own unit attribute (robust to device differences)
+function ahConvert(conv, val, unit){
+  unit=(unit||"").toLowerCase();
+  if(conv==="mass"){ if(unit==="kg") return val*2.20462; if(unit==="g") return val/453.592; return val; }   // -> lb
+  if(conv==="len"){ if(unit==="ft") return val*12; if(unit==="cm") return val/2.54; if(unit==="m") return val*39.3701; return val; } // -> in
+  if(conv==="dist"){ if(unit==="km") return val*0.621371; if(unit==="m") return val/1609.34; return val; } // -> mi
+  if(conv==="temp"){ if(unit==="degc"||unit==="°c"||unit==="c") return val*9/5+32; return val; } // -> °F
+  return val;
+}
+// regex pulls a record's type, unit, value and the best available date
+const AH_REC_RE=/<Record\b[^>]*?\btype="([^"]+)"[^>]*?>/g;
+function ahAttr(tag, name){ const m=tag.match(new RegExp('\\b'+name+'="([^"]*)"')); return m?m[1]:null; }
+function ahDateOf(tag){ return ahAttr(tag,"endDate")||ahAttr(tag,"startDate")||ahAttr(tag,"creationDate")||null; }
+function ahParseDate(s){ if(!s) return 0; // "2026-02-05 08:00:00 -0500"
+  const m=s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/); if(!m) return Date.parse(s)||0;
+  return new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+m[6]).getTime(); }
+
+async function parseAppleHealth(file){
+  const statusEl=document.getElementById("vtImportStatus");
+  const setS=(t)=>{ if(statusEl) statusEl.textContent=t; };
+  if(/\.zip$/i.test(file.name)){ setS("Please unzip the export first and pick the export.xml inside (a web app can't open the multi-GB zip directly)."); return; }
+  setS("Reading… 0%");
+  // latest[ key ] = {value, ts}
+  const latest={};
+  const me={};  // <Me> characteristics
+  const CHUNK=8*1024*1024; // 8MB chunks
+  let offset=0, tail="", grabbedMe=false;
+  const total=file.size;
+  function handleChunk(text){
+    // capture <Me .../> once (characteristics: DOB, sex, blood type)
+    if(!grabbedMe){
+      const meM=text.match(/<Me\b[^>]*\/?>/);
+      if(meM){ grabbedMe=true; const mt=meM[0];
+        me.dob=ahAttr(mt,"HKCharacteristicTypeIdentifierDateOfBirth");
+        me.sex=ahAttr(mt,"HKCharacteristicTypeIdentifierBiologicalSex");
+        me.blood=ahAttr(mt,"HKCharacteristicTypeIdentifierBloodType");
+      }
+    }
+    AH_REC_RE.lastIndex=0; let m;
+    while((m=AH_REC_RE.exec(text))){
+      const type=m[1]; const def=AH_METRICS[type]; if(!def) continue;
+      const tag=m[0];
+      const vRaw=ahAttr(tag,"value"); if(vRaw==null) continue;
+      const v=parseFloat(vRaw); if(isNaN(v)) continue;
+      const ts=ahParseDate(ahDateOf(tag));
+      const cur=latest[def.key];
+      if(!cur || ts>=cur.ts){ latest[def.key]={value:v, ts, unit:ahAttr(tag,"unit")||""}; }
+    }
+  }
+  function readNext(){
+    return new Promise((resolve,reject)=>{
+      const slice=file.slice(offset, offset+CHUNK);
+      const rd=new FileReader();
+      rd.onerror=()=>reject(rd.error);
+      rd.onload=()=>{
+        const text=tail + rd.result;
+        // keep a tail so a <Record> split across the chunk boundary isn't lost
+        const lastLt=text.lastIndexOf("<");
+        let processable=text, keep="";
+        if(lastLt>0 && lastLt>text.length-2000){ processable=text.slice(0,lastLt); keep=text.slice(lastLt); }
+        handleChunk(processable);
+        tail=keep;
+        offset+=CHUNK;
+        resolve();
+      };
+      rd.readAsText(slice);
+    });
+  }
+  try{
+    while(offset<total){
+      await readNext();
+      setS(`Reading… ${Math.min(99,Math.round(offset/total*100))}%`);
+    }
+    if(tail) handleChunk(tail);
+    applyAppleHealth(latest, me);
+  }catch(err){ setS("Couldn't read that file. Make sure it's the export.xml from your Health export."); }
+}
+
+function applyAppleHealth(latest, me){
+  const today=todayStr();
+  const imported=[]; // for the summary
+  // 1) Profile characteristics
+  if(me.dob){ const d=me.dob.slice(0,10); if(/^\d{4}-\d{2}-\d{2}$/.test(d)){ S.profile.birthdate=d; imported.push("Date of birth"); } }
+  if(me.sex){ const s=/female/i.test(me.sex)?"f":/male/i.test(me.sex)?"m":null; if(s){ S.profile.sex=s; imported.push("Biological sex"); } }
+  if(me.blood){ // Apple format e.g. "HKBloodTypeOPositive", "HKBloodTypeABNegative"
+    const bm=me.blood.match(/BloodType(AB|A|B|O)(Positive|Negative)/);
+    if(bm){ S.profile.bloodType=bm[1]+(bm[2]==="Positive"?"+":"-"); imported.push("Blood type"); }
+  }
+  // helper: convert a stored {value,unit} using the metric's own conversion + its unit attribute
+  const tdefOf=k=>AH_METRICS[Object.keys(AH_METRICS).find(t=>AH_METRICS[t].key===k)];
+  function conv(k){ const e=latest[k]; if(!e) return null; const d=tdefOf(k); let v=e.value; if(d&&d.conv) v=ahConvert(d.conv, v, e.unit); if(d&&d.pct&&v<=1) v=v*100; return v; }
+  // 2) Weight & height into Profile (height converts ft->in via the record's own unit)
+  if(latest.weightLb){ S.profile.weightLb=Math.round(conv("weightLb")*10)/10; S.profile.weightDate=today; (S.weightLog=S.weightLog||[]).push({date:today, lb:S.profile.weightLb}); imported.push("Body weight"); }
+  if(latest.heightIn){ S.profile.heightIn=Math.round(conv("heightIn")*10)/10; S.profile.heightDate=today; imported.push("Height"); }
+  // 3) Build a vitals entry from pulse / BP (hemoglobin isn't in a standard Health export)
+  const vt={id:id(), date:today, pulse:null, bpSys:null, bpDia:null, hemoglobin:null, note:"Apple Health import"};
+  if(latest.restingHR){ vt.pulse=Math.round(latest.restingHR.value); imported.push("Resting heart rate"); }
+  else if(latest.walkHR){ vt.pulse=Math.round(latest.walkHR.value); imported.push("Walking heart rate"); }
+  else if(latest.heartRate){ vt.pulse=Math.round(latest.heartRate.value); imported.push("Heart rate"); }
+  if(latest.bpSys && latest.bpDia){ vt.bpSys=Math.round(latest.bpSys.value); vt.bpDia=Math.round(latest.bpDia.value); imported.push("Blood pressure"); }
+  if(vt.pulse!=null || vt.bpSys!=null){ S.vitals.push(vt); }
+  // 4) Richer Apple-only metrics stored in healthImport.latest (each converted via its own unit)
+  const extra={};
+  ["restingHR","heartRate","walkHR","hrv","hrRecovery","vo2max","spo2","respRate","wristTemp","steadiness","sixMinWalk","bmi","bodyFat","leanMass","steps","flights","activeKcal","exerciseMin","distWalkRun"].forEach(k=>{
+    if(latest[k]){
+      const d=tdefOf(k); const r=d?d.round:1;
+      const val=conv(k);
+      extra[k]={value:Math.round(val*Math.pow(10,r))/Math.pow(10,r), ts:latest[k].ts};
+    }
+  });
+  // map to the physiological "Resting heart rate" skill auto-hook if present
+  if(latest.restingHR){
+    const sk=S.lifeSkills.find(s=>s.auto==="vital:rhr");
+    if(sk){ const rhr=latest.restingHR.value; const lvl=rhr<50?4:rhr<60?3:rhr<70?2:1; if(lvl>sk.currentLevel){ sk.currentLevel=lvl; skUpdatePeak(sk); sk.lastQuestTs=Date.now(); } }
+  }
+  S.healthImport={ lastImport:new Date().toISOString(), latest:extra, fields:imported.slice() };
+  save(); render();
+  // summary UI
+  const sumEl=document.getElementById("vtImportSummary");
+  const st=document.getElementById("vtImportStatus");
+  if(st) st.textContent = imported.length ? `✓ Imported ${imported.length} metric${imported.length!==1?'s':''}` : "No matching metrics found in that file.";
+  if(sumEl){
+    const rows=Object.keys(extra).map(k=>{ const d=AH_METRICS[Object.keys(AH_METRICS).find(t=>AH_METRICS[t].key===k)]; return d?`<div class="ah-row"><span>${esc(d.label)}</span><b>${extra[k].value}${d.u?' '+d.u:''}</b></div>`:""; }).join("");
+    sumEl.innerHTML = rows ? `<div class="ah-summary"><div class="ah-h">Latest readings from your export</div>${rows}<div class="ah-note">Resting heart rate and blood pressure were also added to your Vitals log. Hemoglobin isn't in a standard Health export — log it manually from donations.</div></div>` : "";
+  }
+  toast(imported.length?`📥 Apple Health: imported ${imported.length} metrics`:"No matching metrics found");
+}
+
 
 // ===== Habits (daily quests, per-habit streaks, skill feed, grace day) =====
 const HABIT_STARTERS=[
