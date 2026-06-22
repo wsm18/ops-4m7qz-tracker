@@ -476,6 +476,7 @@
   .test-card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px;margin-bottom:12px}
   .test-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .test-title{font-size:15px;font-weight:700;color:var(--ink)}
+  .test-dur{font-size:11px;font-weight:600;color:var(--ink-faint);background:#0e0f09;border:1px solid var(--line);padding:2px 7px;border-radius:10px;margin-left:6px;white-space:nowrap}
   .test-lvl{font-size:12px;font-weight:700;color:var(--violet);background:rgba(124,147,168,.12);border:1px solid #5a4d72;padding:2px 9px;border-radius:14px}
   .test-stats{font-size:12px;color:var(--ink-faint);margin-top:5px}
   .test-stats b{color:var(--ink-dim)}
@@ -3446,19 +3447,19 @@ if(_hbAdd) _hbAdd.onclick=()=>{
 // ===== TEST tab: cognitive tests/trainers =====
 // Each test: id, name, the skill it feeds, and scoreToLevel(raw)->1..N.
 const TESTS=[
-  {id:"reaction", name:"Reaction time", skill:"Reaction speed", unit:"ms (lower better)",
+  {id:"reaction", name:"Reaction time", skill:"Reaction speed", unit:"ms (lower better)", dur:"~20 sec · 5 taps",
    scoreToLevel:ms=> ms<=220?5: ms<=250?4: ms<=280?3: ms<=320?2: ms<=400?1: 0},
-  {id:"digitspan", name:"Memory span (digit span)", skill:"Memory span", unit:"digits",
+  {id:"digitspan", name:"Memory span (digit span)", skill:"Memory span", unit:"digits", dur:"~1–2 min",
    scoreToLevel:span=> span>=9?4: span>=7?3: span>=6?2: span>=5?1: 0},
-  {id:"typing", name:"Typing speed & accuracy", skill:"Typing speed & accuracy", unit:"WPM",
+  {id:"typing", name:"Typing speed & accuracy", skill:"Typing speed & accuracy", unit:"WPM", dur:"~30 sec · 1 sentence",
    scoreToLevel:wpm=> wpm>=90?4: wpm>=70?3: wpm>=50?2: wpm>=30?1: 0},
-  {id:"nback", name:"N-back (working memory)", skill:"Working memory (n-back)", unit:"highest n passed",
+  {id:"nback", name:"N-back (working memory)", skill:"Working memory (n-back)", unit:"highest n passed", dur:"~1 min per round",
    scoreToLevel:n=> n>=4?4: n>=3?3: n>=2?2: n>=1?1: 0},
-  {id:"gonogo", name:"Go / No-Go (attention)", skill:"Attention / sustained focus", unit:"accuracy %",
+  {id:"gonogo", name:"Go / No-Go (attention)", skill:"Attention / sustained focus", unit:"accuracy %", dur:"~45 sec · 25 signals",
    scoreToLevel:acc=> acc>=97?4: acc>=92?3: acc>=85?2: acc>=70?1: 0},
-  {id:"procspeed", name:"Processing speed", skill:"Cognitive / processing speed", unit:"matches/min",
+  {id:"procspeed", name:"Processing speed", skill:"Cognitive / processing speed", unit:"matches/min", dur:"60 sec",
    scoreToLevel:mpm=> mpm>=45?4: mpm>=35?3: mpm>=25?2: mpm>=15?1: 0},
-  {id:"mathsprint", name:"Mental math sprint", skill:"Mental math", unit:"correct/min",
+  {id:"mathsprint", name:"Mental math sprint", skill:"Mental math", unit:"correct/min", dur:"60 sec",
    scoreToLevel:cpm=> cpm>=30?4: cpm>=22?3: cpm>=15?2: cpm>=8?1: 0},
 ];
 function testSkillOf(t){ return S.lifeSkills.find(s=>s.name===t.skill); }
@@ -3535,7 +3536,7 @@ function renderTests(){
     const lastStr = last ? testUnit(t.id, last.raw) : "—";
     return `<div class="test-card" id="test-${t.id}">
       <div class="test-head">
-        <div class="test-title">${esc(t.name)}</div>
+        <div class="test-title">${esc(t.name)} <span class="test-dur">⏱ ${esc(t.dur)}</span></div>
         <span class="test-lvl">${sk?('Lv '+lvl):''}</span>
       </div>
       <div class="test-stats">Best: <b>${bestStr}</b> · Last: <b>${lastStr}</b> · feeds <b>${esc(t.skill)}</b></div>
@@ -3543,7 +3544,7 @@ function renderTests(){
         <div class="test-why">${sk&&sk.why?`<p><b>Why:</b> ${esc(sk.why)}</p>`:''}${sk&&sk.whatYouDo?`<p><b>What you do:</b> ${esc(sk.whatYouDo)}</p>`:''}</div>
       </details>
       <div class="test-stage" id="stage-${t.id}"></div>
-      <button class="btn-add test-start" data-teststart="${t.id}">Start ${esc(t.name)}</button>
+      <button class="btn-add test-start" data-teststart="${t.id}">Start (${esc(t.dur)})</button>
     </div>`;
   }).join("");
 }
@@ -3556,9 +3557,10 @@ function startReaction(){
   rxNext();
   function rxNext(){
     if(_rxState.n>=_rxState.max){ rxDone(); return; }
-    stage.className="test-stage rx wait"; stage.textContent="Wait for green…"; _rxState.ready=false;
+    const prog=`(${_rxState.n+1}/${_rxState.max})`;
+    stage.className="test-stage rx wait"; stage.textContent=`Wait for green… ${prog}`; _rxState.ready=false;
     const delay=900+Math.random()*2200;
-    _rxState.timer=setTimeout(()=>{ stage.className="test-stage rx go"; stage.textContent="TAP!"; _rxState.ready=true; _rxState.t0=performance.now(); }, delay);
+    _rxState.timer=setTimeout(()=>{ stage.className="test-stage rx go"; stage.textContent=`TAP! ${prog}`; _rxState.ready=true; _rxState.t0=performance.now(); }, delay);
   }
   stage.onclick=()=>{
     if(!_rxState) return;
@@ -3570,7 +3572,8 @@ function startReaction(){
     }
     const ms=Math.round(performance.now()-_rxState.t0);
     _rxState.trials.push(ms); _rxState.n++;
-    stage.className="test-stage rx"; stage.textContent=`${ms}ms — tap for next (${_rxState.n}/${_rxState.max})`;
+    const left=_rxState.max-_rxState.n;
+    stage.className="test-stage rx"; stage.textContent=left>0?`${ms}ms — tap for next (${left} to go)`:`${ms}ms — tap to finish`;
     stage.onclick=()=>{ rxNext(); };
   };
   function rxDone(){
