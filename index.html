@@ -104,17 +104,35 @@
   .stat.gold .v{color:var(--gold)}
 
   /* ---- Tabs ---- */
-  nav.tabs{display:flex;gap:5px;margin:18px 0 14px;position:sticky;top:0;z-index:5;
-    background:linear-gradient(180deg,var(--bg) 70%,transparent);padding:6px 0;
-    overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-  nav.tabs::-webkit-scrollbar{display:none}
+  .main-row{display:flex;gap:14px;align-items:flex-start}
+  .content-col{flex:1;min-width:0}
+  nav.tabs{display:flex;flex-direction:column;gap:5px;position:sticky;top:12px;flex:none;
+    width:var(--nav-w,168px);transition:width .2s}
+  nav.tabs.icons-only{width:54px}
   nav.tabs button{
-    flex:1 0 auto;min-width:62px;background:var(--panel);border:1px solid var(--line);color:var(--ink-dim);
-    padding:9px 8px;border-radius:9px;font-family:inherit;font-size:12px;letter-spacing:.03em;
+    display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+    background:var(--panel);border:1px solid var(--line);color:var(--ink-dim);
+    padding:10px 12px;border-radius:9px;font-family:inherit;font-size:13px;letter-spacing:.02em;
     cursor:pointer;transition:.15s;font-weight:600;
   }
-  nav.tabs button .ic{display:block;font-size:16px;margin-bottom:2px}
+  nav.tabs button .ic{font-size:17px;flex:none;width:20px;text-align:center}
+  nav.tabs.icons-only button .lbl{display:none}
+  nav.tabs.icons-only button{justify-content:center;padding:10px 8px}
   nav.tabs button.on{background:linear-gradient(180deg,var(--gold),#b3801f);color:#1a1208;border-color:var(--gold-bright);box-shadow:0 3px 10px rgba(184,160,106,.25)}
+  nav.tabs .nav-toggle{color:var(--ink-faint);background:transparent;border-style:dashed;margin-bottom:3px}
+  nav.tabs .nav-toggle:hover{color:var(--gold);border-color:var(--gold)}
+  /* On narrow screens, the rail becomes a top icon strip again */
+  @media(max-width:560px){
+    .main-row{flex-direction:column;gap:0}
+    nav.tabs{flex-direction:row;width:auto !important;overflow-x:auto;position:sticky;top:0;z-index:5;
+      background:linear-gradient(180deg,var(--bg) 70%,transparent);padding:6px 0;margin-bottom:12px;
+      scrollbar-width:none}
+    nav.tabs::-webkit-scrollbar{display:none}
+    nav.tabs button{flex:0 0 auto;flex-direction:column;gap:3px;min-width:60px;padding:8px;text-align:center;font-size:11px}
+    nav.tabs button .ic{margin:0}
+    nav.tabs.icons-only button .lbl{display:block}  /* labels always wrap on mobile strip */
+    nav.tabs .nav-toggle{display:none}  /* toggle is desktop-only */
+  }
 
   .view{display:none;animation:fade .25s ease}
   .view.on{display:block}
@@ -347,6 +365,58 @@
   .recovery-line{font-size:13px;color:var(--ink-dim);line-height:1.55;padding:3px 0}
   .recovery-line b{color:var(--ember)}
 
+  /* ---- Skills ---- */
+  .sk-form-title{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:10px}
+  #skName{width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:11px;border-radius:8px;font-family:inherit;font-size:15px}
+  #skName:focus{outline:none;border-color:var(--violet)}
+  .sk-levels-help{font-size:11.5px;color:var(--ink-faint);margin:11px 0 7px}
+  .sk-level-row{display:flex;gap:8px;align-items:center;margin-bottom:7px}
+  .sk-level-row .ln{font-size:11px;color:var(--violet);font-weight:700;flex:none;width:30px}
+  .sk-level-row input{flex:1;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:7px;font-family:inherit;font-size:14px}
+  .sk-level-row input:focus{outline:none;border-color:var(--violet)}
+  .sk-level-row .rm{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:15px;flex:none}
+  .sk-addlevel{background:none;border:1px dashed var(--line);color:var(--ink-dim);padding:8px;border-radius:7px;font-family:inherit;font-size:12.5px;cursor:pointer;width:100%;margin-top:3px}
+  .sk-addlevel:hover{border-color:var(--violet);color:var(--violet)}
+  /* skill quest cards */
+  .sk-quest{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-left:3px solid var(--violet);border-radius:10px;padding:12px 14px;margin-bottom:9px}
+  .sk-quest.promote{border-left-color:var(--jade)}
+  .sk-quest.decay{border-left-color:var(--ember)}
+  .sk-quest-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .sk-quest-name{font-size:14px;font-weight:700}
+  .sk-quest-tag{font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:20px;border:1px solid;flex:none}
+  .sk-quest-tag.promote{color:var(--jade);border-color:#3c5230}
+  .sk-quest-tag.maintain{color:var(--violet);border-color:#5a4d72}
+  .sk-quest-tag.decay{color:var(--ember);border-color:#7a5e2a}
+  .sk-quest-ability{font-size:13px;color:var(--ink-dim);margin:7px 0;line-height:1.5}
+  .sk-quest-ability b{color:var(--ink)}
+  .sk-quest-btns{display:flex;gap:8px;margin-top:9px}
+  .sk-quest-btns button{flex:1;padding:9px;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;border:1px solid}
+  .sk-pass{background:rgba(111,158,84,.16);border-color:var(--jade);color:var(--jade)}
+  .sk-pass:hover{background:rgba(111,158,84,.28)}
+  .sk-skip{background:transparent;border-color:var(--line);color:var(--ink-faint)}
+  /* skill list cards */
+  .sk-card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 15px;margin-bottom:10px}
+  .sk-card-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .sk-card-name{font-size:15px;font-weight:700}
+  .sk-card-cat{font-size:11px;color:var(--ink-faint);letter-spacing:.05em;text-transform:uppercase}
+  .sk-level-badge{font-size:12px;font-weight:700;color:var(--violet);background:rgba(124,147,168,.12);border:1px solid #5a4d72;padding:3px 10px;border-radius:20px;flex:none}
+  .sk-level-badge.maxed{color:var(--gold);border-color:var(--gold)}
+  .sk-ladder{margin-top:10px;display:flex;flex-direction:column;gap:5px}
+  .sk-rung{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;padding:4px 0}
+  .sk-rung .dot{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line);flex:none;display:grid;place-items:center;font-size:10px;margin-top:1px}
+  .sk-rung.have .dot{background:var(--violet);border-color:var(--violet);color:#14160f}
+  .sk-rung.current .dot{border-color:var(--gold);color:var(--gold)}
+  .sk-rung .rung-txt{color:var(--ink-dim);line-height:1.4}
+  .sk-rung.have .rung-txt{color:var(--ink)}
+  .sk-fade-note{font-size:11.5px;color:var(--ink-faint);margin-top:9px}
+  .sk-fade-note.warn{color:var(--ember)}
+  .sk-card-del{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;flex:none}
+  .sk-card-del:hover{color:var(--blood)}
+  .sk-cat-hd{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--violet);margin:18px 2px 10px;padding-bottom:5px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
+  .sk-cat-hd span{color:var(--ink-faint);font-weight:400}
+  .sk-card-edit{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;flex:none}
+  .sk-card-edit:hover{color:var(--gold)}
+
   /* ---- Awards / The Wall ---- */
   #awallGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   @media(max-width:380px){#awallGrid{grid-template-columns:1fr}}
@@ -356,8 +426,66 @@
   .aw-title{font-size:14px;font-weight:700;margin-top:7px;line-height:1.3}
   .aw-note{font-size:12px;color:var(--ink-faint);margin-top:4px;line-height:1.45}
   .aw-meta{font-size:12px;color:var(--gold);margin-top:4px;letter-spacing:.02em}
+
+  /* ---- Wall sub-sections ---- */
+  .wall-subnav{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+  .wall-subnav .wsub{background:var(--panel);border:1px solid var(--line);color:var(--ink-dim);padding:8px 12px;border-radius:20px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+  .wall-subnav .wsub.on{background:rgba(184,160,106,.16);border-color:var(--gold);color:var(--gold-bright)}
+  .wall-sec{display:none}
+  .wall-sec.on{display:block}
+  /* year grouping headers on the awards grid */
+  .wall-year-hd{font-size:13px;font-weight:700;color:var(--gold);letter-spacing:.06em;margin:16px 2px 9px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+  .wall-org-hd{font-size:11.5px;color:var(--ink-faint);letter-spacing:.05em;text-transform:uppercase;margin:8px 2px 6px}
+  .wall-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:480px){.wall-grid{grid-template-columns:1fr}}
+  /* memberships */
+  .mb-roles-label,.sk-levels-help{font-size:11.5px;color:var(--ink-faint);margin:11px 0 7px}
+  .mb-role-row{display:flex;gap:7px;align-items:center;margin-bottom:7px;flex-wrap:wrap}
+  .mb-role-row input.rt{flex:1 1 100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:7px;font-family:inherit;font-size:14px}
+  .mb-role-row .yrs{display:flex;gap:7px;flex:1 1 100%}
+  .mb-role-row .yrs input{flex:1;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:8px;border-radius:7px;font-family:inherit;font-size:13px}
+  .mb-role-row .rm{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:15px}
+  .mb-card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 15px;margin-bottom:10px;position:relative}
+  .mb-card.founder{border-left:3px solid var(--gold);background:linear-gradient(180deg,rgba(184,160,106,.07),var(--panel))}
+  .mb-card.charter{border-left:3px solid var(--violet)}
+  .mb-card-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .mb-org{font-size:15px;font-weight:700}
+  .mb-type{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:2px 9px;border-radius:20px;border:1px solid;flex:none}
+  .mb-type.founder{color:var(--gold-bright);border-color:var(--gold)}
+  .mb-type.charter{color:var(--violet);border-color:#5a4d72}
+  .mb-type.regular{color:var(--ink-dim);border-color:var(--line)}
+  .mb-type.honorary{color:var(--jade);border-color:#3c5230}
+  .mb-years{font-size:12px;color:var(--ink-faint);margin-top:3px}
+  .mb-roles{margin-top:9px;display:flex;flex-direction:column;gap:4px}
+  .mb-role{font-size:12.5px;color:var(--ink-dim);padding-left:14px;position:relative}
+  .mb-role::before{content:"▸";position:absolute;left:0;color:var(--gold)}
+  .mb-del{position:absolute;top:11px;right:13px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px}
+  .mb-edit{position:absolute;top:11px;right:34px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:13px}
+  .mb-edit:hover{color:var(--gold)}
+  .mb-del:hover{color:var(--blood)}
+  /* events */
+  .ev-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px;position:relative}
+  .ev-title{font-size:14px;font-weight:700}
+  .ev-meta{font-size:12px;color:var(--gold);margin-top:3px}
+  .ev-role{font-size:12.5px;color:var(--ink-dim);margin-top:3px}
+  .ev-del{position:absolute;top:11px;right:13px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px}
+  .ev-edit{position:absolute;top:11px;right:34px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:13px}
+  .ev-edit:hover{color:var(--gold)}
+  .ev-del:hover{color:var(--blood)}
+  /* volunteer jars */
+  .volunteer-jars{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+  @media(max-width:480px){.volunteer-jars{grid-template-columns:repeat(2,1fr)}}
+  .vjar{text-align:center}
+  .vjar .jar-vessel{width:100%;height:120px}
+  .vjar-year{font-size:13px;font-weight:700;color:var(--gold);margin-top:5px}
+  .vjar-hours{font-size:12px;color:var(--ink-dim)}
+  .vol-log-row{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin-bottom:6px}
+  .vol-log-row .del{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px}
+  .vol-log-row .del:hover{color:var(--blood)}
   .aw-date{font-size:10.5px;color:var(--ink-faint);letter-spacing:.06em;text-transform:uppercase;margin-top:7px}
   .aw-del{position:absolute;top:8px;right:9px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:15px;z-index:2}
+  .aw-edit{position:absolute;top:8px;right:30px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:13px;z-index:2}
+  .aw-edit:hover{color:var(--gold)}
   .aw-del:hover{color:var(--blood)}
   .aw-empty{grid-column:1/-1;text-align:center;padding:34px 20px;color:var(--ink-faint);border:1px dashed var(--line);border-radius:12px;font-size:14px}
   .aw-empty .big{font-size:30px;display:block;margin-bottom:8px;opacity:.7}
@@ -493,19 +621,23 @@
     </div>
   </header>
 
-  <nav class="tabs">
-    <button data-tab="quests" class="on"><span class="ic">🎯</span>Missions</button>
-    <button data-tab="dailies"><span class="ic">📋</span>Orders</button>
-    <button data-tab="quizzes"><span class="ic">📚</span>Quiz</button>
-    <button data-tab="aft"><span class="ic">💪</span>AFT</button>
-    <button data-tab="log"><span class="ic">🏋️</span>Log</button>
-    <button data-tab="bosses"><span class="ic">⭐</span>Obj</button>
-    <button data-tab="board"><span class="ic">📈</span>Board</button>
-    <button data-tab="shop"><span class="ic">🏅</span>R&amp;R</button>
-    <button data-tab="plan"><span class="ic">📕</span>FM</button>
-    <button data-tab="awards"><span class="ic">🏆</span>Awards</button>
-    <button data-tab="weight"><span class="ic">⚖️</span>Weight</button>
+  <div class="main-row">
+  <nav class="tabs" id="sideNav">
+    <button class="nav-toggle" id="navToggle" title="Toggle labels"><span class="ic">≡</span><span class="lbl">Menu</span></button>
+    <button data-tab="quests" class="on"><span class="ic">🎯</span><span class="lbl">Missions</span></button>
+    <button data-tab="dailies"><span class="ic">📋</span><span class="lbl">Orders</span></button>
+    <button data-tab="quizzes"><span class="ic">📚</span><span class="lbl">Quiz</span></button>
+    <button data-tab="aft"><span class="ic">💪</span><span class="lbl">AFT</span></button>
+    <button data-tab="log"><span class="ic">🏋️</span><span class="lbl">Log</span></button>
+    <button data-tab="skills"><span class="ic">🧠</span><span class="lbl">Skills</span></button>
+    <button data-tab="bosses"><span class="ic">⭐</span><span class="lbl">Objectives</span></button>
+    <button data-tab="board"><span class="ic">📈</span><span class="lbl">Board</span></button>
+    <button data-tab="plan"><span class="ic">📕</span><span class="lbl">FM</span></button>
+    <button data-tab="shop"><span class="ic">🏅</span><span class="lbl">R&amp;R</span></button>
+    <button data-tab="awards"><span class="ic">🏆</span><span class="lbl">The Wall</span></button>
+    <button data-tab="weight"><span class="ic">⚖️</span><span class="lbl">Weight</span></button>
   </nav>
+  <div class="content-col">
 
   <!-- MISSIONS -->
   <section class="view on" id="view-quests">
@@ -663,6 +795,44 @@
     <div id="lgHistory"></div>
   </section>
 
+  <!-- SKILLS -->
+  <section class="view" id="view-skills">
+    <div class="sec-h"><h2>Skills</h2><span class="hint">level up · keep sharp</span></div>
+    <div class="plan-intro">Track skills you're building. Each has <b>levels that build on each other</b> — every level is a concrete ability you must prove with a promotion test. Set how fast a skill fades; if you don't do a maintenance quest in time, it drops a level until you re-prove it. Active quests appear automatically below.</div>
+
+    <div class="adder">
+      <div class="sk-form-title">Add a skill</div>
+      <input id="skName" placeholder="Skill — e.g. Land navigation, Public speaking" maxlength="50">
+      <div class="row" style="gap:9px;margin-top:9px">
+        <select id="skCat" style="flex:1">
+          <option value="tactical">Tactical / field</option>
+          <option value="physical">Physical</option>
+          <option value="technical">Technical / cyber</option>
+          <option value="leadership">Leadership</option>
+          <option value="academic">Academic</option>
+          <option value="personal">Personal</option>
+        </select>
+        <select id="skFade" style="flex:1">
+          <option value="14">Fades in 2 weeks</option>
+          <option value="30" selected>Fades in 1 month</option>
+          <option value="60">Fades in 2 months</option>
+          <option value="90">Fades in 3 months</option>
+          <option value="180">Fades in 6 months</option>
+        </select>
+      </div>
+      <div class="sk-levels-help">Define each level as an ability you can test (level 1 first). Add as many as you want.</div>
+      <div id="skLevelInputs"></div>
+      <button class="sk-addlevel" id="skAddLevel">+ add a level</button>
+      <button class="btn-add" id="skSave" style="margin-top:10px">Create skill</button>
+    </div>
+
+    <div class="sec-h" style="margin-top:18px"><h2>Active Skill Quests</h2><span class="hint" id="skQuestCount"></span></div>
+    <div id="skQuests"></div>
+
+    <div class="sec-h" style="margin-top:18px"><h2>Your Skills</h2></div>
+    <div id="skList"></div>
+  </section>
+
   <!-- PLAN -->
   <section class="view" id="view-plan">
     <div class="sec-h"><h2>FM — Training</h2><span class="hint">AFT field manual</span></div>
@@ -751,28 +921,91 @@
 
   <!-- AWARDS — the "I Love Me" wall -->
   <section class="view" id="view-awards">
-    <div class="sec-h"><h2>The Wall</h2><span class="hint">awards & memorabilia</span></div>
-    <div class="plan-intro">Your "I Love Me" wall — the record of what you've earned and carried. Add awards, ribbons, coins, certifications, milestones, and memorabilia as they come. It fills up as your career and life build.</div>
-    <div class="adder">
-      <div class="row" style="gap:9px">
-        <select id="awKind" style="flex:0 0 42%">
-          <option value="award">🎖️ Award / Ribbon</option>
-          <option value="coin">🪙 Challenge Coin</option>
-          <option value="cert">📜 Certification</option>
-          <option value="badge">🏅 Badge / Tab</option>
-          <option value="milestone">⭐ Milestone</option>
-          <option value="memento">📦 Memorabilia</option>
-        </select>
-        <input id="awTitle" placeholder="Title — e.g. Air Assault Badge" maxlength="70" style="flex:1">
-      </div>
-      <div class="row" style="gap:9px;margin-top:9px">
-        <input id="awYear" type="number" placeholder="Year" min="1990" max="2100" style="flex:0 0 30%">
-        <input id="awFrom" placeholder="From — place or person" maxlength="60" style="flex:1">
-      </div>
-      <input id="awNote" placeholder="Note / story (optional)" maxlength="140" style="margin-top:9px">
-      <button class="btn-add" id="awAdd">Add to the Wall</button>
+    <div class="sec-h"><h2>The Wall</h2><span class="hint">your record</span></div>
+    <div class="wall-subnav">
+      <button class="wsub on" data-wsub="awards">🏆 Awards</button>
+      <button class="wsub" data-wsub="memberships">🎟️ Memberships</button>
+      <button class="wsub" data-wsub="events">📅 Events</button>
+      <button class="wsub" data-wsub="volunteer">🫙 Volunteer</button>
     </div>
-    <div id="awallGrid"></div>
+
+    <!-- AWARDS sub-section -->
+    <div class="wall-sec on" id="wsec-awards">
+      <div class="adder">
+        <div class="row" style="gap:9px">
+          <select id="awKind" style="flex:0 0 42%">
+            <option value="award">🎖️ Award / Ribbon</option>
+            <option value="coin">🪙 Challenge Coin</option>
+            <option value="cert">📜 Certification</option>
+            <option value="badge">🏅 Badge / Tab</option>
+            <option value="milestone">⭐ Milestone</option>
+            <option value="memento">📦 Memorabilia</option>
+          </select>
+          <input id="awTitle" placeholder="Title — e.g. Air Assault Badge" maxlength="70" style="flex:1">
+        </div>
+        <div class="row" style="gap:9px;margin-top:9px">
+          <input id="awYear" type="number" placeholder="Year" min="1990" max="2100" style="flex:0 0 30%">
+          <input id="awOrg" placeholder="Organization / person it's from" maxlength="60" style="flex:1">
+        </div>
+        <input id="awNote" placeholder="Note / story (optional)" maxlength="140" style="margin-top:9px">
+        <button class="btn-add" id="awAdd">Add to the Wall</button>
+      </div>
+      <div id="awallGrid"></div>
+    </div>
+
+    <!-- MEMBERSHIPS sub-section -->
+    <div class="wall-sec" id="wsec-memberships">
+      <div class="adder">
+        <input id="mbOrg" placeholder="Organization — e.g. Pershing Rifles" maxlength="70">
+        <div class="row" style="gap:9px;margin-top:9px">
+          <input id="mbStart" type="number" placeholder="Start year" min="1990" max="2100" style="flex:1">
+          <input id="mbEnd" type="number" placeholder="End year (blank = present)" min="1990" max="2100" style="flex:1">
+        </div>
+        <label class="lg-label" style="margin-top:9px">Member type</label>
+        <select id="mbType">
+          <option value="founder">★ Founding member</option>
+          <option value="charter">Charter member</option>
+          <option value="regular" selected>Regular member</option>
+          <option value="honorary">Honorary member</option>
+        </select>
+        <div class="mb-roles-label">Leadership positions held (optional)</div>
+        <div id="mbRoleInputs"></div>
+        <button class="sk-addlevel" id="mbAddRole">+ add a leadership position</button>
+        <input id="mbNote" placeholder="Note (optional)" maxlength="140" style="margin-top:9px">
+        <button class="btn-add" id="mbSave" style="margin-top:10px">Add membership</button>
+      </div>
+      <div id="mbList"></div>
+    </div>
+
+    <!-- EVENTS sub-section -->
+    <div class="wall-sec" id="wsec-events">
+      <div class="adder">
+        <input id="evTitle" placeholder="Event — e.g. Ranger Challenge Competition" maxlength="80">
+        <div class="row" style="gap:9px;margin-top:9px">
+          <input id="evYear" type="number" placeholder="Year" min="1990" max="2100" style="flex:0 0 32%">
+          <input id="evOrg" placeholder="Host / organization" maxlength="60" style="flex:1">
+        </div>
+        <input id="evRole" placeholder="Your role — e.g. Competitor, Volunteer, Lead" maxlength="60" style="margin-top:9px">
+        <input id="evNote" placeholder="Note / result (optional)" maxlength="140" style="margin-top:9px">
+        <button class="btn-add" id="evSave">Add event</button>
+      </div>
+      <div id="evList"></div>
+    </div>
+
+    <!-- VOLUNTEER sub-section -->
+    <div class="wall-sec" id="wsec-volunteer">
+      <div class="adder">
+        <div class="pt-intro">Log volunteer hours. They collect into a jar for each year — watch the years fill up.</div>
+        <div class="row" style="gap:9px">
+          <input id="volYear" type="number" placeholder="Year" min="1990" max="2100" style="flex:0 0 30%">
+          <input id="volHours" type="number" placeholder="Hours" min="0" step="0.5" style="flex:0 0 28%">
+          <input id="volOrg" placeholder="Where / what" maxlength="50" style="flex:1">
+        </div>
+        <button class="btn-add" id="volSave" style="margin-top:9px">Add hours</button>
+      </div>
+      <div class="volunteer-jars" id="volJars"></div>
+      <div id="volLog"></div>
+    </div>
   </section>
 
   <!-- THE WEIGHT — read-only mirror of the standalone Weight app -->
@@ -802,6 +1035,9 @@
 
     <div class="weight-ledger" id="weightLedger"></div>
   </section>
+
+  </div><!-- /content-col -->
+  </div><!-- /main-row -->
 
   <div class="foot">
     <span id="footStatus">OPERATIONS · all data lives only on this device</span><br>
@@ -851,8 +1087,14 @@ const DEFAULT = {
   weight:{ nextDisc:1, promises:[], memorial:[] },  // The Weight — read-only mirror of the standalone Weight app
   weightAppUrl:"https://wsm-ai.github.io/tw-9f3kx-ledger/",   // hosted URL of the standalone Weight app (portal link)
   lastMirrorUpdate:null,   // toDateString() of the last mirror refresh, for the daily nudge
-  awards:[],         // I-Love-Me wall: {id, ts, date, kind, title, note}
+  awards:[],         // Wall awards: {id, ts, date, kind, title, org, year, note}
+  memberships:[],    // {id, org, startYear, endYear|null, memberType, roles:[{title,startYear,endYear|null}], note}
+  events:[],         // event participation: {id, title, org, year, role, note}
+  volunteer:[],      // {id, year, org, hours, note}  (aggregated into per-year jars)
+  lifeSkills:[],     // {id, name, cat, fadeDays, currentLevel, lastQuestTs, levels:[{n, ability}], history:[]}
   ptLog:[],          // cadre PT sessions: {id, ts, date, areas:[...], intensity}
+  navLabels:true,    // side rail shows labels (true) or icons only (false)
+  _seeded:false,     // whether starter skills have been seeded
   boardTasks:[
     {id:id(), name:"Create / verify your CC IMS (Cadet Command) & TBB account", done:false},
     {id:id(), name:"Build your Talent-Based Branching (TBB) accessions file", done:false},
@@ -1021,6 +1263,12 @@ function load(){
     merged.lastMirrorUpdate=r.lastMirrorUpdate||null;
     merged.awards=r.awards||[];
     merged.ptLog=r.ptLog||[];
+    merged.memberships=r.memberships||[];
+    merged.events=r.events||[];
+    merged.volunteer=r.volunteer||[];
+    merged.lifeSkills=r.lifeSkills||[];
+    merged._seeded=r._seeded||false;
+    merged.navLabels=r.navLabels!==undefined?r.navLabels:true;
     return merged;
   }catch(e){return structuredClone(DEFAULT)}
 }
@@ -1129,6 +1377,7 @@ function render(){
   if(typeof renderLog==="function") renderLog();
   if(typeof renderPT==="function") renderPT();
   if(typeof renderRecoveryAdvisory==="function") renderRecoveryAdvisory();
+  if(typeof renderSkills==="function") renderSkills();
   if(typeof renderAdaptiveTargets==="function") renderAdaptiveTargets();
   if(typeof renderBaseline==="function") renderBaseline();
   if(typeof renderBoard==="function") renderBoard();
@@ -1213,12 +1462,18 @@ function renderShop(){
 function esc(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 
 /* ---------------- Events ---------------- */
-document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{
+document.querySelectorAll("nav.tabs button[data-tab]").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.remove("on"));
   document.querySelectorAll(".view").forEach(x=>x.classList.remove("on"));
   b.classList.add("on");
   document.getElementById("view-"+b.dataset.tab).classList.add("on");
+  window.scrollTo(0,0);
 });
+// side-rail label toggle (desktop)
+function applyNavMode(){ document.getElementById("sideNav").classList.toggle("icons-only", !S.navLabels); }
+const _navToggle=document.getElementById("navToggle");
+if(_navToggle) _navToggle.onclick=()=>{ S.navLabels=!S.navLabels; save(); applyNavMode(); };
+applyNavMode();
 
 document.getElementById("qAdd").onclick=()=>{
   const n=document.getElementById("qName").value.trim();if(!n)return;
@@ -2117,17 +2372,86 @@ function importWeightLedger(obj){
 const AW_IC={award:"🎖️",coin:"🪙",cert:"📜",badge:"🏅",milestone:"⭐",memento:"📦"};
 function renderAwards(){
   const el=document.getElementById("awallGrid"); if(!el) return;
-  if(!S.awards.length){el.innerHTML=`<div class="aw-empty"><span class="big">🏆</span>The wall is empty. Add your first award, coin, badge, or milestone above — it fills as you earn.</div>`;return;}
-  el.innerHTML=S.awards.slice().reverse().map(a=>{
-    const meta=[a.year?String(a.year):null, a.from?("from "+esc(a.from)):null].filter(Boolean).join(" · ");
-    return `<div class="aw-card">
-    <button class="aw-del" data-daw="${a.id}">✕</button>
-    <div class="aw-ic">${AW_IC[a.kind]||"🏆"}</div>
-    <div class="aw-title">${esc(a.title)}</div>
-    ${meta?`<div class="aw-meta">${meta}</div>`:""}
-    ${a.note?`<div class="aw-note">${esc(a.note)}</div>`:""}
-    <div class="aw-date">added ${esc(a.date)}</div>
-  </div>`;}).join("");
+  if(!S.awards.length){el.innerHTML=`<div class="aw-empty"><span class="big">🏆</span>The wall is empty. Add your first award, coin, badge, or milestone above — it fills as you earn.</div>`;}
+  else{
+    const lc=s=>(s||"").toLowerCase().trim();
+    const sorted=S.awards.slice().sort((a,b)=>{
+      const ya=a.year||0, yb=b.year||0;
+      if(yb!==ya) return yb-ya;
+      const oa=lc(a.org), ob=lc(b.org);
+      if(oa!==ob) return oa<ob?-1:1;
+      return lc(a.title)<lc(b.title)?-1:1;
+    });
+    // build nested groups: year -> org -> [awards]
+    const years=[];
+    sorted.forEach(a=>{
+      const yr=a.year||"Undated"; const org=a.org||"";
+      let yg=years.find(y=>y.yr===yr); if(!yg){ yg={yr,orgs:[]}; years.push(yg); }
+      let og=yg.orgs.find(o=>o.org===org); if(!og){ og={org,items:[]}; yg.orgs.push(og); }
+      og.items.push(a);
+    });
+    const card=a=>{
+      const meta=[a.year?String(a.year):null, a.org?("from "+esc(a.org)):null].filter(Boolean).join(" · ");
+      return `<div class="aw-card"><button class="aw-del" data-daw="${a.id}">✕</button><button class="aw-edit" data-awedit="${a.id}">✎</button><div class="aw-ic">${AW_IC[a.kind]||"🏆"}</div><div class="aw-title">${esc(a.title)}</div>${meta?`<div class="aw-meta">${meta}</div>`:""}${a.note?`<div class="aw-note">${esc(a.note)}</div>`:""}<div class="aw-date">added ${esc(a.date)}</div></div>`;
+    };
+    el.innerHTML=years.map(yg=>`<div class="wall-year-hd">${yg.yr}</div>`+
+      yg.orgs.map(og=>(og.org?`<div class="wall-org-hd">${esc(og.org)}</div>`:"")+`<div class="wall-grid">${og.items.map(card).join("")}</div>`).join("")
+    ).join("");
+  }
+  renderMemberships(); renderEvents(); renderVolunteer();
+}
+
+const MB_TYPE={founder:"★ Founder",charter:"Charter",regular:"Member",honorary:"Honorary"};
+function renderMemberships(){
+  const el=document.getElementById("mbList"); if(!el) return;
+  if(!S.memberships.length){ el.innerHTML=`<div class="aw-empty"><span class="big">🎟️</span>No memberships yet. Add organizations you belong to above.</div>`; return; }
+  // founders/charter weighted to the top, then by start year desc
+  const rank={founder:0,charter:1,regular:2,honorary:3};
+  const sorted=S.memberships.slice().sort((a,b)=>(rank[a.memberType]-rank[b.memberType])||((b.startYear||0)-(a.startYear||0)));
+  el.innerHTML=sorted.map(m=>{
+    const yrs=(m.startYear||"?")+" – "+(m.endYear||"present");
+    const roles=(m.roles||[]).map(r=>`<div class="mb-role">${esc(r.title)}${r.startYear?` (${r.startYear}${r.endYear?'–'+r.endYear:'–present'})`:''}</div>`).join("");
+    return `<div class="mb-card ${m.memberType}"><button class="mb-del" data-mbdel="${m.id}">✕</button><button class="mb-edit" data-mbedit="${m.id}">✎</button>
+      <div class="mb-card-top"><span class="mb-org">${esc(m.org)}</span><span class="mb-type ${m.memberType}">${MB_TYPE[m.memberType]||m.memberType}</span></div>
+      <div class="mb-years">${yrs}</div>
+      ${roles?`<div class="mb-roles">${roles}</div>`:""}
+      ${m.note?`<div class="aw-note">${esc(m.note)}</div>`:""}
+    </div>`;
+  }).join("");
+}
+function renderEvents(){
+  const el=document.getElementById("evList"); if(!el) return;
+  if(!S.events.length){ el.innerHTML=`<div class="aw-empty"><span class="big">📅</span>No events yet. Add competitions, ceremonies, or activities you took part in.</div>`; return; }
+  const sorted=S.events.slice().sort((a,b)=>(b.year||0)-(a.year||0));
+  el.innerHTML=sorted.map(ev=>{
+    const meta=[ev.year?String(ev.year):null, ev.org?esc(ev.org):null].filter(Boolean).join(" · ");
+    return `<div class="ev-card"><button class="ev-del" data-evdel="${ev.id}">✕</button><button class="ev-edit" data-evedit="${ev.id}">✎</button>
+      <div class="ev-title">${esc(ev.title)}</div>
+      ${meta?`<div class="ev-meta">${meta}</div>`:""}
+      ${ev.role?`<div class="ev-role">Role: ${esc(ev.role)}</div>`:""}
+      ${ev.note?`<div class="aw-note">${esc(ev.note)}</div>`:""}
+    </div>`;
+  }).join("");
+}
+// a simple filling jar for volunteer hours
+function volJarSVG(hours){
+  const ratio=Math.min(1,hours/100); // 100h fills the jar
+  const top=34, bot=116, level=bot-(bot-top)*ratio;
+  return `<svg class="jar-vessel" viewBox="0 0 80 130" preserveAspectRatio="xMidYMid meet">
+    <defs><clipPath id="cv${Math.round(hours*10)}"><path d="M14 38 L66 38 L64 120 Q64 122 60 122 L20 122 Q16 122 16 120 Z"/></clipPath></defs>
+    <path d="M22 30 L58 30 L58 38 L22 38 Z" fill="none" stroke="#9fc59a" stroke-width="2" opacity=".7"/>
+    <path d="M14 38 L66 38 L64 120 Q64 122 60 122 L20 122 Q16 122 16 120 Z" fill="rgba(159,197,154,.04)" stroke="#9fc59a" stroke-width="1.8" opacity=".8"/>
+    <g clip-path="url(#cv${Math.round(hours*10)})"><rect x="14" y="${level.toFixed(1)}" width="52" height="${(bot-level+4).toFixed(1)}" fill="rgba(159,197,154,.32)"/><rect x="14" y="${level.toFixed(1)}" width="52" height="3" fill="rgba(159,197,154,.6)"/></g>
+  </svg>`;
+}
+function renderVolunteer(){
+  const jars=document.getElementById("volJars"); if(!jars) return;
+  const byYear={};
+  S.volunteer.forEach(v=>{ const y=v.year||"?"; byYear[y]=(byYear[y]||0)+(parseFloat(v.hours)||0); });
+  const years=Object.keys(byYear).sort((a,b)=>b-a);
+  jars.innerHTML=years.length?years.map(y=>`<div class="vjar"><div>${volJarSVG(byYear[y])}</div><div class="vjar-year">${y}</div><div class="vjar-hours">${byYear[y]} hrs</div></div>`).join(""):`<div class="aw-empty" style="grid-column:1/-1"><span class="big">🫙</span>No volunteer hours yet. Each year you log fills its own jar.</div>`;
+  const log=document.getElementById("volLog");
+  log.innerHTML=S.volunteer.length?`<div class="sec-h" style="margin-top:6px"><h2>Log</h2></div>`+S.volunteer.slice().reverse().map(v=>`<div class="vol-log-row"><span>${v.year} · <b>${v.hours} hrs</b>${v.org?' · '+esc(v.org):''}</span><button class="del" data-voldel="${v.id}">✕</button></div>`).join(""):"";
 }
 
 /* ---------------- Weight mirror + Awards handlers ---------------- */
@@ -2143,9 +2467,27 @@ document.body.addEventListener("click",e=>{
     renderPT(); return; }
   const dpt=e.target.closest("[data-dpt]");
   if(dpt){ S.ptLog=S.ptLog.filter(p=>p.id!==dpt.dataset.dpt); save(); render(); return; }
+  // skills
+  const skrm=e.target.closest("[data-skrm]"); if(skrm){ _skLevels.splice(+skrm.dataset.skrm,1); if(!_skLevels.length)_skLevels=[""]; renderSkLevelInputs(); return; }
+  const skpass=e.target.closest("[data-skpass]"); if(skpass){ skPass(skpass.dataset.skpass); return; }
+  const skskip=e.target.closest("[data-skskip]"); if(skskip){ skSkip(skskip.dataset.skskip); return; }
+  const skdel=e.target.closest("[data-skdel]"); if(skdel){ if(confirm("Delete this skill?")){ S.lifeSkills=S.lifeSkills.filter(s=>s.id!==skdel.dataset.skdel); save(); render(); } return; }
+  // wall delete + role-draft remove
+  const mbdel=e.target.closest("[data-mbdel]"); if(mbdel){ if(confirm("Remove this membership?")){ S.memberships=S.memberships.filter(m=>m.id!==mbdel.dataset.mbdel); save(); render(); } return; }
+  const mbrrm=e.target.closest("[data-mbrrm]"); if(mbrrm){ _mbRoles.splice(+mbrrm.dataset.mbrrm,1); renderMbRoleInputs(); return; }
+  const evdel=e.target.closest("[data-evdel]"); if(evdel){ if(confirm("Remove this event?")){ S.events=S.events.filter(x=>x.id!==evdel.dataset.evdel); save(); render(); } return; }
+  const voldel=e.target.closest("[data-voldel]"); if(voldel){ S.volunteer=S.volunteer.filter(v=>v.id!==voldel.dataset.voldel); save(); render(); return; }
+  const awedit=e.target.closest("[data-awedit]"); if(awedit){ awEdit(awedit.dataset.awedit); return; }
+  const evedit=e.target.closest("[data-evedit]"); if(evedit){ evEdit(evedit.dataset.evedit); return; }
+  const mbedit=e.target.closest("[data-mbedit]"); if(mbedit){ mbEdit(mbedit.dataset.mbedit); return; }
+  const skedit=e.target.closest("[data-skedit]"); if(skedit){ skEdit(skedit.dataset.skedit); return; }
 });
 const _ptSave=document.getElementById("ptSave"); if(_ptSave) _ptSave.onclick=savePT;
 const _ptText=document.getElementById("ptText"); if(_ptText) _ptText.addEventListener("input",ptOnText);
+// skills: capture level-ability typing, add-level, create
+document.addEventListener("input",e=>{ const i=e.target.dataset.skl; if(i!=null){ _skLevels[+i]=e.target.value; } });
+const _skAddLevel=document.getElementById("skAddLevel"); if(_skAddLevel) _skAddLevel.onclick=()=>{ _skLevels.push(""); renderSkLevelInputs(); };
+const _skSave=document.getElementById("skSave"); if(_skSave) _skSave.onclick=skCreate;
 // Open the Weight app (portal link)
 const _wmOpen=document.getElementById("wmOpen");
 if(_wmOpen) _wmOpen.onclick=()=>{
@@ -2177,18 +2519,122 @@ function updateWmStatus(){
     : 'Read-only mirror. Set the Weight app link below, then export your ledger there and tap "Update mirror" to bring it in.';
 }
 updateWmStatus();
+let _awEditId=null;
 const _awAdd=document.getElementById("awAdd");
 if(_awAdd) _awAdd.onclick=()=>{
   const title=document.getElementById("awTitle").value.trim(); if(!title){toast("Give it a title first");return;}
   const kind=document.getElementById("awKind").value;
   const note=document.getElementById("awNote").value.trim();
   const year=parseInt(document.getElementById("awYear").value)||null;
-  const from=document.getElementById("awFrom").value.trim();
-  S.awards.push({id:id(),ts:Date.now(),date:new Date().toLocaleDateString(),kind,title,note,year,from});
+  const org=document.getElementById("awOrg").value.trim();
+  if(_awEditId){
+    const a=S.awards.find(x=>x.id===_awEditId);
+    if(a){ a.kind=kind; a.title=title; a.note=note; a.year=year; a.org=org; }
+    _awEditId=null; _awAdd.textContent="Add to the Wall";
+    toast("✎ Award updated");
+  } else {
+    S.awards.push({id:id(),ts:Date.now(),date:new Date().toLocaleDateString(),kind,title,note,year,org});
+    toast("🏆 Added to the wall");
+  }
   document.getElementById("awTitle").value=""; document.getElementById("awNote").value="";
-  document.getElementById("awYear").value=""; document.getElementById("awFrom").value="";
+  document.getElementById("awYear").value=""; document.getElementById("awOrg").value="";
   save();render();
-  toast("🏆 Added to the wall");
+};
+function awEdit(awId){
+  const a=S.awards.find(x=>x.id===awId); if(!a) return;
+  document.getElementById("awKind").value=a.kind||"award";
+  document.getElementById("awTitle").value=a.title||"";
+  document.getElementById("awYear").value=a.year||"";
+  document.getElementById("awOrg").value=a.org||"";
+  document.getElementById("awNote").value=a.note||"";
+  _awEditId=awId; _awAdd.textContent="Save changes";
+  document.getElementById("awTitle").scrollIntoView({behavior:"smooth",block:"center"});
+  document.getElementById("awTitle").focus();
+}
+
+/* ---- Wall sub-navigation ---- */
+document.querySelectorAll(".wsub").forEach(btn=>btn.onclick=()=>{
+  document.querySelectorAll(".wsub").forEach(x=>x.classList.remove("on"));
+  document.querySelectorAll(".wall-sec").forEach(x=>x.classList.remove("on"));
+  btn.classList.add("on");
+  document.getElementById("wsec-"+btn.dataset.wsub).classList.add("on");
+});
+
+/* ---- Memberships ---- */
+let _mbRoles=[];  // draft leadership roles {title,startYear,endYear}
+function renderMbRoleInputs(){
+  const el=document.getElementById("mbRoleInputs"); if(!el) return;
+  el.innerHTML=_mbRoles.map((r,i)=>`<div class="mb-role-row">
+    <input class="rt" data-mbr="${i}.title" placeholder="Position — e.g. Squad Leader, President" value="${esc(r.title)}">
+    <div class="yrs"><input data-mbr="${i}.startYear" type="number" placeholder="Start yr" value="${r.startYear||''}"><input data-mbr="${i}.endYear" type="number" placeholder="End yr (blank=present)" value="${r.endYear||''}"><button class="rm" data-mbrrm="${i}">✕</button></div>
+  </div>`).join("");
+}
+const _mbAddRole=document.getElementById("mbAddRole"); if(_mbAddRole) _mbAddRole.onclick=()=>{ _mbRoles.push({title:"",startYear:"",endYear:""}); renderMbRoleInputs(); };
+document.addEventListener("input",e=>{
+  const r=e.target.dataset.mbr; if(r){ const [i,f]=r.split("."); _mbRoles[+i][f]=e.target.value; }
+});
+let _mbEditId=null;
+const _mbSave=document.getElementById("mbSave"); if(_mbSave) _mbSave.onclick=()=>{
+  const org=document.getElementById("mbOrg").value.trim(); if(!org){toast("Name the organization");return;}
+  const startYear=parseInt(document.getElementById("mbStart").value)||null;
+  const endYear=parseInt(document.getElementById("mbEnd").value)||null;
+  const memberType=document.getElementById("mbType").value;
+  const note=document.getElementById("mbNote").value.trim();
+  const roles=_mbRoles.filter(r=>r.title.trim()).map(r=>({title:r.title.trim(),startYear:parseInt(r.startYear)||null,endYear:parseInt(r.endYear)||null}));
+  if(_mbEditId){
+    const m=S.memberships.find(x=>x.id===_mbEditId);
+    if(m){ m.org=org; m.startYear=startYear; m.endYear=endYear; m.memberType=memberType; m.note=note; m.roles=roles; }
+    _mbEditId=null; _mbSave.textContent="Add membership"; toast("✎ Membership updated");
+  } else {
+    S.memberships.push({id:id(),org,startYear,endYear,memberType,roles,note}); toast("🎟️ Membership added");
+  }
+  _mbRoles=[]; renderMbRoleInputs();
+  ["mbOrg","mbStart","mbEnd","mbNote"].forEach(x=>document.getElementById(x).value="");
+  save();render();
+};
+function mbEdit(mbId){
+  const m=S.memberships.find(x=>x.id===mbId); if(!m) return;
+  document.getElementById("mbOrg").value=m.org||"";
+  document.getElementById("mbStart").value=m.startYear||"";
+  document.getElementById("mbEnd").value=m.endYear||"";
+  document.getElementById("mbType").value=m.memberType||"regular";
+  document.getElementById("mbNote").value=m.note||"";
+  _mbRoles=(m.roles||[]).map(r=>({title:r.title||"",startYear:r.startYear||"",endYear:r.endYear||""}));
+  renderMbRoleInputs();
+  _mbEditId=mbId; _mbSave.textContent="Save changes";
+  document.getElementById("mbOrg").scrollIntoView({behavior:"smooth",block:"center"}); document.getElementById("mbOrg").focus();
+}
+
+/* ---- Events ---- */
+let _evEditId=null;
+const _evSave=document.getElementById("evSave"); if(_evSave) _evSave.onclick=()=>{
+  const title=document.getElementById("evTitle").value.trim(); if(!title){toast("Name the event");return;}
+  const data={title,year:parseInt(document.getElementById("evYear").value)||null,org:document.getElementById("evOrg").value.trim(),role:document.getElementById("evRole").value.trim(),note:document.getElementById("evNote").value.trim()};
+  if(_evEditId){ const ev=S.events.find(x=>x.id===_evEditId); if(ev) Object.assign(ev,data); _evEditId=null; _evSave.textContent="Add event"; toast("✎ Event updated"); }
+  else { S.events.push({id:id(),...data}); toast("📅 Event added"); }
+  ["evTitle","evYear","evOrg","evRole","evNote"].forEach(x=>document.getElementById(x).value="");
+  save();render();
+};
+function evEdit(evId){
+  const ev=S.events.find(x=>x.id===evId); if(!ev) return;
+  document.getElementById("evTitle").value=ev.title||"";
+  document.getElementById("evYear").value=ev.year||"";
+  document.getElementById("evOrg").value=ev.org||"";
+  document.getElementById("evRole").value=ev.role||"";
+  document.getElementById("evNote").value=ev.note||"";
+  _evEditId=evId; _evSave.textContent="Save changes";
+  document.getElementById("evTitle").scrollIntoView({behavior:"smooth",block:"center"}); document.getElementById("evTitle").focus();
+}
+
+/* ---- Volunteer ---- */
+const _volSave=document.getElementById("volSave"); if(_volSave) _volSave.onclick=()=>{
+  const year=parseInt(document.getElementById("volYear").value)||null;
+  const hours=parseFloat(document.getElementById("volHours").value)||0;
+  if(!year||hours<=0){toast("Enter a year and hours");return;}
+  S.volunteer.push({id:id(),year,hours,org:document.getElementById("volOrg").value.trim()});
+  ["volYear","volHours","volOrg"].forEach(x=>document.getElementById(x).value="");
+  save();render();
+  toast("🫙 Hours added to "+year+"'s jar");
 };
 
 /* ================= CLOUD FILE SYNC (File System Access API) =================
@@ -2281,9 +2727,302 @@ const _cloudBtn=document.getElementById("cloudBtn");
 if(_cloudBtn) _cloudBtn.onclick=()=>{ if(fileHandle){ if(confirm("Unlink this cloud file on this device? Your data stays; it just stops auto-saving to the file.")) unlinkCloudFile(); } else linkCloudFile(); };
 cloudInit();
 
+/* ================= SKILLS (levels, decay, promotion quests) ================= */
+const SK_CAT={tactical:"Tactical/field",physical:"Physical",technical:"Technical/cyber",leadership:"Leadership",academic:"Academic",personal:"Personal"};
+const SK_CAT_ORDER=["tactical","physical","technical","leadership","academic","personal"];
+// Seed skills — editable starters across every category, each with a level ladder.
+// fadeDays = how long a level lasts without a maintenance/practice quest.
+const SEED_SKILLS=[
+  // ---- Tactical / field ----
+  {name:"Land navigation", cat:"tactical", fadeDays:60, levels:[
+    "Read a military map: grid coordinates, terrain features, marginal data",
+    "Plot a point and shoot an azimuth with a lensatic compass",
+    "Complete a 3-point day land-nav course unassisted",
+    "Complete a night land-nav course unassisted",
+    "Navigate cross-country over 5+ km with map & compass only"]},
+  {name:"Marksmanship (M4)", cat:"tactical", fadeDays:90, levels:[
+    "Clear, assemble, and perform a function check safely",
+    "Zero your weapon and explain BRM fundamentals",
+    "Qualify (hit standard) on a known-distance/scored range",
+    "Engage targets from multiple firing positions under time",
+    "Coach another shooter to qualification"]},
+  {name:"Tactical movement", cat:"tactical", fadeDays:60, levels:[
+    "Demonstrate the 3-5 second rush and high/low crawl",
+    "Move as part of a buddy team with bounding overwatch",
+    "Lead a team through a movement formation switch",
+    "React to contact as a team leader"]},
+  {name:"Troop leading procedures", cat:"tactical", fadeDays:90, levels:[
+    "Recite the 8 TLPs in order",
+    "Receive a mission and issue a warning order",
+    "Build and brief an OPORD (5 paragraphs)",
+    "Lead a squad through a planned mission start-to-finish"]},
+  // ---- Physical (transferred from the old Fitness track) ----
+  {name:"Physical fitness (AFT)", cat:"physical", fadeDays:30, levels:[
+    "Pass every AFT event at the minimum standard",
+    "Score 70+ in every event",
+    "Score 80+ in every event",
+    "Score 90+ in every event",
+    "Max (100) at least one event and 90+ in the rest"]},
+  {name:"Running / endurance", cat:"physical", fadeDays:21, levels:[
+    "Run 2 miles without stopping",
+    "Run a sub-18:00 2-mile",
+    "Run a sub-16:00 2-mile",
+    "Complete a 4-mile ruck (35 lb) under time",
+    "Complete a 12-mile ruck (35 lb) under 3 hours"]},
+  {name:"Strength", cat:"physical", fadeDays:30, levels:[
+    "Do 30 hand-release push-ups in 2 min",
+    "Deadlift 1.5x bodyweight with form",
+    "Do 10 strict pull-ups",
+    "Deadlift 2x bodyweight with form"]},
+  {name:"Swimming", cat:"physical", fadeDays:90, levels:[
+    "Tread water 5 minutes",
+    "Swim 100m continuously",
+    "Swim 100m in uniform",
+    "Complete the Combat Water Survival Test"]},
+  // ---- Technical / cyber ----
+  {name:"Linux / command line", cat:"technical", fadeDays:60, levels:[
+    "Navigate the filesystem and manage files from the shell",
+    "Write a basic bash script with variables and loops",
+    "Manage processes, permissions, and users",
+    "Configure networking and services on a Linux host",
+    "Harden and audit a Linux box"]},
+  {name:"Networking", cat:"technical", fadeDays:90, levels:[
+    "Explain the OSI model and TCP/IP basics",
+    "Subnet IPv4 by hand",
+    "Configure a router/switch (VLANs, routing)",
+    "Capture and analyze traffic with Wireshark",
+    "Design a small secure network"]},
+  {name:"Programming (Python)", cat:"technical", fadeDays:45, levels:[
+    "Write scripts with functions, loops, and conditionals",
+    "Work with files, APIs, and libraries",
+    "Build a small CLI tool end-to-end",
+    "Write tested, modular code in a project structure"]},
+  {name:"Cybersecurity fundamentals", cat:"technical", fadeDays:90, levels:[
+    "Explain the CIA triad and common attack types",
+    "Use basic recon tools (nmap, etc.) in a lab",
+    "Complete a guided CTF / lab exercise",
+    "Explain DCO vs OCO and the cyber kill chain"]},
+  // ---- Leadership ----
+  {name:"Public speaking", cat:"leadership", fadeDays:60, levels:[
+    "Deliver a 2-minute briefing without notes",
+    "Brief a plan to a small team clearly",
+    "Present to a room of 20+ and handle questions",
+    "Deliver an impromptu speech confidently"]},
+  {name:"Drill & ceremony", cat:"leadership", fadeDays:90, levels:[
+    "Execute all stationary drill movements",
+    "Call a squad through marching movements",
+    "Lead a platoon in drill",
+    "Run a formation/ceremony as commander"]},
+  {name:"Counseling & mentorship", cat:"leadership", fadeDays:90, levels:[
+    "Conduct an event-oriented counseling using the right form",
+    "Give actionable feedback that improves performance",
+    "Develop a subordinate over a full term",
+    "Mentor a peer into a leadership role"]},
+  {name:"Decision-making under pressure", cat:"leadership", fadeDays:60, levels:[
+    "Make a timely call with incomplete information",
+    "Run a quick risk assessment before acting",
+    "Lead a team through an unexpected change of plan",
+    "Stay calm and direct others in a real crisis"]},
+  // ---- Academic ----
+  {name:"Military history", cat:"academic", fadeDays:120, levels:[
+    "Know the Army's founding and major eras",
+    "Explain 3 battles and their leadership lessons",
+    "Connect a historical campaign to modern doctrine",
+    "Teach a history lesson to peers"]},
+  {name:"Writing", cat:"academic", fadeDays:90, levels:[
+    "Write a clear paragraph with one main idea",
+    "Write a structured essay with a thesis",
+    "Write a concise military memo (1 page)",
+    "Edit others' writing for clarity and concision"]},
+  {name:"Study & retention", cat:"academic", fadeDays:30, levels:[
+    "Use active recall on a set of facts",
+    "Build and follow a spaced-repetition routine",
+    "Teach a topic from memory (the Feynman test)",
+    "Maintain a 3.5+ term GPA while training"]},
+  // ---- Personal / life ----
+  {name:"Cooking", cat:"personal", fadeDays:45, levels:[
+    "Cook 3 simple meals safely (eggs, rice, pasta)",
+    "Cook a balanced meal with a protein, starch, and vegetable",
+    "Meal-prep a week of food on a budget",
+    "Cook a multi-dish meal for guests from scratch",
+    "Improvise a good meal from whatever's on hand"]},
+  {name:"Personal finance", cat:"personal", fadeDays:90, levels:[
+    "Track a monthly budget",
+    "Build a starter emergency fund",
+    "Understand and use a TSP/retirement account",
+    "Invest with a basic long-term plan"]},
+  {name:"First aid", cat:"personal", fadeDays:90, levels:[
+    "Apply a tourniquet and pressure dressing correctly",
+    "Perform the MARCH assessment",
+    "Perform CPR to standard",
+    "Manage a casualty until help arrives (TCCC basics)"]},
+  {name:"Time management", cat:"personal", fadeDays:30, levels:[
+    "Keep a working calendar and to-do system",
+    "Plan a week and hit your top 3 priorities",
+    "Protect deep-work blocks consistently",
+    "Run your life and duties without dropped commitments"]},
+  {name:"Discipline / habits", cat:"personal", fadeDays:21, levels:[
+    "Hold one daily keystone habit for 2 weeks",
+    "Maintain a morning routine for a month",
+    "Keep 3 daily habits through a stressful week",
+    "Sustain your core habits for a full semester"]},
+  {name:"Driving / vehicle ops", cat:"personal", fadeDays:180, levels:[
+    "Drive confidently in normal conditions",
+    "Drive at night and in rain safely",
+    "Change a tire and check fluids",
+    "Drive a manual / larger vehicle"]},
+];
+function seedSkillsIfEmpty(){
+  if(S.lifeSkills && S.lifeSkills.length) return;
+  if(S._seeded) return;
+  S.lifeSkills=SEED_SKILLS.map(s=>({
+    id:id(), name:s.name, cat:s.cat, fadeDays:s.fadeDays,
+    currentLevel:0, lastQuestTs:Date.now(),
+    levels:s.levels.map((ability,i)=>({n:i+1,ability})), history:[], seeded:true
+  }));
+  S._seeded=true; save();
+}
+let _skLevels=["",""];  // draft level abilities being entered (start with 2 blanks)
+function renderSkLevelInputs(){
+  const el=document.getElementById("skLevelInputs"); if(!el) return;
+  el.innerHTML=_skLevels.map((v,i)=>`<div class="sk-level-row">
+    <span class="ln">L${i+1}</span>
+    <input data-skl="${i}" placeholder="Ability at level ${i+1} — something you can test" value="${esc(v)}">
+    ${_skLevels.length>1?`<button class="rm" data-skrm="${i}">✕</button>`:''}
+  </div>`).join("");
+}
+let _skEditId=null;
+function skCreate(){
+  const name=document.getElementById("skName").value.trim(); if(!name){toast("Name the skill first");return;}
+  const cat=document.getElementById("skCat").value;
+  const fadeDays=parseInt(document.getElementById("skFade").value)||30;
+  const levels=_skLevels.map(s=>s.trim()).filter(Boolean).map((ability,i)=>({n:i+1,ability}));
+  if(!levels.length){toast("Define at least one level (an ability)");return;}
+  if(_skEditId){
+    const sk=S.lifeSkills.find(x=>x.id===_skEditId);
+    if(sk){ sk.name=name; sk.cat=cat; sk.fadeDays=fadeDays; sk.levels=levels;
+      if(sk.currentLevel>levels.length) sk.currentLevel=levels.length; } // clamp if levels removed
+    _skEditId=null; document.getElementById("skSave").textContent="Create skill"; toast("✎ Skill updated");
+  } else {
+    S.lifeSkills.push({id:id(),name,cat,fadeDays,currentLevel:0,lastQuestTs:Date.now(),levels,history:[]});
+    toast("🧠 Skill added — your first promotion quest is ready");
+  }
+  _skLevels=["",""];
+  document.getElementById("skName").value="";
+  save();render();
+}
+function skEdit(skId){
+  const sk=S.lifeSkills.find(x=>x.id===skId); if(!sk) return;
+  document.getElementById("skName").value=sk.name||"";
+  document.getElementById("skCat").value=sk.cat||"personal";
+  document.getElementById("skFade").value=String(sk.fadeDays||30);
+  _skLevels=sk.levels.map(l=>l.ability);
+  if(!_skLevels.length) _skLevels=[""];
+  renderSkLevelInputs();
+  _skEditId=skId; document.getElementById("skSave").textContent="Save changes";
+  document.getElementById("skName").scrollIntoView({behavior:"smooth",block:"center"}); document.getElementById("skName").focus();
+}
+// effective level after decay: drop 1 level per fade interval missed
+function skEffectiveLevel(sk){
+  if(sk.currentLevel<=0) return 0;
+  const elapsed=Date.now()-(sk.lastQuestTs||Date.now());
+  const intervals=Math.floor(elapsed/(sk.fadeDays*864e5));
+  return Math.max(0, sk.currentLevel - intervals);
+}
+function skDaysLeft(sk){
+  if(sk.currentLevel<=0) return null;
+  const next=(sk.lastQuestTs||Date.now())+sk.fadeDays*864e5;
+  return Math.ceil((next-Date.now())/864e5);
+}
+// generate the active quest for a skill: maintain current, reclaim decayed, or promote
+function skQuest(sk){
+  const eff=skEffectiveLevel(sk);
+  if(eff<sk.currentLevel){ // decayed — must re-prove the level just lost
+    const lvl=sk.levels[eff]; // the level to reclaim (0-indexed -> level eff+1)
+    return {type:"decay", level:eff+1, ability:lvl?lvl.ability:"", label:"Reclaim"};
+  }
+  if(sk.currentLevel<sk.levels.length){ // can promote
+    const lvl=sk.levels[sk.currentLevel];
+    return {type:"promote", level:sk.currentLevel+1, ability:lvl.ability, label:"Promotion test"};
+  }
+  // at max — maintenance only
+  const lvl=sk.levels[sk.currentLevel-1];
+  const days=skDaysLeft(sk);
+  if(days!==null && days<=Math.ceil(sk.fadeDays*0.34)){
+    return {type:"maintain", level:sk.currentLevel, ability:lvl.ability, label:"Maintain"};
+  }
+  return null; // fresh & maxed — no quest needed right now
+}
+function skPass(skId){
+  const sk=S.lifeSkills.find(x=>x.id===skId); if(!sk) return;
+  const q=skQuest(sk); if(!q) return;
+  const eff=skEffectiveLevel(sk);
+  if(q.type==="decay"){ sk.currentLevel=eff+1; }
+  else if(q.type==="promote"){ sk.currentLevel=Math.min(sk.levels.length, sk.currentLevel+1); }
+  // maintain just refreshes the timer
+  sk.lastQuestTs=Date.now();
+  sk.history.push({ts:Date.now(),type:q.type,level:q.level});
+  // skill growth feeds the Knowledge track lightly (earned, not gamifying the skill itself)
+  if(!S.skills.knowledge)S.skills.knowledge={xp:0}; S.skills.knowledge.xp+=15;
+  save();render();
+  toast(q.type==="promote"?`⬆️ Promoted to Level ${sk.currentLevel} — ${esc(sk.name)}`:q.type==="decay"?`Reclaimed Level ${sk.currentLevel}`:`Maintained — ${esc(sk.name)}`);
+}
+function skSkip(skId){
+  const sk=S.lifeSkills.find(x=>x.id===skId); if(!sk) return;
+  // skipping a maintenance just dismisses it until next interval; decay still applies naturally
+  toast("Left for later — the skill will keep fading until you prove it");
+}
+function renderSkills(){
+  const listEl=document.getElementById("skList"); if(!listEl) return;
+  renderSkLevelInputs();
+  // active quests
+  const qEl=document.getElementById("skQuests");
+  const quests=S.lifeSkills.map(sk=>({sk,q:skQuest(sk)})).filter(x=>x.q);
+  document.getElementById("skQuestCount").textContent=quests.length?quests.length+" active":"";
+  qEl.innerHTML=quests.length?quests.map(({sk,q})=>`<div class="sk-quest ${q.type}">
+    <div class="sk-quest-top"><span class="sk-quest-name">${esc(sk.name)}</span><span class="sk-quest-tag ${q.type==='decay'?'decay':q.type==='promote'?'promote':'maintain'}">${q.label} · L${q.level}</span></div>
+    <div class="sk-quest-ability">${q.type==='promote'?'Prove you can: ':q.type==='decay'?'You slipped — re-prove: ':'Stay sharp: '}<b>${esc(q.ability)}</b></div>
+    <div class="sk-quest-btns"><button class="sk-pass" data-skpass="${sk.id}">${q.type==='maintain'?'Did it':'Passed — I can do this'}</button><button class="sk-skip" data-skskip="${sk.id}">Later</button></div>
+  </div>`).join(""):`<div class="aw-empty"><span class="big">🧠</span>No active skill quests. Add a skill above, or you're all caught up and sharp.</div>`;
+  // skill list — grouped by category subsection
+  if(!S.lifeSkills.length){ listEl.innerHTML=`<div class="aw-empty"><span class="big">🧠</span>No skills yet. Add one above to start tracking levels.</div>`; return; }
+  const skCard=sk=>{
+    const eff=skEffectiveLevel(sk), maxed=sk.currentLevel>=sk.levels.length && eff>=sk.levels.length;
+    const days=skDaysLeft(sk);
+    const ladder=sk.levels.map(l=>{
+      const have=l.n<=eff, current=l.n===eff;
+      return `<div class="sk-rung ${have?'have':''} ${current?'current':''}"><div class="dot">${have?'✓':l.n}</div><div class="rung-txt"><b>L${l.n}.</b> ${esc(l.ability)}</div></div>`;
+    }).join("");
+    let fadeNote="";
+    if(sk.currentLevel>0){
+      if(eff<sk.currentLevel) fadeNote=`<div class="sk-fade-note warn">⚠️ Slipped from L${sk.currentLevel} to L${eff} — do the quest above to reclaim it.</div>`;
+      else if(days!==null) fadeNote=`<div class="sk-fade-note ${days<=Math.ceil(sk.fadeDays*0.34)?'warn':''}">Fades in ${days} day${days!==1?'s':''} without practice (every ${sk.fadeDays}d).</div>`;
+    }
+    return `<div class="sk-card">
+      <div class="sk-card-top">
+        <div><div class="sk-card-name">${esc(sk.name)}</div><div class="sk-card-cat">${SK_CAT[sk.cat]||sk.cat}</div></div>
+        <span class="sk-level-badge ${maxed?'maxed':''}">${eff>0?'Level '+eff:'Unproven'}${maxed?' · MAX':''}</span>
+        <button class="sk-card-edit" data-skedit="${sk.id}">✎</button>
+        <button class="sk-card-del" data-skdel="${sk.id}">✕</button>
+      </div>
+      <div class="sk-ladder">${ladder}</div>
+      ${fadeNote}
+    </div>`;
+  };
+  let html="";
+  SK_CAT_ORDER.forEach(cat=>{
+    const inCat=S.lifeSkills.filter(s=>s.cat===cat);
+    if(!inCat.length) return;
+    html+=`<div class="sk-cat-hd">${SK_CAT[cat]} <span>${inCat.length}</span></div>`;
+    html+=inCat.map(skCard).join("");
+  });
+  listEl.innerHTML=html;
+}
+
 /* ---------------- Service worker (offline) ---------------- */
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}
 
+seedSkillsIfEmpty();
 render();
 
 
