@@ -849,6 +849,16 @@
   .i-hard{color:var(--blood);font-weight:600} .i-mod{color:var(--ember);font-weight:600} .i-easy{color:var(--jade);font-weight:600}
   .gl-h{color:var(--gold);font-weight:700;font-size:13px;margin:14px 0 4px;text-transform:uppercase;letter-spacing:.04em}
   ul.gl{margin:0 0 4px;padding-left:18px} ul.gl li{margin-bottom:8px;line-height:1.55} ul.gl b{color:var(--ink)}
+  .gym-toggle{background:#0e0f09;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:12px 0}
+  .gym-toggle.on{border-color:var(--gold)}
+  .gym-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .gym-toggle-label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint)}
+  .gym-toggle-sub{font-size:14px;font-weight:600;color:var(--ink);margin-top:2px}
+  .gym-btn{background:linear-gradient(180deg,var(--gold),#b3801f);color:#1a1208;border:none;border-radius:8px;padding:9px 14px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;flex:none}
+  .gym-toggle.on .gym-btn{background:transparent;border:1px solid var(--line);color:var(--ink-dim)}
+  .gym-toggle-note{font-size:12px;color:var(--ink-faint);line-height:1.55;margin-top:9px}
+  .sess-ex-tag{display:inline-block;font-size:11px;font-weight:600;color:var(--gold);background:rgba(184,160,106,.1);border:1px solid var(--line);border-radius:20px;padding:2px 9px;margin:2px 0 6px}
+  .sess-eq{color:var(--ember);font-size:11px;font-style:italic}
   .foot a{color:var(--ink-dim);cursor:pointer;text-decoration:underline}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -1242,6 +1252,17 @@
     <div class="plan-intro">
       Built to max your <b>AFT</b> (Deadlift · Hand-Release Push-up · Sprint-Drag-Carry · Plank · 2-Mile Run) and rebuild strength + endurance after your break. Runs <b>on top of ROTC PT</b>: on weeks you have PT, count it as one session and do the rest. Aim for <b>4 hard sessions/week</b> (never two hard days back-to-back) plus the <b>Mobility + Balance day</b> on an easy/rest day — it adds recovery, not fatigue.
     </div>
+
+    <div class="gym-toggle" id="gymToggle">
+      <div class="gym-toggle-row">
+        <div>
+          <div class="gym-toggle-label">Equipment mode</div>
+          <div class="gym-toggle-sub" id="gymModeSub">No-equipment — bodyweight only (floor + wall)</div>
+        </div>
+        <button id="gymToggleBtn" class="gym-btn">Switch to Gym</button>
+      </div>
+      <div class="gym-toggle-note">Every session has <b>two versions that hit the same muscles</b>: a <b>No-equipment</b> version (truly just your body, floor, and a wall — plus a grip trainer if you have one) and a <b>Gym</b> version (different movements using equipment). Flip this when you have gym access; it changes <i>how</i> you train, not <i>what</i> muscles, so it never affects your recovery schedule. Default is No-equipment — the whole week works with zero gear. Suggested rotation: <b>mostly no-equipment, use the gym version when you're actually at one.</b></div>
+    </div>
     <div class="phase" style="background:rgba(127,174,107,.08);border-color:#3c5230">🌱 <b style="color:var(--jade)">Lean &amp; bodyweight focus.</b> This plan builds relative strength and lean muscle — the kind that helps your run and push-up scores, not bulk that slows them. The trick: get stronger by making bodyweight moves <i>harder</i> (tougher leverage, slower tempo, more reps, less rest), not by adding mass. External load stays minimal and only where the AFT demands it (deadlift + carries).</div>
 
     <div class="phase">🎯 <b>Your priorities (from your AFT history):</b> Your <b>deadlift</b> is your lowest event (70 pts, stuck at 200 lbs) and the closest to the 60-pt floor — it's your standing risk, so load it up. Your <b>Sprint-Drag-Carry</b> has slipped four tests running (79→74→69→65) — attack it with the AFT circuit. Push-ups, plank, and run are solid; maintain them. Banking those two weak events is your path from ~385 to 450+.</div>
@@ -1267,68 +1288,33 @@
 
     <details class="wk" open><summary><span class="wk-day">Session 1</span> Strength A · Lower + Push</summary>
       <div class="wk-body">
-        <p class="wk-target">Targets: Lower-body strength, Hand-Release Push-up · bodyweight-first</p>
-        <b>Primary (bodyweight):</b>
-        <ul>
-          <li>Bulgarian split squat — 4×10/leg (slow 3-sec lower; harder than it looks)</li>
-          <li>Single-leg Romanian deadlift — 3×10/leg (balance + posterior chain)</li>
-          <li>Hand-release push-ups — 4× max, 75s rest (count total reps, beat it weekly)</li>
-          <li>Pike push-ups → progress toward pseudo-planche — 3×8</li>
-          <li>Pistol squat progression (box/assisted) — 3×5/leg</li>
-          <li>Hollow-body hold — 3×30s</li>
-        </ul>
-        <b>If you have equipment (AFT deadlift prep — keep it lean):</b>
-        <ul>
-          <li>Trap-bar / barbell deadlift — 4×6 moderate, crisp reps (strength, not max bulk)</li>
-          <li>Then do the bodyweight block above for volume</li>
-        </ul>
+        <p class="wk-target">Targets: legs, push (chest/shoulders), core. Aim ~3–4 sets each, leaving 1–2 reps in the tank.</p>
+        <div class="sess-ex" data-sess="s1"></div>
+        <p class="wk-target">Progression (bodyweight): when a move gets easy, make it <i>harder</i> — slower lowering, more reps, less rest, or a tougher variation — instead of needing weight.</p>
       </div>
     </details>
 
     <details class="wk"><summary><span class="wk-day">Session 2</span> Conditioning · Run</summary>
       <div class="wk-body">
-        <p class="wk-target">Targets: 2-Mile Run (your weak spot — this is the priority)</p>
-        <b>Alternate each week between:</b>
-        <ul>
-          <li><b>Intervals:</b> warm up 5 min → 6× 400m hard / 90s walk → cool down. (Builds speed.)</li>
-          <li><b>Tempo:</b> 1.5–2 mi at a "comfortably hard" pace you can barely talk through.</li>
-          <li><b>Long easy:</b> 3–4 mi conversational pace. Builds the aerobic base that makes 2 miles feel short.</li>
-        </ul>
-        <p class="wk-target">Bonus: running keeps you lean and directly trains the event. Every 2–3 weeks, run a timed 2-mile and log it as a quest.</p>
+        <p class="wk-target">Targets: 2-Mile Run (your weak spot — this is the priority). Alternate the run types week to week.</p>
+        <div class="sess-ex" data-sess="s2"></div>
+        <p class="wk-target">Every 2–3 weeks, run a timed 2-mile and log it. Keep most runs easy (conversational) so they don't bleed into your strength days.</p>
       </div>
     </details>
 
     <details class="wk"><summary><span class="wk-day">Session 3</span> Strength B · Upper + Core</summary>
       <div class="wk-body">
-        <p class="wk-target">Targets: Hand-Release Push-up, Pulling strength, Plank · bodyweight-first</p>
-        <b>Primary (bodyweight):</b>
-        <ul>
-          <li>Pull-ups or inverted rows (under a table/bar) — 4×8 (the missing piece of most BW plans)</li>
-          <li>Decline / pike push-ups — 4×10</li>
-          <li>Diamond push-ups — 3×12 (triceps + chest endurance)</li>
-          <li>Plank — 3× max hold, train past your AFT time</li>
-          <li>Side plank — 3×30s/side</li>
-          <li>Superman / back extensions — 3×15</li>
-        </ul>
-        <b>AFT carry prep (minimal load):</b>
-        <ul>
-          <li>Backpack/ruck or farmer's carry — 4× 40m (trains Sprint-Drag-Carry grip + core)</li>
-        </ul>
+        <p class="wk-target">Targets: pull (back/biceps), push, core. ~3–4 sets each.</p>
+        <div class="sess-ex" data-sess="s3"></div>
+        <p class="wk-target">Pulling is the piece most no-gym plans miss — the doorway/towel rows and grip work cover it until you have a bar.</p>
       </div>
     </details>
 
     <details class="wk"><summary><span class="wk-day">Session 4</span> AFT Circuit · Test Sim</summary>
       <div class="wk-body">
-        <p class="wk-target">The "group PT" energy — race the clock, simulate the real test</p>
-        <p>Do 3–4 rounds, rest 2 min between. Time yourself and try to beat it next week:</p>
-        <ul>
-          <li>Sprint-Drag-Carry sim: 50m sprint → 50m backward drag (or bear crawl) → 50m loaded carry → 50m sprint</li>
-          <li>20 hand-release push-ups</li>
-          <li>15 squat jumps</li>
-          <li>30–60s plank</li>
-          <li>200m run</li>
-        </ul>
-        <p class="wk-target">This is the one to lean on when motivation's low — it's fast, competitive against yourself, and feels like a mission.</p>
+        <p class="wk-target">The "group PT" energy — 3–4 rounds, rest 2 min between, race the clock and beat it next week.</p>
+        <div class="sess-ex" data-sess="s4"></div>
+        <p class="wk-target">This is the one to lean on when motivation's low — fast, competitive against yourself, and it directly trains your two weak events.</p>
       </div>
     </details>
 
@@ -1368,44 +1354,82 @@
 
     <details class="wk"><summary><span class="wk-day">📖 Glossary</span> How to perform every exercise (by session)</summary>
       <div class="wk-body">
-        <p class="wk-target">Don't know a name? Find the session it's in below and read the plain-language how-to. "Reps" = repetitions (one full movement). "Each side/leg" = do the full count on one side, then the other. Warm up before, stretch after (see each strength skill's "Why & how" for movement-specific stretches).</p>
+        <p class="wk-target">Don't know a name? Find the session below and read the plain-language how-to. Each session lists its <b>No-equipment</b> moves and its <b>Gym</b> moves separately — they train the same muscles. "Reps" = one full movement; "each side/leg" = full count one side then the other.</p>
 
         <p class="gl-h">Session 1 — Lower + Push</p>
+        <p class="wk-target">No-equipment:</p>
         <ul class="gl">
-          <li><b>Bulgarian split squat:</b> Stand a couple feet in front of a bench/chair, rest the top of one foot behind you on it. Bend your front leg to lower straight down until your front thigh is about parallel to the floor, then push back up through the front heel. Keep your chest tall. Finish all reps, switch legs.</li>
-          <li><b>Single-leg RDL (Romanian deadlift):</b> Stand on one leg, slight bend in that knee. Hinge at the hip — push your butt back and let your torso tip forward while the free leg lifts straight behind you, like a seesaw. Lower until you feel your hamstring, then squeeze back up to standing. Keep your back flat. Add a light weight in the opposite hand once steady.</li>
-          <li><b>Hand-release push-ups:</b> A normal push-up, but at the bottom you lower all the way to the floor and lift your hands off the ground for a moment, then place them and press back up. This is the AFT version — it stops you bouncing out of the bottom.</li>
-          <li><b>Pike push-ups:</b> Start in a push-up position, then walk your feet in and raise your hips high so your body makes an upside-down V. Bend your elbows to lower the top of your head toward the floor between your hands, then press back up. It trains the overhead/shoulder press with bodyweight.</li>
-          <li><b>Pistol squat progression:</b> Working toward a one-legged squat. Start by sitting back onto a box/chair on one leg and standing up from it; lower the box height as you get stronger. Hold something for balance at first. The goal is eventually a full squat on one leg, other leg held out front.</li>
-          <li><b>Hollow-body hold:</b> Lie on your back, press your lower back into the floor, and lift your shoulders and legs a few inches off the ground so your body makes a shallow banana shape. Hold and breathe. If it's too hard, bend the knees or keep arms by your sides.</li>
-          <li><b>Trap-bar / barbell deadlift:</b> Lifting a loaded bar from the floor. Stand with the bar over your mid-foot, hinge down with a flat back and grab it, then stand tall by driving your feet into the floor and pushing your hips forward. Keep the bar close to your body; never round your lower back. A trap-bar (hexagon you stand inside) is the easier, back-friendly version.</li>
+          <li><b>Reverse lunge (no support):</b> From standing, step one foot straight back and lower until both knees are about 90°, then drive through the front heel back to standing. No bench needed — you control the depth. Alternate or finish one leg then switch.</li>
+          <li><b>Single-leg glute bridge:</b> Lie on your back, knees bent, one foot flat and the other leg extended. Push through the planted heel to lift your hips into a straight line, squeeze the glute at the top, lower. Trains the same posterior chain a deadlift does, with zero gear.</li>
+          <li><b>Hand-release push-ups:</b> A push-up where, at the bottom, you lower fully to the floor and lift your hands off for a moment, then place them and press up. The AFT version — stops you bouncing out of the bottom.</li>
+          <li><b>Pike push-ups:</b> From a push-up position, walk your feet in and raise your hips into an upside-down V. Bend your elbows to lower the top of your head toward the floor between your hands, then press up. Bodyweight overhead-press for the shoulders.</li>
+          <li><b>Shrimp / split squat (floor):</b> A single-leg squat done flat on the floor — no bench. Stand on one leg, hold the other foot behind you (shrimp) or just keep it lifted, and lower under control as far as you can, then stand. Scale by holding a wall. Builds single-leg strength without a bench's "just-right height."</li>
+          <li><b>Hollow-body hold:</b> Lie on your back, press your lower back into the floor, lift shoulders and legs a few inches so your body makes a shallow banana. Hold and breathe. Bend knees or keep arms down to make it easier.</li>
+          <li><b>Single-leg hip hinge (airplane):</b> Stand on one leg, slight knee bend. Hinge at the hip — tip your torso forward and float the free leg straight behind you, arms out like wings — then stand tall. Hamstrings, glutes, and balance, no weight needed.</li>
+        </ul>
+        <p class="wk-target">Gym (equipment):</p>
+        <ul class="gl">
+          <li><b>Bulgarian split squat (bench):</b> Rest the top of your back foot on a bench behind you, lower the front leg until the thigh is ~parallel, drive back up through the front heel. Needs a bench of the right height — that's why it's the gym version.</li>
+          <li><b>Single-leg RDL (dumbbells):</b> The airplane hinge holding a dumbbell, for added load on the hamstrings/glutes.</li>
+          <li><b>Barbell / DB bench press:</b> Lying on a bench, press the bar or dumbbells from your chest to straight arms. The loaded chest press.</li>
+          <li><b>Overhead press:</b> Standing, press a barbell or dumbbells from your shoulders to overhead. The loaded version of the pike push-up.</li>
+          <li><b>Leg press or goblet squat:</b> Leg press = push a weighted platform with your legs on the machine. Goblet squat = hold a dumbbell at your chest and squat. Either loads the legs.</li>
+          <li><b>Cable / machine crunch:</b> Loaded core flexion on a cable or ab machine.</li>
+          <li><b>Trap-bar / barbell deadlift:</b> Lift a loaded bar from the floor — hinge with a flat back, grip it, stand tall driving the hips forward, bar close to the body, never round the lower back. Trap-bar (hexagon you stand in) is the back-friendly version. This directly trains your weakest AFT event.</li>
         </ul>
 
         <p class="gl-h">Session 2 — Run</p>
+        <p class="wk-target">No-equipment:</p>
         <ul class="gl">
-          <li><b>Intervals (400m reps):</b> Short, fast efforts with rest between. E.g. run 400m (one lap of a track) hard, then walk/jog ~90 seconds, and repeat 4–6 times. Builds your top-end speed.</li>
-          <li><b>Tempo run:</b> A sustained "comfortably hard" pace — faster than easy jogging but not a sprint, held for 15–25 min. You should be able to say only a few words at a time. Builds your ability to hold a fast pace.</li>
-          <li><b>Long easy run:</b> A slow, conversational-pace run, longer than usual (e.g. 30–50 min). Builds your aerobic base — the engine behind the 2-mile.</li>
-          <li><b>Timed 2-mile:</b> Run 2 miles as fast as you can sustain and record the time — this is the AFT run, used as a test, not every week.</li>
+          <li><b>Intervals (sprint reps):</b> Short fast efforts with rest between — e.g. sprint ~400m or 60–90s hard, walk/jog 90s, repeat 4–6×. Any open ground works. Builds speed.</li>
+          <li><b>Tempo run:</b> A sustained "comfortably hard" pace (only a few words at a time) held 15–25 min. Builds your ability to hold a fast pace.</li>
+          <li><b>Long easy run:</b> Slow conversational-pace run, longer than usual (30–50 min). Builds the aerobic base behind the 2-mile.</li>
+          <li><b>Timed 2-mile:</b> Run 2 miles as fast as you can sustain and record the time — the AFT run, used as a test, not weekly.</li>
+        </ul>
+        <p class="wk-target">Gym (equipment):</p>
+        <ul class="gl">
+          <li><b>Treadmill intervals/tempo:</b> Same run workouts on a treadmill; add incline to build power and protect your joints.</li>
+          <li><b>Rower or bike intervals:</b> Hard/easy bursts on a rowing machine or stationary bike — cardio that spares your legs for lifting days.</li>
         </ul>
 
         <p class="gl-h">Session 3 — Upper + Core</p>
+        <p class="wk-target">No-equipment:</p>
         <ul class="gl">
-          <li><b>Pull-ups:</b> Hang from a bar with palms facing away, arms straight, and pull until your chin clears the bar, then lower all the way. If you can't do one yet, use a band looped on the bar or jump up and lower slowly.</li>
-          <li><b>Inverted rows:</b> The "easier pull-up." Set a bar about waist height (or use a sturdy table edge), lie under it, grab it, and pull your chest up to the bar keeping your body in a straight line. The more horizontal you are, the harder it is.</li>
-          <li><b>Decline push-ups:</b> Push-ups with your feet up on a bench/step so you're angled head-down. Shifts more load to the upper chest and shoulders.</li>
-          <li><b>Diamond push-ups:</b> Push-ups with your hands close together under your chest, thumbs and index fingers touching to form a diamond. Hits the triceps hard.</li>
-          <li><b>Plank:</b> Forearms on the floor under your shoulders, body in a straight line from head to heels, abs and glutes tight. Hold without letting your hips sag or pike up.</li>
-          <li><b>Side plank:</b> On one forearm, body turned sideways in a straight line, hips lifted off the floor and stacked. Hold, then switch sides. Trains the obliques (side core).</li>
-          <li><b>Superman / back extension:</b> Lie face-down, arms extended ahead. Lift your arms, chest, and legs off the floor at the same time (like flying), hold a moment, lower. Strengthens the lower back.</li>
-          <li><b>Ruck / farmer's carry:</b> <b>Ruck</b> = walk while wearing a weighted backpack. <b>Farmer's carry</b> = hold a heavy weight in each hand and walk a set distance, tall and braced. Both build grip, core, and carrying strength.</li>
+          <li><b>Doorway/towel rows (isometric pull):</b> Loop a towel around a sturdy doorknob (both sides of a door) or a fixed post, lean back holding the ends with arms straight, then pull your chest toward your hands and squeeze your shoulder blades. No bar needed — it covers the pulling muscles a pull-up would.</li>
+          <li><b>Decline push-ups:</b> Push-ups with your feet up on a step/ledge so you're angled head-down. Shifts load to the upper chest and shoulders.</li>
+          <li><b>Diamond push-ups:</b> Push-ups with hands close together under your chest (thumbs and index fingers forming a diamond). Hits the triceps hard.</li>
+          <li><b>Plank:</b> Forearms under shoulders, body a straight line head to heels, abs and glutes tight. Hold without sagging or piking.</li>
+          <li><b>Side plank:</b> On one forearm, body sideways in a straight line, hips lifted and stacked. Hold, switch sides. Trains the obliques.</li>
+          <li><b>Superman / back extension:</b> Lie face-down, arms ahead. Lift arms, chest, and legs together (like flying), hold, lower. Strengthens the lower back.</li>
+          <li><b>Grip squeeze:</b> Squeeze a grip trainer (or a rolled towel) hard for 20–40s, repeat. Builds the grip that carries the Sprint-Drag-Carry — the one small tool you said you'd have.</li>
+        </ul>
+        <p class="wk-target">Gym (equipment):</p>
+        <ul class="gl">
+          <li><b>Pull-ups / lat pulldown:</b> Pull-up = hang from a bar (palms away) and pull until your chin clears it. Lat pulldown = the seated machine version, pulling a bar down to your chest. The main back/biceps builder.</li>
+          <li><b>Seated cable / barbell row:</b> Pull a cable handle or barbell toward your stomach, squeezing the shoulder blades. Horizontal pulling for the mid-back.</li>
+          <li><b>Incline DB press:</b> Dumbbell press on an inclined bench — upper chest and shoulders.</li>
+          <li><b>Cable face pulls:</b> Pull a rope to your face with elbows high — strengthens the rear shoulders and posture muscles.</li>
+          <li><b>Hanging knee raises:</b> Hang from a bar and raise your knees to your chest — core.</li>
+          <li><b>Back extension (machine/bench):</b> Hinge over a back-extension bench and raise your torso — loaded lower back.</li>
+          <li><b>Farmer's carry (dumbbells):</b> Hold a heavy dumbbell in each hand and walk tall and braced — grip, core, and carry strength for the SDC.</li>
         </ul>
 
         <p class="gl-h">Session 4 — AFT Circuit</p>
+        <p class="wk-target">No-equipment:</p>
         <ul class="gl">
-          <li><b>Sprint-Drag-Carry sim:</b> A practice of the AFT event. Sprint 50m, come back dragging a weight (a loaded sled, or bear-crawl as a substitute) 50m, then carry weight (two heavy objects, one per hand) 50m, then sprint 50m. Fast and lung-burning.</li>
-          <li><b>Squat jumps:</b> Drop into a squat, then explode straight up off the floor, land softly with bent knees, and immediately go into the next one. Builds explosive leg power.</li>
-          <li><b>200m run:</b> A half-lap of a track at a hard pace — a short conditioning burst within the circuit.</li>
+          <li><b>Shuttle sprints (SDC substitute):</b> Sprint to a line ~25m away, touch it, sprint back, repeat. Mimics the change-of-direction of the Sprint-Drag-Carry without a sled.</li>
+          <li><b>Bear crawl (drag substitute):</b> On hands and feet, knees just off the floor, crawl forward keeping your back flat. Replaces the SDC drag — taxes the same legs, shoulders, and core.</li>
+          <li><b>Hand-release push-ups:</b> (see Session 1) — 20 per round.</li>
+          <li><b>Squat jumps:</b> Drop into a squat, explode straight up, land soft with bent knees, immediately repeat. Explosive leg power.</li>
+          <li><b>Plank:</b> 30–60s hold per round.</li>
+          <li><b>200m run:</b> A half-lap at a hard pace — a short conditioning burst.</li>
+        </ul>
+        <p class="wk-target">Gym (equipment):</p>
+        <ul class="gl">
+          <li><b>Sled push/pull or SDC sim:</b> Push or drag a weighted sled — the closest thing to the real Sprint-Drag-Carry.</li>
+          <li><b>Loaded carry (kettlebells):</b> Carry heavy kettlebells a set distance — the carry portion of the SDC.</li>
+          <li><b>Box jumps:</b> Jump from a squat onto a sturdy box, step down, repeat. Explosive power with a target.</li>
+          <li><b>Rower 200m sprint:</b> An all-out 200m on the rowing machine — full-body conditioning burst.</li>
         </ul>
 
         <p class="gl-h">Session 5 — Mobility + Balance</p>
@@ -1662,6 +1686,7 @@ const DEFAULT = {
   profile:{ birthdate:null, heightIn:null, heightDate:null, weightLb:null, weightDate:null, sex:null, bloodType:null, units:"imperial", notes:"" },
   lifts:{ deadliftLb:null, squatLb:null, benchLb:null, liftDate:null },  // best lifts for bodyweight-relative skills
   aftStandard:"general",  // "general" (sex+age normed, 300 min) or "combat" (sex-neutral, 350 min)
+  hasGym:false,           // equipment mode: false = no-equipment (bodyweight) plans, true = gym versions
   donations:[],           // blood donations: [{id, date, type}]
   weightLog:[],           // weight history for trend: [{date, lb}]
   vitals:[],              // health readings: [{id, date, pulse, bpSys, bpDia, hemoglobin, note}]
@@ -1726,61 +1751,123 @@ const VALUES = {
   daily:{easy:{xp:10,g:4},med:{xp:20,g:8},hard:{xp:40,g:16}},
 };
 // Exercise library — type drives which inputs show: "reps"=sets×reps(±weight), "time"=duration, "dist"=distance+time
+// Each session has TWO variants that train the SAME muscle groups:
+//  bw  = no-equipment (floor + wall/doorway only)
+//  gym = equipment version (different movements, used when you have gym access)
+// A global toggle (S.hasGym) decides which one the log form and plan show.
 const SESSIONS = {
-  s1:{name:"Session 1 · Lower + Push", ex:[
-    {n:"Bulgarian split squat", t:"reps", w:true},
-    {n:"Single-leg RDL", t:"reps", w:true},
-    {n:"Hand-release push-ups", t:"reps"},
-    {n:"Pike push-ups", t:"reps"},
-    {n:"Pistol squat progression", t:"reps"},
-    {n:"Hollow-body hold", t:"time"},
-    {n:"Trap-bar / barbell deadlift", t:"reps", w:true},
-  ]},
-  s2:{name:"Session 2 · Run", ex:[
-    {n:"Intervals (400m reps)", t:"dist"},
-    {n:"Tempo run", t:"dist"},
-    {n:"Long easy run", t:"dist"},
-    {n:"Timed 2-mile", t:"dist"},
-  ]},
-  s3:{name:"Session 3 · Upper + Core", ex:[
-    {n:"Pull-ups / inverted rows", t:"reps", w:true},
-    {n:"Decline / pike push-ups", t:"reps"},
-    {n:"Diamond push-ups", t:"reps"},
-    {n:"Plank", t:"time"},
-    {n:"Side plank", t:"time"},
-    {n:"Superman / back extension", t:"reps"},
-    {n:"Ruck / farmer's carry", t:"dist", w:true},
-  ]},
-  s4:{name:"Session 4 · AFT Circuit", ex:[
-    {n:"Sprint-Drag-Carry sim", t:"time"},
-    {n:"Hand-release push-ups", t:"reps"},
-    {n:"Squat jumps", t:"reps"},
-    {n:"Plank", t:"time"},
-    {n:"200m run", t:"time"},
-  ]},
-  s5:{name:"Session 5 · Mobility + Balance", ex:[
-    // --- Flexibility block (held static stretches, after a light warm-up) ---
-    {n:"5-min easy cardio warm-up (don't stretch cold)", t:"time"},
-    {n:"World's-greatest-stretch (each side)", t:"reps"},
-    {n:"Standing hamstring stretch (hold 30s ×2/side)", t:"time"},
-    {n:"Kneeling hip-flexor stretch (hold 30s ×2/side)", t:"time"},
-    {n:"Figure-4 glute stretch (hold 30s ×2/side)", t:"time"},
-    {n:"Quad stretch (hold 30s ×2/side)", t:"time"},
-    {n:"Calf stretch, straight + bent knee (hold 30s/side)", t:"time"},
-    {n:"Doorway chest/shoulder stretch (hold 30s ×2)", t:"time"},
-    {n:"Thoracic rotations + cat-cow (slow reps)", t:"reps"},
-    // --- Balance block (progressive, near a wall to catch yourself) ---
-    {n:"Single-leg stand, eyes OPEN (hold 30–45s/leg)", t:"time"},
-    {n:"Single-leg stand, eyes CLOSED (hold 15–30s/leg)", t:"time"},
-    {n:"Single-leg stand on cushion/pillow (hold 20–30s/leg)", t:"time"},
-    {n:"Single-leg Romanian deadlift reach (balance, reps/leg)", t:"reps", w:true},
-    {n:"Tandem (heel-to-toe) walk, 10–20 steps", t:"reps"},
-    {n:"Y-balance reach: stand on one leg, reach foot front/side/back", t:"reps"},
-  ]},
-  other:{name:"Other / Custom", ex:[
-    {n:"Custom exercise", t:"reps", w:true, custom:true},
-  ]},
+  s1:{name:"Session 1 · Lower + Push", areas:["legs","push","core"],
+    bw:[
+      {n:"Reverse lunge (no support)", t:"reps"},
+      {n:"Single-leg glute bridge", t:"reps"},
+      {n:"Hand-release push-ups", t:"reps"},
+      {n:"Pike push-ups", t:"reps"},
+      {n:"Shrimp squat / split squat (floor)", t:"reps"},
+      {n:"Hollow-body hold", t:"time"},
+      {n:"Single-leg hip hinge (airplane)", t:"reps"},
+    ],
+    gym:[
+      {n:"Bulgarian split squat (bench)", t:"reps", w:true},
+      {n:"Single-leg RDL (dumbbells)", t:"reps", w:true},
+      {n:"Barbell / DB bench press", t:"reps", w:true},
+      {n:"Overhead press (barbell/DB)", t:"reps", w:true},
+      {n:"Leg press or goblet squat", t:"reps", w:true},
+      {n:"Cable / machine crunch", t:"reps", w:true},
+      {n:"Trap-bar / barbell deadlift", t:"reps", w:true},
+    ]},
+  s2:{name:"Session 2 · Run", areas:["cardio","legs"],
+    bw:[
+      {n:"Intervals (sprint reps, any open ground)", t:"dist"},
+      {n:"Tempo run", t:"dist"},
+      {n:"Long easy run", t:"dist"},
+      {n:"Timed 2-mile", t:"dist"},
+    ],
+    gym:[
+      {n:"Treadmill intervals (incline)", t:"dist", w:true},
+      {n:"Treadmill tempo run", t:"dist", w:true},
+      {n:"Rower or bike intervals", t:"time", w:true},
+      {n:"Timed 2-mile", t:"dist"},
+    ]},
+  s3:{name:"Session 3 · Upper + Core", areas:["pull","push","core"],
+    bw:[
+      {n:"Doorway/towel rows (isometric pull)", t:"reps"},
+      {n:"Decline push-ups (feet on floor ledge/step)", t:"reps"},
+      {n:"Diamond push-ups", t:"reps"},
+      {n:"Plank", t:"time"},
+      {n:"Side plank", t:"time"},
+      {n:"Superman / back extension", t:"reps"},
+      {n:"Grip squeeze (grip trainer / towel)", t:"time"},
+    ],
+    gym:[
+      {n:"Pull-ups / lat pulldown", t:"reps", w:true},
+      {n:"Seated cable / barbell row", t:"reps", w:true},
+      {n:"Incline DB press", t:"reps", w:true},
+      {n:"Cable face pulls", t:"reps", w:true},
+      {n:"Hanging knee raises", t:"reps"},
+      {n:"Back extension (machine/bench)", t:"reps", w:true},
+      {n:"Farmer's carry (dumbbells)", t:"dist", w:true},
+    ]},
+  s4:{name:"Session 4 · AFT Circuit", areas:["legs","push","core","cardio"],
+    bw:[
+      {n:"Shuttle sprints (SDC substitute)", t:"time"},
+      {n:"Bear crawl (drag substitute)", t:"time"},
+      {n:"Hand-release push-ups", t:"reps"},
+      {n:"Squat jumps", t:"reps"},
+      {n:"Plank", t:"time"},
+      {n:"200m run", t:"time"},
+    ],
+    gym:[
+      {n:"Sled push/pull or SDC sim", t:"time", w:true},
+      {n:"Loaded carry (kettlebells)", t:"dist", w:true},
+      {n:"Hand-release push-ups", t:"reps"},
+      {n:"Box jumps", t:"reps", w:true},
+      {n:"Plank", t:"time"},
+      {n:"Rower 200m sprint", t:"time", w:true},
+    ]},
+  s5:{name:"Session 5 · Mobility + Balance", areas:["mobility","balance"],
+    bw:[
+      // --- Flexibility block (held static stretches, after a light warm-up) ---
+      {n:"5-min easy cardio warm-up (don't stretch cold)", t:"time"},
+      {n:"World's-greatest-stretch (each side)", t:"reps"},
+      {n:"Standing hamstring stretch (hold 30s ×2/side)", t:"time"},
+      {n:"Kneeling hip-flexor stretch (hold 30s ×2/side)", t:"time"},
+      {n:"Figure-4 glute stretch (hold 30s ×2/side)", t:"time"},
+      {n:"Quad stretch (hold 30s ×2/side)", t:"time"},
+      {n:"Calf stretch, straight + bent knee (hold 30s/side)", t:"time"},
+      {n:"Doorway chest/shoulder stretch (hold 30s ×2)", t:"time"},
+      {n:"Thoracic rotations + cat-cow (slow reps)", t:"reps"},
+      // --- Balance block (progressive, near a wall to catch yourself) ---
+      {n:"Single-leg stand, eyes OPEN (hold 30–45s/leg)", t:"time"},
+      {n:"Single-leg stand, eyes CLOSED (hold 15–30s/leg)", t:"time"},
+      {n:"Single-leg stand on cushion/pillow (hold 20–30s/leg)", t:"time"},
+      {n:"Single-leg hinge reach (balance, reps/leg)", t:"reps"},
+      {n:"Tandem (heel-to-toe) walk, 10–20 steps", t:"reps"},
+      {n:"Y-balance reach: stand on one leg, reach foot front/side/back", t:"reps"},
+    ],
+    gym:[
+      // mobility/balance is the same either way; gym just adds a couple of tools
+      {n:"5-min easy cardio warm-up (don't stretch cold)", t:"time"},
+      {n:"World's-greatest-stretch (each side)", t:"reps"},
+      {n:"Standing hamstring stretch (hold 30s ×2/side)", t:"time"},
+      {n:"Kneeling hip-flexor stretch (hold 30s ×2/side)", t:"time"},
+      {n:"Figure-4 glute stretch (hold 30s ×2/side)", t:"time"},
+      {n:"Quad stretch (hold 30s ×2/side)", t:"time"},
+      {n:"Calf stretch on a step (straight + bent knee)", t:"time"},
+      {n:"Band shoulder dislocates / chest opener", t:"reps", w:true},
+      {n:"Foam-roll back + thoracic rotations", t:"reps"},
+      {n:"Single-leg stand, eyes OPEN (hold 30–45s/leg)", t:"time"},
+      {n:"Single-leg stand, eyes CLOSED (hold 15–30s/leg)", t:"time"},
+      {n:"Single-leg stand on a balance pad/BOSU", t:"time", w:true},
+      {n:"Single-leg RDL reach (light DB)", t:"reps", w:true},
+      {n:"Tandem (heel-to-toe) walk, 10–20 steps", t:"reps"},
+      {n:"Y-balance reach: stand on one leg, reach foot front/side/back", t:"reps"},
+    ]},
+  other:{name:"Other / Custom", areas:[],
+    bw:[{n:"Custom exercise", t:"reps", w:true, custom:true}],
+    gym:[{n:"Custom exercise", t:"reps", w:true, custom:true}]},
 };
+// resolve a session's exercise list for the current equipment mode
+function sessionEx(skey){ const s=SESSIONS[skey]; if(!s) return []; const useGym=!!(S&&S.hasGym); return (useGym? s.gym : s.bw) || s.bw || s.ex || []; }
 // Body areas / systems each FM session loads — used for PT recovery-aware adjustment.
 const SESSION_AREAS = {
   s1:["legs","push","core"],   // Lower + Push
@@ -2010,6 +2097,7 @@ function render(){
   if(typeof renderPT==="function") renderPT();
   if(typeof renderSkillBalance==="function") renderSkillBalance();
   if(typeof renderRecoveryAdvisory==="function") renderRecoveryAdvisory();
+  if(typeof renderSessionLists==="function") renderSessionLists();
   if(typeof renderSkillsTab==="function") renderSkillsTab();
   if(typeof renderAdaptiveTargets==="function") renderAdaptiveTargets();
   if(typeof renderBaseline==="function") renderBaseline();
@@ -2174,6 +2262,12 @@ function showLevelUp(track,lvl){
   document.getElementById("levelup").classList.add("show");
 }
 document.getElementById("luClose").onclick=()=>document.getElementById("levelup").classList.remove("show");
+
+/* ---------------- Equipment mode toggle ---------------- */
+{
+  const gb=document.getElementById("gymToggleBtn");
+  if(gb) gb.onclick=()=>{ S.hasGym=!S.hasGym; save(); render(); toast(S.hasGym?"🏋️ Gym mode — equipment versions shown":"🤸 No-equipment mode — bodyweight only"); };
+}
 
 /* ---------------- Backup / reset ---------------- */
 document.getElementById("exportBtn").onclick=()=>{
@@ -2592,7 +2686,7 @@ function initLogTab(){
 }
 function buildLogForm(skey){
   const s=SESSIONS[skey];
-  LG={session:skey, exercises:s.ex.map(e=>({name:e.n,type:e.t,w:!!e.w,custom:!!e.custom,sets:[blankSet(e.t)]}))};
+  LG={session:skey, exercises:sessionEx(skey).map(e=>({name:e.n,type:e.t,w:!!e.w,custom:!!e.custom,sets:[blankSet(e.t)]}))};
   renderLogForm();
 }
 function blankSet(type){
@@ -2997,6 +3091,23 @@ function renderRecoveryAdvisory(){
   if(freshSessions.length) lines+=`<div class="recovery-line">✅ Good to train now: <b>${freshSessions.map(sName).join(", ")}</b> — ${freshSessions.length>1?'these hit':'this hits'} muscles PT left fresh.</div>`;
   if(easeSessions.length) lines+=`<div class="recovery-line">🟠 Ease off / reduce volume: <b>${easeSessions.map(sName).join(", ")}</b> — overlaps what PT already worked.</div>`;
   el.innerHTML=`<div class="recovery-card"><h3>♻️ Recovery-aware (from your PT log)</h3>${lines}</div>`;
+}
+
+// Fill each session writeup's exercise list based on the equipment mode (S.hasGym).
+function renderSessionLists(){
+  // update the toggle button + subtitle
+  const sub=document.getElementById("gymModeSub");
+  const btn=document.getElementById("gymToggleBtn");
+  const tgl=document.getElementById("gymToggle");
+  if(sub) sub.textContent = S.hasGym ? "Gym — equipment versions of each session" : "No-equipment — bodyweight only (floor + wall)";
+  if(btn) btn.textContent = S.hasGym ? "Switch to No-equipment" : "Switch to Gym";
+  if(tgl) tgl.className = "gym-toggle"+(S.hasGym?" on":"");
+  // fill each session's exercise container
+  document.querySelectorAll(".sess-ex").forEach(div=>{
+    const skey=div.getAttribute("data-sess");
+    const list=sessionEx(skey);
+    div.innerHTML = `<div class="sess-ex-tag">${S.hasGym?"🏋️ Gym version":"🤸 No-equipment version"}</div><ul class="gl">${list.map(e=>`<li>${esc(e.n)}${e.w?' <span class="sess-eq">· equipment</span>':''}</li>`).join("")}</ul>`;
+  });
 }
 
 /* ---------------- MONTHLY BASELINE ---------------- */
