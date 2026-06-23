@@ -42,8 +42,10 @@
     line-height:1.5;
     padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     overscroll-behavior:none;
+    overflow-x:hidden;
   }
   .wrap{max-width:760px;margin:0 auto;padding:18px 16px 120px}
+  .week-tbl{table-layout:fixed;word-break:break-word}
 
   /* ---- Hero / character header ---- */
   header.hero{
@@ -123,15 +125,17 @@
   nav.tabs .nav-toggle:hover{color:var(--gold);border-color:var(--gold)}
   /* On narrow screens, the rail becomes a top icon strip again */
   @media(max-width:560px){
-    .main-row{flex-direction:column;gap:0}
-    nav.tabs{flex-direction:row;width:auto !important;overflow-x:auto;position:sticky;top:0;z-index:5;
+    .main-row{flex-direction:column;gap:0;width:100%;max-width:100%;min-width:0}
+    nav.tabs{flex-direction:row;width:100% !important;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;position:sticky;top:0;z-index:5;
       background:linear-gradient(180deg,var(--bg) 70%,transparent);padding:6px 0;margin-bottom:12px;
       scrollbar-width:none}
     nav.tabs::-webkit-scrollbar{display:none}
-    nav.tabs button{flex:0 0 auto;flex-direction:column;gap:3px;min-width:60px;padding:8px;text-align:center;font-size:11px}
-    nav.tabs button .ic{margin:0}
+    nav.tabs button{flex:0 0 auto;width:auto !important;flex-direction:column;gap:3px;min-width:58px;max-width:74px;padding:8px 6px;text-align:center;font-size:11px}
+    nav.tabs button .ic{margin:0;width:auto}
+    nav.tabs button .lbl{white-space:nowrap}
     nav.tabs.icons-only button .lbl{display:block}  /* labels always wrap on mobile strip */
     nav.tabs .nav-toggle{display:none}  /* toggle is desktop-only */
+    .content-col{width:100%;min-width:0}
   }
 
   .view{display:none;animation:fade .25s ease}
