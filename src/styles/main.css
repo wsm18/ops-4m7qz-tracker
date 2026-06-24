@@ -104,6 +104,9 @@
   /* More/Less toggle */
   .nav-more-toggle{color:var(--ink-faint);background:transparent;border-style:dashed;border-color:var(--line);font-size:12px;letter-spacing:.06em}
   .nav-more-toggle:hover{color:var(--gold);border-color:var(--gold)}
+  /* Overdue oath count badge on nav buttons */
+  .nav-badge{background:var(--blood);color:#fff;border-radius:99px;font-size:9px;font-weight:700;padding:1px 4px;margin-left:3px;vertical-align:middle;display:inline-block;min-width:14px;text-align:center}
+  .nav-badge:empty{display:none}
   /* Secondary tabs — shown when More is expanded */
   .nav-more{display:none;flex-direction:column;gap:5px;margin-top:2px}
   .nav-more.open{display:flex}
@@ -473,7 +476,8 @@
   .habit-starter-label{font-size:11.5px;color:var(--ink-faint);margin-bottom:7px}
   .hb-starter-btn{display:inline-block;background:#0e0f09;border:1px solid var(--line);color:var(--ink-dim);padding:6px 10px;border-radius:16px;font-family:inherit;font-size:12px;cursor:pointer;margin:0 5px 5px 0}
   .hb-starter-btn:hover{border-color:var(--jade);color:var(--jade)}
-  .hb-card{display:flex;align-items:center;gap:11px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:8px}
+  .hb-card{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:8px}
+  .hb-top-row{display:flex;align-items:center;gap:11px}
   .hb-card.done{opacity:.62;border-color:#3c5230}
   .hb-check{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid var(--line);background:transparent;color:#14160f;font-weight:800;cursor:pointer;font-size:15px;display:grid;place-items:center;transition:.15s}
   .hb-check:hover{border-color:var(--jade)}
@@ -799,6 +803,8 @@
   @media(max-width:680px){.sk-jumpbar{right:4px}.sk-jumpbar button{width:32px;height:32px;font-size:14px}}
   .sk-card-edit{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;flex:none}
   .sk-card-edit:hover{color:var(--gold)}
+  .sk-copy-btn{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:12px;flex:none;padding:2px 4px}
+  .sk-copy-btn:hover{color:var(--jade)}
 
   /* ---- Awards / The Wall ---- */
   #awallGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -1064,6 +1070,18 @@
 
   /* ── v95: Week training bar ── */
   .ds-week{font-size:11px;color:var(--ink-dim);letter-spacing:.05em;padding:5px 0 3px;font-family:ui-monospace,monospace}
+  .path-pips-card{padding:10px 14px}
+  .path-pips-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .path-pip{display:flex;align-items:center;gap:5px;min-width:52px;flex:1 1 52px;max-width:70px}
+  .path-pip-icon{font-size:14px;flex:none}
+  .path-pip-right{flex:1;min-width:0}
+  .path-pip-lv{font-size:10px;font-weight:700;letter-spacing:.04em;line-height:1.2}
+  .path-pip-track{height:4px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;margin-top:2px}
+  .path-pip-fill{height:100%;border-radius:4px;transition:width .4s}
+  .dawn-week-card{padding:10px 14px}
+  .dawn-week-count{font-weight:400;font-size:12px;margin-left:6px}
+  .dawn-week-bar{display:flex;align-items:center;gap:6px;margin-top:4px}
+  .dawn-week-blocks{font-family:ui-monospace,monospace;font-size:14px;letter-spacing:.06em;color:var(--jade)}
 
   /* ── v95: AFT sparkline chart ── */
   .aft-spark{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 8px 6px;margin-bottom:10px}
@@ -1088,5 +1106,227 @@
   /* ── v95: Battle buddy report button ── */
   .rpt-btn{background:rgba(201,162,75,.12);border:1px solid #c9a06a;color:#d8b06a;padding:9px 16px;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:12px;letter-spacing:.04em}
   .rpt-btn:hover{background:rgba(201,162,75,.22)}
+
+  /* ── v96: AFT personal records board ── */
+  .aft-pr-card{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:13px 14px;margin-bottom:10px}
+  .pr-title{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  .pr-row{display:flex;align-items:baseline;gap:6px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+  .pr-row:last-child{border-bottom:none}
+  .pr-label{color:var(--ink-faint);min-width:80px;font-size:12px}
+  .pr-val{flex:1;font-weight:600;color:var(--ink)}
+  .pr-star{font-size:11px}
+  .pr-date{font-size:11px;color:var(--ink-faint)}
+
+  /* ── v96: AFT prep card ── */
+  .aft-prep-card{background:linear-gradient(160deg,rgba(200,119,46,.12),rgba(200,119,46,.04));border:1px solid rgba(200,119,46,.35);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+  .prep-top{display:flex;align-items:baseline;gap:8px;margin-bottom:7px;flex-wrap:wrap}
+  .prep-countdown{font-weight:700;font-size:15px}
+  .prep-date{font-size:12px;color:var(--ink-faint)}
+  .prep-gap{font-size:13px;color:var(--ink-dim);line-height:1.5}
+  .prep-gap b{color:var(--ember)}
+  .prep-gap.ok{color:var(--jade)}
+  /* ── v96: AFT test date input ── */
+  .aft-test-date-row{margin-bottom:12px}
+  .aft-td-label{display:flex;flex-direction:column;font-size:12px;color:var(--ink-faint);letter-spacing:.04em;gap:5px}
+  .aft-td-input{background:#120d07;border:1px solid var(--line);color:var(--ink);padding:9px 11px;border-radius:8px;font-family:inherit;font-size:14px;width:100%;box-sizing:border-box}
+  .aft-td-input:focus{outline:none;border-color:var(--gold)}
+
+  /* ── v96: Session log note ── */
+  .lg-note{width:100%;box-sizing:border-box;background:#120d07;border:1px solid var(--line);color:var(--ink);padding:9px 10px;border-radius:8px;font-family:inherit;font-size:13px;resize:none;margin-top:10px;line-height:1.4}
+  .lg-note:focus{outline:none;border-color:var(--gold)}
+  .lg-note::placeholder{color:var(--ink-faint)}
+  .lg-hist-note{font-size:12px;color:var(--ink-faint);font-style:italic;margin-top:4px;line-height:1.4}
+
+  /* ── v96: Quest due dates ── */
+  .q-due-input{width:100%;box-sizing:border-box;background:#120d07;border:1px solid var(--line);color:var(--ink);padding:9px 11px;border-radius:8px;font-family:inherit;font-size:14px}
+  .q-due-input:focus{outline:none;border-color:var(--gold)}
+  .tag.due-tag{background:rgba(110,116,89,.15);color:var(--ink-dim)}
+  .tag.overdue-tag{background:rgba(200,80,40,.18);color:var(--ember);font-weight:700}
+  .q-snooze{background:none;border:1px solid var(--line);color:var(--ink-faint);padding:2px 7px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit;flex:none;margin-right:3px}
+  .q-snooze:hover{border-color:var(--gold);color:var(--gold)}
+  .card.overdue{border-left:3px solid var(--ember)}
+
+  /* ── v96: PWA install card ── */
+  .install-card{background:rgba(101,160,97,.08);border:1px solid rgba(101,160,97,.28);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+  .install-title{font-size:14px;font-weight:600;color:var(--jade)}
+  .install-sub{font-size:13px;color:var(--ink-dim);line-height:1.5}
+  .install-sub b{color:var(--ink)}
+  .install-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .install-btn{background:var(--jade);color:#0e1009;border:none;padding:8px 16px;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
+  .install-dismiss{background:transparent;border:1px solid var(--line);color:var(--ink-faint);padding:8px 14px;border-radius:7px;font-family:inherit;font-size:13px;cursor:pointer}
+  .install-dismiss:hover{border-color:var(--ink-faint);color:var(--ink)}
+
+  /* ── v96: Notification prompt ── */
+  .notif-prompt-card{background:rgba(110,116,89,.08);border:1px solid rgba(110,116,89,.28);border-radius:9px;padding:10px 13px;font-size:13px;color:var(--ink-dim);display:flex;align-items:center;gap:10px;flex-wrap:wrap;line-height:1.4}
+  .notif-prompt-btn{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:6px 12px;border-radius:6px;font-family:inherit;font-size:12px;cursor:pointer;white-space:nowrap}
+  .notif-prompt-btn:hover{background:rgba(201,162,75,.12)}
+
+  /* ── v97: Habit heat-map ── */
+  .habit-heat-row{display:flex;flex-wrap:wrap;gap:2px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.04)}
+  .heat-sq{width:10px;height:10px;border-radius:2px;background:var(--panel-2)}
+  .heat-sq.done{background:var(--jade)}
+  .heat-sq.miss{background:rgba(200,119,46,.18)}
+
+  /* ── v97: Quest archive ── */
+  .q-archive{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;margin-top:16px;overflow:hidden}
+  .q-archive summary{padding:11px 14px;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-dim);list-style:none;display:flex;align-items:center;gap:6px}
+  .q-archive summary::-webkit-details-marker{display:none}
+  .q-archive[open] summary{border-bottom:1px solid var(--line)}
+  .q-arch-item{display:flex;align-items:flex-start;gap:9px;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.03)}
+  .q-arch-item:last-child{border-bottom:none}
+  .q-arch-check{color:var(--jade);font-size:13px;flex:none;margin-top:2px}
+  .q-arch-body{flex:1;min-width:0}
+  .q-arch-name{font-size:13px;color:var(--ink-dim);line-height:1.3}
+  .q-arch-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:3px}
+  .q-arch-date{font-size:11px;color:var(--ink-faint)}
+
+  /* ── v97: PT calendar ── */
+  .pt-cal-wrap{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-bottom:14px}
+  .pt-cal-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:7px}
+  .pt-cal{display:flex;gap:3px;flex-wrap:wrap}
+  .pt-cal-dot{width:14px;height:14px;border-radius:50%;background:var(--line)}
+  .pt-cal-dot.on{background:var(--jade)}
+  .pt-cal-legend{font-size:11px;color:var(--ink-faint);margin-top:6px}
+
+  /* ── v97: RPE tag ── */
+  .lg-rpe-tag{font-size:11px;background:rgba(124,147,168,.18);color:var(--violet);border-radius:4px;padding:1px 6px;margin-left:4px;display:inline-block}
+
+  /* ── v97: Weight log sparkline ── */
+  .wl-spark{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 8px 4px;margin-top:8px}
+
+  /* ── v97: Baseline sparklines ── */
+  .bl-sparks{margin-bottom:12px}
+  .bl-spark-row{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px}
+  .bl-spark-name{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+  .bl-spark-best{font-size:11.5px;color:var(--ink-faint);margin-top:3px}
+
+  /* ── v98: Habit best-streak badge ── */
+  .hb-best{font-size:11px;color:var(--ink-faint);padding:3px 4px 1px;letter-spacing:.02em}
+
+  /* ── v98: AFT regression card ── */
+  .aft-regress{background:rgba(156,74,52,.12);border:1px solid rgba(156,74,52,.4);border-radius:9px;padding:11px 13px;margin-bottom:10px}
+  .aft-regress-h{font-size:13.5px;font-weight:700;color:var(--ember);margin-bottom:6px}
+  .aft-regress-row{font-size:12.5px;color:var(--ink-dim);padding:3px 0;line-height:1.4}
+  .aft-regress-row.drop{color:var(--ember)}
+  .aft-regress-row.ok{color:var(--jade)}
+  .aft-regress-note{font-size:12px;color:var(--ink-faint);margin-top:7px;font-style:italic;line-height:1.45}
+
+  /* ── v98: Workout weekly volume ── */
+  .week-summary{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin-bottom:14px;font-size:13px;color:var(--ink-dim);letter-spacing:.02em}
+  .week-summary.no-data{color:var(--ink-faint);font-style:italic}
+
+  /* ── v98: Dawn boss card ── */
+  .dawn-boss-card{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--blood);border-radius:10px;padding:12px 13px;display:flex;flex-direction:column;gap:7px}
+  .dawn-boss-header{display:flex;align-items:center;gap:8px}
+  .dawn-boss-icon{font-size:16px;flex:none}
+  .dawn-boss-name{flex:1;font-size:14px;font-weight:600;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dawn-hpbar{height:7px;background:#0a0b06;border-radius:5px;overflow:hidden}
+  .dawn-hpfill{height:100%;background:linear-gradient(90deg,var(--jade),var(--gold));border-radius:5px;transition:width .5s}
+  .dawn-boss-meta{font-size:11.5px;color:var(--ink-faint);letter-spacing:.02em}
+  .dawn-hit-btn{background:rgba(156,74,52,.18);border:1px solid rgba(156,74,52,.45);color:var(--ember);padding:7px 12px;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;align-self:flex-start;letter-spacing:.03em}
+  .dawn-hit-btn:hover{background:rgba(156,74,52,.3)}
+
+  /* ── v98: 7-day discipline bar ── */
+  .disc-log{display:flex;gap:4px;align-items:flex-end;height:32px;padding:2px 0}
+  .disc-cell{width:100%;min-width:8px;border-radius:3px 3px 0 0;flex:1}
+  .disc-avg{font-weight:400;color:var(--ink-faint);font-size:12px;margin-left:6px}
+  .disc-legend{font-size:10.5px;color:var(--ink-faint);margin-top:4px;line-height:1.3}
+
+  /* ── v98: Copy daily brief button ── */
+  .brief-row{text-align:right;padding:2px 0 4px}
+  .brief-btn{background:transparent;border:1px solid var(--line);color:var(--ink-faint);padding:6px 12px;border-radius:7px;font-family:inherit;font-size:12px;cursor:pointer;letter-spacing:.02em}
+  .brief-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+  /* ── v98: Carved Rings (trophies) tab ── */
+  .trophy-lede{font-size:13px;color:var(--ink-faint);line-height:1.5;margin-bottom:16px;font-style:italic;border-left:2px solid var(--line);padding-left:10px}
+  .trophy-summary{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:18px}
+  .trophy-counts{font-size:14px;color:var(--ink-dim);margin-bottom:8px}
+  .trophy-earned-n{font-size:22px;font-weight:700;color:var(--gold-bright)}
+  .trophy-total-n{font-size:16px;color:var(--ink-faint)}
+  .trophy-rings-label{font-size:13px;color:var(--ink-faint);margin-left:4px}
+  .trophy-global-bar{height:8px;background:#0a0b06;border-radius:5px;overflow:hidden}
+  .trophy-global-fill{height:100%;background:linear-gradient(90deg,var(--ember),var(--gold));border-radius:5px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+
+  .trophy-path{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+  .trophy-path.has-rings{border-color:rgba(255,255,255,.1)}
+  .trophy-path-hdr{display:flex;align-items:center;gap:9px;padding:11px 14px;cursor:pointer;list-style:none;user-select:none}
+  .trophy-path-hdr::-webkit-details-marker{display:none}
+  .trophy-path-ic{font-size:17px;flex:none}
+  .trophy-path-nm{flex:1;font-size:14px;font-weight:600;color:var(--ink);letter-spacing:.02em}
+  .trophy-path-ct{font-size:12px;color:var(--ink-faint);white-space:nowrap}
+  .trophy-path-bar-wrap{width:52px;height:6px;background:#0a0b06;border-radius:3px;overflow:hidden;flex:none}
+  .trophy-path-bar-fill{display:block;height:100%;background:var(--tpc,var(--gold));border-radius:3px}
+  .trophy-path[open] .trophy-path-hdr{border-bottom:1px solid var(--line)}
+
+  .trophy-path-body{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+  .trophy-skill{display:flex;align-items:flex-start;gap:10px;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.03)}
+  .trophy-skill:last-child{border-bottom:none}
+  .trophy-skill.started .trophy-skill-name{color:var(--ink)}
+  .trophy-skill-info{flex:none;width:130px;min-width:0}
+  .trophy-skill-name{font-size:12.5px;font-weight:600;color:var(--ink-dim);line-height:1.3;word-break:break-word}
+  .trophy-skill-tier{font-size:10.5px;color:var(--ink-faint);letter-spacing:.03em;margin-top:2px}
+  .trophy-skill-tier.unstarted{font-style:italic;opacity:.5}
+  .trophy-chips{display:flex;flex-wrap:wrap;gap:4px;flex:1}
+
+  /* Each chip: square, level number, earned = colored by tier/path */
+  .trophy-chip{
+    width:26px;height:26px;border-radius:5px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:700;letter-spacing:0;
+    border:1px solid var(--line);color:var(--ink-faint);background:#0e0f09;
+    transition:background .2s,border-color .2s,color .2s;cursor:default;
+  }
+  /* Tier-indexed earned styles — each tier gets a progressively richer treatment */
+  .trophy-chip.on.t0{background:rgba(var(--tpc-rgb,184,160,106),.12);border-color:rgba(var(--tpc-rgb,184,160,106),.25);color:var(--tpc,var(--gold));opacity:.75}
+  .trophy-chip.on.t1{background:rgba(var(--tpc-rgb,184,160,106),.18);border-color:rgba(var(--tpc-rgb,184,160,106),.4);color:var(--tpc,var(--gold));opacity:.85}
+  .trophy-chip.on.t2{background:rgba(var(--tpc-rgb,184,160,106),.26);border-color:rgba(var(--tpc-rgb,184,160,106),.55);color:var(--tpc,var(--gold))}
+  .trophy-chip.on.t3{background:rgba(var(--tpc-rgb,184,160,106),.3);border-color:var(--tpc,var(--gold));color:var(--tpc,var(--gold));font-weight:800}
+  /* Max-level (★) chip — gold glow regardless of path */
+  .trophy-chip.max{background:rgba(184,160,106,.28);border-color:var(--gold);color:var(--gold-bright);font-size:13px;box-shadow:0 0 8px rgba(184,160,106,.25)}
+  .trophy-chip[data-trophychip]{cursor:pointer}
+  .trophy-chip[data-trophychip]:hover{filter:brightness(1.25)}
+  /* Tap-to-reveal trophy detail panel */
+  .trophy-detail{display:flex;gap:10px;align-items:flex-start;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:12px 14px;margin-top:10px}
+  .td-chip-icon{font-size:20px;flex:none;margin-top:1px}
+  .td-chip-title{font-size:13px;font-weight:700;color:var(--ink);letter-spacing:.03em;margin-bottom:4px}
+  .td-chip-ability{font-size:12.5px;color:var(--ink-dim);line-height:1.5;font-style:italic}
+  /* Streak-recovery card */
+  .recovery-mode-card{background:rgba(124,100,200,.08);border:1px solid var(--violet);border-radius:11px;padding:13px 15px;margin-bottom:10px}
+  .recovery-mode-card .rm-title{font-size:13.5px;font-weight:700;color:var(--violet);margin-bottom:5px}
+  .recovery-mode-card .rm-body{font-size:13px;color:var(--ink-dim);line-height:1.5}
+  .recovery-mode-card .rm-pips{display:flex;gap:6px;margin-top:8px}
+  .recovery-mode-card .rm-pip{width:22px;height:22px;border-radius:50%;border:2px solid var(--violet);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--violet)}
+  .recovery-mode-card .rm-pip.done{background:var(--violet);color:#fff;border-color:var(--violet)}
+  /* Oath age / completion timing */
+  .quest-age{font-size:11px;color:var(--ink-faint);margin-left:6px}
+  .quest-age.old{color:var(--ember)}
+  .quest-archive-timing{font-size:11px;color:var(--ink-faint);margin-top:2px}
+  /* Skill history timeline */
+  .sk-hist{margin-top:5px;display:flex;flex-wrap:wrap;align-items:center;gap:0;font-size:11px;color:var(--ink-faint);line-height:1.6}
+  .sk-hist-item{color:var(--ink-faint)}
+  .sk-hist-sep{color:var(--line);margin:0 3px}
+  .sk-hist-item.decay{color:var(--ember)}
+  .sk-hist-item.promote{color:var(--jade)}
+  /* AFT inline delta badge */
+  .aft-event-delta{font-size:13px;font-weight:600;margin-left:5px}
+  /* Baseline PR card */
+  .bl-pr-card{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:13px 14px;margin-bottom:10px}
+  .bl-pr-title{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ember);margin-bottom:8px}
+  .bl-pr-row{display:flex;align-items:baseline;gap:6px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+  .bl-pr-row:last-child{border-bottom:none}
+  .bl-pr-label{color:var(--ink-dim);min-width:110px}
+  .bl-pr-val{font-weight:700;color:var(--ink);flex:1}
+  .bl-pr-date{font-size:11px;color:var(--ink-faint)}
+  .bl-pr-star{color:var(--gold)}
+  /* Habit monthly grid */
+  .hb-view-toggle{font-size:11px;color:var(--ink-faint);background:none;border:1px solid var(--line);border-radius:5px;padding:2px 7px;cursor:pointer;margin-left:auto}
+  .hb-view-toggle.on{background:var(--panel-2);color:var(--ink)}
+  .hb-month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:6px}
+  .hb-month-cell{width:100%;aspect-ratio:1;border-radius:3px;background:var(--panel-2);position:relative}
+  .hb-month-cell.hm-done{background:var(--jade)}
+  .hb-month-cell.hm-miss{background:rgba(200,119,46,.25)}
+  .hb-month-cell.hm-future{background:rgba(255,255,255,.03)}
+  .hb-month-header{display:flex;gap:2px;margin-bottom:2px}
+  .hb-month-dow{flex:1;text-align:center;font-size:9px;color:var(--ink-faint);font-weight:600;letter-spacing:.03em}
 
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}

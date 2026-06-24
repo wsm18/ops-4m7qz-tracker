@@ -3,6 +3,10 @@
 // Determine the single most important action right now.
 function getWarriorsFocus(){
   const p=typeof todaysPlan==="function"?todaysPlan():null;
+  // 0. Overdue oaths
+  const today=localYMD();
+  const overdueQ=(S.quests||[]).find(q=>!q.done&&q.due&&q.due<today);
+  if(overdueQ) return {icon:"⚠️", action:overdueQ.name, sub:`Overdue — was due ${overdueQ.due}`, btn:"All oaths →", tab:"quests"};
   // 1. Scheduled training session not yet logged — session is already shown above, so action = log it
   if(p&&p.sessionKey&&!p.todayLogged){
     return {icon:"💪", action:"Complete today's training — then log it.", sub:"Session details are above.", btn:"Open Log to record it →", tab:"log", logsess:p.sessionKey};
@@ -56,6 +60,94 @@ function dawnOrdersHtml(){
   return `<div class="td-card fn-card dawn-orders-card">${header}${rows}${moreLink}</div>`;
 }
 
+function disciplineLogHtml(){
+  const log=(S.streakLog||[]).slice(-7);
+  if(log.length<2) return "";
+  const avg=Math.round(log.reduce((s,e)=>s+e.pct,0)/log.length);
+  const cells=log.map(e=>{
+    const h=Math.max(4,Math.round(e.pct/100*28));
+    const col=e.pct>=100?"var(--jade)":e.pct>=50?"var(--gold)":"var(--ember)";
+    return `<div class="disc-cell" title="${e.pct}% on ${e.date}" style="height:${h}px;background:${col}"></div>`;
+  }).join('');
+  return `<div class="td-card fn-card">
+    <div class="td-h fn-h">7-Day Discipline <span class="disc-avg">${avg}% avg</span></div>
+    <div class="disc-log">${cells}</div>
+    <div class="disc-legend">Orders completed per day — green=100%, amber≥50%, ember&lt;50%</div>
+  </div>`;
+}
+
+function dawnBossHtml(){
+  const boss=(S.bosses||[]).find(b=>b.hp>0); if(!boss) return "";
+  const progress=boss.maxhp-boss.hp;
+  const pct=Math.round(progress/boss.maxhp*100);
+  return `<div class="dawn-boss-card">
+    <div class="dawn-boss-header">
+      <span class="dawn-boss-icon">⚔️</span>
+      <div class="dawn-boss-name">${esc(boss.name)}</div>
+      <button class="td-go-sm" data-gototab="bosses">All →</button>
+    </div>
+    <div class="dawn-hpbar"><div class="dawn-hpfill" style="width:${pct}%"></div></div>
+    <div class="dawn-boss-meta">${progress}/${boss.maxhp} steps complete · ${boss.hp} remaining</div>
+    <button class="dawn-hit-btn" data-hit="${boss.id}">⚔️ Strike it</button>
+  </div>`;
+}
+
+function copyDailyBrief(){
+  const name=S.name||"Cadet";
+  const rank=S.rank||"MS2 Cadet";
+  const date=new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric",year:"numeric"});
+  const lastAft=S.aft&&S.aft.length?S.aft[S.aft.length-1]:null;
+  const aftLine=lastAft?`AFT: ${lastAft.total} pts (${lastAft.date})`:"AFT: not logged";
+  const cd=S.profile&&S.profile.commissionDate;
+  const commissLine=cd?`Commission: ${Math.max(0,Math.ceil((new Date(cd+"T12:00:00")-Date.now())/864e5))} days`:"Commission: date not set";
+  const done=(S.dailies||[]).filter(d=>d.done).length, total=(S.dailies||[]).length;
+  const overdueCount=(S.quests||[]).filter(q=>!q.done&&q.due&&q.due<localYMD()).length;
+  const activeQ=(S.quests||[]).filter(q=>!q.done).length;
+  const brief=[
+    `DAILY BRIEF — ${name} · ${rank}`,
+    `Date: ${date}`,
+    `─────────────────────`,
+    aftLine,
+    commissLine,
+    `Orders: ${done}/${total} complete today`,
+    `Active oaths: ${activeQ}${overdueCount>0?` (${overdueCount} OVERDUE)`:""}`,
+    `Branch goal: ${S.branchGoal||"TBD"}`,
+    `─────────────────────`,
+    `OPERATIONS — carried at the root`,
+  ].join("\n");
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(brief).then(()=>toast("📋 Brief copied to clipboard")).catch(()=>toast("Copy failed — try long-pressing"));
+  } else { toast("Clipboard not available in this browser"); }
+}
+
+function pathPipsHtml(){
+  const pxp=S.pathXP||{};
+  const order=typeof SK_CAT_ORDER!=="undefined"?SK_CAT_ORDER:Object.keys(PATH_META);
+  const active=order.filter(cat=>pxp[cat]>0);
+  if(!active.length) return "";
+  const pips=active.map(cat=>{
+    const xp=pxp[cat]||0;
+    const {lvl,into,need}=typeof skillLevel==="function"?skillLevel(xp):{lvl:1,into:0,need:80};
+    const pct=Math.round(into/need*100);
+    const pm=PATH_META[cat]||{icon:"•",name:cat,color:"var(--ink-faint)"};
+    return `<div class="path-pip"><div class="path-pip-icon">${pm.icon}</div><div class="path-pip-right"><div class="path-pip-lv" style="color:${pm.color}">Lv${lvl}</div><div class="path-pip-track"><div class="path-pip-fill" style="width:${pct}%;background:${pm.color}"></div></div></div></div>`;
+  }).join('');
+  return `<div class="td-card fn-card path-pips-card">
+    <div class="td-h fn-h">Paths <span style="color:var(--ink-faint);font-weight:400;font-size:12px">${active.length} active</span></div>
+    <div class="path-pips-row">${pips}</div>
+  </div>`;
+}
+function weekTrainCardHtml(){
+  const ws=typeof weekTrainingStats==="function"?weekTrainingStats():{done:0,sched:0};
+  if(!ws.sched) return "";
+  const done=ws.done, sched=ws.sched;
+  const bar='▓'.repeat(done)+'░'.repeat(Math.max(0,sched-done));
+  const allDone=done>=sched;
+  return `<div class="td-card fn-card dawn-week-card">
+    <div class="td-h fn-h">This Week <span class="dawn-week-count" style="color:${allDone?"var(--jade)":"var(--ink-dim)"}">${done}/${sched} sessions</span></div>
+    <div class="dawn-week-bar"><span class="dawn-week-blocks">${bar}</span><button class="td-go-sm" style="margin-left:auto" data-gototab="plan">Plan →</button></div>
+  </div>`;
+}
 function renderToday(){
   const el=document.getElementById("todayDash"); if(!el) return;
   const hour=new Date().getHours();
@@ -169,12 +261,22 @@ function renderToday(){
     const c=typeof aftCtx==="function"?aftCtx():{standard:"general"};
     const pass=lastAft.total>=(c.standard==="combat"?350:300);
     notes.push(`<div class="fn-row"><span class="fn-dot">⚔️</span><span>AFT: ${lastAft.total} pts <span style="color:${pass?"var(--jade)":"var(--ember)"}">(${pass?"passing":"below standard"})</span></span></div>`);
+    // AFT regression note
+    if(S.aft.length>=2){
+      const prevAft=S.aft[S.aft.length-2];
+      if(lastAft.total < prevAft.total - 4){
+        notes.push(`<div class="fn-row"><span class="fn-dot">📉</span><span>Score dropped ${prevAft.total-lastAft.total} pts from last test</span><button class="td-go-sm" data-gototab="aft">→</button></div>`);
+      }
+    }
   }
   if(S.profile&&S.profile.gpa) notes.push(`<div class="fn-row"><span class="fn-dot">📊</span><span>GPA ${S.profile.gpa} · ${esc(S.branchGoal||"Branch TBD")}</span></div>`);
   if(S.profile&&S.profile.bloodType){
     const lastDon=(S.donations||[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
     if(lastDon){const nxt=new Date(lastDon.date);nxt.setDate(nxt.getDate()+56);const d=Math.ceil((nxt-Date.now())/864e5);if(d<=7)notes.push(`<div class="fn-row"><span class="fn-dot">🩸</span><span>Blood donation: ${d<=0?"eligible now":`eligible in ${d} day${d!==1?"s":""}`}</span></div>`);}
   }
+  if(S.aftTestDate){const _aftD=Math.ceil((new Date(S.aftTestDate+"T12:00:00")-Date.now())/864e5);if(_aftD>=0&&_aftD<=60)notes.push(`<div class="fn-row"><span class="fn-dot">⏳</span><span>AFT in ${_aftD===0?"today":_aftD+" day"+(_aftD!==1?"s":"")} · <span style="color:${_aftD<=14?"var(--ember)":"var(--ink-dim)"}">stay on plan</span></span><button class="td-go-sm" data-gototab="aft">→</button></div>`);}
+  const overdueCount=(S.quests||[]).filter(q=>!q.done&&q.due&&q.due<localYMD()).length;
+  if(overdueCount>1) notes.push(`<div class="fn-row"><span class="fn-dot">⚠️</span><span>${overdueCount} overdue oaths</span><button class="td-go-sm" data-gototab="quests">→</button></div>`);
   const notesHtml=notes.length?`<div class="td-card fn-card"><div class="td-h fn-h">Field Notes</div>${notes.join("")}</div>`:"";
 
   // ── FM Advisory (only if recovery data exists)
@@ -205,8 +307,58 @@ function renderToday(){
     </div>`;
   }
 
+  // ── PWA install nudge — shown once (mobile only, before the user installs)
+  let installHtml="";
+  if(!window.matchMedia("(display-mode:standalone)").matches && !S.installPromptDismissed){
+    const canOneTab=typeof _deferredInstallPrompt!=="undefined"&&_deferredInstallPrompt;
+    installHtml=`<div class="install-card">
+      <div class="install-body">
+        <div class="install-title">📲 Install as App</div>
+        <div class="install-sub">${canOneTab?"Tap <b>Install</b> to add Operations to your home screen.":"Open your browser's share menu and choose <b>Add to Home Screen</b> to install."}</div>
+      </div>
+      <div class="install-actions">${canOneTab?`<button class="install-btn" data-install-now="1">Install</button>`:""}<button class="install-dismiss" data-install-dismiss="1">Dismiss</button></div>
+    </div>`;
+  }
+
+  // ── Notification prompt — shown only when streak is active and permission not yet granted
+  let notifPromptHtml="";
+  if(typeof Notification!=="undefined"&&Notification.permission==="default"&&S.streak>0&&!S.notifEnabled){
+    notifPromptHtml=`<div class="notif-prompt-card">🔔 Enable streak alerts to get a reminder at 7 pm when orders are still open.<button class="notif-prompt-btn" data-notif-prompt="1">Enable →</button></div>`;
+  }
+
+  // ── Streak recovery mode (first 3 days after a break)
+  let recoveryHtml="";
+  if(S.streak===0 && S.streakBrokenDate){
+    const daysSince=dayDiff(S.streakBrokenDate, localYMD());
+    const dayNum=Math.min(daysSince+1, 3);
+    const left=3-daysSince;
+    if(left>0){
+      const pips=[1,2,3].map(n=>`<div class="rm-pip${n<dayNum?' done':''}">${n<dayNum?'✓':n}</div>`).join('');
+      recoveryHtml=`<div class="recovery-mode-card">
+        <div class="rm-title">⚡ Day ${dayNum} of rebuilding</div>
+        <div class="rm-body">${left===1?"One perfect day restores your momentum.":`${left} perfect days to restore your momentum.`} Today: complete all orders.</div>
+        <div class="rm-pips">${pips}</div>
+      </div>`;
+    }
+  }
+
+  // ── Path XP pips
+  const pathPips=pathPipsHtml();
+
+  // ── Weekly training summary card
+  const weekCardHtml=weekTrainCardHtml();
+
+  // ── Active boss card
+  const bossHtml=dawnBossHtml();
+
+  // ── 7-day discipline bar
+  const discHtml=disciplineLogHtml();
+
+  // ── Copy daily brief button (compact row)
+  const briefBtnHtml=`<div class="brief-row"><button class="brief-btn" data-copybriefbtn="1">📋 Copy today's brief</button></div>`;
+
   // ── Assemble — creed always first, then guided flow
-  const flow=[startHtml, sessHtml, ordersHtml, streakHtml, commissionHtml, focusHtml, adaptHtml, neglectHtml, notesHtml, fmHtml].filter(Boolean).join("");
+  const flow=[startHtml, sessHtml, weekCardHtml, ordersHtml, recoveryHtml, discHtml, bossHtml, streakHtml, commissionHtml, focusHtml, adaptHtml, neglectHtml, pathPips, notesHtml, fmHtml, briefBtnHtml, installHtml, notifPromptHtml].filter(Boolean).join("");
 
   el.innerHTML=`<div class="td-creed">🌲 <span>${creed}</span></div>`+(
     flow

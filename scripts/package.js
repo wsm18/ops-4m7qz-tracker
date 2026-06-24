@@ -10,7 +10,7 @@ const ROOT = path.resolve(__dirname, "..");
 const DIST = path.join(ROOT, "dist");
 fs.mkdirSync(DIST, { recursive: true });
 
-const FILES = ["index.html", "quizbank.js", "sw.js", "manifest.json", "icon-192.png", "icon-512.png", "HOW TO INSTALL.txt", "README.md"];
+const FILES = ["index.html", "quizbank.js", "sw.js", "manifest.json", "icon-192.png", "icon-512.png", "docs/HOW TO INSTALL.txt", "README.md"];
 const present = FILES.filter((f) => fs.existsSync(path.join(ROOT, f)));
 const out = path.join(DIST, "operations.zip");
 if (fs.existsSync(out)) fs.unlinkSync(out);

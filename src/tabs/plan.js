@@ -23,15 +23,12 @@ function dawnSessionHtml(){
   const action=p.todayLogged
     ? `<div class="ds-done">✓ Logged — well done.</div>`
     : `<button class="td-go ds-log-btn" data-gototab="log" data-logsess="${p.sessionKey}">Log this session →</button>`;
-  const ws=typeof weekTrainingStats==="function"?weekTrainingStats():{done:0,sched:0};
-  const weekBar=ws.sched>0?`<div class="ds-week">Week · ${ws.done}/${ws.sched} ${'▓'.repeat(ws.done)}${'░'.repeat(Math.max(0,ws.sched-ws.done))}</div>`:"";
   return `<div class="dawn-sess">
     <div class="ds-top">
       <span class="ds-name">${esc(dayName)} · ${esc(sess.name.split("·").slice(-1)[0].trim())}</span>
       <span class="ds-badges">${intLabel} <span class="ds-mode">${modeTag}</span></span>
     </div>
     <div class="ds-exlist">${exList}${more}</div>
-    ${weekBar}
     <div class="ds-actions">${action}<button class="td-go ds-plan-btn" data-gototab="plan">Full plan →</button></div>
   </div>`;
 }
@@ -222,6 +219,29 @@ function baselineDueThisMonth(){
   return !S.baselines.some(b=>b.month===currentMonth());
 }
 let BL_DRAFT=null;
+function baselinePrCard(){
+  const entries=(S.baselines||[]);
+  if(entries.length<1) return "";
+  const sorted=entries.slice().sort((a,b)=>a.ts-b.ts);
+  const latest=sorted[sorted.length-1];
+  const rows=BASELINE_TEST.map(def=>{
+    const allVals=sorted.filter(b=>b.results&&b.results[def.key]);
+    if(!allVals.length) return null;
+    const best=allVals.reduce((bst,b)=>{
+      const v=baselineVolume(def,b.results[def.key]); if(v==null) return bst;
+      const bv=bst?baselineVolume(def,bst.results[def.key]):null;
+      return (bv==null||(def.lowerBetter?v<bv:v>bv))?b:bst;
+    },null);
+    if(!best) return null;
+    const isCurrent=latest&&best===latest;
+    const valStr=fmtBaselineVal(def,best.results[def.key]);
+    const shortName=def.name.replace(/ \(.*\)/,'');
+    return `<div class="bl-pr-row"><span class="bl-pr-label">${esc(shortName)}</span><span class="bl-pr-val">${esc(valStr)}${isCurrent?' <span class="bl-pr-star">⭐</span>':''}</span><span class="bl-pr-date">${esc(monthLabel(best.month))}</span></div>`;
+  }).filter(Boolean);
+  if(!rows.length) return "";
+  return `<div class="bl-pr-card"><div class="bl-pr-title">🏅 Baseline Personal Records</div>${rows.join("")}</div>`;
+}
+
 function renderBaseline(){
   const area=document.getElementById("baselineArea");
   const prompt=document.getElementById("baselinePrompt");
@@ -268,9 +288,31 @@ function renderBaseline(){
     }).join("")}
     <button class="btn-add" id="blSave" style="margin-top:12px">${due?'Log This Month&rsquo;s Baseline':'Save Baseline (updates targets)'}</button>
   </div>`;
-  area.innerHTML=latestHtml+form;
+  area.innerHTML=baselinePrCard()+latestHtml+baselineSparklines()+form;
   const btn=document.getElementById("blSave");
   if(btn) btn.onclick=saveBaseline;
+}
+function baselineSparklines(){
+  if((S.baselines||[]).length<2) return "";
+  const sorted=S.baselines.slice().sort((a,b)=>a.ts-b.ts);
+  const rows=BASELINE_TEST.map(def=>{
+    const entries=sorted.filter(b=>b.results&&b.results[def.key]);
+    const vals=entries.map(b=>baselineVolume(def,b.results[def.key])).filter(v=>v!=null&&v>0);
+    if(vals.length<2) return "";
+    const bestEntry=entries.reduce((bst,b)=>{
+      const v=baselineVolume(def,b.results[def.key]); if(v==null) return bst;
+      const bv=bst?baselineVolume(def,bst.results[def.key]):null;
+      return (bv==null||(def.lowerBetter?v<bv:v>bv))?b:bst;
+    },null);
+    const bestLabel=bestEntry?`Best: <b>${esc(fmtBaselineVal(def,bestEntry.results[def.key]))}</b> (${esc(monthLabel(bestEntry.month))})`:"";
+    return `<div class="bl-spark-row">
+      <div class="bl-spark-name">${esc(def.name.replace(/ \(.*\)/,''))}</div>
+      <div class="wl-spark">${miniSparkline(vals,240,40)}</div>
+      <div class="bl-spark-best">${bestLabel}</div>
+    </div>`;
+  }).filter(Boolean).join("");
+  if(!rows) return "";
+  return `<div class="bl-sparks"><div class="sec-h" style="margin-bottom:8px"><h2>Baseline History</h2><span class="hint">month-over-month</span></div>${rows}</div>`;
 }
 function baselineInputs(def){
   if(def.type==="reps"){

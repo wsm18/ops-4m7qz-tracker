@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Regression test: serve the repo root, load the app, click all 16 tabs, assert no
+// Regression test: serve the repo root, load the app, click all 17 tabs, assert no
 // pageerror, optionally screenshot the skill tree. Auto-detects the local Chromium that
 // `npx playwright install chromium` provides (no hard-coded path).
 // Usage: node scripts/regress.js [--shot]
@@ -21,7 +21,10 @@ const server = http.createServer((req, res) => {
   fs.createReadStream(fp).pipe(res);
 });
 
-const TABS = ["today", "quests", "profile", "test", "dailies", "quizzes", "aft", "log", "skills", "bosses", "board", "plan", "shop", "awards", "records", "weight"];
+// Primary tabs are always visible; secondary tabs live inside the .nav-more drawer (hidden until opened).
+const PRIMARY_TABS = ["today", "quests", "dailies", "plan", "aft", "log", "skills"];
+const SECONDARY_TABS = ["profile", "test", "quizzes", "bosses", "board", "shop", "awards", "records", "weight", "trophies"];
+const TABS = [...PRIMARY_TABS, ...SECONDARY_TABS];
 
 (async () => {
   await new Promise((r) => server.listen(0, r));
@@ -37,6 +40,11 @@ const TABS = ["today", "quests", "profile", "test", "dailies", "quizzes", "aft",
   await page.waitForTimeout(500);
 
   for (const t of TABS) {
+    // Open the More drawer before clicking secondary tabs (it's collapsed by default).
+    if (SECONDARY_TABS.includes(t) && t === SECONDARY_TABS[0]) {
+      const moreBtn = await page.$("#navMoreBtn");
+      if (moreBtn) { await moreBtn.click(); await page.waitForTimeout(150); }
+    }
     const btn = await page.$(`#sideNav button[data-tab="${t}"]`);
     if (!btn) { errors.push("MISSING TAB: " + t); continue; }
     await btn.click();

@@ -120,6 +120,9 @@
   /* More/Less toggle */
   .nav-more-toggle{color:var(--ink-faint);background:transparent;border-style:dashed;border-color:var(--line);font-size:12px;letter-spacing:.06em}
   .nav-more-toggle:hover{color:var(--gold);border-color:var(--gold)}
+  /* Overdue oath count badge on nav buttons */
+  .nav-badge{background:var(--blood);color:#fff;border-radius:99px;font-size:9px;font-weight:700;padding:1px 4px;margin-left:3px;vertical-align:middle;display:inline-block;min-width:14px;text-align:center}
+  .nav-badge:empty{display:none}
   /* Secondary tabs — shown when More is expanded */
   .nav-more{display:none;flex-direction:column;gap:5px;margin-top:2px}
   .nav-more.open{display:flex}
@@ -489,7 +492,8 @@
   .habit-starter-label{font-size:11.5px;color:var(--ink-faint);margin-bottom:7px}
   .hb-starter-btn{display:inline-block;background:#0e0f09;border:1px solid var(--line);color:var(--ink-dim);padding:6px 10px;border-radius:16px;font-family:inherit;font-size:12px;cursor:pointer;margin:0 5px 5px 0}
   .hb-starter-btn:hover{border-color:var(--jade);color:var(--jade)}
-  .hb-card{display:flex;align-items:center;gap:11px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:8px}
+  .hb-card{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:8px}
+  .hb-top-row{display:flex;align-items:center;gap:11px}
   .hb-card.done{opacity:.62;border-color:#3c5230}
   .hb-check{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid var(--line);background:transparent;color:#14160f;font-weight:800;cursor:pointer;font-size:15px;display:grid;place-items:center;transition:.15s}
   .hb-check:hover{border-color:var(--jade)}
@@ -815,6 +819,8 @@
   @media(max-width:680px){.sk-jumpbar{right:4px}.sk-jumpbar button{width:32px;height:32px;font-size:14px}}
   .sk-card-edit{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;flex:none}
   .sk-card-edit:hover{color:var(--gold)}
+  .sk-copy-btn{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:12px;flex:none;padding:2px 4px}
+  .sk-copy-btn:hover{color:var(--jade)}
 
   /* ---- Awards / The Wall ---- */
   #awallGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -1080,6 +1086,18 @@
 
   /* ── v95: Week training bar ── */
   .ds-week{font-size:11px;color:var(--ink-dim);letter-spacing:.05em;padding:5px 0 3px;font-family:ui-monospace,monospace}
+  .path-pips-card{padding:10px 14px}
+  .path-pips-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .path-pip{display:flex;align-items:center;gap:5px;min-width:52px;flex:1 1 52px;max-width:70px}
+  .path-pip-icon{font-size:14px;flex:none}
+  .path-pip-right{flex:1;min-width:0}
+  .path-pip-lv{font-size:10px;font-weight:700;letter-spacing:.04em;line-height:1.2}
+  .path-pip-track{height:4px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;margin-top:2px}
+  .path-pip-fill{height:100%;border-radius:4px;transition:width .4s}
+  .dawn-week-card{padding:10px 14px}
+  .dawn-week-count{font-weight:400;font-size:12px;margin-left:6px}
+  .dawn-week-bar{display:flex;align-items:center;gap:6px;margin-top:4px}
+  .dawn-week-blocks{font-family:ui-monospace,monospace;font-size:14px;letter-spacing:.06em;color:var(--jade)}
 
   /* ── v95: AFT sparkline chart ── */
   .aft-spark{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 8px 6px;margin-bottom:10px}
@@ -1104,6 +1122,228 @@
   /* ── v95: Battle buddy report button ── */
   .rpt-btn{background:rgba(201,162,75,.12);border:1px solid #c9a06a;color:#d8b06a;padding:9px 16px;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:12px;letter-spacing:.04em}
   .rpt-btn:hover{background:rgba(201,162,75,.22)}
+
+  /* ── v96: AFT personal records board ── */
+  .aft-pr-card{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:13px 14px;margin-bottom:10px}
+  .pr-title{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  .pr-row{display:flex;align-items:baseline;gap:6px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+  .pr-row:last-child{border-bottom:none}
+  .pr-label{color:var(--ink-faint);min-width:80px;font-size:12px}
+  .pr-val{flex:1;font-weight:600;color:var(--ink)}
+  .pr-star{font-size:11px}
+  .pr-date{font-size:11px;color:var(--ink-faint)}
+
+  /* ── v96: AFT prep card ── */
+  .aft-prep-card{background:linear-gradient(160deg,rgba(200,119,46,.12),rgba(200,119,46,.04));border:1px solid rgba(200,119,46,.35);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+  .prep-top{display:flex;align-items:baseline;gap:8px;margin-bottom:7px;flex-wrap:wrap}
+  .prep-countdown{font-weight:700;font-size:15px}
+  .prep-date{font-size:12px;color:var(--ink-faint)}
+  .prep-gap{font-size:13px;color:var(--ink-dim);line-height:1.5}
+  .prep-gap b{color:var(--ember)}
+  .prep-gap.ok{color:var(--jade)}
+  /* ── v96: AFT test date input ── */
+  .aft-test-date-row{margin-bottom:12px}
+  .aft-td-label{display:flex;flex-direction:column;font-size:12px;color:var(--ink-faint);letter-spacing:.04em;gap:5px}
+  .aft-td-input{background:#120d07;border:1px solid var(--line);color:var(--ink);padding:9px 11px;border-radius:8px;font-family:inherit;font-size:14px;width:100%;box-sizing:border-box}
+  .aft-td-input:focus{outline:none;border-color:var(--gold)}
+
+  /* ── v96: Session log note ── */
+  .lg-note{width:100%;box-sizing:border-box;background:#120d07;border:1px solid var(--line);color:var(--ink);padding:9px 10px;border-radius:8px;font-family:inherit;font-size:13px;resize:none;margin-top:10px;line-height:1.4}
+  .lg-note:focus{outline:none;border-color:var(--gold)}
+  .lg-note::placeholder{color:var(--ink-faint)}
+  .lg-hist-note{font-size:12px;color:var(--ink-faint);font-style:italic;margin-top:4px;line-height:1.4}
+
+  /* ── v96: Quest due dates ── */
+  .q-due-input{width:100%;box-sizing:border-box;background:#120d07;border:1px solid var(--line);color:var(--ink);padding:9px 11px;border-radius:8px;font-family:inherit;font-size:14px}
+  .q-due-input:focus{outline:none;border-color:var(--gold)}
+  .tag.due-tag{background:rgba(110,116,89,.15);color:var(--ink-dim)}
+  .tag.overdue-tag{background:rgba(200,80,40,.18);color:var(--ember);font-weight:700}
+  .q-snooze{background:none;border:1px solid var(--line);color:var(--ink-faint);padding:2px 7px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit;flex:none;margin-right:3px}
+  .q-snooze:hover{border-color:var(--gold);color:var(--gold)}
+  .card.overdue{border-left:3px solid var(--ember)}
+
+  /* ── v96: PWA install card ── */
+  .install-card{background:rgba(101,160,97,.08);border:1px solid rgba(101,160,97,.28);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+  .install-title{font-size:14px;font-weight:600;color:var(--jade)}
+  .install-sub{font-size:13px;color:var(--ink-dim);line-height:1.5}
+  .install-sub b{color:var(--ink)}
+  .install-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .install-btn{background:var(--jade);color:#0e1009;border:none;padding:8px 16px;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
+  .install-dismiss{background:transparent;border:1px solid var(--line);color:var(--ink-faint);padding:8px 14px;border-radius:7px;font-family:inherit;font-size:13px;cursor:pointer}
+  .install-dismiss:hover{border-color:var(--ink-faint);color:var(--ink)}
+
+  /* ── v96: Notification prompt ── */
+  .notif-prompt-card{background:rgba(110,116,89,.08);border:1px solid rgba(110,116,89,.28);border-radius:9px;padding:10px 13px;font-size:13px;color:var(--ink-dim);display:flex;align-items:center;gap:10px;flex-wrap:wrap;line-height:1.4}
+  .notif-prompt-btn{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:6px 12px;border-radius:6px;font-family:inherit;font-size:12px;cursor:pointer;white-space:nowrap}
+  .notif-prompt-btn:hover{background:rgba(201,162,75,.12)}
+
+  /* ── v97: Habit heat-map ── */
+  .habit-heat-row{display:flex;flex-wrap:wrap;gap:2px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.04)}
+  .heat-sq{width:10px;height:10px;border-radius:2px;background:var(--panel-2)}
+  .heat-sq.done{background:var(--jade)}
+  .heat-sq.miss{background:rgba(200,119,46,.18)}
+
+  /* ── v97: Quest archive ── */
+  .q-archive{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;margin-top:16px;overflow:hidden}
+  .q-archive summary{padding:11px 14px;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-dim);list-style:none;display:flex;align-items:center;gap:6px}
+  .q-archive summary::-webkit-details-marker{display:none}
+  .q-archive[open] summary{border-bottom:1px solid var(--line)}
+  .q-arch-item{display:flex;align-items:flex-start;gap:9px;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.03)}
+  .q-arch-item:last-child{border-bottom:none}
+  .q-arch-check{color:var(--jade);font-size:13px;flex:none;margin-top:2px}
+  .q-arch-body{flex:1;min-width:0}
+  .q-arch-name{font-size:13px;color:var(--ink-dim);line-height:1.3}
+  .q-arch-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:3px}
+  .q-arch-date{font-size:11px;color:var(--ink-faint)}
+
+  /* ── v97: PT calendar ── */
+  .pt-cal-wrap{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-bottom:14px}
+  .pt-cal-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:7px}
+  .pt-cal{display:flex;gap:3px;flex-wrap:wrap}
+  .pt-cal-dot{width:14px;height:14px;border-radius:50%;background:var(--line)}
+  .pt-cal-dot.on{background:var(--jade)}
+  .pt-cal-legend{font-size:11px;color:var(--ink-faint);margin-top:6px}
+
+  /* ── v97: RPE tag ── */
+  .lg-rpe-tag{font-size:11px;background:rgba(124,147,168,.18);color:var(--violet);border-radius:4px;padding:1px 6px;margin-left:4px;display:inline-block}
+
+  /* ── v97: Weight log sparkline ── */
+  .wl-spark{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 8px 4px;margin-top:8px}
+
+  /* ── v97: Baseline sparklines ── */
+  .bl-sparks{margin-bottom:12px}
+  .bl-spark-row{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px}
+  .bl-spark-name{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+  .bl-spark-best{font-size:11.5px;color:var(--ink-faint);margin-top:3px}
+
+  /* ── v98: Habit best-streak badge ── */
+  .hb-best{font-size:11px;color:var(--ink-faint);padding:3px 4px 1px;letter-spacing:.02em}
+
+  /* ── v98: AFT regression card ── */
+  .aft-regress{background:rgba(156,74,52,.12);border:1px solid rgba(156,74,52,.4);border-radius:9px;padding:11px 13px;margin-bottom:10px}
+  .aft-regress-h{font-size:13.5px;font-weight:700;color:var(--ember);margin-bottom:6px}
+  .aft-regress-row{font-size:12.5px;color:var(--ink-dim);padding:3px 0;line-height:1.4}
+  .aft-regress-row.drop{color:var(--ember)}
+  .aft-regress-row.ok{color:var(--jade)}
+  .aft-regress-note{font-size:12px;color:var(--ink-faint);margin-top:7px;font-style:italic;line-height:1.45}
+
+  /* ── v98: Workout weekly volume ── */
+  .week-summary{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin-bottom:14px;font-size:13px;color:var(--ink-dim);letter-spacing:.02em}
+  .week-summary.no-data{color:var(--ink-faint);font-style:italic}
+
+  /* ── v98: Dawn boss card ── */
+  .dawn-boss-card{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--blood);border-radius:10px;padding:12px 13px;display:flex;flex-direction:column;gap:7px}
+  .dawn-boss-header{display:flex;align-items:center;gap:8px}
+  .dawn-boss-icon{font-size:16px;flex:none}
+  .dawn-boss-name{flex:1;font-size:14px;font-weight:600;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dawn-hpbar{height:7px;background:#0a0b06;border-radius:5px;overflow:hidden}
+  .dawn-hpfill{height:100%;background:linear-gradient(90deg,var(--jade),var(--gold));border-radius:5px;transition:width .5s}
+  .dawn-boss-meta{font-size:11.5px;color:var(--ink-faint);letter-spacing:.02em}
+  .dawn-hit-btn{background:rgba(156,74,52,.18);border:1px solid rgba(156,74,52,.45);color:var(--ember);padding:7px 12px;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;align-self:flex-start;letter-spacing:.03em}
+  .dawn-hit-btn:hover{background:rgba(156,74,52,.3)}
+
+  /* ── v98: 7-day discipline bar ── */
+  .disc-log{display:flex;gap:4px;align-items:flex-end;height:32px;padding:2px 0}
+  .disc-cell{width:100%;min-width:8px;border-radius:3px 3px 0 0;flex:1}
+  .disc-avg{font-weight:400;color:var(--ink-faint);font-size:12px;margin-left:6px}
+  .disc-legend{font-size:10.5px;color:var(--ink-faint);margin-top:4px;line-height:1.3}
+
+  /* ── v98: Copy daily brief button ── */
+  .brief-row{text-align:right;padding:2px 0 4px}
+  .brief-btn{background:transparent;border:1px solid var(--line);color:var(--ink-faint);padding:6px 12px;border-radius:7px;font-family:inherit;font-size:12px;cursor:pointer;letter-spacing:.02em}
+  .brief-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+  /* ── v98: Carved Rings (trophies) tab ── */
+  .trophy-lede{font-size:13px;color:var(--ink-faint);line-height:1.5;margin-bottom:16px;font-style:italic;border-left:2px solid var(--line);padding-left:10px}
+  .trophy-summary{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:18px}
+  .trophy-counts{font-size:14px;color:var(--ink-dim);margin-bottom:8px}
+  .trophy-earned-n{font-size:22px;font-weight:700;color:var(--gold-bright)}
+  .trophy-total-n{font-size:16px;color:var(--ink-faint)}
+  .trophy-rings-label{font-size:13px;color:var(--ink-faint);margin-left:4px}
+  .trophy-global-bar{height:8px;background:#0a0b06;border-radius:5px;overflow:hidden}
+  .trophy-global-fill{height:100%;background:linear-gradient(90deg,var(--ember),var(--gold));border-radius:5px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+
+  .trophy-path{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+  .trophy-path.has-rings{border-color:rgba(255,255,255,.1)}
+  .trophy-path-hdr{display:flex;align-items:center;gap:9px;padding:11px 14px;cursor:pointer;list-style:none;user-select:none}
+  .trophy-path-hdr::-webkit-details-marker{display:none}
+  .trophy-path-ic{font-size:17px;flex:none}
+  .trophy-path-nm{flex:1;font-size:14px;font-weight:600;color:var(--ink);letter-spacing:.02em}
+  .trophy-path-ct{font-size:12px;color:var(--ink-faint);white-space:nowrap}
+  .trophy-path-bar-wrap{width:52px;height:6px;background:#0a0b06;border-radius:3px;overflow:hidden;flex:none}
+  .trophy-path-bar-fill{display:block;height:100%;background:var(--tpc,var(--gold));border-radius:3px}
+  .trophy-path[open] .trophy-path-hdr{border-bottom:1px solid var(--line)}
+
+  .trophy-path-body{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+  .trophy-skill{display:flex;align-items:flex-start;gap:10px;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.03)}
+  .trophy-skill:last-child{border-bottom:none}
+  .trophy-skill.started .trophy-skill-name{color:var(--ink)}
+  .trophy-skill-info{flex:none;width:130px;min-width:0}
+  .trophy-skill-name{font-size:12.5px;font-weight:600;color:var(--ink-dim);line-height:1.3;word-break:break-word}
+  .trophy-skill-tier{font-size:10.5px;color:var(--ink-faint);letter-spacing:.03em;margin-top:2px}
+  .trophy-skill-tier.unstarted{font-style:italic;opacity:.5}
+  .trophy-chips{display:flex;flex-wrap:wrap;gap:4px;flex:1}
+
+  /* Each chip: square, level number, earned = colored by tier/path */
+  .trophy-chip{
+    width:26px;height:26px;border-radius:5px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:700;letter-spacing:0;
+    border:1px solid var(--line);color:var(--ink-faint);background:#0e0f09;
+    transition:background .2s,border-color .2s,color .2s;cursor:default;
+  }
+  /* Tier-indexed earned styles — each tier gets a progressively richer treatment */
+  .trophy-chip.on.t0{background:rgba(var(--tpc-rgb,184,160,106),.12);border-color:rgba(var(--tpc-rgb,184,160,106),.25);color:var(--tpc,var(--gold));opacity:.75}
+  .trophy-chip.on.t1{background:rgba(var(--tpc-rgb,184,160,106),.18);border-color:rgba(var(--tpc-rgb,184,160,106),.4);color:var(--tpc,var(--gold));opacity:.85}
+  .trophy-chip.on.t2{background:rgba(var(--tpc-rgb,184,160,106),.26);border-color:rgba(var(--tpc-rgb,184,160,106),.55);color:var(--tpc,var(--gold))}
+  .trophy-chip.on.t3{background:rgba(var(--tpc-rgb,184,160,106),.3);border-color:var(--tpc,var(--gold));color:var(--tpc,var(--gold));font-weight:800}
+  /* Max-level (★) chip — gold glow regardless of path */
+  .trophy-chip.max{background:rgba(184,160,106,.28);border-color:var(--gold);color:var(--gold-bright);font-size:13px;box-shadow:0 0 8px rgba(184,160,106,.25)}
+  .trophy-chip[data-trophychip]{cursor:pointer}
+  .trophy-chip[data-trophychip]:hover{filter:brightness(1.25)}
+  /* Tap-to-reveal trophy detail panel */
+  .trophy-detail{display:flex;gap:10px;align-items:flex-start;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:12px 14px;margin-top:10px}
+  .td-chip-icon{font-size:20px;flex:none;margin-top:1px}
+  .td-chip-title{font-size:13px;font-weight:700;color:var(--ink);letter-spacing:.03em;margin-bottom:4px}
+  .td-chip-ability{font-size:12.5px;color:var(--ink-dim);line-height:1.5;font-style:italic}
+  /* Streak-recovery card */
+  .recovery-mode-card{background:rgba(124,100,200,.08);border:1px solid var(--violet);border-radius:11px;padding:13px 15px;margin-bottom:10px}
+  .recovery-mode-card .rm-title{font-size:13.5px;font-weight:700;color:var(--violet);margin-bottom:5px}
+  .recovery-mode-card .rm-body{font-size:13px;color:var(--ink-dim);line-height:1.5}
+  .recovery-mode-card .rm-pips{display:flex;gap:6px;margin-top:8px}
+  .recovery-mode-card .rm-pip{width:22px;height:22px;border-radius:50%;border:2px solid var(--violet);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--violet)}
+  .recovery-mode-card .rm-pip.done{background:var(--violet);color:#fff;border-color:var(--violet)}
+  /* Oath age / completion timing */
+  .quest-age{font-size:11px;color:var(--ink-faint);margin-left:6px}
+  .quest-age.old{color:var(--ember)}
+  .quest-archive-timing{font-size:11px;color:var(--ink-faint);margin-top:2px}
+  /* Skill history timeline */
+  .sk-hist{margin-top:5px;display:flex;flex-wrap:wrap;align-items:center;gap:0;font-size:11px;color:var(--ink-faint);line-height:1.6}
+  .sk-hist-item{color:var(--ink-faint)}
+  .sk-hist-sep{color:var(--line);margin:0 3px}
+  .sk-hist-item.decay{color:var(--ember)}
+  .sk-hist-item.promote{color:var(--jade)}
+  /* AFT inline delta badge */
+  .aft-event-delta{font-size:13px;font-weight:600;margin-left:5px}
+  /* Baseline PR card */
+  .bl-pr-card{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:13px 14px;margin-bottom:10px}
+  .bl-pr-title{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ember);margin-bottom:8px}
+  .bl-pr-row{display:flex;align-items:baseline;gap:6px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+  .bl-pr-row:last-child{border-bottom:none}
+  .bl-pr-label{color:var(--ink-dim);min-width:110px}
+  .bl-pr-val{font-weight:700;color:var(--ink);flex:1}
+  .bl-pr-date{font-size:11px;color:var(--ink-faint)}
+  .bl-pr-star{color:var(--gold)}
+  /* Habit monthly grid */
+  .hb-view-toggle{font-size:11px;color:var(--ink-faint);background:none;border:1px solid var(--line);border-radius:5px;padding:2px 7px;cursor:pointer;margin-left:auto}
+  .hb-view-toggle.on{background:var(--panel-2);color:var(--ink)}
+  .hb-month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:6px}
+  .hb-month-cell{width:100%;aspect-ratio:1;border-radius:3px;background:var(--panel-2);position:relative}
+  .hb-month-cell.hm-done{background:var(--jade)}
+  .hb-month-cell.hm-miss{background:rgba(200,119,46,.25)}
+  .hb-month-cell.hm-future{background:rgba(255,255,255,.03)}
+  .hb-month-header{display:flex;gap:2px;margin-bottom:2px}
+  .hb-month-dow{flex:1;text-align:center;font-size:9px;color:var(--ink-faint);font-weight:600;letter-spacing:.03em}
 
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
@@ -1144,7 +1384,7 @@
     <button class="nav-toggle" id="navToggle" title="Toggle labels"><span class="ic">≡</span><span class="lbl">Menu</span></button>
     <!-- Primary — always visible -->
     <button data-tab="today" class="on"><span class="ic">🌅</span><span class="lbl">Dawn</span></button>
-    <button data-tab="quests"><span class="ic">🎯</span><span class="lbl">Oaths</span></button>
+    <button data-tab="quests"><span class="ic">🎯</span><span class="lbl">Oaths</span><span class="nav-badge"></span></button>
     <button data-tab="dailies"><span class="ic">📋</span><span class="lbl">Orders</span></button>
     <button data-tab="plan"><span class="ic">📕</span><span class="lbl">FM Plan</span></button>
     <button data-tab="aft"><span class="ic">💪</span><span class="lbl">AFT</span></button>
@@ -1161,6 +1401,7 @@
       <button data-tab="bosses"><span class="ic">⚔️</span><span class="lbl">Trials</span></button>
       <button data-tab="board"><span class="ic">📈</span><span class="lbl">Muster</span></button>
       <button data-tab="shop"><span class="ic">🍺</span><span class="lbl">Mead Hall</span></button>
+      <button data-tab="trophies"><span class="ic">🏺</span><span class="lbl">Carved Rings</span></button>
       <button data-tab="awards"><span class="ic">🏆</span><span class="lbl">The Wall</span></button>
       <button data-tab="records"><span class="ic">📖</span><span class="lbl">Saga</span></button>
       <button data-tab="weight"><span class="ic">⚖️</span><span class="lbl">Weight</span></button>
@@ -1195,10 +1436,14 @@
           <option value="roots">🌳 Path of Roots</option>
         </select>
       </div>
+      <div class="row" style="margin-top:8px">
+        <label style="font-size:12px;color:var(--ink-faint);display:flex;flex-direction:column;gap:4px;flex:1">Due date (optional)<input type="date" id="qDue" class="q-due-input"></label>
+      </div>
       <button class="btn-add" id="qAdd">Swear the Oath</button>
     </div>
     <div class="sec-h"><h2>Active Oaths</h2><span class="hint">sworn and unfinished — each one a debt</span></div>
     <ul class="list" id="qList"></ul>
+    <div id="qArchive"></div>
   </section>
 
   <section class="view" id="view-dailies">
@@ -1315,7 +1560,11 @@
   <section class="view" id="view-aft">
     <div class="sec-h"><h2>AFT Scorecard</h2><span class="hint">input scores, auto-tune plan</span></div>
     <div id="aftStandardBar"></div>
+    <div id="aftPrepArea"></div>
     <div class="adder">
+      <div class="aft-test-date-row">
+        <label class="aft-td-label">Next AFT date<input id="aftTestDateInput" type="date" class="aft-td-input" placeholder="Set your next test date"></label>
+      </div>
       <p style="font-size:13px;color:var(--ink-dim);margin-bottom:10px">Enter your latest AFT raw results. The plan re-weights to attack your weakest event.</p>
       <div class="aft-grid">
         <label>Deadlift (lbs)<input id="aDl" type="number" min="0" max="500" placeholder="e.g. 240"></label>
@@ -1374,6 +1623,9 @@
     <div class="sec-h" style="margin-top:18px"><h2>Readout</h2><span class="hint">computed</span></div>
     <div id="pfReadout" class="bl-readout"></div>
 
+    <div class="sec-h" style="margin-top:18px"><h2>Weight Log</h2><span class="hint">daily trend</span></div>
+    <div id="wlSection"></div>
+
     <div class="sec-h" style="margin-top:18px"><h2>Emergency Info</h2><span class="hint">screen-grab this</span></div>
     <div id="pfEmergency"></div>
 
@@ -1431,6 +1683,7 @@
 
   <section class="view" id="view-log">
     <div id="baselinePrompt"></div>
+    <div id="ptCal"></div>
     <div class="sec-h"><h2>Log Cadre PT</h2><span class="hint">recovery-aware</span></div>
     <div class="adder">
       <div class="pt-intro">Type what PT actually did — e.g. "2-mile run, walking lunges, water jug carries, flutter kicks." The app figures out which muscles that hit and eases the FM plan off them for the week. (Or just tap the areas below.) PT never touches your streak.</div>
@@ -1454,12 +1707,22 @@
     <div class="adder">
       <label class="lg-label">Which session?</label>
       <select id="lgSession"></select>
-      <div class="row" style="margin-top:9px">
+      <div class="row" style="margin-top:9px;gap:9px">
         <label class="lg-label" style="flex:1">Duration (min)<input id="lgDur" type="number" min="1" max="300" placeholder="e.g. 45"></label>
+        <label class="lg-label" style="flex:1">RPE (opt)<select id="lgRpe">
+          <option value="">—</option>
+          <option value="6">6 — light</option>
+          <option value="7">7 — moderate</option>
+          <option value="8">8 — hard</option>
+          <option value="9">9 — very hard</option>
+          <option value="10">10 — max</option>
+        </select></label>
       </div>
       <div id="lgExercises" style="margin-top:12px"></div>
+      <textarea id="lgNote" class="lg-note" placeholder="Optional note — conditions, felt strong, modified…" rows="2" maxlength="120"></textarea>
       <button class="btn-add" id="lgSave" style="margin-top:12px">Save Workout</button>
     </div>
+    <div id="lgWeekSummary"></div>
     <div class="sec-h" style="margin-top:18px"><h2>Progress by Exercise</h2><span class="hint">spot stalls</span></div>
     <div id="lgProgress"></div>
     <div class="sec-h" style="margin-top:18px"><h2>Recent Workouts</h2></div>
@@ -1927,6 +2190,14 @@
     <div class="weight-ledger" id="weightLedger"></div>
   </section>
 
+  <section class="view" id="view-trophies">
+    <div class="sec-h"><h2>🏺 Carved Rings</h2><span class="hint">every level earned, kept here</span></div>
+    <p class="trophy-lede">Each level reached on a skill carves a ring into Yggdrasil. These are yours — permanent, honest, the record of what you've built.</p>
+    <div id="trophyStats"></div>
+    <div id="trophyGrid"></div>
+    <div id="trophyDetail" class="trophy-detail" style="display:none"></div>
+  </section>
+
 
   </div><!-- /content-col -->
   </div><!-- /main-row -->
@@ -2037,6 +2308,8 @@ const DEFAULT = {
   weightLog:[],           // weight history for trend: [{date, lb}]
   vitals:[],              // health readings: [{id, date, pulse, bpSys, bpDia, hemoglobin, note}]
   healthImport:{lastImport:null},  // Apple Health export import stub
+  installPromptDismissed:false,    // true once user dismisses the "add to home screen" nudge
+  notifEnabled:false,              // true once user grants notification permission
   habits:[],              // {id, name, linkedSkill, streak, bestStreak, lastDone, graceUsed, history:[]}
   tests:[],               // test results: [{id, type, date, score, raw, linkedSkill}]
   srsDecks:[],            // [{id, name, cards:[{id, front, back, due, interval, ease, reps}]}]
@@ -2085,7 +2358,10 @@ const DEFAULT = {
     {id:id(), name:"Favorite coffee / treat", cost:20},
     {id:id(), name:"One episode of your show", cost:30},
     {id:id(), name:"Full rest/recovery day, no guilt", cost:60},
-  ]
+  ],
+  questArchive: [],
+  streakLog: [],    // [{date, pct}] — daily order completion rate, last 90 days
+  streakBrokenDate: null, // YYYY-MM-DD when streak last broke (cleared after 3 recovery days)
 };
 const VALUES = {
   quest:{easy:{xp:15,g:5},med:{xp:35,g:12},hard:{xp:70,g:28}},
@@ -2571,6 +2847,9 @@ function load(){
     merged.studyPlans=r.studyPlans||[];
     merged.counseling=r.counseling||[];
     merged.checklists=r.checklists||[];
+    merged.questArchive=r.questArchive||[];
+    merged.streakLog=r.streakLog||[];
+    merged.streakBrokenDate=r.streakBrokenDate||null;
     return merged;
   }catch(e){return structuredClone(DEFAULT)}
 }
@@ -2584,10 +2863,22 @@ function checkDailyReset(){
   const t=today();
   if(S.lastDaily===t) return;
   if(S.lastDaily){
+    // record yesterday's completion rate before resetting
+    if(S.dailies.length>0){
+      const done=S.dailies.filter(d=>d.done).length;
+      const pct=Math.round(done/S.dailies.length*100);
+      if(!S.streakLog) S.streakLog=[];
+      S.streakLog.push({date:S.lastDaily, pct});
+      S.streakLog=S.streakLog.slice(-90);
+    }
     const diff=Math.round((new Date(t)-new Date(S.lastDaily))/864e5);
     if(diff===1 && S._yesterdayComplete){ S.streak++; S.missedYesterday=false; }
-    else { if(S.streak>0) S.missedYesterday=true; S.streak=0; }
+    else {
+      if(S.streak>0){ S.missedYesterday=true; S.streakBrokenDate=localYMD(); }
+      S.streak=0;
+    }
   }
+  if(S.streak>=3) S.streakBrokenDate=null; // recovery complete
   if(S.streak>S.bestStreak) S.bestStreak=S.streak;
   S._yesterdayComplete = S.dailies.length>0 && S.dailies.every(d=>d.done);
   S.dailies.forEach(d=>d.done=false);
@@ -2703,6 +2994,7 @@ function render(){
   if(typeof renderWeight==="function") renderWeight();
   if(typeof renderAwards==="function") renderAwards();
   if(typeof renderGarden==="function") renderGarden();
+  if(typeof renderTrophies==="function") renderTrophies();
 }
 
 function pathTag(path){
@@ -2719,14 +3011,52 @@ function diffTag(scope,diff){
 
 function renderQuests(){
   const el=document.getElementById("qList");
-  if(!S.quests.length){el.innerHTML=`<div class="empty"><span class="big">🎯</span>The board is clear. Swear an oath above and carry it forward.</div>`;return}
-  el.innerHTML=S.quests.map(q=>`
-    <li class="card ${q.done?'done':''}">
-      <div class="check" data-q="${q.id}">${q.done?'✓':''}</div>
-      <div class="c-body"><div class="c-name">${esc(q.name)}</div>
-        <div class="c-meta">${diffTag('quest',q.diff)}${pathTag(q.path)}</div></div>
-      <button class="del" data-dq="${q.id}">✕</button>
-    </li>`).join("");
+  if(!S.quests.length){el.innerHTML=`<div class="empty"><span class="big">🎯</span>The board is clear. Swear an oath above and carry it forward.</div>`;}
+  else{
+    const today=localYMD();
+    const sorted=S.quests.slice().sort((a,b)=>{
+      const aOver=a.due&&a.due<today, bOver=b.due&&b.due<today;
+      if(aOver&&!bOver) return -1; if(bOver&&!aOver) return 1;
+      if(a.due&&b.due) return a.due<b.due?-1:a.due>b.due?1:0;
+      if(a.due&&!b.due) return -1; if(b.due&&!a.due) return 1;
+      return 0;
+    });
+    el.innerHTML=sorted.map(q=>{
+      const overdue=!q.done&&q.due&&q.due<today;
+      const dueTag=q.due?`<span class="tag ${overdue?'overdue-tag':'due-tag'}">${overdue?'OVERDUE':'due '+q.due}</span>`:'';
+      const ageDays=q.createdDate&&!q.done?dayDiff(q.createdDate,today):0;
+      const ageTag=ageDays>3?`<span class="quest-age${ageDays>14?' old':''}">open ${ageDays}d</span>`:'';
+      const snoozeBtn=(!q.done&&q.due)?`<button class="q-snooze" data-qsnooze="${q.id}" title="Postpone 3 days">+3d</button>`:'';
+      return `<li class="card ${q.done?'done':''}${overdue?' overdue':''}">
+        <div class="check" data-q="${q.id}">${q.done?'✓':''}</div>
+        <div class="c-body"><div class="c-name">${esc(q.name)}</div>
+          <div class="c-meta">${diffTag('quest',q.diff)}${pathTag(q.path)}${dueTag}${ageTag}</div></div>
+        ${snoozeBtn}
+        <button class="del" data-dq="${q.id}">✕</button>
+      </li>`;
+    }).join("");
+  }
+  // Update overdue oath count badge on the nav button
+  const _overdueC=(S.quests||[]).filter(q=>!q.done&&q.due&&q.due<localYMD()).length;
+  const _qdot=document.querySelector('#sideNav button[data-tab="quests"] .nav-badge');
+  if(_qdot) _qdot.textContent=_overdueC>0?String(_overdueC):'';
+  const archEl=document.getElementById("qArchive");
+  if(!archEl) return;
+  const arch=(S.questArchive||[]).slice(0,20);
+  if(!arch.length){archEl.innerHTML="";return;}
+  archEl.innerHTML=`<details class="q-archive">
+    <summary>✓ Completed oaths (${arch.length})</summary>
+    ${arch.map(q=>{
+      const timingStr=(q.createdDate&&q.completedDate)?` · ${dayDiff(q.createdDate,q.completedDate)} day${dayDiff(q.createdDate,q.completedDate)!==1?'s':''}`:'' ;
+      return `<div class="q-arch-item">
+        <span class="q-arch-check">✓</span>
+        <div class="q-arch-body">
+          <div class="q-arch-name">${esc(q.name)}</div>
+          <div class="q-arch-meta">${pathTag(q.path)}<span class="q-arch-date">Completed ${esc(q.completedDate||'')}</span><span class="quest-archive-timing">${timingStr}</span></div>
+        </div>
+      </div>`;
+    }).join("")}
+  </details>`;
 }
 function renderDailies(){
   const el=document.getElementById("dList");
@@ -2773,7 +3103,23 @@ function renderShop(){
     </li>`).join("");
 }
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function miniSparkline(vals,W,H){
+  if(!vals||vals.length<2) return "";
+  const PAD=4;
+  const mn=Math.min(...vals),mx=Math.max(...vals),rng=(mx-mn)||1;
+  const cx=i=>PAD+Math.round((i/(vals.length-1))*(W-PAD*2));
+  const cy=v=>H-PAD-Math.round(((v-mn)/rng)*(H-PAD*2));
+  const pts=vals.map((v,i)=>`${cx(i)},${cy(v)}`).join(" ");
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px">
+    <polyline points="${pts}" fill="none" stroke="var(--jade)" stroke-width="1.5" stroke-linejoin="round"/>
+    ${vals.map((v,i)=>`<circle cx="${cx(i)}" cy="${cy(v)}" r="2.5" fill="var(--jade)"/>`).join("")}
+  </svg>`;
+}
 
+
+/* ---------------- PWA install prompt / Notifications ---------------- */
+let _deferredInstallPrompt = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); _deferredInstallPrompt = e; });
 
 /* ---------------- Events ---------------- */
 // Apply the More/Less collapsed state of the secondary nav section
@@ -2811,8 +3157,11 @@ applyNavMore();
 document.getElementById("qAdd").onclick=()=>{
   const n=document.getElementById("qName").value.trim();if(!n)return;
   const path=document.getElementById("qPath").value||"tactical";
-  S.quests.unshift({id:id(),name:n,diff:document.getElementById("qDiff").value,path:path,done:false});
-  document.getElementById("qName").value="";save();render();
+  const due=document.getElementById("qDue").value||null;
+  S.quests.unshift({id:id(),name:n,diff:document.getElementById("qDiff").value,path:path,done:false,due,createdDate:localYMD()});
+  document.getElementById("qName").value="";
+  document.getElementById("qDue").value="";
+  save();render();
 };
 document.getElementById("dAdd").onclick=()=>{
   const n=document.getElementById("dName").value.trim();if(!n)return;
@@ -2836,18 +3185,73 @@ document.getElementById("rAdd").onclick=()=>{
 document.body.addEventListener("click",e=>{
   const t=e.target;
   // complete quest
-  if(t.dataset.q){const q=S.quests.find(x=>x.id===t.dataset.q);if(q&&!q.done){q.done=true;const v=VALUES.quest[q.diff];grant(v.xp,v.g,"Mission complete",q.path||"tactical");setTimeout(()=>{S.quests=S.quests.filter(x=>x.id!==q.id||!x.done);},900);}return}
+  if(t.dataset.q){
+    const q=S.quests.find(x=>x.id===t.dataset.q);
+    if(q&&!q.done){
+      q.done=true;
+      if(!S.questArchive) S.questArchive=[];
+      S.questArchive.unshift({...q, completedDate:new Date().toLocaleDateString()});
+      if(S.questArchive.length>200) S.questArchive=S.questArchive.slice(0,200);
+      const v=VALUES.quest[q.diff];
+      grant(v.xp,v.g,"Mission complete",q.path||"tactical");
+      setTimeout(()=>{S.quests=S.quests.filter(x=>x.id!==q.id||!x.done);save();render();},900);
+    }
+    return;
+  }
   // complete daily
   if(t.dataset.d){const d=S.dailies.find(x=>x.id===t.dataset.d);if(d&&!d.done){d.done=true;const v=VALUES.daily[d.diff];grant(v.xp,v.g,"Order executed",d.path||"tactical");const allNow=S.dailies.every(x=>x.done);if(allNow){onPerfectDay();}}else if(d&&d.done){d.done=false;save();render();}return}
   // boss hit
   if(t.dataset.hit){const b=S.bosses.find(x=>x.id===t.dataset.hit);if(b&&b.hp>0){b.hp--;grant(8,4,"Progress logged",b.path||"tactical");if(b.hp<=0){setTimeout(()=>{toast(`<span class="t-xp">✅ ${esc(b.name)} secured! Bonus awarded</span>`);S.gold+=b.maxhp*2;save();render();},400);}}return}
   // buy reward
   if(t.dataset.buy){const r=S.rewards.find(x=>x.id===t.dataset.buy);if(r&&S.gold>=r.cost){S.gold-=r.cost;save();render();toast(`🍺 Rest claimed: ${esc(r.name)} — you earned this. Take it fully.`);}return}
+  // snooze quest +3 days
+  if(t.dataset.qsnooze){
+    const q=S.quests.find(x=>x.id===t.dataset.qsnooze); if(!q) return;
+    const base=q.due&&q.due>=localYMD()?q.due:localYMD();
+    const nd=new Date(base+"T12:00:00"); nd.setDate(nd.getDate()+3);
+    q.due=localYMD(nd);
+    save();render();
+    toast(`Oath postponed to ${q.due}`);
+    return;
+  }
   // deletes
   if(t.dataset.dq){S.quests=S.quests.filter(x=>x.id!==t.dataset.dq);save();render();return}
   if(t.dataset.dd){S.dailies=S.dailies.filter(x=>x.id!==t.dataset.dd);save();render();return}
   if(t.dataset.db){S.bosses=S.bosses.filter(x=>x.id!==t.dataset.db);save();render();return}
   if(t.dataset.dr){S.rewards=S.rewards.filter(x=>x.id!==t.dataset.dr);save();render();return}
+  // install prompt dismiss / one-tap install
+  if(t.dataset.installDismiss){S.installPromptDismissed=true;save();if(typeof renderToday==="function")renderToday();return;}
+  if(t.dataset.installNow&&_deferredInstallPrompt){_deferredInstallPrompt.prompt();_deferredInstallPrompt.userChoice.then(()=>{S.installPromptDismissed=true;save();if(typeof renderToday==="function")renderToday();});return;}
+  // notification permission request
+  if(t.dataset.notifPrompt){
+    if(typeof Notification!=="undefined"){
+      Notification.requestPermission().then(perm=>{
+        if(perm==="granted"){S.notifEnabled=true;save();scheduleStreakNotif();}
+        if(typeof renderToday==="function")renderToday();
+      });
+    }
+    return;
+  }
+  // copy skill card to clipboard
+  if(t.dataset.skcopy){
+    const sk=S.lifeSkills.find(x=>x.id===t.dataset.skcopy); if(!sk) return;
+    const eff=typeof skEffectiveLevel==="function"?skEffectiveLevel(sk):sk.currentLevel;
+    const tierLabel=typeof getTierLabelForLevel==="function"?getTierLabelForLevel(sk,eff):"";
+    const days=typeof skDaysLeft==="function"?skDaysLeft(sk):null;
+    const peak=sk.peakLevel||0;
+    const txt=[
+      sk.name,
+      `L${eff}${tierLabel?" "+tierLabel:""}`,
+      peak>eff?`peak L${peak}`:"",
+      days!==null?`fades in ${days}d`:""
+    ].filter(Boolean).join(" · ");
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(()=>toast("⧉ Skill card copied")).catch(()=>toast("Copy failed — try long-pressing"));
+    } else { toast("Clipboard not available in this browser"); }
+    return;
+  }
+  // copy daily brief
+  if(t.dataset.copybriefbtn){ if(typeof copyDailyBrief==="function") copyDailyBrief(); return; }
   // global tab navigation — any button with data-gototab anywhere in the app
   const goBtn=t.closest("[data-gototab]");
   if(goBtn){
@@ -3200,6 +3604,83 @@ function score_run(sec){ if(sec==null)return null; const c=aftCtx(); return aftL
 function clampScore(x){return Math.max(0,Math.min(100,Math.round(x)));}
 
 
+function aftPrCard(){
+  const entries=S.aft||[]; if(!entries.length) return "";
+  const last=entries[entries.length-1];
+  let bestDl=null,bestHrp=null,bestSdc=null,bestPlank=null,bestRun=null,bestTotal=null;
+  entries.forEach(a=>{
+    if(a.raw.dl!=null&&(bestDl===null||a.raw.dl>bestDl.v)) bestDl={v:a.raw.dl,date:a.date,a};
+    if(a.raw.hrp!=null&&(bestHrp===null||a.raw.hrp>bestHrp.v)) bestHrp={v:a.raw.hrp,date:a.date,a};
+    if(a.raw.sdc!=null&&(bestSdc===null||a.raw.sdc<bestSdc.v)) bestSdc={v:a.raw.sdc,date:a.date,a};
+    if(a.raw.plank!=null&&(bestPlank===null||a.raw.plank>bestPlank.v)) bestPlank={v:a.raw.plank,date:a.date,a};
+    if(a.raw.run!=null&&(bestRun===null||a.raw.run<bestRun.v)) bestRun={v:a.raw.run,date:a.date,a};
+    if(bestTotal===null||a.total>bestTotal.v) bestTotal={v:a.total,date:a.date,a};
+  });
+  const rows=[
+    bestDl   &&{label:"Deadlift",  val:`${bestDl.v} lb`,    date:bestDl.date,   cur:bestDl.a===last},
+    bestHrp  &&{label:"Push-ups",  val:`${bestHrp.v} reps`, date:bestHrp.date,  cur:bestHrp.a===last},
+    bestSdc  &&{label:"SDC",       val:fmtSec(bestSdc.v),   date:bestSdc.date,  cur:bestSdc.a===last},
+    bestPlank&&{label:"Plank",     val:fmtSec(bestPlank.v), date:bestPlank.date,cur:bestPlank.a===last},
+    bestRun  &&{label:"2-Mile",    val:fmtSec(bestRun.v),   date:bestRun.date,  cur:bestRun.a===last},
+    bestTotal&&{label:"Total",     val:`${bestTotal.v} pts`,date:bestTotal.date,cur:bestTotal.a===last},
+  ].filter(Boolean);
+  if(!rows.length) return "";
+  return `<div class="aft-pr-card">
+    <div class="pr-title">🏅 Personal Records</div>
+    ${rows.map(r=>`<div class="pr-row"><span class="pr-label">${r.label}</span><span class="pr-val">${r.val}${r.cur?' <span class="pr-star">⭐</span>':''}</span><span class="pr-date">${r.date}</span></div>`).join("")}
+  </div>`;
+}
+function aftPrepCard(){
+  if(!S.aftTestDate) return "";
+  const last=(S.aft||[])[S.aft.length-1]; if(!last) return "";
+  const days=Math.ceil((new Date(S.aftTestDate+"T12:00:00")-Date.now())/864e5);
+  if(days<0) return "";
+  const c=aftCtx();
+  const minTotal=c.standard==="combat"?350:300;
+  const gap=minTotal-last.total;
+  let gapHtml;
+  if(gap>0){
+    const events=[
+      {k:"dl",label:"Deadlift",s:last.scores.dl},
+      {k:"hrp",label:"Push-ups",s:last.scores.hrp},
+      {k:"sdc",label:"SDC",s:last.scores.sdc},
+      {k:"plank",label:"Plank",s:last.scores.plank},
+      {k:"run",label:"2-Mile Run",s:last.scores.run},
+    ].filter(e=>e.s!=null).sort((a,b)=>a.s-b.s);
+    const minPer=c.standard==="combat"?70:60;
+    const focus=events.slice(0,2).map(e=>{
+      const eg=Math.max(0,minPer-e.s);
+      return eg>0?`${e.label} (+${eg} to floor)`:e.label;
+    });
+    gapHtml=`<div class="prep-gap">Need <b>${gap} more pts</b> to hit ${minTotal}. Focus: ${focus.join(" · ")}</div>`;
+  } else {
+    gapHtml=`<div class="prep-gap ok">✅ Currently at ${last.total} — meeting ${minTotal}-pt standard. Keep pushing.</div>`;
+  }
+  const dayColor=days<=14?"var(--ember)":days<=30?"var(--gold)":"var(--jade)";
+  return `<div class="aft-prep-card">
+    <div class="prep-top"><span class="prep-countdown" style="color:${dayColor}">⏳ ${days===0?"Test day!":days+" day"+(days!==1?"s":"")} to test</span><span class="prep-date">· ${S.aftTestDate}</span></div>
+    ${gapHtml}
+  </div>`;
+}
+function aftRegressionCard(){
+  const entries=S.aft||[]; if(entries.length<2) return "";
+  const last=entries[entries.length-1];
+  const prev=entries[entries.length-2];
+  const diff=last.total-prev.total;
+  if(diff>-5) return ""; // only flag drops >= 5 pts
+  const evts=[
+    {k:"dl",label:"Deadlift"},{k:"hrp",label:"Push-ups"},
+    {k:"sdc",label:"SDC"},{k:"plank",label:"Plank"},{k:"run",label:"2-Mile"},
+  ];
+  const dropped=evts.filter(e=>last.scores[e.k]!=null&&prev.scores[e.k]!=null&&last.scores[e.k]<prev.scores[e.k]-2);
+  const held=evts.filter(e=>last.scores[e.k]!=null&&prev.scores[e.k]!=null&&Math.abs(last.scores[e.k]-prev.scores[e.k])<=2);
+  return `<div class="aft-regress">
+    <div class="aft-regress-h">▼ ${Math.abs(diff)} pts from last test (${prev.date})</div>
+    ${dropped.length?`<div class="aft-regress-row drop">Dropped: ${dropped.map(e=>`${e.label} (${last.scores[e.k]-prev.scores[e.k]})`).join(' · ')}</div>`:''}
+    ${held.length?`<div class="aft-regress-row ok">Held: ${held.map(e=>e.label).join(' · ')}</div>`:''}
+    <div class="aft-regress-note">Address the dropped events before the next test — one focused block per event is enough to reverse a small regression.</div>
+  </div>`;
+}
 function aftSparkline(){
   const entries=S.aft||[]; if(entries.length<2) return "";
   const vals=entries.map(a=>a.total);
@@ -3253,12 +3734,20 @@ function renderAftStandardBar(){
 function renderAft(){
   const hist=document.getElementById("aftHistory");
   if(!hist) return;
+  // wire test-date input
+  const tdInput=document.getElementById("aftTestDateInput");
+  if(tdInput){tdInput.value=S.aftTestDate||"";tdInput.onchange=()=>{S.aftTestDate=tdInput.value||null;save();renderAft();};}
+  // render prep card
+  const prepEl=document.getElementById("aftPrepArea");
+  if(prepEl) prepEl.innerHTML=aftPrepCard();
   renderAftStandardBar();
   if(!S.aft.length){hist.innerHTML=`<div class="empty"><span class="big">💪</span>No AFT logged yet. Enter your scores above.</div>`;}
   else{
     const rev=S.aft.slice().reverse();
+    const prHtml=S.aft.length>=1?aftPrCard():"";
     const sparkHtml=S.aft.length>=2?aftSparkline():"";
-    hist.innerHTML=sparkHtml+rev.map((a,i)=>{
+    const regressHtml=S.aft.length>=2?aftRegressionCard():"";
+    hist.innerHTML=prHtml+sparkHtml+regressHtml+rev.map((a,i)=>{
       const older=rev[i+1];
       let tr="";
       if(older){const d=a.total-older.total; tr=d>0?`<span style="color:var(--jade);font-size:12px"> ▲${d}</span>`:d<0?`<span style="color:var(--ember);font-size:12px"> ▼${Math.abs(d)}</span>`:`<span style="color:var(--ink-faint);font-size:12px"> —</span>`;}
@@ -3330,9 +3819,9 @@ function showAftResult(a){
   function trend(e){
     if(!prev||prev.scores[e.k]==null) return "";
     const d=e.s-prev.scores[e.k];
-    if(d>2) return `<span style="color:var(--jade)"> ▲${d}</span>`;
-    if(d<-2) return `<span style="color:var(--ember)"> ▼${Math.abs(d)}</span>`;
-    return `<span style="color:var(--ink-faint)"> —</span>`;
+    if(d>2) return `<span class="aft-event-delta" style="color:var(--jade)">▲${d}</span>`;
+    if(d<-2) return `<span class="aft-event-delta" style="color:var(--ember)">▼${Math.abs(d)}</span>`;
+    return `<span class="aft-event-delta" style="color:var(--ink-faint)">—</span>`;
   }
   // build focus: primary weakest + any declining secondary
   let focus=EVENT_FOCUS[weakest.k];
@@ -3455,17 +3944,21 @@ function setHasData(ex,st){
 document.getElementById("lgSave").onclick=()=>{
   if(!LG) return;
   const dur=parseInt(document.getElementById("lgDur").value)||null;
+  const rpe=parseInt(document.getElementById("lgRpe").value)||null;
   // keep only exercises with at least one filled set
   const exercises=LG.exercises.map(ex=>({
     name:ex.name, type:ex.type, w:ex.w,
     sets:ex.sets.filter(st=>setHasData(ex,st))
   })).filter(ex=>ex.sets.length>0 && ex.name && ex.name!=="Custom exercise");
   if(!exercises.length){toast("Log at least one set first");return;}
-  S.workouts.push({id:id(), date:new Date().toLocaleDateString(), ts:Date.now(), session:LG.session, duration:dur, exercises});
+  const note=document.getElementById("lgNote").value.trim()||null;
+  S.workouts.push({id:id(), date:new Date().toLocaleDateString(), ts:Date.now(), session:LG.session, duration:dur, rpe, exercises, note});
   if(!S.pathXP) S.pathXP={};
   S.pathXP.physical=(S.pathXP.physical||0)+25; S.gold+=8; S.totalDone++;
   save();
   document.getElementById("lgDur").value="";
+  document.getElementById("lgRpe").value="";
+  document.getElementById("lgNote").value="";
   buildLogForm(document.getElementById("lgSession").value);
   render();
   toast(`<span class="t-xp">Workout logged · +25 Fitness XP +8 pts</span>`);
@@ -3546,6 +4039,33 @@ function savePT(){
 function renderLog(){
   if(!document.getElementById("lgSession")) return;
   initLogTab();
+  // PT calendar — 30-day training frequency view
+  const calEl=document.getElementById("ptCal");
+  if(calEl){
+    const workedDates=new Set();
+    (S.workouts||[]).forEach(w=>workedDates.add(w.date));
+    (S.ptLog||[]).forEach(p=>workedDates.add(p.date));
+    const dots=[];
+    for(let i=29;i>=0;i--){
+      const d=new Date(); d.setDate(d.getDate()-i);
+      const ds=d.toLocaleDateString();
+      dots.push(`<div class="pt-cal-dot ${workedDates.has(ds)?'on':''}" title="${ds}"></div>`);
+    }
+    calEl.innerHTML=`<div class="pt-cal-wrap"><div class="pt-cal-title">Training frequency — last 30 days</div><div class="pt-cal">${dots.join('')}</div><div class="pt-cal-legend">● = training day (workout or PT logged)</div></div>`;
+  }
+  // weekly volume summary
+  const wkSumEl=document.getElementById("lgWeekSummary");
+  if(wkSumEl){
+    const cut=Date.now()-7*864e5;
+    const wkW=(S.workouts||[]).filter(w=>w.ts>=cut);
+    const wkP=(S.ptLog||[]).filter(p=>p.ts>=cut);
+    const totalMin=wkW.reduce((s,w)=>s+(w.duration||0),0);
+    const h=Math.floor(totalMin/60), m=totalMin%60;
+    const sessions=wkW.length+wkP.length;
+    wkSumEl.innerHTML=sessions>0
+      ?`<div class="week-summary">${sessions} session${sessions!==1?'s':''} this week${totalMin>0?` · ${h>0?h+'h ':''}${m>0?m+'min':h>0?'':''}`:''}${wkP.length>0?` (${wkP.length} PT)`:''}  </div>`
+      :`<div class="week-summary no-data">No sessions logged this week.</div>`;
+  }
   // progress by exercise: scan all workouts, group by exercise name
   const prog=document.getElementById("lgProgress");
   const byEx={};
@@ -3584,8 +4104,9 @@ function renderLog(){
   else{
     hist.innerHTML=S.workouts.slice().reverse().slice(0,12).map(w=>`<div class="lg-hist">
       <button class="del-w" data-delw="${w.id}">✕</button>
-      <div class="lg-hist-top"><span class="dt">${SESSIONS[w.session]?SESSIONS[w.session].name.split(' · ')[0]:'Workout'}</span><span>${w.date}${w.duration?` · ${w.duration} min`:''}</span></div>
+      <div class="lg-hist-top"><span class="dt">${SESSIONS[w.session]?SESSIONS[w.session].name.split(' · ')[0]:'Workout'}</span><span>${w.date}${w.duration?` · ${w.duration} min`:''}${w.rpe?`<span class="lg-rpe-tag">RPE ${w.rpe}</span>`:''}</span></div>
       ${w.exercises.map(ex=>`<div class="lg-hist-ex">${esc(ex.name)}: ${ex.sets.map(st=>esc(fmtSet(ex,st))).join(", ")}</div>`).join("")}
+      ${w.note?`<div class="lg-hist-note">${esc(w.note)}</div>`:""}
     </div>`).join("");
   }
 }
@@ -3751,15 +4272,12 @@ function dawnSessionHtml(){
   const action=p.todayLogged
     ? `<div class="ds-done">✓ Logged — well done.</div>`
     : `<button class="td-go ds-log-btn" data-gototab="log" data-logsess="${p.sessionKey}">Log this session →</button>`;
-  const ws=typeof weekTrainingStats==="function"?weekTrainingStats():{done:0,sched:0};
-  const weekBar=ws.sched>0?`<div class="ds-week">Week · ${ws.done}/${ws.sched} ${'▓'.repeat(ws.done)}${'░'.repeat(Math.max(0,ws.sched-ws.done))}</div>`:"";
   return `<div class="dawn-sess">
     <div class="ds-top">
       <span class="ds-name">${esc(dayName)} · ${esc(sess.name.split("·").slice(-1)[0].trim())}</span>
       <span class="ds-badges">${intLabel} <span class="ds-mode">${modeTag}</span></span>
     </div>
     <div class="ds-exlist">${exList}${more}</div>
-    ${weekBar}
     <div class="ds-actions">${action}<button class="td-go ds-plan-btn" data-gototab="plan">Full plan →</button></div>
   </div>`;
 }
@@ -3950,6 +4468,29 @@ function baselineDueThisMonth(){
   return !S.baselines.some(b=>b.month===currentMonth());
 }
 let BL_DRAFT=null;
+function baselinePrCard(){
+  const entries=(S.baselines||[]);
+  if(entries.length<1) return "";
+  const sorted=entries.slice().sort((a,b)=>a.ts-b.ts);
+  const latest=sorted[sorted.length-1];
+  const rows=BASELINE_TEST.map(def=>{
+    const allVals=sorted.filter(b=>b.results&&b.results[def.key]);
+    if(!allVals.length) return null;
+    const best=allVals.reduce((bst,b)=>{
+      const v=baselineVolume(def,b.results[def.key]); if(v==null) return bst;
+      const bv=bst?baselineVolume(def,bst.results[def.key]):null;
+      return (bv==null||(def.lowerBetter?v<bv:v>bv))?b:bst;
+    },null);
+    if(!best) return null;
+    const isCurrent=latest&&best===latest;
+    const valStr=fmtBaselineVal(def,best.results[def.key]);
+    const shortName=def.name.replace(/ \(.*\)/,'');
+    return `<div class="bl-pr-row"><span class="bl-pr-label">${esc(shortName)}</span><span class="bl-pr-val">${esc(valStr)}${isCurrent?' <span class="bl-pr-star">⭐</span>':''}</span><span class="bl-pr-date">${esc(monthLabel(best.month))}</span></div>`;
+  }).filter(Boolean);
+  if(!rows.length) return "";
+  return `<div class="bl-pr-card"><div class="bl-pr-title">🏅 Baseline Personal Records</div>${rows.join("")}</div>`;
+}
+
 function renderBaseline(){
   const area=document.getElementById("baselineArea");
   const prompt=document.getElementById("baselinePrompt");
@@ -3996,9 +4537,31 @@ function renderBaseline(){
     }).join("")}
     <button class="btn-add" id="blSave" style="margin-top:12px">${due?'Log This Month&rsquo;s Baseline':'Save Baseline (updates targets)'}</button>
   </div>`;
-  area.innerHTML=latestHtml+form;
+  area.innerHTML=baselinePrCard()+latestHtml+baselineSparklines()+form;
   const btn=document.getElementById("blSave");
   if(btn) btn.onclick=saveBaseline;
+}
+function baselineSparklines(){
+  if((S.baselines||[]).length<2) return "";
+  const sorted=S.baselines.slice().sort((a,b)=>a.ts-b.ts);
+  const rows=BASELINE_TEST.map(def=>{
+    const entries=sorted.filter(b=>b.results&&b.results[def.key]);
+    const vals=entries.map(b=>baselineVolume(def,b.results[def.key])).filter(v=>v!=null&&v>0);
+    if(vals.length<2) return "";
+    const bestEntry=entries.reduce((bst,b)=>{
+      const v=baselineVolume(def,b.results[def.key]); if(v==null) return bst;
+      const bv=bst?baselineVolume(def,bst.results[def.key]):null;
+      return (bv==null||(def.lowerBetter?v<bv:v>bv))?b:bst;
+    },null);
+    const bestLabel=bestEntry?`Best: <b>${esc(fmtBaselineVal(def,bestEntry.results[def.key]))}</b> (${esc(monthLabel(bestEntry.month))})`:"";
+    return `<div class="bl-spark-row">
+      <div class="bl-spark-name">${esc(def.name.replace(/ \(.*\)/,''))}</div>
+      <div class="wl-spark">${miniSparkline(vals,240,40)}</div>
+      <div class="bl-spark-best">${bestLabel}</div>
+    </div>`;
+  }).filter(Boolean).join("");
+  if(!rows) return "";
+  return `<div class="bl-sparks"><div class="sec-h" style="margin-bottom:8px"><h2>Baseline History</h2><span class="hint">month-over-month</span></div>${rows}</div>`;
 }
 function baselineInputs(def){
   if(def.type==="reps"){
@@ -4304,6 +4867,7 @@ document.body.addEventListener("click",e=>{
   const hbdo=e.target.closest("[data-hbdo]"); if(hbdo){ habitDo(hbdo.dataset.hbdo); return; }
   const hbdel=e.target.closest("[data-hbdel]"); if(hbdel){ if(confirm("Delete this habit? Its streak history will be lost.")){ S.habits=S.habits.filter(h=>h.id!==hbdel.dataset.hbdel); save(); render(); } return; }
   const hbstart=e.target.closest("[data-hbstart]"); if(hbstart){ const st=HABIT_STARTERS.find(x=>x.name===hbstart.dataset.hbstart); if(st && !S.habits.some(h=>h.name===st.name)){ S.habits.push({id:id(),name:st.name,linkedSkill:st.skill,streak:0,bestStreak:0,lastDone:null,graceUsed:false,history:[]}); save(); render(); toast("📋 Added: "+st.name); } return; }
+  const hbview=e.target.closest("[data-hbview]"); if(hbview){ const hid=hbview.dataset.hbview; if(typeof _hbView!=="undefined"){ _hbView[hid]=(_hbView[hid]==='month')?'strip':'month'; if(typeof renderHabits==="function")renderHabits(); } return; }
   const teststart=e.target.closest("[data-teststart]"); if(teststart){ const tid=teststart.dataset.teststart; if(tid==="reaction")startReaction(); else if(tid==="digitspan")startDigitSpan(); else if(tid==="typing")startTyping(); else if(tid==="nback")startNback(); else if(tid==="gonogo")startGoNoGo(); else if(tid==="procspeed")startProcSpeed(); else if(tid==="mathsprint")startMathSprint(); return; }
   const srsReview=e.target.closest("[data-srsreview]"); if(srsReview){ startSrsReview(srsReview.dataset.srsreview); return; }
   const srsGradeBtn=e.target.closest("[data-srsgrade]"); if(srsGradeBtn){ srsGrade(parseInt(srsGradeBtn.dataset.srsgrade)); return; }
@@ -4370,6 +4934,34 @@ function renderProfile(){
   if(p.weightDate) rows.push(`<div class="r-row"><span>Weight measured</span><b>${fmtMeasDate(p.weightDate)}</b></div>`);
   if(p.heightDate) rows.push(`<div class="r-row"><span>Height measured</span><b>${fmtMeasDate(p.heightDate)}</b></div>`);
   ro.innerHTML=rows.length?(rows.join("")+`<div style="margin-top:8px;color:var(--ink-faint);font-style:italic">Your bodyweight drives the Deadlift & Squat skills automatically.</div>`):`<div style="color:var(--ink-faint)">Fill in your profile above to see computed stats and power the strength skills.</div>`;
+  // Weight log section
+  const wlEl=document.getElementById("wlSection"); if(!wlEl) return;
+  const wlLogs=(S.weightLog||[]).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const last30=wlLogs.filter(w=>{const d=new Date(w.date);return !isNaN(d)&&(Date.now()-d)/864e5<=30;});
+  const last7=wlLogs.filter(w=>{const d=new Date(w.date);return !isNaN(d)&&(Date.now()-d)/864e5<=7;});
+  const avg7=last7.length?Math.round(last7.reduce((s,w)=>s+w.lb,0)/last7.length*10)/10:null;
+  const sparkHtml=last30.length>=2?`<div class="wl-spark">${miniSparkline(last30.map(w=>w.lb),260,50)}</div>`:"";
+  wlEl.innerHTML=`<div class="adder" style="padding-bottom:12px">
+    <div class="row" style="gap:9px;align-items:flex-end">
+      <label class="lg-label" style="flex:1">Weight (lb)<input id="wlVal" type="number" min="50" max="400" step="0.5" placeholder="e.g. 175"></label>
+      <button class="btn-add" id="wlLog" style="flex:0 0 auto;width:auto;padding:10px 14px;margin:0;font-size:13px">Log</button>
+    </div>
+    ${avg7!=null?`<div style="font-size:12px;color:var(--ink-faint);margin-top:6px">7-day avg: <b style="color:var(--ink)">${avg7} lb</b></div>`:""}
+    ${sparkHtml}
+    ${last30.length?`<div style="font-size:11px;color:var(--ink-faint);margin-top:4px">${last30.length} entr${last30.length===1?"y":"ies"} in last 30 days</div>`:`<div style="font-size:12px;color:var(--ink-faint);margin-top:6px">No weight entries yet. Log your weight above to start trending.</div>`}
+  </div>`;
+  const wlBtn=document.getElementById("wlLog");
+  if(wlBtn) wlBtn.onclick=()=>{
+    const val=parseFloat(document.getElementById("wlVal").value);
+    if(!val||val<50||val>400){toast("Enter a valid weight (50–400 lb)");return;}
+    const date=localYMD();
+    if(!S.weightLog) S.weightLog=[];
+    const existing=S.weightLog.find(w=>w.date===date);
+    if(existing) existing.lb=val; else S.weightLog.push({date,lb:val,ts:Date.now()});
+    S.profile.weightLb=val; S.profile.weightDate=date;
+    save(); render();
+    toast(`⚖️ ${val} lb logged`);
+  };
 }
 const _pfSave=document.getElementById("pfSave");
 if(_pfSave) _pfSave.onclick=()=>{
@@ -4748,6 +5340,17 @@ function habitStreakState(h){
   if(gap===2 && !h.graceUsed) return {streak:h.streak, state:"grace"}; // grace available
   return {streak:h.streak, state:"broken"};                // will reset
 }
+function habitHeatMap(h){
+  if(!(h.history||[]).length) return "";
+  const doneSet=new Set(h.history||[]);
+  const squares=[];
+  for(let i=59;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const ds=localYMD(d);
+    squares.push(`<div class="heat-sq ${doneSet.has(ds)?'done':'miss'}" title="${ds}"></div>`);
+  }
+  return `<div class="habit-heat-row">${squares.join('')}</div>`;
+}
 function renderHabits(){
   const wrap=document.getElementById("habitQuests"); if(!wrap) return;
   // populate skill dropdown + starters (once per render is fine)
@@ -4762,19 +5365,55 @@ function renderHabits(){
   wrap.innerHTML=S.habits.map(h=>{
     const st=habitStreakState(h);
     const done=st.state==="done";
-    const streakBadge = st.streak>0 ? `<span class="hb-streak ${st.state}">🔥 ${st.streak}</span>` : "";
+    const graceIcon=(st.state==="grace"&&!h.graceUsed)?' ⏰':(h.graceUsed&&st.state!=="done"?' ⚠️':'');
+    const streakBadge = st.streak>0 ? `<span class="hb-streak ${st.state}">🔥 ${st.streak}${graceIcon}</span>` : "";
     let note="";
     if(st.state==="grace") note=`<div class="hb-note warn">Missed yesterday — complete today to use your grace day and keep the streak.</div>`;
     else if(st.state==="broken" && h.streak>0) note=`<div class="hb-note warn">Streak will reset — that's okay, just start again today.</div>`;
     else if(h.linkedSkill) note=`<div class="hb-note">Feeds: ${esc(h.linkedSkill)}</div>`;
+    const best=h.bestStreak||0;
+    const cur=st.streak||0;
+    const bestHtml=best>0?`<div class="hb-best">Best: ${best} day${best!==1?'s':''} ${cur>=best&&cur>0?' ⭐':''}</div>`:'';
+    const view=_hbView[h.id]||'strip';
+    const calView=view==='month'?habitMonthGrid(h):habitHeatMap(h);
+    const toggleBtn=(h.history&&h.history.length)?`<button class="hb-view-toggle ${view==='month'?'on':''}" data-hbview="${h.id}">${view==='month'?'60d':'Cal'}</button>`:'';
     return `<div class="hb-card ${done?'done':''}">
-      <button class="hb-check ${done?'on':''}" data-hbdo="${h.id}" ${done?'disabled':''}>${done?'✓':''}</button>
-      <div class="hb-body"><div class="hb-name">${esc(h.name)}</div>${note}</div>
-      ${streakBadge}
-      <button class="hb-del" data-hbdel="${h.id}">✕</button>
+      <div class="hb-top-row">
+        <button class="hb-check ${done?'on':''}" data-hbdo="${h.id}" ${done?'disabled':''}>${done?'✓':''}</button>
+        <div class="hb-body"><div class="hb-name">${esc(h.name)}</div>${note}</div>
+        ${streakBadge}
+        ${toggleBtn}
+        <button class="hb-del" data-hbdel="${h.id}">✕</button>
+      </div>
+      ${calView}
+      ${bestHtml}
     </div>`;
   }).join("");
 }
+// per-habit UI view: "strip" (60-day heat map) or "month" (current month grid)
+const _hbView={};
+function habitMonthGrid(h){
+  const doneSet=new Set(h.history||[]);
+  const now=new Date();
+  const year=now.getFullYear(), month=now.getMonth();
+  const firstDay=new Date(year,month,1);
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  // Monday-first: 0=Mon…6=Sun; getDay returns 0=Sun
+  const startDow=(firstDay.getDay()+6)%7;
+  const todayStr2=localYMD();
+  const DOW=['M','T','W','T','F','S','S'];
+  const header=DOW.map(d=>`<div class="hb-month-dow">${d}</div>`).join('');
+  const cells=[];
+  for(let i=0;i<startDow;i++) cells.push('<div class="hb-month-cell hm-future"></div>');
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const isFuture=ds>todayStr2;
+    const cls=isFuture?'hm-future':doneSet.has(ds)?'hm-done':'hm-miss';
+    cells.push(`<div class="hb-month-cell ${cls}" title="${ds}"></div>`);
+  }
+  return `<div class="hb-month-header">${header}</div><div class="hb-month-grid">${cells.join('')}</div>`;
+}
+
 const _hbAdd=document.getElementById("hbAdd");
 if(_hbAdd) _hbAdd.onclick=()=>{
   const name=document.getElementById("hbName").value.trim(); if(!name){toast("Name the habit");return;}
@@ -5553,6 +6192,10 @@ if(_rptBtn) _rptBtn.onclick=exportBattleBuddyReport;
 // Determine the single most important action right now.
 function getWarriorsFocus(){
   const p=typeof todaysPlan==="function"?todaysPlan():null;
+  // 0. Overdue oaths
+  const today=localYMD();
+  const overdueQ=(S.quests||[]).find(q=>!q.done&&q.due&&q.due<today);
+  if(overdueQ) return {icon:"⚠️", action:overdueQ.name, sub:`Overdue — was due ${overdueQ.due}`, btn:"All oaths →", tab:"quests"};
   // 1. Scheduled training session not yet logged — session is already shown above, so action = log it
   if(p&&p.sessionKey&&!p.todayLogged){
     return {icon:"💪", action:"Complete today's training — then log it.", sub:"Session details are above.", btn:"Open Log to record it →", tab:"log", logsess:p.sessionKey};
@@ -5606,6 +6249,94 @@ function dawnOrdersHtml(){
   return `<div class="td-card fn-card dawn-orders-card">${header}${rows}${moreLink}</div>`;
 }
 
+function disciplineLogHtml(){
+  const log=(S.streakLog||[]).slice(-7);
+  if(log.length<2) return "";
+  const avg=Math.round(log.reduce((s,e)=>s+e.pct,0)/log.length);
+  const cells=log.map(e=>{
+    const h=Math.max(4,Math.round(e.pct/100*28));
+    const col=e.pct>=100?"var(--jade)":e.pct>=50?"var(--gold)":"var(--ember)";
+    return `<div class="disc-cell" title="${e.pct}% on ${e.date}" style="height:${h}px;background:${col}"></div>`;
+  }).join('');
+  return `<div class="td-card fn-card">
+    <div class="td-h fn-h">7-Day Discipline <span class="disc-avg">${avg}% avg</span></div>
+    <div class="disc-log">${cells}</div>
+    <div class="disc-legend">Orders completed per day — green=100%, amber≥50%, ember&lt;50%</div>
+  </div>`;
+}
+
+function dawnBossHtml(){
+  const boss=(S.bosses||[]).find(b=>b.hp>0); if(!boss) return "";
+  const progress=boss.maxhp-boss.hp;
+  const pct=Math.round(progress/boss.maxhp*100);
+  return `<div class="dawn-boss-card">
+    <div class="dawn-boss-header">
+      <span class="dawn-boss-icon">⚔️</span>
+      <div class="dawn-boss-name">${esc(boss.name)}</div>
+      <button class="td-go-sm" data-gototab="bosses">All →</button>
+    </div>
+    <div class="dawn-hpbar"><div class="dawn-hpfill" style="width:${pct}%"></div></div>
+    <div class="dawn-boss-meta">${progress}/${boss.maxhp} steps complete · ${boss.hp} remaining</div>
+    <button class="dawn-hit-btn" data-hit="${boss.id}">⚔️ Strike it</button>
+  </div>`;
+}
+
+function copyDailyBrief(){
+  const name=S.name||"Cadet";
+  const rank=S.rank||"MS2 Cadet";
+  const date=new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric",year:"numeric"});
+  const lastAft=S.aft&&S.aft.length?S.aft[S.aft.length-1]:null;
+  const aftLine=lastAft?`AFT: ${lastAft.total} pts (${lastAft.date})`:"AFT: not logged";
+  const cd=S.profile&&S.profile.commissionDate;
+  const commissLine=cd?`Commission: ${Math.max(0,Math.ceil((new Date(cd+"T12:00:00")-Date.now())/864e5))} days`:"Commission: date not set";
+  const done=(S.dailies||[]).filter(d=>d.done).length, total=(S.dailies||[]).length;
+  const overdueCount=(S.quests||[]).filter(q=>!q.done&&q.due&&q.due<localYMD()).length;
+  const activeQ=(S.quests||[]).filter(q=>!q.done).length;
+  const brief=[
+    `DAILY BRIEF — ${name} · ${rank}`,
+    `Date: ${date}`,
+    `─────────────────────`,
+    aftLine,
+    commissLine,
+    `Orders: ${done}/${total} complete today`,
+    `Active oaths: ${activeQ}${overdueCount>0?` (${overdueCount} OVERDUE)`:""}`,
+    `Branch goal: ${S.branchGoal||"TBD"}`,
+    `─────────────────────`,
+    `OPERATIONS — carried at the root`,
+  ].join("\n");
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(brief).then(()=>toast("📋 Brief copied to clipboard")).catch(()=>toast("Copy failed — try long-pressing"));
+  } else { toast("Clipboard not available in this browser"); }
+}
+
+function pathPipsHtml(){
+  const pxp=S.pathXP||{};
+  const order=typeof SK_CAT_ORDER!=="undefined"?SK_CAT_ORDER:Object.keys(PATH_META);
+  const active=order.filter(cat=>pxp[cat]>0);
+  if(!active.length) return "";
+  const pips=active.map(cat=>{
+    const xp=pxp[cat]||0;
+    const {lvl,into,need}=typeof skillLevel==="function"?skillLevel(xp):{lvl:1,into:0,need:80};
+    const pct=Math.round(into/need*100);
+    const pm=PATH_META[cat]||{icon:"•",name:cat,color:"var(--ink-faint)"};
+    return `<div class="path-pip"><div class="path-pip-icon">${pm.icon}</div><div class="path-pip-right"><div class="path-pip-lv" style="color:${pm.color}">Lv${lvl}</div><div class="path-pip-track"><div class="path-pip-fill" style="width:${pct}%;background:${pm.color}"></div></div></div></div>`;
+  }).join('');
+  return `<div class="td-card fn-card path-pips-card">
+    <div class="td-h fn-h">Paths <span style="color:var(--ink-faint);font-weight:400;font-size:12px">${active.length} active</span></div>
+    <div class="path-pips-row">${pips}</div>
+  </div>`;
+}
+function weekTrainCardHtml(){
+  const ws=typeof weekTrainingStats==="function"?weekTrainingStats():{done:0,sched:0};
+  if(!ws.sched) return "";
+  const done=ws.done, sched=ws.sched;
+  const bar='▓'.repeat(done)+'░'.repeat(Math.max(0,sched-done));
+  const allDone=done>=sched;
+  return `<div class="td-card fn-card dawn-week-card">
+    <div class="td-h fn-h">This Week <span class="dawn-week-count" style="color:${allDone?"var(--jade)":"var(--ink-dim)"}">${done}/${sched} sessions</span></div>
+    <div class="dawn-week-bar"><span class="dawn-week-blocks">${bar}</span><button class="td-go-sm" style="margin-left:auto" data-gototab="plan">Plan →</button></div>
+  </div>`;
+}
 function renderToday(){
   const el=document.getElementById("todayDash"); if(!el) return;
   const hour=new Date().getHours();
@@ -5719,12 +6450,22 @@ function renderToday(){
     const c=typeof aftCtx==="function"?aftCtx():{standard:"general"};
     const pass=lastAft.total>=(c.standard==="combat"?350:300);
     notes.push(`<div class="fn-row"><span class="fn-dot">⚔️</span><span>AFT: ${lastAft.total} pts <span style="color:${pass?"var(--jade)":"var(--ember)"}">(${pass?"passing":"below standard"})</span></span></div>`);
+    // AFT regression note
+    if(S.aft.length>=2){
+      const prevAft=S.aft[S.aft.length-2];
+      if(lastAft.total < prevAft.total - 4){
+        notes.push(`<div class="fn-row"><span class="fn-dot">📉</span><span>Score dropped ${prevAft.total-lastAft.total} pts from last test</span><button class="td-go-sm" data-gototab="aft">→</button></div>`);
+      }
+    }
   }
   if(S.profile&&S.profile.gpa) notes.push(`<div class="fn-row"><span class="fn-dot">📊</span><span>GPA ${S.profile.gpa} · ${esc(S.branchGoal||"Branch TBD")}</span></div>`);
   if(S.profile&&S.profile.bloodType){
     const lastDon=(S.donations||[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
     if(lastDon){const nxt=new Date(lastDon.date);nxt.setDate(nxt.getDate()+56);const d=Math.ceil((nxt-Date.now())/864e5);if(d<=7)notes.push(`<div class="fn-row"><span class="fn-dot">🩸</span><span>Blood donation: ${d<=0?"eligible now":`eligible in ${d} day${d!==1?"s":""}`}</span></div>`);}
   }
+  if(S.aftTestDate){const _aftD=Math.ceil((new Date(S.aftTestDate+"T12:00:00")-Date.now())/864e5);if(_aftD>=0&&_aftD<=60)notes.push(`<div class="fn-row"><span class="fn-dot">⏳</span><span>AFT in ${_aftD===0?"today":_aftD+" day"+(_aftD!==1?"s":"")} · <span style="color:${_aftD<=14?"var(--ember)":"var(--ink-dim)"}">stay on plan</span></span><button class="td-go-sm" data-gototab="aft">→</button></div>`);}
+  const overdueCount=(S.quests||[]).filter(q=>!q.done&&q.due&&q.due<localYMD()).length;
+  if(overdueCount>1) notes.push(`<div class="fn-row"><span class="fn-dot">⚠️</span><span>${overdueCount} overdue oaths</span><button class="td-go-sm" data-gototab="quests">→</button></div>`);
   const notesHtml=notes.length?`<div class="td-card fn-card"><div class="td-h fn-h">Field Notes</div>${notes.join("")}</div>`:"";
 
   // ── FM Advisory (only if recovery data exists)
@@ -5755,8 +6496,58 @@ function renderToday(){
     </div>`;
   }
 
+  // ── PWA install nudge — shown once (mobile only, before the user installs)
+  let installHtml="";
+  if(!window.matchMedia("(display-mode:standalone)").matches && !S.installPromptDismissed){
+    const canOneTab=typeof _deferredInstallPrompt!=="undefined"&&_deferredInstallPrompt;
+    installHtml=`<div class="install-card">
+      <div class="install-body">
+        <div class="install-title">📲 Install as App</div>
+        <div class="install-sub">${canOneTab?"Tap <b>Install</b> to add Operations to your home screen.":"Open your browser's share menu and choose <b>Add to Home Screen</b> to install."}</div>
+      </div>
+      <div class="install-actions">${canOneTab?`<button class="install-btn" data-install-now="1">Install</button>`:""}<button class="install-dismiss" data-install-dismiss="1">Dismiss</button></div>
+    </div>`;
+  }
+
+  // ── Notification prompt — shown only when streak is active and permission not yet granted
+  let notifPromptHtml="";
+  if(typeof Notification!=="undefined"&&Notification.permission==="default"&&S.streak>0&&!S.notifEnabled){
+    notifPromptHtml=`<div class="notif-prompt-card">🔔 Enable streak alerts to get a reminder at 7 pm when orders are still open.<button class="notif-prompt-btn" data-notif-prompt="1">Enable →</button></div>`;
+  }
+
+  // ── Streak recovery mode (first 3 days after a break)
+  let recoveryHtml="";
+  if(S.streak===0 && S.streakBrokenDate){
+    const daysSince=dayDiff(S.streakBrokenDate, localYMD());
+    const dayNum=Math.min(daysSince+1, 3);
+    const left=3-daysSince;
+    if(left>0){
+      const pips=[1,2,3].map(n=>`<div class="rm-pip${n<dayNum?' done':''}">${n<dayNum?'✓':n}</div>`).join('');
+      recoveryHtml=`<div class="recovery-mode-card">
+        <div class="rm-title">⚡ Day ${dayNum} of rebuilding</div>
+        <div class="rm-body">${left===1?"One perfect day restores your momentum.":`${left} perfect days to restore your momentum.`} Today: complete all orders.</div>
+        <div class="rm-pips">${pips}</div>
+      </div>`;
+    }
+  }
+
+  // ── Path XP pips
+  const pathPips=pathPipsHtml();
+
+  // ── Weekly training summary card
+  const weekCardHtml=weekTrainCardHtml();
+
+  // ── Active boss card
+  const bossHtml=dawnBossHtml();
+
+  // ── 7-day discipline bar
+  const discHtml=disciplineLogHtml();
+
+  // ── Copy daily brief button (compact row)
+  const briefBtnHtml=`<div class="brief-row"><button class="brief-btn" data-copybriefbtn="1">📋 Copy today's brief</button></div>`;
+
   // ── Assemble — creed always first, then guided flow
-  const flow=[startHtml, sessHtml, ordersHtml, streakHtml, commissionHtml, focusHtml, adaptHtml, neglectHtml, notesHtml, fmHtml].filter(Boolean).join("");
+  const flow=[startHtml, sessHtml, weekCardHtml, ordersHtml, recoveryHtml, discHtml, bossHtml, streakHtml, commissionHtml, focusHtml, adaptHtml, neglectHtml, pathPips, notesHtml, fmHtml, briefBtnHtml, installHtml, notifPromptHtml].filter(Boolean).join("");
 
   el.innerHTML=`<div class="td-creed">🌲 <span>${creed}</span></div>`+(
     flow
@@ -8317,7 +9108,12 @@ function skReachLevel(skId, level){
   sk.history.push({ts:Date.now(),type:prevType,level});
   if(!S.skills.knowledge)S.skills.knowledge={xp:0}; S.skills.knowledge.xp+=15;
   save();render();
-  toast(`✓ Reached Level ${level} — ${esc(sk.name)}`);
+  if(typeof getTierLabelForLevel==="function"){
+    const tierLabel=getTierLabelForLevel(sk,level);
+    toast(`🏺 <b>${esc(tierLabel)}</b> carved — ${esc(sk.name)} L${level}`);
+  } else {
+    toast(`✓ Reached Level ${level} — ${esc(sk.name)}`);
+  }
 }
 function skSkip(skId){
   const sk=S.lifeSkills.find(x=>x.id===skId); if(!sk) return;
@@ -8551,6 +9347,22 @@ function renderSkillTree(){
       const ty = slot.ry + Math.sin(a)*(realmR+boughLen);
       parts.push(limb(fx,fy,tx,ty,4.2,1.6,barkLite,0.12));
 
+      // helper: push a fade-countdown arc onto a leaf if it's about to decay
+      function pushFadeRing(cx,cy,baseRad,sk){
+        const eff=skEffectiveLevel(sk);
+        if(eff<=0) return;
+        const days=skDaysLeft(sk);
+        if(days===null) return;
+        const threshold=sk.fadeDays?sk.fadeDays*0.5:15;
+        if(days>=threshold) return;
+        const frac=Math.max(0,days/threshold);
+        const rr=baseRad+2.8;
+        const circ=2*Math.PI*rr;
+        const dash=(circ*frac).toFixed(1);
+        const offset=(circ*0.25).toFixed(1); // start at 12 o'clock
+        const col=days<=Math.ceil((sk.fadeDays||30)*0.34)?"var(--ember)":"var(--gold)";
+        leaves.push(`<circle cx="${cx}" cy="${cy}" r="${rr.toFixed(1)}" fill="none" stroke="${col}" stroke-width="2.5" stroke-dasharray="${dash} ${circ.toFixed(1)}" stroke-dashoffset="${offset}" opacity=".8" pointer-events="none"/>`);
+      }
       if(node.group){
         const subs=skSubsOf(node);
         const lblAnchor = Math.cos(a)<-0.2?"end":(Math.cos(a)>0.2?"start":"middle");
@@ -8567,12 +9379,14 @@ function renderSkillTree(){
           const eff=skEffectiveLevel(leaf), peak=leaf.peakLevel||0, max=leaf.levels.length;
           const rad = 4 + Math.min(5,(peak/max)*5);
           leaves.push(`<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="${rad.toFixed(1)}" fill="${skLeafColor(eff,max)}" stroke="rgba(0,0,0,.4)" stroke-width=".7"><title>${esc(leaf.name)} — ${eff>0?'Lv '+eff:'unproven'}${peak>eff?' · peak '+peak:''}</title></circle>`);
+          pushFadeRing(lx.toFixed(1), ly.toFixed(1), rad, leaf);
         });
       } else {
         const eff=skEffectiveLevel(node), peak=node.peakLevel||0, max=node.levels.length;
         const rad = 4.5 + Math.min(5.2,(peak/max)*5.2);
         const lblAnchor = Math.cos(a)<-0.2?"end":(Math.cos(a)>0.2?"start":"middle");
         leaves.push(`<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="${rad.toFixed(1)}" fill="${skLeafColor(eff,max)}" stroke="rgba(0,0,0,.4)" stroke-width=".7"><title>${esc(node.name)} — ${eff>0?'Lv '+eff:'unproven'}${peak>eff?' · peak '+peak:''}</title></circle>`);
+        pushFadeRing(tx.toFixed(1), ty.toFixed(1), rad, node);
         leaves.push(`<text x="${(tx+Math.cos(a)*11).toFixed(0)}" y="${(ty+Math.sin(a)*11+3).toFixed(0)}" text-anchor="${lblAnchor}" font-size="10.5" fill="var(--ink-faint)" style="text-shadow:0 1px 3px #000,0 0 2px #000">${esc(node.name)}</text>`);
       }
     });
@@ -8756,6 +9570,15 @@ function skProgressBlock(sk, eff){
       if(eff<sk.currentLevel) fadeNote=`<div class="sk-fade-note warn">⚠️ Slipped from L${sk.currentLevel} to L${eff} — tap L${eff+1} below when you can do it again to reclaim it.</div>`;
       else if(days!==null) fadeNote=`<div class="sk-fade-note ${days<=Math.ceil(sk.fadeDays*0.34)?'warn':''}">Fades in ${days} day${days!==1?'s':''} (every ${sk.fadeDays}d).</div>`;
     }
+    const histItems=(sk.history||[]).filter(h=>h.type==="promote"||h.type==="decay").slice(-8);
+    const histHtml=histItems.length>1?(()=>{
+      const parts=histItems.map((h,i)=>{
+        const dt=new Date(h.ts).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+        const sep=i<histItems.length-1?'<span class="sk-hist-sep">→</span>':'';
+        return '<span class="sk-hist-item '+h.type+'">L'+h.level+'<span class="sk-hist-date"> '+dt+'</span></span>'+sep;
+      });
+      return '<div class="sk-hist">'+parts.join('')+'</div>';
+    })():'';
     const peak=sk.peakLevel||0;
     const peakStr = (peak>0 && peak>eff) ? ` · peak L${peak}` : "";
     let reclaimNote="";
@@ -8769,10 +9592,12 @@ function skProgressBlock(sk, eff){
       <div class="sk-card-top">
         <div><div class="sk-card-name">${tierPrefix}${esc(sk.name)}${sk.auto?' <span class="sk-auto">auto</span>':''}</div></div>
         <span class="sk-level-badge ${maxed?'maxed':''}">${eff>0?'Lv '+eff:'Unproven'}${tierBadge}${maxed?' · MAX':peakStr}</span>
+        <button class="sk-copy-btn" data-skcopy="${sk.id}" title="Copy skill card">⧉</button>
         <button class="sk-card-edit" data-skedit="${sk.id}">✎</button>
         <button class="sk-card-del" data-skdel="${sk.id}">✕</button>
       </div>
       <div class="sk-ladder">${ladder}</div>
+      ${histHtml}
       ${fadeNote}
       ${reclaimNote}
       ${(sk.why||sk.whatYouDo||sk.howTo||sk.prep||sk.recover||sk.safety||sk.roadmap||sk.advance||sk.maintain)?`<details class="sk-info"><summary>ℹ️ Why, how &amp; how to level up</summary><div class="sk-info-body">${sk.why?`<p><b>Why:</b> ${esc(sk.why)}</p>`:''}${sk.whatYouDo?`<p><b>What you do:</b> ${esc(sk.whatYouDo)}</p>`:''}${sk.howTo?`<p><b>How:</b> ${esc(sk.howTo)}</p>`:''}${sk.prep?`<p class="sk-prep"><b>🤸 Warm-up before:</b> ${esc(sk.prep)}</p>`:''}${sk.recover?`<p class="sk-recover"><b>🧘 Stretch after:</b> ${esc(sk.recover)}</p>`:''}${skProgressBlock(sk,eff)}${sk.safety?`<p class="sk-safety">⚠️ ${esc(sk.safety)}</p>`:''}</div></details>`:''}
@@ -8879,11 +9704,146 @@ function renderGarden(){
   }).join("");
 }
 
+// ===== Carved Rings — trophy cabinet, one ring per level ever reached =====
+// Uses peakLevel so rings are permanent even if a skill decays.
+
+function getTierLabelForLevel(sk, level){
+  if(!sk.tiers||!sk.tiers.length) return `L${level}`;
+  for(const t of sk.tiers){ if(level<=t.upTo) return t.label; }
+  return `L${level}`;
+}
+
+function getTierIndexForLevel(sk, level){
+  if(!sk.tiers||!sk.tiers.length) return 0;
+  for(let i=0;i<sk.tiers.length;i++){ if(level<=sk.tiers[i].upTo) return i; }
+  return sk.tiers.length-1;
+}
+
+function renderSkillRings(sk, pm){
+  const peak=sk.peakLevel||0;
+  const levels=sk.levels||[];
+  const maxLevel=levels.length;
+  if(!maxLevel) return '';
+  const isMaxed=peak>=maxLevel;
+
+  const chips=levels.map((lv,i)=>{
+    const lvNum=i+1;
+    const earned=peak>=lvNum;
+    const isMax=lvNum===maxLevel;
+    const tierLabel=getTierLabelForLevel(sk,lvNum);
+    const tierIdx=getTierIndexForLevel(sk,lvNum);
+    const title=`${tierLabel} · ${sk.name} · L${lvNum}${earned?' (earned)':' (not yet)'}`;
+    const interactAttrs=earned?` role="button" tabindex="0" data-trophychip="${sk.id}" data-trophylvl="${lvNum}"`:"";
+    return `<div class="trophy-chip t${tierIdx} ${earned?'on':''} ${isMax&&earned?'max':''}"
+      title="${esc(title)}"
+      style="${earned?`--tpc:${pm.color}`:''}"
+      ${interactAttrs}
+    >${isMax&&earned?'★':lvNum}</div>`;
+  }).join('');
+
+  return `<div class="trophy-skill ${peak>0?'started':''}">
+    <div class="trophy-skill-info">
+      <div class="trophy-skill-name">${esc(sk.name)}</div>
+      ${peak>0?`<div class="trophy-skill-tier">${getTierLabelForLevel(sk,peak)} · L${peak}/${maxLevel}${isMaxed?' ✦':''}</div>`:'<div class="trophy-skill-tier unstarted">not yet started</div>'}
+    </div>
+    <div class="trophy-chips">${chips}</div>
+  </div>`;
+}
+
+function renderTrophies(){
+  const el=document.getElementById("trophyGrid");
+  const statsEl=document.getElementById("trophyStats");
+  if(!el) return;
+
+  const leafSkills=S.lifeSkills.filter(s=>!s.group&&s.levels&&s.levels.length);
+  const totalRings=leafSkills.reduce((n,s)=>n+s.levels.length,0);
+  const earnedRings=leafSkills.reduce((n,s)=>n+Math.min(s.peakLevel||0,s.levels.length),0);
+  const pct=totalRings>0?Math.round(earnedRings/totalRings*100):0;
+
+  if(statsEl){
+    statsEl.innerHTML=`<div class="trophy-summary">
+      <div class="trophy-counts"><span class="trophy-earned-n">${earnedRings}</span><span class="trophy-total-n"> / ${totalRings}</span><span class="trophy-rings-label"> rings carved · ${pct}% of the full tree</span></div>
+      <div class="trophy-global-bar"><div class="trophy-global-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }
+
+  if(!leafSkills.length){
+    el.innerHTML=`<div class="aw-empty"><span class="big">🌱</span>Level up skills in The Tree to start carving your rings.</div>`;
+    return;
+  }
+
+  let html='';
+  for(const cat of SK_CAT_ORDER){
+    const pm=PATH_META[cat]; if(!pm) continue;
+    const catLeaves=leafSkills.filter(s=>s.cat===cat);
+    if(!catLeaves.length) continue;
+    const catEarned=catLeaves.reduce((n,s)=>n+Math.min(s.peakLevel||0,s.levels.length),0);
+    const catTotal=catLeaves.reduce((n,s)=>n+s.levels.length,0);
+    const catPct=catTotal>0?Math.round(catEarned/catTotal*100):0;
+    const anyEarned=catEarned>0;
+
+    html+=`<details class="trophy-path ${anyEarned?'has-rings':''}" ${anyEarned?'open':''}>
+      <summary class="trophy-path-hdr" style="--tpc:${pm.color}">
+        <span class="trophy-path-ic">${pm.icon}</span>
+        <span class="trophy-path-nm">${pm.name}</span>
+        <span class="trophy-path-ct">${catEarned}/${catTotal}</span>
+        <span class="trophy-path-bar-wrap"><span class="trophy-path-bar-fill" style="width:${catPct}%"></span></span>
+      </summary>
+      <div class="trophy-path-body">
+        ${catLeaves.map(sk=>renderSkillRings(sk,pm)).join('')}
+      </div>
+    </details>`;
+  }
+
+  el.innerHTML=html||`<div class="aw-empty">No skills seeded yet.</div>`;
+}
+
+let _lastTrophyChip=null;
+document.addEventListener("click",e=>{
+  const chip=e.target.closest("[data-trophychip]");
+  const detail=document.getElementById("trophyDetail");
+  if(!detail) return;
+  if(!chip){ detail.style.display="none"; _lastTrophyChip=null; return; }
+  const skId=chip.dataset.trophychip;
+  const lvNum=parseInt(chip.dataset.trophylvl)||1;
+  if(_lastTrophyChip===chip){ detail.style.display="none"; _lastTrophyChip=null; return; }
+  _lastTrophyChip=chip;
+  const sk=S.lifeSkills.find(x=>x.id===skId); if(!sk){ detail.style.display="none"; return; }
+  const lvDef=(sk.levels||[]).find(l=>l.n===lvNum);
+  const tierLabel=getTierLabelForLevel(sk,lvNum);
+  const pm=PATH_META[sk.cat]||{name:sk.cat,icon:"•"};
+  detail.innerHTML=`<div class="td-chip-icon">${pm.icon}</div>
+    <div class="td-chip-body">
+      <div class="td-chip-title">◆ ${esc(tierLabel)} · ${esc(sk.name)} · L${lvNum}</div>
+      <div class="td-chip-ability">${lvDef?esc(lvDef.ability):"—"}</div>
+    </div>`;
+  detail.style.display="flex";
+  e.stopPropagation();
+});
+
 /* ---------------- Service worker (offline) ---------------- */
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}
 
 seedSkillsIfEmpty();
 render();
+
+/* ---------------- Streak notification scheduler ---------------- */
+// Fires a local notification at 7 pm if streak is alive and orders remain.
+// Only runs while the tab is open; that's acceptable (the permission prompt alone adds value).
+function scheduleStreakNotif(){
+  if(typeof Notification==="undefined"||Notification.permission!=="granted"||!S.notifEnabled) return;
+  const now=new Date();
+  const target=new Date(now);
+  target.setHours(19,0,0,0);
+  if(target<=now) target.setDate(target.getDate()+1);
+  setTimeout(()=>{
+    if(S.streak>0&&(S.dailies||[]).some(d=>!d.done)){
+      new Notification("🔥 Streak at risk",{body:`${S.streak}-day streak — orders remaining before midnight.`,tag:"streak-alert"});
+    }
+    scheduleStreakNotif(); // reschedule for next 7 pm
+  }, target-now);
+}
+scheduleStreakNotif();
 
 
 </script>

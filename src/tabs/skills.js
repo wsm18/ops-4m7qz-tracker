@@ -83,6 +83,15 @@ function skProgressBlock(sk, eff){
       if(eff<sk.currentLevel) fadeNote=`<div class="sk-fade-note warn">⚠️ Slipped from L${sk.currentLevel} to L${eff} — tap L${eff+1} below when you can do it again to reclaim it.</div>`;
       else if(days!==null) fadeNote=`<div class="sk-fade-note ${days<=Math.ceil(sk.fadeDays*0.34)?'warn':''}">Fades in ${days} day${days!==1?'s':''} (every ${sk.fadeDays}d).</div>`;
     }
+    const histItems=(sk.history||[]).filter(h=>h.type==="promote"||h.type==="decay").slice(-8);
+    const histHtml=histItems.length>1?(()=>{
+      const parts=histItems.map((h,i)=>{
+        const dt=new Date(h.ts).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+        const sep=i<histItems.length-1?'<span class="sk-hist-sep">→</span>':'';
+        return '<span class="sk-hist-item '+h.type+'">L'+h.level+'<span class="sk-hist-date"> '+dt+'</span></span>'+sep;
+      });
+      return '<div class="sk-hist">'+parts.join('')+'</div>';
+    })():'';
     const peak=sk.peakLevel||0;
     const peakStr = (peak>0 && peak>eff) ? ` · peak L${peak}` : "";
     let reclaimNote="";
@@ -96,10 +105,12 @@ function skProgressBlock(sk, eff){
       <div class="sk-card-top">
         <div><div class="sk-card-name">${tierPrefix}${esc(sk.name)}${sk.auto?' <span class="sk-auto">auto</span>':''}</div></div>
         <span class="sk-level-badge ${maxed?'maxed':''}">${eff>0?'Lv '+eff:'Unproven'}${tierBadge}${maxed?' · MAX':peakStr}</span>
+        <button class="sk-copy-btn" data-skcopy="${sk.id}" title="Copy skill card">⧉</button>
         <button class="sk-card-edit" data-skedit="${sk.id}">✎</button>
         <button class="sk-card-del" data-skdel="${sk.id}">✕</button>
       </div>
       <div class="sk-ladder">${ladder}</div>
+      ${histHtml}
       ${fadeNote}
       ${reclaimNote}
       ${(sk.why||sk.whatYouDo||sk.howTo||sk.prep||sk.recover||sk.safety||sk.roadmap||sk.advance||sk.maintain)?`<details class="sk-info"><summary>ℹ️ Why, how &amp; how to level up</summary><div class="sk-info-body">${sk.why?`<p><b>Why:</b> ${esc(sk.why)}</p>`:''}${sk.whatYouDo?`<p><b>What you do:</b> ${esc(sk.whatYouDo)}</p>`:''}${sk.howTo?`<p><b>How:</b> ${esc(sk.howTo)}</p>`:''}${sk.prep?`<p class="sk-prep"><b>🤸 Warm-up before:</b> ${esc(sk.prep)}</p>`:''}${sk.recover?`<p class="sk-recover"><b>🧘 Stretch after:</b> ${esc(sk.recover)}</p>`:''}${skProgressBlock(sk,eff)}${sk.safety?`<p class="sk-safety">⚠️ ${esc(sk.safety)}</p>`:''}</div></details>`:''}

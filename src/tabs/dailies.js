@@ -49,6 +49,17 @@ function habitStreakState(h){
   if(gap===2 && !h.graceUsed) return {streak:h.streak, state:"grace"}; // grace available
   return {streak:h.streak, state:"broken"};                // will reset
 }
+function habitHeatMap(h){
+  if(!(h.history||[]).length) return "";
+  const doneSet=new Set(h.history||[]);
+  const squares=[];
+  for(let i=59;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const ds=localYMD(d);
+    squares.push(`<div class="heat-sq ${doneSet.has(ds)?'done':'miss'}" title="${ds}"></div>`);
+  }
+  return `<div class="habit-heat-row">${squares.join('')}</div>`;
+}
 function renderHabits(){
   const wrap=document.getElementById("habitQuests"); if(!wrap) return;
   // populate skill dropdown + starters (once per render is fine)
@@ -63,19 +74,55 @@ function renderHabits(){
   wrap.innerHTML=S.habits.map(h=>{
     const st=habitStreakState(h);
     const done=st.state==="done";
-    const streakBadge = st.streak>0 ? `<span class="hb-streak ${st.state}">🔥 ${st.streak}</span>` : "";
+    const graceIcon=(st.state==="grace"&&!h.graceUsed)?' ⏰':(h.graceUsed&&st.state!=="done"?' ⚠️':'');
+    const streakBadge = st.streak>0 ? `<span class="hb-streak ${st.state}">🔥 ${st.streak}${graceIcon}</span>` : "";
     let note="";
     if(st.state==="grace") note=`<div class="hb-note warn">Missed yesterday — complete today to use your grace day and keep the streak.</div>`;
     else if(st.state==="broken" && h.streak>0) note=`<div class="hb-note warn">Streak will reset — that's okay, just start again today.</div>`;
     else if(h.linkedSkill) note=`<div class="hb-note">Feeds: ${esc(h.linkedSkill)}</div>`;
+    const best=h.bestStreak||0;
+    const cur=st.streak||0;
+    const bestHtml=best>0?`<div class="hb-best">Best: ${best} day${best!==1?'s':''} ${cur>=best&&cur>0?' ⭐':''}</div>`:'';
+    const view=_hbView[h.id]||'strip';
+    const calView=view==='month'?habitMonthGrid(h):habitHeatMap(h);
+    const toggleBtn=(h.history&&h.history.length)?`<button class="hb-view-toggle ${view==='month'?'on':''}" data-hbview="${h.id}">${view==='month'?'60d':'Cal'}</button>`:'';
     return `<div class="hb-card ${done?'done':''}">
-      <button class="hb-check ${done?'on':''}" data-hbdo="${h.id}" ${done?'disabled':''}>${done?'✓':''}</button>
-      <div class="hb-body"><div class="hb-name">${esc(h.name)}</div>${note}</div>
-      ${streakBadge}
-      <button class="hb-del" data-hbdel="${h.id}">✕</button>
+      <div class="hb-top-row">
+        <button class="hb-check ${done?'on':''}" data-hbdo="${h.id}" ${done?'disabled':''}>${done?'✓':''}</button>
+        <div class="hb-body"><div class="hb-name">${esc(h.name)}</div>${note}</div>
+        ${streakBadge}
+        ${toggleBtn}
+        <button class="hb-del" data-hbdel="${h.id}">✕</button>
+      </div>
+      ${calView}
+      ${bestHtml}
     </div>`;
   }).join("");
 }
+// per-habit UI view: "strip" (60-day heat map) or "month" (current month grid)
+const _hbView={};
+function habitMonthGrid(h){
+  const doneSet=new Set(h.history||[]);
+  const now=new Date();
+  const year=now.getFullYear(), month=now.getMonth();
+  const firstDay=new Date(year,month,1);
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  // Monday-first: 0=Mon…6=Sun; getDay returns 0=Sun
+  const startDow=(firstDay.getDay()+6)%7;
+  const todayStr2=localYMD();
+  const DOW=['M','T','W','T','F','S','S'];
+  const header=DOW.map(d=>`<div class="hb-month-dow">${d}</div>`).join('');
+  const cells=[];
+  for(let i=0;i<startDow;i++) cells.push('<div class="hb-month-cell hm-future"></div>');
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const isFuture=ds>todayStr2;
+    const cls=isFuture?'hm-future':doneSet.has(ds)?'hm-done':'hm-miss';
+    cells.push(`<div class="hb-month-cell ${cls}" title="${ds}"></div>`);
+  }
+  return `<div class="hb-month-header">${header}</div><div class="hb-month-grid">${cells.join('')}</div>`;
+}
+
 const _hbAdd=document.getElementById("hbAdd");
 if(_hbAdd) _hbAdd.onclick=()=>{
   const name=document.getElementById("hbName").value.trim(); if(!name){toast("Name the habit");return;}

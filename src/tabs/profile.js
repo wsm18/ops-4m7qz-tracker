@@ -37,6 +37,34 @@ function renderProfile(){
   if(p.weightDate) rows.push(`<div class="r-row"><span>Weight measured</span><b>${fmtMeasDate(p.weightDate)}</b></div>`);
   if(p.heightDate) rows.push(`<div class="r-row"><span>Height measured</span><b>${fmtMeasDate(p.heightDate)}</b></div>`);
   ro.innerHTML=rows.length?(rows.join("")+`<div style="margin-top:8px;color:var(--ink-faint);font-style:italic">Your bodyweight drives the Deadlift & Squat skills automatically.</div>`):`<div style="color:var(--ink-faint)">Fill in your profile above to see computed stats and power the strength skills.</div>`;
+  // Weight log section
+  const wlEl=document.getElementById("wlSection"); if(!wlEl) return;
+  const wlLogs=(S.weightLog||[]).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const last30=wlLogs.filter(w=>{const d=new Date(w.date);return !isNaN(d)&&(Date.now()-d)/864e5<=30;});
+  const last7=wlLogs.filter(w=>{const d=new Date(w.date);return !isNaN(d)&&(Date.now()-d)/864e5<=7;});
+  const avg7=last7.length?Math.round(last7.reduce((s,w)=>s+w.lb,0)/last7.length*10)/10:null;
+  const sparkHtml=last30.length>=2?`<div class="wl-spark">${miniSparkline(last30.map(w=>w.lb),260,50)}</div>`:"";
+  wlEl.innerHTML=`<div class="adder" style="padding-bottom:12px">
+    <div class="row" style="gap:9px;align-items:flex-end">
+      <label class="lg-label" style="flex:1">Weight (lb)<input id="wlVal" type="number" min="50" max="400" step="0.5" placeholder="e.g. 175"></label>
+      <button class="btn-add" id="wlLog" style="flex:0 0 auto;width:auto;padding:10px 14px;margin:0;font-size:13px">Log</button>
+    </div>
+    ${avg7!=null?`<div style="font-size:12px;color:var(--ink-faint);margin-top:6px">7-day avg: <b style="color:var(--ink)">${avg7} lb</b></div>`:""}
+    ${sparkHtml}
+    ${last30.length?`<div style="font-size:11px;color:var(--ink-faint);margin-top:4px">${last30.length} entr${last30.length===1?"y":"ies"} in last 30 days</div>`:`<div style="font-size:12px;color:var(--ink-faint);margin-top:6px">No weight entries yet. Log your weight above to start trending.</div>`}
+  </div>`;
+  const wlBtn=document.getElementById("wlLog");
+  if(wlBtn) wlBtn.onclick=()=>{
+    const val=parseFloat(document.getElementById("wlVal").value);
+    if(!val||val<50||val>400){toast("Enter a valid weight (50–400 lb)");return;}
+    const date=localYMD();
+    if(!S.weightLog) S.weightLog=[];
+    const existing=S.weightLog.find(w=>w.date===date);
+    if(existing) existing.lb=val; else S.weightLog.push({date,lb:val,ts:Date.now()});
+    S.profile.weightLb=val; S.profile.weightDate=date;
+    save(); render();
+    toast(`⚖️ ${val} lb logged`);
+  };
 }
 const _pfSave=document.getElementById("pfSave");
 if(_pfSave) _pfSave.onclick=()=>{

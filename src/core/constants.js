@@ -51,6 +51,8 @@ const DEFAULT = {
   weightLog:[],           // weight history for trend: [{date, lb}]
   vitals:[],              // health readings: [{id, date, pulse, bpSys, bpDia, hemoglobin, note}]
   healthImport:{lastImport:null},  // Apple Health export import stub
+  installPromptDismissed:false,    // true once user dismisses the "add to home screen" nudge
+  notifEnabled:false,              // true once user grants notification permission
   habits:[],              // {id, name, linkedSkill, streak, bestStreak, lastDone, graceUsed, history:[]}
   tests:[],               // test results: [{id, type, date, score, raw, linkedSkill}]
   srsDecks:[],            // [{id, name, cards:[{id, front, back, due, interval, ease, reps}]}]
@@ -99,7 +101,10 @@ const DEFAULT = {
     {id:id(), name:"Favorite coffee / treat", cost:20},
     {id:id(), name:"One episode of your show", cost:30},
     {id:id(), name:"Full rest/recovery day, no guilt", cost:60},
-  ]
+  ],
+  questArchive: [],
+  streakLog: [],    // [{date, pct}] — daily order completion rate, last 90 days
+  streakBrokenDate: null, // YYYY-MM-DD when streak last broke (cleared after 3 recovery days)
 };
 const VALUES = {
   quest:{easy:{xp:15,g:5},med:{xp:35,g:12},hard:{xp:70,g:28}},

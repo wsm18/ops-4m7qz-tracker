@@ -1,4 +1,8 @@
 
+/* ---------------- PWA install prompt / Notifications ---------------- */
+let _deferredInstallPrompt = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); _deferredInstallPrompt = e; });
+
 /* ---------------- Events ---------------- */
 // Apply the More/Less collapsed state of the secondary nav section
 function applyNavMore(){
@@ -35,8 +39,11 @@ applyNavMore();
 document.getElementById("qAdd").onclick=()=>{
   const n=document.getElementById("qName").value.trim();if(!n)return;
   const path=document.getElementById("qPath").value||"tactical";
-  S.quests.unshift({id:id(),name:n,diff:document.getElementById("qDiff").value,path:path,done:false});
-  document.getElementById("qName").value="";save();render();
+  const due=document.getElementById("qDue").value||null;
+  S.quests.unshift({id:id(),name:n,diff:document.getElementById("qDiff").value,path:path,done:false,due,createdDate:localYMD()});
+  document.getElementById("qName").value="";
+  document.getElementById("qDue").value="";
+  save();render();
 };
 document.getElementById("dAdd").onclick=()=>{
   const n=document.getElementById("dName").value.trim();if(!n)return;
@@ -60,18 +67,73 @@ document.getElementById("rAdd").onclick=()=>{
 document.body.addEventListener("click",e=>{
   const t=e.target;
   // complete quest
-  if(t.dataset.q){const q=S.quests.find(x=>x.id===t.dataset.q);if(q&&!q.done){q.done=true;const v=VALUES.quest[q.diff];grant(v.xp,v.g,"Mission complete",q.path||"tactical");setTimeout(()=>{S.quests=S.quests.filter(x=>x.id!==q.id||!x.done);},900);}return}
+  if(t.dataset.q){
+    const q=S.quests.find(x=>x.id===t.dataset.q);
+    if(q&&!q.done){
+      q.done=true;
+      if(!S.questArchive) S.questArchive=[];
+      S.questArchive.unshift({...q, completedDate:new Date().toLocaleDateString()});
+      if(S.questArchive.length>200) S.questArchive=S.questArchive.slice(0,200);
+      const v=VALUES.quest[q.diff];
+      grant(v.xp,v.g,"Mission complete",q.path||"tactical");
+      setTimeout(()=>{S.quests=S.quests.filter(x=>x.id!==q.id||!x.done);save();render();},900);
+    }
+    return;
+  }
   // complete daily
   if(t.dataset.d){const d=S.dailies.find(x=>x.id===t.dataset.d);if(d&&!d.done){d.done=true;const v=VALUES.daily[d.diff];grant(v.xp,v.g,"Order executed",d.path||"tactical");const allNow=S.dailies.every(x=>x.done);if(allNow){onPerfectDay();}}else if(d&&d.done){d.done=false;save();render();}return}
   // boss hit
   if(t.dataset.hit){const b=S.bosses.find(x=>x.id===t.dataset.hit);if(b&&b.hp>0){b.hp--;grant(8,4,"Progress logged",b.path||"tactical");if(b.hp<=0){setTimeout(()=>{toast(`<span class="t-xp">✅ ${esc(b.name)} secured! Bonus awarded</span>`);S.gold+=b.maxhp*2;save();render();},400);}}return}
   // buy reward
   if(t.dataset.buy){const r=S.rewards.find(x=>x.id===t.dataset.buy);if(r&&S.gold>=r.cost){S.gold-=r.cost;save();render();toast(`🍺 Rest claimed: ${esc(r.name)} — you earned this. Take it fully.`);}return}
+  // snooze quest +3 days
+  if(t.dataset.qsnooze){
+    const q=S.quests.find(x=>x.id===t.dataset.qsnooze); if(!q) return;
+    const base=q.due&&q.due>=localYMD()?q.due:localYMD();
+    const nd=new Date(base+"T12:00:00"); nd.setDate(nd.getDate()+3);
+    q.due=localYMD(nd);
+    save();render();
+    toast(`Oath postponed to ${q.due}`);
+    return;
+  }
   // deletes
   if(t.dataset.dq){S.quests=S.quests.filter(x=>x.id!==t.dataset.dq);save();render();return}
   if(t.dataset.dd){S.dailies=S.dailies.filter(x=>x.id!==t.dataset.dd);save();render();return}
   if(t.dataset.db){S.bosses=S.bosses.filter(x=>x.id!==t.dataset.db);save();render();return}
   if(t.dataset.dr){S.rewards=S.rewards.filter(x=>x.id!==t.dataset.dr);save();render();return}
+  // install prompt dismiss / one-tap install
+  if(t.dataset.installDismiss){S.installPromptDismissed=true;save();if(typeof renderToday==="function")renderToday();return;}
+  if(t.dataset.installNow&&_deferredInstallPrompt){_deferredInstallPrompt.prompt();_deferredInstallPrompt.userChoice.then(()=>{S.installPromptDismissed=true;save();if(typeof renderToday==="function")renderToday();});return;}
+  // notification permission request
+  if(t.dataset.notifPrompt){
+    if(typeof Notification!=="undefined"){
+      Notification.requestPermission().then(perm=>{
+        if(perm==="granted"){S.notifEnabled=true;save();scheduleStreakNotif();}
+        if(typeof renderToday==="function")renderToday();
+      });
+    }
+    return;
+  }
+  // copy skill card to clipboard
+  if(t.dataset.skcopy){
+    const sk=S.lifeSkills.find(x=>x.id===t.dataset.skcopy); if(!sk) return;
+    const eff=typeof skEffectiveLevel==="function"?skEffectiveLevel(sk):sk.currentLevel;
+    const tierLabel=typeof getTierLabelForLevel==="function"?getTierLabelForLevel(sk,eff):"";
+    const days=typeof skDaysLeft==="function"?skDaysLeft(sk):null;
+    const peak=sk.peakLevel||0;
+    const txt=[
+      sk.name,
+      `L${eff}${tierLabel?" "+tierLabel:""}`,
+      peak>eff?`peak L${peak}`:"",
+      days!==null?`fades in ${days}d`:""
+    ].filter(Boolean).join(" · ");
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(()=>toast("⧉ Skill card copied")).catch(()=>toast("Copy failed — try long-pressing"));
+    } else { toast("Clipboard not available in this browser"); }
+    return;
+  }
+  // copy daily brief
+  if(t.dataset.copybriefbtn){ if(typeof copyDailyBrief==="function") copyDailyBrief(); return; }
   // global tab navigation — any button with data-gototab anywhere in the app
   const goBtn=t.closest("[data-gototab]");
   if(goBtn){

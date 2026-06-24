@@ -1,6 +1,6 @@
 # CLAUDE.md — Operating rules for AI assistants in this repo
 
-You are continuing work on **Operations**, a gamified ROTC + life-tracker PWA. Read this file first, then **OPERATIONS-HANDOFF.md** for full architecture and history. This file is the short, binding rulebook.
+You are continuing work on **Operations**, a gamified ROTC + life-tracker PWA. Read this file first, then **`docs/OPERATIONS-HANDOFF.md`** for full architecture and history. This file is the short, binding rulebook.
 
 ---
 

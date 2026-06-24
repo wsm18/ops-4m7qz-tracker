@@ -130,7 +130,12 @@ function skReachLevel(skId, level){
   sk.history.push({ts:Date.now(),type:prevType,level});
   if(!S.skills.knowledge)S.skills.knowledge={xp:0}; S.skills.knowledge.xp+=15;
   save();render();
-  toast(`✓ Reached Level ${level} — ${esc(sk.name)}`);
+  if(typeof getTierLabelForLevel==="function"){
+    const tierLabel=getTierLabelForLevel(sk,level);
+    toast(`🏺 <b>${esc(tierLabel)}</b> carved — ${esc(sk.name)} L${level}`);
+  } else {
+    toast(`✓ Reached Level ${level} — ${esc(sk.name)}`);
+  }
 }
 function skSkip(skId){
   const sk=S.lifeSkills.find(x=>x.id===skId); if(!sk) return;

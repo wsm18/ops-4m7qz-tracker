@@ -49,6 +49,7 @@ TAB_HTML = [
     'tabs/awards.html',
     'tabs/records.html',
     'tabs/weight.html',
+    'tabs/trophies.html',
 ]
 
 # ── JS files ─────────────────────────────────────────────────────────────────
@@ -84,6 +85,7 @@ JS_FILES = [
     'core/tree.js',            # SK_PATH_ICON, Yggdrasil SVG renderer, pan/zoom
     'tabs/skills.js',          # renderSkillsTab, skTier, skProgressBlock
     'tabs/garden.js',          # renderGarden, path idols, The Grove tab
+    'tabs/trophies.js',        # renderTrophies, Carved Rings cabinet
     'core/init.js',            # SW register, seedSkillsIfEmpty(), render()  ← always last
 ]
 

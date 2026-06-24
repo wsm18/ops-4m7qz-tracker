@@ -64,6 +64,9 @@ function load(){
     merged.studyPlans=r.studyPlans||[];
     merged.counseling=r.counseling||[];
     merged.checklists=r.checklists||[];
+    merged.questArchive=r.questArchive||[];
+    merged.streakLog=r.streakLog||[];
+    merged.streakBrokenDate=r.streakBrokenDate||null;
     return merged;
   }catch(e){return structuredClone(DEFAULT)}
 }
@@ -77,10 +80,22 @@ function checkDailyReset(){
   const t=today();
   if(S.lastDaily===t) return;
   if(S.lastDaily){
+    // record yesterday's completion rate before resetting
+    if(S.dailies.length>0){
+      const done=S.dailies.filter(d=>d.done).length;
+      const pct=Math.round(done/S.dailies.length*100);
+      if(!S.streakLog) S.streakLog=[];
+      S.streakLog.push({date:S.lastDaily, pct});
+      S.streakLog=S.streakLog.slice(-90);
+    }
     const diff=Math.round((new Date(t)-new Date(S.lastDaily))/864e5);
     if(diff===1 && S._yesterdayComplete){ S.streak++; S.missedYesterday=false; }
-    else { if(S.streak>0) S.missedYesterday=true; S.streak=0; }
+    else {
+      if(S.streak>0){ S.missedYesterday=true; S.streakBrokenDate=localYMD(); }
+      S.streak=0;
+    }
   }
+  if(S.streak>=3) S.streakBrokenDate=null; // recovery complete
   if(S.streak>S.bestStreak) S.bestStreak=S.streak;
   S._yesterdayComplete = S.dailies.length>0 && S.dailies.every(d=>d.done);
   S.dailies.forEach(d=>d.done=false);
@@ -196,6 +211,7 @@ function render(){
   if(typeof renderWeight==="function") renderWeight();
   if(typeof renderAwards==="function") renderAwards();
   if(typeof renderGarden==="function") renderGarden();
+  if(typeof renderTrophies==="function") renderTrophies();
 }
 
 function pathTag(path){
@@ -212,14 +228,52 @@ function diffTag(scope,diff){
 
 function renderQuests(){
   const el=document.getElementById("qList");
-  if(!S.quests.length){el.innerHTML=`<div class="empty"><span class="big">🎯</span>The board is clear. Swear an oath above and carry it forward.</div>`;return}
-  el.innerHTML=S.quests.map(q=>`
-    <li class="card ${q.done?'done':''}">
-      <div class="check" data-q="${q.id}">${q.done?'✓':''}</div>
-      <div class="c-body"><div class="c-name">${esc(q.name)}</div>
-        <div class="c-meta">${diffTag('quest',q.diff)}${pathTag(q.path)}</div></div>
-      <button class="del" data-dq="${q.id}">✕</button>
-    </li>`).join("");
+  if(!S.quests.length){el.innerHTML=`<div class="empty"><span class="big">🎯</span>The board is clear. Swear an oath above and carry it forward.</div>`;}
+  else{
+    const today=localYMD();
+    const sorted=S.quests.slice().sort((a,b)=>{
+      const aOver=a.due&&a.due<today, bOver=b.due&&b.due<today;
+      if(aOver&&!bOver) return -1; if(bOver&&!aOver) return 1;
+      if(a.due&&b.due) return a.due<b.due?-1:a.due>b.due?1:0;
+      if(a.due&&!b.due) return -1; if(b.due&&!a.due) return 1;
+      return 0;
+    });
+    el.innerHTML=sorted.map(q=>{
+      const overdue=!q.done&&q.due&&q.due<today;
+      const dueTag=q.due?`<span class="tag ${overdue?'overdue-tag':'due-tag'}">${overdue?'OVERDUE':'due '+q.due}</span>`:'';
+      const ageDays=q.createdDate&&!q.done?dayDiff(q.createdDate,today):0;
+      const ageTag=ageDays>3?`<span class="quest-age${ageDays>14?' old':''}">open ${ageDays}d</span>`:'';
+      const snoozeBtn=(!q.done&&q.due)?`<button class="q-snooze" data-qsnooze="${q.id}" title="Postpone 3 days">+3d</button>`:'';
+      return `<li class="card ${q.done?'done':''}${overdue?' overdue':''}">
+        <div class="check" data-q="${q.id}">${q.done?'✓':''}</div>
+        <div class="c-body"><div class="c-name">${esc(q.name)}</div>
+          <div class="c-meta">${diffTag('quest',q.diff)}${pathTag(q.path)}${dueTag}${ageTag}</div></div>
+        ${snoozeBtn}
+        <button class="del" data-dq="${q.id}">✕</button>
+      </li>`;
+    }).join("");
+  }
+  // Update overdue oath count badge on the nav button
+  const _overdueC=(S.quests||[]).filter(q=>!q.done&&q.due&&q.due<localYMD()).length;
+  const _qdot=document.querySelector('#sideNav button[data-tab="quests"] .nav-badge');
+  if(_qdot) _qdot.textContent=_overdueC>0?String(_overdueC):'';
+  const archEl=document.getElementById("qArchive");
+  if(!archEl) return;
+  const arch=(S.questArchive||[]).slice(0,20);
+  if(!arch.length){archEl.innerHTML="";return;}
+  archEl.innerHTML=`<details class="q-archive">
+    <summary>✓ Completed oaths (${arch.length})</summary>
+    ${arch.map(q=>{
+      const timingStr=(q.createdDate&&q.completedDate)?` · ${dayDiff(q.createdDate,q.completedDate)} day${dayDiff(q.createdDate,q.completedDate)!==1?'s':''}`:'' ;
+      return `<div class="q-arch-item">
+        <span class="q-arch-check">✓</span>
+        <div class="q-arch-body">
+          <div class="q-arch-name">${esc(q.name)}</div>
+          <div class="q-arch-meta">${pathTag(q.path)}<span class="q-arch-date">Completed ${esc(q.completedDate||'')}</span><span class="quest-archive-timing">${timingStr}</span></div>
+        </div>
+      </div>`;
+    }).join("")}
+  </details>`;
 }
 function renderDailies(){
   const el=document.getElementById("dList");
@@ -266,3 +320,15 @@ function renderShop(){
     </li>`).join("");
 }
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function miniSparkline(vals,W,H){
+  if(!vals||vals.length<2) return "";
+  const PAD=4;
+  const mn=Math.min(...vals),mx=Math.max(...vals),rng=(mx-mn)||1;
+  const cx=i=>PAD+Math.round((i/(vals.length-1))*(W-PAD*2));
+  const cy=v=>H-PAD-Math.round(((v-mn)/rng)*(H-PAD*2));
+  const pts=vals.map((v,i)=>`${cx(i)},${cy(v)}`).join(" ");
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px">
+    <polyline points="${pts}" fill="none" stroke="var(--jade)" stroke-width="1.5" stroke-linejoin="round"/>
+    ${vals.map((v,i)=>`<circle cx="${cx(i)}" cy="${cy(v)}" r="2.5" fill="var(--jade)"/>`).join("")}
+  </svg>`;
+}

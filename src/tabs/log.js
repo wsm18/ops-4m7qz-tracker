@@ -73,17 +73,21 @@ function setHasData(ex,st){
 document.getElementById("lgSave").onclick=()=>{
   if(!LG) return;
   const dur=parseInt(document.getElementById("lgDur").value)||null;
+  const rpe=parseInt(document.getElementById("lgRpe").value)||null;
   // keep only exercises with at least one filled set
   const exercises=LG.exercises.map(ex=>({
     name:ex.name, type:ex.type, w:ex.w,
     sets:ex.sets.filter(st=>setHasData(ex,st))
   })).filter(ex=>ex.sets.length>0 && ex.name && ex.name!=="Custom exercise");
   if(!exercises.length){toast("Log at least one set first");return;}
-  S.workouts.push({id:id(), date:new Date().toLocaleDateString(), ts:Date.now(), session:LG.session, duration:dur, exercises});
+  const note=document.getElementById("lgNote").value.trim()||null;
+  S.workouts.push({id:id(), date:new Date().toLocaleDateString(), ts:Date.now(), session:LG.session, duration:dur, rpe, exercises, note});
   if(!S.pathXP) S.pathXP={};
   S.pathXP.physical=(S.pathXP.physical||0)+25; S.gold+=8; S.totalDone++;
   save();
   document.getElementById("lgDur").value="";
+  document.getElementById("lgRpe").value="";
+  document.getElementById("lgNote").value="";
   buildLogForm(document.getElementById("lgSession").value);
   render();
   toast(`<span class="t-xp">Workout logged · +25 Fitness XP +8 pts</span>`);
@@ -164,6 +168,33 @@ function savePT(){
 function renderLog(){
   if(!document.getElementById("lgSession")) return;
   initLogTab();
+  // PT calendar — 30-day training frequency view
+  const calEl=document.getElementById("ptCal");
+  if(calEl){
+    const workedDates=new Set();
+    (S.workouts||[]).forEach(w=>workedDates.add(w.date));
+    (S.ptLog||[]).forEach(p=>workedDates.add(p.date));
+    const dots=[];
+    for(let i=29;i>=0;i--){
+      const d=new Date(); d.setDate(d.getDate()-i);
+      const ds=d.toLocaleDateString();
+      dots.push(`<div class="pt-cal-dot ${workedDates.has(ds)?'on':''}" title="${ds}"></div>`);
+    }
+    calEl.innerHTML=`<div class="pt-cal-wrap"><div class="pt-cal-title">Training frequency — last 30 days</div><div class="pt-cal">${dots.join('')}</div><div class="pt-cal-legend">● = training day (workout or PT logged)</div></div>`;
+  }
+  // weekly volume summary
+  const wkSumEl=document.getElementById("lgWeekSummary");
+  if(wkSumEl){
+    const cut=Date.now()-7*864e5;
+    const wkW=(S.workouts||[]).filter(w=>w.ts>=cut);
+    const wkP=(S.ptLog||[]).filter(p=>p.ts>=cut);
+    const totalMin=wkW.reduce((s,w)=>s+(w.duration||0),0);
+    const h=Math.floor(totalMin/60), m=totalMin%60;
+    const sessions=wkW.length+wkP.length;
+    wkSumEl.innerHTML=sessions>0
+      ?`<div class="week-summary">${sessions} session${sessions!==1?'s':''} this week${totalMin>0?` · ${h>0?h+'h ':''}${m>0?m+'min':h>0?'':''}`:''}${wkP.length>0?` (${wkP.length} PT)`:''}  </div>`
+      :`<div class="week-summary no-data">No sessions logged this week.</div>`;
+  }
   // progress by exercise: scan all workouts, group by exercise name
   const prog=document.getElementById("lgProgress");
   const byEx={};
@@ -202,8 +233,9 @@ function renderLog(){
   else{
     hist.innerHTML=S.workouts.slice().reverse().slice(0,12).map(w=>`<div class="lg-hist">
       <button class="del-w" data-delw="${w.id}">✕</button>
-      <div class="lg-hist-top"><span class="dt">${SESSIONS[w.session]?SESSIONS[w.session].name.split(' · ')[0]:'Workout'}</span><span>${w.date}${w.duration?` · ${w.duration} min`:''}</span></div>
+      <div class="lg-hist-top"><span class="dt">${SESSIONS[w.session]?SESSIONS[w.session].name.split(' · ')[0]:'Workout'}</span><span>${w.date}${w.duration?` · ${w.duration} min`:''}${w.rpe?`<span class="lg-rpe-tag">RPE ${w.rpe}</span>`:''}</span></div>
       ${w.exercises.map(ex=>`<div class="lg-hist-ex">${esc(ex.name)}: ${ex.sets.map(st=>esc(fmtSet(ex,st))).join(", ")}</div>`).join("")}
+      ${w.note?`<div class="lg-hist-note">${esc(w.note)}</div>`:""}
     </div>`).join("");
   }
 }

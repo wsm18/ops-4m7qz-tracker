@@ -1,5 +1,6 @@
   <section class="view" id="view-log">
     <div id="baselinePrompt"></div>
+    <div id="ptCal"></div>
     <div class="sec-h"><h2>Log Cadre PT</h2><span class="hint">recovery-aware</span></div>
     <div class="adder">
       <div class="pt-intro">Type what PT actually did — e.g. "2-mile run, walking lunges, water jug carries, flutter kicks." The app figures out which muscles that hit and eases the FM plan off them for the week. (Or just tap the areas below.) PT never touches your streak.</div>
@@ -23,12 +24,22 @@
     <div class="adder">
       <label class="lg-label">Which session?</label>
       <select id="lgSession"></select>
-      <div class="row" style="margin-top:9px">
+      <div class="row" style="margin-top:9px;gap:9px">
         <label class="lg-label" style="flex:1">Duration (min)<input id="lgDur" type="number" min="1" max="300" placeholder="e.g. 45"></label>
+        <label class="lg-label" style="flex:1">RPE (opt)<select id="lgRpe">
+          <option value="">—</option>
+          <option value="6">6 — light</option>
+          <option value="7">7 — moderate</option>
+          <option value="8">8 — hard</option>
+          <option value="9">9 — very hard</option>
+          <option value="10">10 — max</option>
+        </select></label>
       </div>
       <div id="lgExercises" style="margin-top:12px"></div>
+      <textarea id="lgNote" class="lg-note" placeholder="Optional note — conditions, felt strong, modified…" rows="2" maxlength="120"></textarea>
       <button class="btn-add" id="lgSave" style="margin-top:12px">Save Workout</button>
     </div>
+    <div id="lgWeekSummary"></div>
     <div class="sec-h" style="margin-top:18px"><h2>Progress by Exercise</h2><span class="hint">spot stalls</span></div>
     <div id="lgProgress"></div>
     <div class="sec-h" style="margin-top:18px"><h2>Recent Workouts</h2></div>

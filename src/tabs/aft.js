@@ -1,3 +1,80 @@
+function aftPrCard(){
+  const entries=S.aft||[]; if(!entries.length) return "";
+  const last=entries[entries.length-1];
+  let bestDl=null,bestHrp=null,bestSdc=null,bestPlank=null,bestRun=null,bestTotal=null;
+  entries.forEach(a=>{
+    if(a.raw.dl!=null&&(bestDl===null||a.raw.dl>bestDl.v)) bestDl={v:a.raw.dl,date:a.date,a};
+    if(a.raw.hrp!=null&&(bestHrp===null||a.raw.hrp>bestHrp.v)) bestHrp={v:a.raw.hrp,date:a.date,a};
+    if(a.raw.sdc!=null&&(bestSdc===null||a.raw.sdc<bestSdc.v)) bestSdc={v:a.raw.sdc,date:a.date,a};
+    if(a.raw.plank!=null&&(bestPlank===null||a.raw.plank>bestPlank.v)) bestPlank={v:a.raw.plank,date:a.date,a};
+    if(a.raw.run!=null&&(bestRun===null||a.raw.run<bestRun.v)) bestRun={v:a.raw.run,date:a.date,a};
+    if(bestTotal===null||a.total>bestTotal.v) bestTotal={v:a.total,date:a.date,a};
+  });
+  const rows=[
+    bestDl   &&{label:"Deadlift",  val:`${bestDl.v} lb`,    date:bestDl.date,   cur:bestDl.a===last},
+    bestHrp  &&{label:"Push-ups",  val:`${bestHrp.v} reps`, date:bestHrp.date,  cur:bestHrp.a===last},
+    bestSdc  &&{label:"SDC",       val:fmtSec(bestSdc.v),   date:bestSdc.date,  cur:bestSdc.a===last},
+    bestPlank&&{label:"Plank",     val:fmtSec(bestPlank.v), date:bestPlank.date,cur:bestPlank.a===last},
+    bestRun  &&{label:"2-Mile",    val:fmtSec(bestRun.v),   date:bestRun.date,  cur:bestRun.a===last},
+    bestTotal&&{label:"Total",     val:`${bestTotal.v} pts`,date:bestTotal.date,cur:bestTotal.a===last},
+  ].filter(Boolean);
+  if(!rows.length) return "";
+  return `<div class="aft-pr-card">
+    <div class="pr-title">🏅 Personal Records</div>
+    ${rows.map(r=>`<div class="pr-row"><span class="pr-label">${r.label}</span><span class="pr-val">${r.val}${r.cur?' <span class="pr-star">⭐</span>':''}</span><span class="pr-date">${r.date}</span></div>`).join("")}
+  </div>`;
+}
+function aftPrepCard(){
+  if(!S.aftTestDate) return "";
+  const last=(S.aft||[])[S.aft.length-1]; if(!last) return "";
+  const days=Math.ceil((new Date(S.aftTestDate+"T12:00:00")-Date.now())/864e5);
+  if(days<0) return "";
+  const c=aftCtx();
+  const minTotal=c.standard==="combat"?350:300;
+  const gap=minTotal-last.total;
+  let gapHtml;
+  if(gap>0){
+    const events=[
+      {k:"dl",label:"Deadlift",s:last.scores.dl},
+      {k:"hrp",label:"Push-ups",s:last.scores.hrp},
+      {k:"sdc",label:"SDC",s:last.scores.sdc},
+      {k:"plank",label:"Plank",s:last.scores.plank},
+      {k:"run",label:"2-Mile Run",s:last.scores.run},
+    ].filter(e=>e.s!=null).sort((a,b)=>a.s-b.s);
+    const minPer=c.standard==="combat"?70:60;
+    const focus=events.slice(0,2).map(e=>{
+      const eg=Math.max(0,minPer-e.s);
+      return eg>0?`${e.label} (+${eg} to floor)`:e.label;
+    });
+    gapHtml=`<div class="prep-gap">Need <b>${gap} more pts</b> to hit ${minTotal}. Focus: ${focus.join(" · ")}</div>`;
+  } else {
+    gapHtml=`<div class="prep-gap ok">✅ Currently at ${last.total} — meeting ${minTotal}-pt standard. Keep pushing.</div>`;
+  }
+  const dayColor=days<=14?"var(--ember)":days<=30?"var(--gold)":"var(--jade)";
+  return `<div class="aft-prep-card">
+    <div class="prep-top"><span class="prep-countdown" style="color:${dayColor}">⏳ ${days===0?"Test day!":days+" day"+(days!==1?"s":"")} to test</span><span class="prep-date">· ${S.aftTestDate}</span></div>
+    ${gapHtml}
+  </div>`;
+}
+function aftRegressionCard(){
+  const entries=S.aft||[]; if(entries.length<2) return "";
+  const last=entries[entries.length-1];
+  const prev=entries[entries.length-2];
+  const diff=last.total-prev.total;
+  if(diff>-5) return ""; // only flag drops >= 5 pts
+  const evts=[
+    {k:"dl",label:"Deadlift"},{k:"hrp",label:"Push-ups"},
+    {k:"sdc",label:"SDC"},{k:"plank",label:"Plank"},{k:"run",label:"2-Mile"},
+  ];
+  const dropped=evts.filter(e=>last.scores[e.k]!=null&&prev.scores[e.k]!=null&&last.scores[e.k]<prev.scores[e.k]-2);
+  const held=evts.filter(e=>last.scores[e.k]!=null&&prev.scores[e.k]!=null&&Math.abs(last.scores[e.k]-prev.scores[e.k])<=2);
+  return `<div class="aft-regress">
+    <div class="aft-regress-h">▼ ${Math.abs(diff)} pts from last test (${prev.date})</div>
+    ${dropped.length?`<div class="aft-regress-row drop">Dropped: ${dropped.map(e=>`${e.label} (${last.scores[e.k]-prev.scores[e.k]})`).join(' · ')}</div>`:''}
+    ${held.length?`<div class="aft-regress-row ok">Held: ${held.map(e=>e.label).join(' · ')}</div>`:''}
+    <div class="aft-regress-note">Address the dropped events before the next test — one focused block per event is enough to reverse a small regression.</div>
+  </div>`;
+}
 function aftSparkline(){
   const entries=S.aft||[]; if(entries.length<2) return "";
   const vals=entries.map(a=>a.total);
@@ -51,12 +128,20 @@ function renderAftStandardBar(){
 function renderAft(){
   const hist=document.getElementById("aftHistory");
   if(!hist) return;
+  // wire test-date input
+  const tdInput=document.getElementById("aftTestDateInput");
+  if(tdInput){tdInput.value=S.aftTestDate||"";tdInput.onchange=()=>{S.aftTestDate=tdInput.value||null;save();renderAft();};}
+  // render prep card
+  const prepEl=document.getElementById("aftPrepArea");
+  if(prepEl) prepEl.innerHTML=aftPrepCard();
   renderAftStandardBar();
   if(!S.aft.length){hist.innerHTML=`<div class="empty"><span class="big">💪</span>No AFT logged yet. Enter your scores above.</div>`;}
   else{
     const rev=S.aft.slice().reverse();
+    const prHtml=S.aft.length>=1?aftPrCard():"";
     const sparkHtml=S.aft.length>=2?aftSparkline():"";
-    hist.innerHTML=sparkHtml+rev.map((a,i)=>{
+    const regressHtml=S.aft.length>=2?aftRegressionCard():"";
+    hist.innerHTML=prHtml+sparkHtml+regressHtml+rev.map((a,i)=>{
       const older=rev[i+1];
       let tr="";
       if(older){const d=a.total-older.total; tr=d>0?`<span style="color:var(--jade);font-size:12px"> ▲${d}</span>`:d<0?`<span style="color:var(--ember);font-size:12px"> ▼${Math.abs(d)}</span>`:`<span style="color:var(--ink-faint);font-size:12px"> —</span>`;}
@@ -128,9 +213,9 @@ function showAftResult(a){
   function trend(e){
     if(!prev||prev.scores[e.k]==null) return "";
     const d=e.s-prev.scores[e.k];
-    if(d>2) return `<span style="color:var(--jade)"> ▲${d}</span>`;
-    if(d<-2) return `<span style="color:var(--ember)"> ▼${Math.abs(d)}</span>`;
-    return `<span style="color:var(--ink-faint)"> —</span>`;
+    if(d>2) return `<span class="aft-event-delta" style="color:var(--jade)">▲${d}</span>`;
+    if(d<-2) return `<span class="aft-event-delta" style="color:var(--ember)">▼${Math.abs(d)}</span>`;
+    return `<span class="aft-event-delta" style="color:var(--ink-faint)">—</span>`;
   }
   // build focus: primary weakest + any declining secondary
   let focus=EVENT_FOCUS[weakest.k];
