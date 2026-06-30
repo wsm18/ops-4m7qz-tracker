@@ -1,4 +1,4 @@
-const SKILL_LADDER_VER=94;
+const SKILL_LADDER_VER=96;
 // Returns the user's current ROTC/Army career stage based on S.rank.
 function careerStage(){
   const r=((S.profile&&S.profile.rank)||S.rank||"").toUpperCase();

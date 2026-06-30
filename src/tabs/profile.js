@@ -128,9 +128,47 @@ function renderMilestones(){
     return `<div class="milestone-row"><span class="milestone-date">${m.date}</span><span class="milestone-label">${esc(m.label)}</span><span class="milestone-when" style="color:${past?"var(--ink-faint)":"var(--jade)"}">${when}</span><button class="milestone-del" data-msdel="${m.id}">✕</button></div>`;
   }).join("");
 }
+function renderCommReadiness(){
+  const el=document.getElementById("commReadyWrap"); if(!el) return;
+  const items=[];
+  const lastAft=(S.aftHistory||[]).slice(-1)[0];
+  const aftTotal=lastAft&&lastAft.scores?Object.values(lastAft.scores).reduce((a,b)=>a+(+b||0),0):0;
+  const aftOk=aftTotal>=270;
+  items.push({label:"AFT total",value:lastAft?aftTotal+"pts":"no record",ok:aftOk,hint:"target ≥270 total"});
+  const gpas=S.gpaHistory||[];
+  const curGpa=gpas.length?gpas[gpas.length-1].gpa:null;
+  const gpaOk=curGpa!=null&&curGpa>=2.0;
+  items.push({label:"GPA",value:curGpa!=null?curGpa.toFixed(2):"no record",ok:gpaOk,hint:"min 2.0 to commission"});
+  const withTgt=(S.lifeSkills||[]).filter(s=>!s.group&&(s.currentLevel||0)>0&&s.targetLevel!=null);
+  const atTgt=withTgt.filter(s=>skEffectiveLevel(s)>=(s.targetLevel||0)).length;
+  const skillOk=withTgt.length>0&&atTgt>=withTgt.length*0.7;
+  items.push({label:"Skills at target",value:withTgt.length?atTgt+"/"+withTgt.length:"no targets set",ok:skillOk,hint:"advance lagging skills"});
+  const quals=S.qualifications||[];
+  const expired=quals.filter(q=>q.expDate&&new Date(q.expDate).getTime()<Date.now()).length;
+  const qualOk=expired===0&&quals.length>0;
+  items.push({label:"Qualifications",value:quals.length?quals.length+" held"+(expired?" · "+expired+" expired":""):"none logged",ok:qualOk,hint:"renew expired quals"});
+  const rr=S.rotcRecord;
+  const hasRecord=rr&&((rr.positions&&rr.positions.length)||(rr.competitions&&rr.competitions.length));
+  items.push({label:"ROTC record",value:hasRecord?"entries logged":"none logged",ok:!!hasRecord,hint:"add positions & competition results"});
+  const hasClear=S.profile&&S.profile.clearance&&S.profile.clearance.level;
+  items.push({label:"Clearance status",value:hasClear?S.profile.clearance.level:"not logged",ok:!!hasClear,hint:"log clearance in Profile"});
+  const passing=items.filter(i=>i.ok).length;
+  el.innerHTML=`<div class="comm-ready-bar">
+    <div class="comm-ready-score">${passing}/${items.length}</div>
+    <div class="comm-ready-label">readiness indicators on track</div>
+  </div>
+  <div class="comm-ready-list">
+    ${items.map(i=>`<div class="comm-ready-row ${i.ok?'cr-ok':'cr-behind'}">
+      <span class="cr-dot">${i.ok?'●':'○'}</span>
+      <span class="cr-label">${esc(i.label)}</span>
+      <span class="cr-value">${esc(i.value)}</span>
+      ${!i.ok?`<span class="cr-hint">${esc(i.hint)}</span>`:''}
+    </div>`).join('')}
+  </div>`;
+}
 function renderProfile(){
   if(!document.getElementById("pfWt")) return;
-  renderGpaHistory(); renderMilestones();
+  renderCommReadiness(); renderGpaHistory(); renderMilestones();
   const p=S.profile||{}, l=S.lifts||{};
   const setv=(id,v)=>{const el=document.getElementById(id); if(el&&document.activeElement!==el) el.value=(v??"");};
   setv("pfName",S.name); setv("pfRank",S.rank); setv("pfPos",S.position); setv("pfBranch",S.branchGoal);

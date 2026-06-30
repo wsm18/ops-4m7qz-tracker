@@ -125,6 +125,33 @@ function renderAftStandardBar(){
     <div class="std-note">Scored from the official AFT tables (HQDA EXORD 218-25, Annex B, eff 1 Jun 2025). Cyber (17-series) is general/enabling, so General is the default; switch to Combat if your role requires it.</div>
   </div>`;
 }
+function renderAftGoal(el){
+  if(!el) return;
+  const last=S.aft&&S.aft.length?S.aft[S.aft.length-1]:null;
+  const current=last?last.total:null;
+  const goal=S.aftGoal||null;
+  const gap=goal&&current!==null?goal-current:null;
+  const pct=goal&&current!==null?Math.min(100,Math.round(current/goal*100)):null;
+  const gapStr=gap!==null?(gap>0?`${gap} pts to go`:(gap===0?'Goal reached!':`${Math.abs(gap)} pts over goal`)):'';
+  const barFill=pct!==null?`<div class="aft-goal-fill" style="width:${pct}%"></div>`:'';
+  const barGoalLine=goal?`<div class="aft-goal-line" title="Goal: ${goal}" style="left:100%"></div>`:'';
+  el.innerHTML=`<div class="aft-goal-row">
+    <label class="aft-goal-lbl">AFT Score Goal</label>
+    <input class="aft-goal-inp" id="aftGoalInp" type="number" min="0" max="600" step="5" placeholder="e.g. 450" value="${goal||''}">
+    <button class="aft-goal-set-btn" id="aftGoalSetBtn">Set</button>
+    ${goal?`<span class="aft-goal-clear" id="aftGoalClear" title="Clear goal">✕</span>`:''}
+  </div>
+  ${goal&&current!==null?`<div class="aft-goal-progress">
+    <div class="aft-goal-bar">${barFill}${barGoalLine}</div>
+    <div class="aft-goal-gap">${current} / ${goal} — ${gapStr}</div>
+  </div>`:''}`;
+  document.getElementById("aftGoalSetBtn").onclick=()=>{
+    const v=parseInt((document.getElementById("aftGoalInp")||{}).value)||null;
+    S.aftGoal=v&&v>0?v:null; save(); renderAft();
+  };
+  const clr=document.getElementById("aftGoalClear");
+  if(clr) clr.onclick=()=>{ S.aftGoal=null; save(); renderAft(); };
+}
 function renderAft(){
   const hist=document.getElementById("aftHistory");
   if(!hist) return;
@@ -154,6 +181,9 @@ function renderAft(){
     }).join("");
   }
   if(S.aft.length){ showAftResult(S.aft[S.aft.length-1]); }
+  // AFT Goal setter
+  const goalEl=document.getElementById("aftGoalWrap");
+  if(goalEl) renderAftGoal(goalEl);
   // mini trend sparkline — insert before history element, replacing any previous one
   const _prevTrend=document.querySelector('.aft-trend-wrap');
   if(_prevTrend) _prevTrend.remove();

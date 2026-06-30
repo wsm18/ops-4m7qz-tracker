@@ -194,6 +194,32 @@ ${counselRows?`<h2>Counseling Log (last 5)</h2><ul>${counselRows}</ul>`:""}
 }
 const _rptBtn=document.getElementById("battleBuddyBtn");
 if(_rptBtn) _rptBtn.onclick=exportBattleBuddyReport;
+function copySkillHistory(){
+  const started=(S.lifeSkills||[]).filter(s=>!s.group&&s.currentLevel>0&&s.levels&&s.levels.length);
+  if(!started.length){ toast("No skill history to export"); return; }
+  const lines=["# Skill History Export","","Date: "+new Date().toLocaleDateString(),""];
+  const byPath={};
+  started.forEach(s=>{ (byPath[s.cat]=byPath[s.cat]||[]).push(s); });
+  (typeof SK_CAT_ORDER!=="undefined"?SK_CAT_ORDER:Object.keys(byPath)).forEach(cat=>{
+    if(!byPath[cat]) return;
+    const catName=(typeof SK_CAT!=="undefined"&&SK_CAT[cat])||cat;
+    lines.push(`## ${catName}`);
+    byPath[cat].sort((a,b)=>b.currentLevel-a.currentLevel).forEach(s=>{
+      const eff=typeof skEffectiveLevel==="function"?skEffectiveLevel(s):s.currentLevel;
+      const peak=s.peakLevel||eff;
+      const maxLv=(s.levels||[]).length;
+      const hist=(s.history||[]).filter(h=>h.type==="promote").slice(-5).map(h=>`${new Date(h.ts).toLocaleDateString()} L${h.level}`).join(" → ");
+      lines.push(`- ${s.name}: L${eff}/${maxLv}${peak>eff?` (peak L${peak})`:''}${hist?` | ${hist}`:''}`);
+    });
+    lines.push("");
+  });
+  const txt=lines.join("\n");
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(()=>toast("📋 Skill history copied to clipboard")).catch(()=>toast("Copy failed"));
+  } else { toast("Clipboard unavailable in this browser"); }
+}
+const _skHistExportBtn=document.getElementById("skHistExport");
+if(_skHistExportBtn) _skHistExportBtn.onclick=copySkillHistory;
 
 /* ---- Counseling bulk import ---- */
 {

@@ -335,6 +335,20 @@ const skEmblemSvg = (function(){
   };
 })();
 
+const SK_SUIT={
+  tactical:      {sym:"⚔",  name:"Swords",    col:"#78909c", light:"#eceff1"},
+  physical:      {sym:"🔥", name:"Wands",     col:"#bf5b30", light:"#fbe9e7"},
+  cognitive:     {sym:"🌊", name:"Cups",      col:"#4a7fad", light:"#e3f2fd"},
+  physiological: {sym:"🌿", name:"Pentacles", col:"#4caf70", light:"#e8f5e9"},
+  technical:     {sym:"⚡", name:"Circuits",  col:"#7e57c2", light:"#ede7f6"},
+  leadership:    {sym:"🛡", name:"Shields",   col:"#b58900", light:"#fff8e1"},
+  academic:      {sym:"📜", name:"Scrolls",   col:"#00796b", light:"#e0f2f1"},
+  personal:      {sym:"✦",  name:"Stars",     col:"#af8c00", light:"#fffde7"},
+  hearth:        {sym:"🗝", name:"Keys",      col:"#8d6e63", light:"#efebe9"},
+  roots:         {sym:"🌳", name:"Roots",     col:"#558b2f", light:"#f1f8e9"},
+};
+const CARD_RANKS=["A","2","3","4","5","6","7","8","9","10","Page","Knight","Queen","King"];
+
 let _skSearchTerm = "";
 let _skHeatmapVisible = false;
 
@@ -425,10 +439,11 @@ function renderSkillsTab(){
     const decayed=started.filter(s=>skEffectiveLevel(s)<s.currentLevel);
     const atRisk=started.filter(s=>!decayed.includes(s)&&skFadeState(s)==="at-risk");
     const maxed=started.filter(s=>s.currentLevel>=s.levels.length);
-    if(started.length){
+    const totalCollectable=allLeaves.length;
+    if(started.length||totalCollectable>0){
       sbEl.innerHTML=`<div class="sk-summary-bar">
-        <span class="sk-summary-stat">${started.length} active</span>
-        ${maxed.length?`<span class="sk-summary-stat maxed">⭐ ${maxed.length} maxed</span>`:''}
+        <span class="sk-summary-stat discovered">${started.length}<span class="sk-stat-sep">/</span>${totalCollectable} <span class="sk-stat-label">collected</span></span>
+        ${maxed.length?`<span class="sk-summary-stat maxed">⭐ ${maxed.length} mastered</span>`:''}
         ${atRisk.length?`<span class="sk-summary-stat atrisk">🔶 ${atRisk.length} at risk</span>`:''}
         ${decayed.length?`<span class="sk-summary-stat decayed">🍂 ${decayed.length} decayed</span>`:''}
       </div>`;
@@ -477,7 +492,42 @@ function skProgressBlock(sk, eff){
   return out;
 }
 
-  const leafCard=(sk,isSub)=>{
+  // Face-down card for unstarted skills
+  const faceDownCard=(sk,suit,rank,isSynthPending)=>{
+    const s=suit||(SK_SUIT[sk.cat]||{sym:"★",col:"#555",light:"#ddd"});
+    const rar=typeof skRarity==="function"?skRarity(sk):{name:"",col:"#555",border:"#555"};
+    const pathCol=PATH_COL[sk.cat]||"#3a3a3a";
+    // Synthesis cards: show set progress + combine button
+    const seed=typeof skSeedOf==="function"?skSeedOf(sk.name,sk.cat):null;
+    const setKey=seed&&seed.setKey;
+    const synthFrom=seed&&seed.synthesizedFrom;
+    const members=synthFrom&&typeof skSetMembers==="function"?skSetMembers(synthFrom):[];
+    const mastCount=synthFrom&&typeof skSetMasteredCount==="function"?skSetMasteredCount(synthFrom):0;
+    const canCombine=synthFrom&&typeof skSetCanCombine==="function"?skSetCanCombine(synthFrom):false;
+    const hint=seed&&seed.unlockHint?`<div class="sk-fd-hint">${esc(seed.unlockHint)}</div>`:'';
+    const setProBar=members.length>1?`<div class="sk-fd-setprog"><div class="sk-fd-prog-fill" style="width:${Math.round(mastCount/members.length*100)}%"></div><span>${mastCount}/${members.length} mastered</span></div>`:'';
+    const combineBtn=canCombine&&sk.synthesisUnlocked!==true?`<button class="sk-combine-btn" data-skcombine="${esc(synthFrom)}">⚡ Combine all ${members.length}</button>`:'';
+    const typeTag=isSynthPending?`<span class="sk-fd-synth-tag">Synthesis card</span>`:'';
+    return `<div class="sk-card sk-card-facedown rarity-${rar.name.toLowerCase()}" style="--sk-col:${pathCol};--deck-col:${s.col};--deck-light:${s.light};--rar-col:${rar.border}">
+      <div class="spc-corner tl" style="color:${s.col}"><div class="spc-rank">${rank||""}</div><div class="spc-suit">${s.sym}</div></div>
+      <div class="sk-fd-body">
+        <div class="sk-fd-top"><span class="sk-fd-rar" style="color:${rar.col}">${esc(rar.name)}</span>${typeTag}</div>
+        <div class="sk-fd-name">${esc(sk.name)}</div>
+        ${isSynthPending&&members.length>1?`<div class="sk-fd-synth-lbl">Requires mastery of a set</div>`:``}
+        ${hint}
+        ${setProBar}
+        ${combineBtn}
+        ${!isSynthPending&&!sk.synthesisUnlocked?`<button class="sk-fd-start-btn" data-skreach="${sk.id}" data-skreachlvl="1">Unlock → set level 1</button>`:''}
+        ${sk.synthesisUnlocked?`<div class="sk-fd-unlocked">⚡ Synthesis unlocked — set level 1 to start</div><button class="sk-fd-start-btn" data-skreach="${sk.id}" data-skreachlvl="1">Start training</button>`:''}
+      </div>
+      <div class="spc-corner br" style="color:${s.col}"><div class="spc-rank">${rank||""}</div><div class="spc-suit">${s.sym}</div></div>
+    </div>`;
+  };
+
+  const leafCard=(sk,isSub,suit,rank)=>{
+    const suitInfo=suit||(SK_SUIT[sk.cat]||{sym:"★",col:"#555",light:"#ddd"});
+    const cardRank=rank||"";
+    const rar=typeof skRarity==="function"?skRarity(sk):{name:"",col:"#555",border:"#555"};
     const eff=skEffectiveLevel(sk), maxed=sk.currentLevel>=sk.levels.length && eff>=sk.levels.length;
     const days=skDaysLeft(sk);
     const pathCol=PATH_COL[sk.cat]||"#3a3a3a";
@@ -534,6 +584,8 @@ function skProgressBlock(sk, eff){
     const pracFoot=pracDays!==null?(pracDays===0?"practiced today":`practiced ${pracDays}d ago`):"";
     const streak=typeof skStreak==="function"?skStreak(sk):0;
     const streakFoot=streak>=2?`<span class="sk-streak">🔥 ${streak}-day streak</span>`:"";
+    const synergyWith=typeof skHasSynergy==="function"?skHasSynergy(sk):null;
+    const synergyFoot=synergyWith?`<span class="sk-synergy-foot">⚡ ${esc(synergyWith)}</span>`:'';
 
     // Target level tick + footer
     const tgt=sk.targetLevel&&sk.targetLevel>0&&sk.targetLevel<=maxLv?sk.targetLevel:null;
@@ -549,7 +601,8 @@ function skProgressBlock(sk, eff){
     // Level / max badge in header
     const lvBadge=maxed ? `Lv ${eff} / ${maxLv} <span class="sk-max-badge">MAX</span>` : (peak>eff&&peak>0 ? `Lv ${eff} / ${maxLv} <span class="sk-peak-badge">peak L${peak}</span>` : `Lv ${eff} / ${maxLv}`);
 
-    return `<div class="sk-card ${isSub?'sk-sub':''} ${eff>0?'started':''}" style="--sk-col:${leafCol};--sk-fill:${fillPct}%">
+    return `<div class="sk-card ${isSub?'sk-sub':''} ${eff>0?'started':''} rarity-${rar.name.toLowerCase()}" style="--sk-col:${leafCol};--sk-fill:${fillPct}%;--deck-col:${suitInfo.col};--deck-light:${suitInfo.light||'#eee'};--rar-col:${rar.border}">
+      <div class="spc-corner tl" style="color:${suitInfo.col}"><div class="spc-rank">${cardRank}</div><div class="spc-suit">${suitInfo.sym}</div></div>
       <div class="sk-card-header" style="background:${pathCol}22;border-bottom:1px solid ${pathCol}55">
         <span class="sk-card-path-icon">${pathIcon}</span>
         <span class="sk-card-path-label">PATH OF ${esc(pathName.toUpperCase())}</span>
@@ -561,11 +614,11 @@ function skProgressBlock(sk, eff){
         ${skEmblemSvg(sk,eff,maxLv)||`<div class="sk-emblem-placeholder" style="border-color:${leafCol}"></div>`}
       </div>
       <div class="sk-card-name">${esc(sk.name)}${sk.auto?' <span class="sk-auto">auto</span>':''}</div>
-      <div class="sk-card-tier">${esc(tierLabel)}</div>
+      <div class="sk-card-tier">${esc(tierLabel)} <span class="sk-rarity-badge" style="color:${rar.col}">${esc(rar.name)}</span></div>
       <div class="sk-level-bar"><div class="sk-level-fill" style="background:${leafCol}"></div>${tgtPct?`<div class="sk-tgt-tick" style="left:${tgtPct}%"></div>`:''}${_nextPct?`<div class="sk-tgt-tick-next" style="left:${_nextPct}%" title="${_nextStage} target: L${_nextTgt}"></div>`:''}</div>
       ${(()=>{const noted=(sk.history||[]).filter(h=>h.note).slice(-3).reverse();return noted.length?`<div class="sk-log-recent">${noted.map(h=>`<div class="sk-log-entry"><span class="sk-log-entry-ts">${new Date(h.ts).toLocaleDateString()}</span> ${esc(h.note.slice(0,80))}</div>`).join('')}</div>`:'';})()}
       <div class="sk-card-footer">
-        <div class="sk-card-footer-left">${fadeFoot}${pracFoot?`<span class="sk-prac-foot">${pracFoot}</span>`:''}${streakFoot}${tgtFoot}</div>
+        <div class="sk-card-footer-left">${fadeFoot}${pracFoot?`<span class="sk-prac-foot">${pracFoot}</span>`:''}${streakFoot}${tgtFoot}${synergyFoot}</div>
         <div class="sk-footer-actions">
           ${!sk.auto && sk.currentLevel>0 ? `<button class="sk-practice-btn" data-skpractice="${esc(sk.id)}" title="Reset fade timer — mark as practiced outside the app">practiced</button>` : ''}
           <button class="sk-copy-btn" data-skcopy="${sk.id}" title="Copy skill card">⧉ copy</button>
@@ -583,20 +636,41 @@ function skProgressBlock(sk, eff){
           <div class="sk-work-panel" id="skwork-${sk.id}"></div>
         </div>
       </details>
+      <div class="spc-corner br" style="color:${suitInfo.col}"><div class="spc-rank">${cardRank}</div><div class="spc-suit">${suitInfo.sym}</div></div>
     </div>`;
   };
 
-  const groupCard=sk=>{
+  const groupCard=(sk,suit,rankMap)=>{
     const subs=skSubsOf(sk);
     const rolled=skRolledLevel(sk);
+    const s=suit||{sym:"★",col:"#555",light:"#ddd"};
+    const miniCard=sub=>{
+      const eff=skEffectiveLevel(sub); const max=(sub.levels||[]).length||10;
+      const pct=Math.min(100,Math.round(eff/max*100));
+      const col=skLeafColor(eff,max,sub);
+      const tier=skTier(sub,eff); const tierLabel=tier&&eff>0?tier.label:(eff>0?"L"+eff:"—");
+      const state=skFadeState(sub);
+      const r=rankMap&&rankMap[sub.id]||"";
+      return `<div class="sk-mini-card${state!=='current'?' sk-mini-atrisk':''}${eff===0?' sk-mini-unstarted':''}" style="--deck-col:${s.col};--deck-light:${s.light}">
+        <div class="spc-corner tl" style="color:${s.col}"><div class="spc-rank">${r}</div><div class="spc-suit">${s.sym}</div></div>
+        <div class="sk-mini-emb">${skEmblemSvg(sub,eff,max)||''}</div>
+        <div class="sk-mini-name">${esc(sub.name)}</div>
+        <div class="sk-mini-tier">${esc(tierLabel)}</div>
+        <div class="sk-mini-bar"><div class="sk-mini-fill" style="width:${pct}%;background:${col}"></div></div>
+        <div class="sk-mini-lvl">L${eff}/${max}</div>
+        ${sub.auto?'':`<button class="sk-mini-prac" data-skpractice="${sub.id}" title="practiced">✓</button>`}
+        <div class="spc-corner br" style="color:${s.col}"><div class="spc-rank">${r}</div><div class="spc-suit">${s.sym}</div></div>
+      </div>`;
+    };
     return `<div class="sk-group">
       <div class="sk-group-top">
-        <div class="sk-group-name">${esc(sk.name)} <span class="sk-group-sub">${subs.length} sub-skill${subs.length!==1?'s':''}</span></div>
+        <span class="sk-group-suit">${s.sym}</span>
+        <div class="sk-group-name">${esc(sk.name)} <span class="sk-group-sub">${subs.length} skill${subs.length!==1?'s':''}</span></div>
         <span class="sk-level-badge group">Lv ${fmtLvl(rolled)}</span>
         <button class="sk-card-edit" data-skedit="${sk.id}">✎</button>
         <button class="sk-card-del" data-skdel="${sk.id}">✕</button>
       </div>
-      <div class="sk-subs">${subs.map(s=>leafCard(s,true)).join("")}</div>
+      <div class="sk-subs sk-mini-grid">${subs.map(miniCard).join("")}</div>
     </div>`;
   };
 
@@ -618,27 +692,110 @@ function skProgressBlock(sk, eff){
     const pathCol=PATH_COL[cat]||"#3a3a3a";
     const pathIcon=(typeof SK_PATH_ICON!=="undefined"&&SK_PATH_ICON[cat])||"🌿";
     const pathName=(typeof SK_CAT!=="undefined"&&SK_CAT[cat])||cat||"";
-    const isOpen=cat===maxPxCat;
+    const isOpen=false;
     // fading skill count for this category
     const catLeaves=S.lifeSkills.filter(s=>s.cat===cat&&!s.group&&s.levels&&s.levels.length&&s.currentLevel>0);
     const fadingCount=catLeaves.filter(s=>{ const d=skDaysLeft(s); return d!==null && d<=Math.ceil((s.fadeDays||30)*0.34); }).length;
-    const fadingBadge=fadingCount>0?`<span class="sk-deck-fading">🍂 ${fadingCount}</span>`:"";
-    const cardsHtml=tops.map(sk=> sk.group ? groupCard(sk) : leafCard(sk,false)).join("");
+    const suit=SK_SUIT[cat]||{sym:"★",name:cat,col:"#555",light:"#ddd"};
+    const rankMap={};
+    // importance-ranked: most important leaf → King (highest face), least → Ace/2
+    const _stage=typeof careerStage==="function"?careerStage():"MS2";
+    const _allLeaves=[];
+    tops.forEach(sk=>{ if(sk.group) _allLeaves.push(...skSubsOf(sk)); else _allLeaves.push(sk); });
+    _allLeaves.sort((a,b)=>{
+      const tA=(a.targets&&a.targets[_stage])||a.targetLevel||a.currentLevel||0;
+      const tB=(b.targets&&b.targets[_stage])||b.targetLevel||b.currentLevel||0;
+      return tB-tA;
+    });
+    _allLeaves.forEach((sk,i)=>{ rankMap[sk.id]=CARD_RANKS[Math.max(0,CARD_RANKS.length-1-i)]; });
+    const deckEmblemSvg=skEmblemSvg({id:cat+"-deck",cat:cat},5,10)||'';
+    const pathAllLeaves=S.lifeSkills.filter(s=>s.cat===cat&&!s.group&&s.levels&&s.levels.length);
+    const totalLeaves=pathAllLeaves.length;
+    const pathStartedCount=pathAllLeaves.filter(s=>s.currentLevel>0).length;
+    const pathMaxedCount=pathAllLeaves.filter(s=>s.currentLevel>0&&s.currentLevel>=s.levels.length).length;
+    const allStartedBadge=pathStartedCount===totalLeaves&&totalLeaves>0?`<span class="sk-path-badge discovered">All Collected</span>`:'';
+    const allMaxedBadge=pathMaxedCount===totalLeaves&&totalLeaves>0?`<span class="sk-path-badge mastered">★ All Mastered</span>`:'';
+    const pathBadges=allMaxedBadge||allStartedBadge;
+    // Split tops: groups always in main deck; leaves split by started vs unstarted
+    const mainTops=tops.filter(sk=>sk.group||(sk.currentLevel>0));
+    const sideTops=tops.filter(sk=>!sk.group&&sk.currentLevel===0);
+    const _roman=["I","II","III","IV","V","VI","VII","VIII"];
+    const _SUBDECK=13;
+    const chunks=[];
+    for(let i=0;i<mainTops.length;i+=_SUBDECK) chunks.push(mainTops.slice(i,i+_SUBDECK));
+    const bodyContent=mainTops.length===0?'':(chunks.length>1
+      ? chunks.map((chunk,ci)=>{
+          const chCards=chunk.map(sk=>sk.group?groupCard(sk,suit,rankMap):leafCard(sk,false,suit,rankMap[sk.id])).join("");
+          const num=_roman[ci]||String(ci+1);
+          const sdCount=chunk.reduce((a,sk)=>a+(sk.group?skSubsOf(sk).length:1),0);
+          return `<div class="sk-subdeck" style="--deck-col:${suit.col};--deck-light:${suit.light}">
+            <div class="sk-subdeck-hdr" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+              <div class="sdb-corner tl"><div class="sdb-rank">${num}</div><div class="sdb-suit">${suit.sym}</div></div>
+              <div class="sdb-center"><div class="sdb-path-name" style="font-size:.72rem">${esc(suit.name)} ${num}</div><div class="sdb-count">${sdCount} skill${sdCount!==1?'s':''}</div></div>
+              <div class="sdb-corner br"><div class="sdb-rank">${num}</div><div class="sdb-suit">${suit.sym}</div></div>
+            </div>
+            <div class="sk-subdeck-body">${chCards}</div>
+          </div>`;
+        }).join("")
+      : mainTops.map(sk=>sk.group?groupCard(sk,suit,rankMap):leafCard(sk,false,suit,rankMap[sk.id])).join(""));
+    const multiTag=chunks.length>1?` · <span class="sdb-subdeck-tag">${chunks.length} decks</span>`:"";
+    // Side Deck — face-down cards for unstarted skills
+    let sideDeckHtml='';
+    if(sideTops.length>0){
+      const sideCards=sideTops.map((sk,i)=>{
+        const seed=typeof skSeedOf==="function"?skSeedOf(sk.name,sk.cat):null;
+        const isSynth=!!(seed&&seed.synthesizedFrom)&&!sk.synthesisUnlocked;
+        return faceDownCard(sk,suit,rankMap[sk.id],isSynth);
+      }).join("");
+      sideDeckHtml=`<details class="sk-side-deck">
+        <summary class="sk-side-deck-hdr">
+          <span class="sk-side-deck-icon">${suit.sym}</span>
+          <span class="sk-side-deck-title">Side Deck</span>
+          <span class="sk-side-deck-count">${sideTops.length} unstarted</span>
+        </summary>
+        <div class="sk-side-deck-body">${sideCards}</div>
+      </details>`;
+    }
 
-    html+=`<div class="sk-deck" id="skcat-${cat}">
-      <div class="sk-deck-header${isOpen?' open':''}" style="--deck-col:${pathCol}" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
-        <span class="sk-deck-icon">${pathIcon}</span>
-        <span class="sk-deck-name">${esc(pathName)}</span>
-        <span class="sk-deck-lv">Lv ${fmtLvl(catLvl)}</span>
-        <span class="sk-deck-count">${tops.length} skill${tops.length!==1?'s':''}</span>
-        ${fadingBadge}
-        <span class="sk-deck-arrow">▼</span>
+    html+=`<div class="sk-deck" id="skcat-${cat}" style="--deck-col:${suit.col};--deck-light:${suit.light}">
+      <div class="sk-deck-header${isOpen?' open':''}" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+        <div class="sdb-corner tl"><div class="sdb-rank">Lv${fmtLvl(catLvl)}</div><div class="sdb-suit">${suit.sym}</div></div>
+        <div class="sdb-center">
+          <div class="sdb-emblem">${deckEmblemSvg}</div>
+          <div class="sdb-path-name">${esc(pathName)}${pathBadges?` ${pathBadges}`:''}</div>
+          <div class="sdb-suit-name">${esc(suit.name)}</div>
+          <div class="sdb-count">${pathStartedCount}/${totalLeaves} skill${totalLeaves!==1?'s':''}${fadingCount?` · <span class="sdb-fading">🍂${fadingCount}</span>`:''}${multiTag}</div>
+        </div>
+        <div class="sdb-corner br"><div class="sdb-rank">Lv${fmtLvl(catLvl)}</div><div class="sdb-suit">${suit.sym}</div></div>
       </div>
       <div class="sk-deck-body${isOpen?' open':''}">
-        ${cardsHtml}
+        ${bodyContent}
+        ${sideDeckHtml}
       </div>
     </div>`;
   });
+  // Jokers deck — auto skills + user-tagged jokers from all paths
+  const _jokers=(S.lifeSkills||[]).filter(s=>!s.group&&(s.auto||s.joker)&&s.levels&&s.levels.length);
+  if(_jokers.length){
+    const _jSuit={sym:"🃏",name:"Wildcards",col:"#7b1fa2",light:"#fce4ec"};
+    _jokers.sort((a,b)=>{ const tA=(a.targets&&a.targets[_stage])||a.targetLevel||a.currentLevel||0; const tB=(b.targets&&b.targets[_stage])||b.targetLevel||b.currentLevel||0; return tB-tA; });
+    const _jRankMap={};
+    _jokers.forEach((sk,i)=>{ _jRankMap[sk.id]=CARD_RANKS[Math.max(0,CARD_RANKS.length-1-i)]; });
+    const _jCards=_jokers.map(sk=>leafCard(sk,false,_jSuit,_jRankMap[sk.id])).join("");
+    html=`<div class="sk-deck sk-joker-deck" id="skcat-joker" style="--deck-col:#7b1fa2;--deck-light:#fce4ec">
+      <div class="sk-deck-header" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+        <div class="sdb-corner tl"><div class="sdb-rank">★</div><div class="sdb-suit">🃏</div></div>
+        <div class="sdb-center">
+          <div class="sdb-path-name">WILDCARDS</div>
+          <div class="sdb-suit-name">Jokers</div>
+          <div class="sdb-count">${_jokers.length} card${_jokers.length!==1?'s':''}</div>
+        </div>
+        <div class="sdb-corner br"><div class="sdb-rank">★</div><div class="sdb-suit">🃏</div></div>
+      </div>
+      <div class="sk-deck-body">${_jCards}</div>
+    </div>`+html;
+  }
+
   listEl.innerHTML=html;
   // wire search input — persist term across re-renders, filter immediately
   const srchEl=document.getElementById("skSearch");
@@ -687,7 +844,8 @@ function skProgressBlock(sk, eff){
   const jb=document.getElementById("skJumpbar");
   if(jb){
     const icons={tactical:"⚔️",physical:"💪",cognitive:"🧠",physiological:"❤️",technical:"⚙️",leadership:"⭐",academic:"📚",personal:"🌱"};
-    jb.innerHTML=SK_CAT_ORDER.filter(c=>skTopLevelInCat(c).length).map(c=>
+    const jokerBtn=_jokers&&_jokers.length?`<button data-skjump="joker">🃏<span class="jb-tip">Wildcards</span></button>`:"";
+    jb.innerHTML=jokerBtn+SK_CAT_ORDER.filter(c=>skTopLevelInCat(c).length).map(c=>
       `<button data-skjump="${c}">${icons[c]||"•"}<span class="jb-tip">${SK_CAT[c]}</span></button>`).join("");
   }
 }

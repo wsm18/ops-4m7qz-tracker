@@ -15,9 +15,10 @@ function skCreate(){
   const parent=document.getElementById("skParent").value||null;
   const levels=_skLevels.map(s=>s.trim()).filter(Boolean).map((ability,i)=>({n:i+1,ability}));
   if(!levels.length){toast("Define at least one level (an ability)");return;}
+  const joker=!!(document.getElementById("skJoker")||{}).checked;
   if(_skEditId){
     const sk=S.lifeSkills.find(x=>x.id===_skEditId);
-    if(sk){ sk.name=name; sk.cat=cat; sk.fadeDays=fadeDays; sk.levels=levels; sk.parent=parent;
+    if(sk){ sk.name=name; sk.cat=cat; sk.fadeDays=fadeDays; sk.levels=levels; sk.parent=parent; sk.joker=joker||undefined;
       if(sk.currentLevel>levels.length) sk.currentLevel=levels.length; }
     _skEditId=null; document.getElementById("skSave").textContent="Create skill"; toast("✎ Skill updated");
   } else {
@@ -36,6 +37,7 @@ function skEdit(skId){
   _skLevels=sk.levels.map(l=>l.ability);
   if(!_skLevels.length) _skLevels=[""];
   renderSkLevelInputs();
+  const jEl=document.getElementById("skJoker"); if(jEl) jEl.checked=!!sk.joker;
   _skEditId=skId; document.getElementById("skSave").textContent="Save changes";
   document.getElementById("skName").scrollIntoView({behavior:"smooth",block:"center"}); document.getElementById("skName").focus();
 }
@@ -60,6 +62,89 @@ function catRolledLevel(cat){
   return tops.reduce((s,x)=>s+skRolledLevel(x),0)/tops.length;
 }
 function fmtLvl(n){ return (Math.round(n*10)/10).toFixed(1); }
+// Rarity tier — explicit `rarity` field on seed takes priority; falls back to level-count inference
+const _RARITY_MAP={
+  common:    {name:"Common",   col:"#757575",light:"#f5f5f5",sym:"♠",border:"#9e9e9e"},
+  uncommon:  {name:"Uncommon", col:"#2e7d32",light:"#e8f5e9",sym:"♣",border:"#4caf50"},
+  rare:      {name:"Rare",     col:"#1565c0",light:"#e3f2fd",sym:"♦",border:"#42a5f5"},
+  legendary: {name:"Legendary",col:"#6a1b9a",light:"#f3e5f5",sym:"♥",border:"#ab47bc"},
+  mythic:    {name:"Mythic",   col:"#b8860b",light:"#fffde7",sym:"✦",border:"#ffd700"},
+};
+function skRarity(sk){
+  if(sk.joker||sk.auto) return {name:"Joker",col:"#c62828",light:"#fff0f0",sym:"🃏",border:"#ef5350"};
+  if(sk.rarity&&_RARITY_MAP[sk.rarity.toLowerCase()]) return _RARITY_MAP[sk.rarity.toLowerCase()];
+  const n=(sk.levels||[]).length;
+  if(n<=4) return _RARITY_MAP.common;
+  if(n<=7) return _RARITY_MAP.uncommon;
+  if(n<=10) return _RARITY_MAP.rare;
+  if(n<=13) return _RARITY_MAP.legendary;
+  return _RARITY_MAP.mythic;
+}
+// ── Pyramid / Set mechanics ──────────────────────────────────────────────────
+// Look up a SEED_SKILLS entry by name+cat (for reading pyramid fields at runtime)
+function skSeedOf(name, cat){
+  if(typeof SEED_SKILLS==="undefined") return null;
+  return SEED_SKILLS.find(s=>s.name===name&&s.cat===cat)||null;
+}
+// All SEED_SKILLS belonging to a set (by setKey), excluding group entries
+function skSetMembers(setKey){
+  if(!setKey||typeof SEED_SKILLS==="undefined") return [];
+  return SEED_SKILLS.filter(s=>s.setKey===setKey&&!s.group);
+}
+// How many of a set are fully mastered (currentLevel >= levels.length) in S.lifeSkills
+function skSetMasteredCount(setKey){
+  const members=skSetMembers(setKey);
+  return members.filter(m=>{
+    const live=(S.lifeSkills||[]).find(s=>s.name===m.name&&s.cat===m.cat);
+    return live&&(live.levels||[]).length>0&&live.currentLevel>=(live.levels||[]).length;
+  }).length;
+}
+// True when all 5 (or all present) members of a set are fully mastered
+function skSetCanCombine(setKey){
+  const members=skSetMembers(setKey);
+  return members.length>=2&&skSetMasteredCount(setKey)>=members.length;
+}
+// Trigger synthesis: mark the skill whose synthesizedFrom===setKey as synthesisUnlocked
+function skCombineSet(setKey){
+  if(!skSetCanCombine(setKey)) return false;
+  const synthSeed=(typeof SEED_SKILLS!=="undefined"?SEED_SKILLS:[]).find(s=>s.synthesizedFrom===setKey);
+  if(!synthSeed) return false;
+  const live=(S.lifeSkills||[]).find(s=>s.name===synthSeed.name&&s.cat===synthSeed.cat);
+  if(!live) return false;
+  live.synthesisUnlocked=true;
+  save(); render();
+  toast(`⚡ Synthesis complete — <b>${esc(synthSeed.name)}</b> is now active!`);
+  return true;
+}
+// ── Synergy combos — complementary pairs that unlock ⚡ indicator at L4+ ───
+const SYNERGY_PAIRS=[
+  ["2-mile run","Rucking"],
+  ["Marksmanship (M4)","Land navigation"],
+  ["Leadership presence","Decision-making under pressure"],
+  ["Push-ups / muscular endurance","Deadlift"],
+  ["Deadlift","Rucking"],
+  ["Swimming","Combat water survival"],
+  ["ROTC knowledge (quizzes)","Land navigation"],
+  ["Critical thinking","Decision-making under pressure"],
+  ["Sleep quality","Resting heart rate"],
+  ["Compound lifting mastery","Strength programming & periodization"],
+  ["Running mastery","Aerobic base development"],
+  ["Combatives foundation","Combat water survival"],
+  ["Rucking mastery","Field endurance"],
+  ["Mental toughness training","Field endurance"],
+  ["Joint mobility","Injury prevention & prehab"],
+];
+// Returns the synergy partner's name if sk is at L4+ and its partner is also L4+, else null
+function skHasSynergy(sk){
+  if(!sk||sk.currentLevel<4) return null;
+  for(const pair of SYNERGY_PAIRS){
+    const otherName=pair[0]===sk.name?pair[1]:pair[1]===sk.name?pair[0]:null;
+    if(!otherName) continue;
+    const other=(S.lifeSkills||[]).find(s=>s.name===otherName&&s.currentLevel>=4);
+    if(other) return otherName;
+  }
+  return null;
+}
 
 function skEffectiveLevel(sk){
   if(sk.currentLevel<=0) return 0;
@@ -180,6 +265,18 @@ function skStreak(sk){
   return streak;
 }
 // "Work on this" — route a skill to the right trainer/plan/protocol
+function skTrendSparkline(sk){
+  if(!sk.history||sk.history.length<2) return '';
+  const now=Date.now(); const day=86400000; const days=30;
+  const pts=[];
+  for(let d=days-1;d>=0;d--){
+    const ts=now-d*day;
+    const entries=sk.history.filter(h=>h.ts<=ts);
+    pts.push(entries.length?(entries[entries.length-1].level||0):0);
+  }
+  if(pts.every(p=>p===pts[0])) return '';
+  return typeof miniSparkline==="function"?miniSparkline(pts,220,28):'';
+}
 function skWorkGuidance(sk){
   if(!sk) return "";
   const go=(tab,label)=>`<button class="sk-work-go" data-gototab="${tab}">${label} →</button>`;
@@ -189,20 +286,22 @@ function skWorkGuidance(sk){
   const placeholder=sk.advance&&sk.advance[nextLvl-1]?sk.advance[nextLvl-1]:"What did you practice? Add a brief note for your own record.";
   const noteInput=!sk.auto?`<div class="sk-note-wrap"><label class="sk-tgt-set-label">Practice note (optional — saved with next level-up)<textarea class="sk-note-input" data-sknote="${sk.id}" rows="2" placeholder="${esc(placeholder)}" maxlength="300"></textarea></label></div>`:"";
   const tgtInput=`<div class="sk-tgt-set"><label class="sk-tgt-set-label">Target level (optional)<input type="number" class="sk-tgt-inp-work" data-sktgtlv="${sk.id}" min="1" max="${maxLv}" value="${sk.targetLevel||''}"></label></div>`;
+  const _spark=skTrendSparkline(sk);
+  const tgtBlock=tgtInput+(_spark?`<div class="sk-trend-wrap"><span class="sk-trend-label">30-day</span>${_spark}</div>`:'');
   // cognitive skills with a test trainer
   const testMap={"Reaction speed":"reaction","Cognitive / processing speed":"procspeed","Working memory (n-back)":"nback","Memory span":"digitspan","Attention / sustained focus":"gonogo","Mental math":"mathsprint","Pattern recognition":"patterns","Typing speed & accuracy":"typing"};
-  if(testMap[sk.name]) return `<div class="sk-work-body">Train this directly in the Test tab — run the <b>${esc(sk.name)}</b> test, and your level updates from the result.${go("test","Open Test tab")}</div>${noteInput}${tgtInput}`;
-  if(sk.name==="Memory technique") return `<div class="sk-work-body">Use the <b>Memory Track</b> in the Test tab: build a memory palace and run spaced-repetition decks. Practicing either keeps this skill sharp.${go("test","Open Memory Track")}</div>${noteInput}${tgtInput}`;
-  if(sk.name==="ROTC knowledge (quizzes)") return `<div class="sk-work-body">Pass quiz banks in the Quiz tab — each one you pass raises this skill. Build a study plan there for any graded test.${go("quizzes","Open Quiz tab")}</div>${noteInput}${tgtInput}`;
-  if(sk.cat==="academic") return `<div class="sk-work-body">Study with active recall and spacing: make a spaced-repetition deck in the Test tab's Memory Track, and build a study plan in the Quiz tab if you have a graded test coming.${go("test","Memory Track")} ${go("quizzes","Study plans")}</div>${noteInput}${tgtInput}`;
-  if(sk.cat==="cognitive") return `<div class="sk-work-body">Practice in the Test tab — pick the closest trainer and run it regularly.${go("test","Open Test tab")}</div>${noteInput}${tgtInput}`;
+  if(testMap[sk.name]) return `<div class="sk-work-body">Train this directly in the Test tab — run the <b>${esc(sk.name)}</b> test, and your level updates from the result.${go("test","Open Test tab")}</div>${noteInput}${tgtBlock}`;
+  if(sk.name==="Memory technique") return `<div class="sk-work-body">Use the <b>Memory Track</b> in the Test tab: build a memory palace and run spaced-repetition decks. Practicing either keeps this skill sharp.${go("test","Open Memory Track")}</div>${noteInput}${tgtBlock}`;
+  if(sk.name==="ROTC knowledge (quizzes)") return `<div class="sk-work-body">Pass quiz banks in the Quiz tab — each one you pass raises this skill. Build a study plan there for any graded test.${go("quizzes","Open Quiz tab")}</div>${noteInput}${tgtBlock}`;
+  if(sk.cat==="academic") return `<div class="sk-work-body">Study with active recall and spacing: make a spaced-repetition deck in the Test tab's Memory Track, and build a study plan in the Quiz tab if you have a graded test coming.${go("test","Memory Track")} ${go("quizzes","Study plans")}</div>${noteInput}${tgtBlock}`;
+  if(sk.cat==="cognitive") return `<div class="sk-work-body">Practice in the Test tab — pick the closest trainer and run it regularly.${go("test","Open Test tab")}</div>${noteInput}${tgtBlock}`;
   if(sk.cat==="physiological"){
-    if(sk.name==="Resting heart rate") return `<div class="sk-work-body">This improves with cardio over time. Log your resting pulse in Profile → Vitals to track it; lower over months = fitter.${go("profile","Log vitals")}</div>${noteInput}${tgtInput}`;
-    return `<div class="sk-work-body">${esc(sk.whatYouDo||"Practice the self-test described above regularly and log your progress.")}</div>${noteInput}${tgtInput}`;
+    if(sk.name==="Resting heart rate") return `<div class="sk-work-body">This improves with cardio over time. Log your resting pulse in Profile → Vitals to track it; lower over months = fitter.${go("profile","Log vitals")}</div>${noteInput}${tgtBlock}`;
+    return `<div class="sk-work-body">${esc(sk.whatYouDo||"Practice the self-test described above regularly and log your progress.")}</div>${noteInput}${tgtBlock}`;
   }
-  if(sk.cat==="physical") return `<div class="sk-work-body">Train this in your PT sessions — the FM tab tells you what to prioritize, and logging workouts in the Log tab keeps the skill from fading.${go("plan","Open FM plan")} ${go("log","Log a workout")}</div>${noteInput}${tgtInput}`;
+  if(sk.cat==="physical") return `<div class="sk-work-body">Train this in your PT sessions — the FM tab tells you what to prioritize, and logging workouts in the Log tab keeps the skill from fading.${go("plan","Open FM plan")} ${go("log","Log a workout")}</div>${noteInput}${tgtBlock}`;
   // generic practice protocol
-  return `<div class="sk-work-body"><b>Practice protocol:</b> ${esc(sk.whatYouDo||"Find a real situation to practice the next level's ability, do it deliberately, then mark the level reached on its rung when you can do it reliably.")} When you can perform the next level reliably, tap that level's rung above to mark it.</div>${tgtInput}`;
+  return `<div class="sk-work-body"><b>Practice protocol:</b> ${esc(sk.whatYouDo||"Find a real situation to practice the next level's ability, do it deliberately, then mark the level reached on its rung when you can do it reliably.")} When you can perform the next level reliably, tap that level's rung above to mark it.</div>${tgtBlock}`;
 }
 // ============ THE TREE VIEW — a living branching diagram of the whole skill tree ============
 // Trunk = the cadet. Limbs = Paths. Boughs = sub-path branches. Leaves = skills.

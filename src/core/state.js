@@ -282,12 +282,22 @@ function renderQuests(){
       const updatesHtml=(q.updates&&q.updates.length)?`<div class="q-updates">${q.updates.slice().reverse().map(u=>`<div class="q-update-item"><span class="q-update-ts">${new Date(u.ts).toLocaleDateString()}</span>${esc(u.text)}</div>`).join("")}</div>`:"";
       const updateForm=`<div class="q-update-form"><input class="q-update-input" data-qupdateid="${q.id}" placeholder="Log a dispatch…" maxlength="120"><button class="q-update-add" data-qupdateadd="${q.id}">→</button></div>`;
       const stepsProg=q.steps>=2&&!q.done?`<div class="q-steps-row"><div class="q-steps-bar"><div class="q-steps-fill" style="width:${Math.round((q.progress||0)/q.steps*100)}%"></div></div><span class="q-steps-count">${q.progress||0}/${q.steps}</span><button class="q-step-btn" data-qprogress="${q.id}">+1 step</button></div>`:'';
+      const startedSkills=!q.done?(S.lifeSkills||[]).filter(s=>!s.group&&(s.currentLevel||0)>0):[];
+      const skillLinkHtml=!q.done&&startedSkills.length?`<div class="q-skilllink">
+        <select class="q-skilllink-sel" data-qsklink="${q.id}">
+          <option value="">link to skill…</option>${startedSkills.map(s=>`<option value="${s.id}"${q.linkedSkillId===s.id?' selected':''}>${esc(s.name)}</option>`).join('')}
+        </select>
+        <span class="q-skilllink-type">
+          <label><input type="radio" name="qlt${q.id}" value="practice"${q.linkedSkillType!=='level'?' checked':''}> practice</label>
+          <label><input type="radio" name="qlt${q.id}" value="level"${q.linkedSkillType==='level'?' checked':''}> level up</label>
+        </span>
+      </div>`:'';
       return `<li class="card ${q.done?'done':''}${overdue?' overdue':''}">
         <div class="check" data-q="${q.id}">${q.done?'✓':''}</div>
         <div class="c-body"><div class="c-name">${esc(q.name)}</div>
           ${q.notes?`<div class="q-notes">${esc(q.notes)}</div>`:''}
           <div class="c-meta">${diffTag('quest',q.diff)}${pathTag(q.path)}${dueTag}${ageTag}</div>
-          ${stepsProg}${updatesHtml}${updateForm}</div>
+          ${stepsProg}${updatesHtml}${updateForm}${skillLinkHtml}</div>
         ${snoozeBtn}
         <button class="del" data-dq="${q.id}">✕</button>
       </li>`;

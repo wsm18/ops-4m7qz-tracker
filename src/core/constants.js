@@ -70,6 +70,7 @@ const DEFAULT = {
   lifts:{ deadliftLb:null, squatLb:null, benchLb:null, liftDate:null },  // best lifts for bodyweight-relative skills
   aftEventTargets:{hrp:null,sdc:null,run:null,dl:null,plank:null},
   aftStandard:"general",  // "general" (sex+age normed, 300 min) or "combat" (sex-neutral, 350 min)
+  aftGoal:null,           // target total AFT score (e.g. 500); shown as a gap line on the score display
   hasGym:false,           // equipment mode: false = no-equipment (bodyweight) plans, true = gym versions
   weather:"clear",        // manual weather: clear|rain|snow|heat|cold|wind|air|dark — bad conditions swap outdoor work indoors
   donations:[],           // blood donations: [{id, date, type}]
@@ -85,6 +86,7 @@ const DEFAULT = {
   studyPlans:[],          // [{id, title, testDate, topics:[], created, done:[]}]
   counseling:[],          // DA 4856-style: [{id, date, type, people, summary, plan, followUp}]
   checklists:[],          // packing/gear: [{id, name, items:[{text,done}], template}]
+  dayLog:[],              // [{date:"YYYY-MM-DD", trained, wins, notes}]
   _seeded:false,     // whether starter skills have been seeded
   _skillLadderVer:0, // bumped whenever seed ladders change; forces a full ladder resync on load
   boardTasks:[

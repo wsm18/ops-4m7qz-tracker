@@ -341,6 +341,17 @@
   .aft-focus b{color:var(--ember)}
   .aft-hist-row{display:flex;justify-content:space-between;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:11px 13px;margin-bottom:7px;font-size:13.5px}
   .aft-hist-row .ttl{font-weight:700;color:var(--gold)}
+  /* AFT Goal setter */
+  .aft-goal-row{display:flex;align-items:center;gap:8px;padding:10px 0;flex-wrap:wrap}
+  .aft-goal-lbl{font-size:12px;color:var(--ink-faint);white-space:nowrap}
+  .aft-goal-inp{background:#120d07;border:1px solid var(--line);color:var(--ink);padding:8px 10px;border-radius:7px;font-family:inherit;font-size:14px;width:80px}
+  .aft-goal-inp:focus{outline:none;border-color:var(--gold)}
+  .aft-goal-set-btn{padding:8px 14px;background:var(--gold);color:#000;border:none;border-radius:7px;font-weight:700;cursor:pointer;font-size:13px}
+  .aft-goal-clear{cursor:pointer;color:var(--ink-faint);font-size:13px;padding:4px}
+  .aft-goal-progress{margin-bottom:10px}
+  .aft-goal-bar{height:8px;background:#2a2a2a;border-radius:4px;position:relative;overflow:hidden;margin-bottom:4px}
+  .aft-goal-fill{height:100%;background:linear-gradient(90deg,var(--ember),var(--gold));border-radius:4px;transition:width .3s}
+  .aft-goal-gap{font-size:12px;color:var(--ink-dim)}
 
   /* ---- Workout Log ---- */
   .lg-label{font-size:11.5px;color:var(--ink-faint);letter-spacing:.04em;display:flex;flex-direction:column;gap:5px;margin-bottom:4px}
@@ -487,20 +498,129 @@
   .sk-pass{background:rgba(111,158,84,.16);border-color:var(--jade);color:var(--jade)}
   .sk-pass:hover{background:rgba(111,158,84,.28)}
   .sk-skip{background:transparent;border-color:var(--line);color:var(--ink-faint)}
-  /* skill list cards — Phase 1 deck layout */
+  /* skill list — card table felt */
+  #view-skills{background:linear-gradient(160deg,#0d2214 0%,#0a1a0f 100%);}
   /* Deck wrappers */
-  .sk-deck{margin-bottom:18px}
-  .sk-deck-header{display:flex;align-items:center;gap:9px;cursor:pointer;padding:11px 14px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-left:4px solid var(--deck-col,var(--line));border-radius:10px;user-select:none;transition:background .15s}
-  .sk-deck-header:hover{background:rgba(255,255,255,.055)}
-  .sk-deck-icon{font-size:17px;flex:none}
-  .sk-deck-name{font-size:13px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink);flex:1}
-  .sk-deck-lv{font-size:12px;color:var(--gold);font-weight:700;background:rgba(184,160,106,.12);border:1px solid var(--gold);padding:2px 9px;border-radius:14px;flex:none}
-  .sk-deck-count{font-size:11px;color:var(--ink-faint);flex:none}
-  .sk-deck-fading{font-size:11px;color:var(--ember);font-weight:600;flex:none}
-  .sk-deck-arrow{font-size:11px;color:var(--ink-faint);transition:transform .2s;display:inline-block}
-  .sk-deck-header.open .sk-deck-arrow{transform:rotate(180deg)}
+  .sk-deck{margin-bottom:.75rem}
+  /* Deck header = card back */
+  .sk-deck-header{
+    position:relative;display:flex;align-items:center;justify-content:center;
+    min-height:160px;cursor:pointer;border-radius:.6rem;
+    background:var(--deck-col,#444);
+    box-shadow:3px 3px 0 rgba(0,0,0,.35),6px 6px 0 rgba(0,0,0,.2),9px 9px 0 rgba(0,0,0,.1);
+    transition:box-shadow .15s,transform .15s;
+    border:1.5px solid color-mix(in srgb,var(--deck-col,#444) 60%,#fff 40%);
+    overflow:hidden;user-select:none;
+  }
+  .sk-deck-header:active{transform:translateY(2px);box-shadow:1px 1px 0 rgba(0,0,0,.35)}
+  .sk-deck-header::before{content:'';position:absolute;inset:6px;border:1px solid rgba(255,255,255,.12);border-radius:.35rem;pointer-events:none}
+  .sdb-corner{position:absolute;display:flex;flex-direction:column;align-items:center;gap:.05rem;padding:.45rem .55rem;line-height:1;color:color-mix(in srgb,var(--deck-light,#eee) 90%,transparent)}
+  .sdb-corner.tl{top:0;left:0}
+  .sdb-corner.br{bottom:0;right:0;transform:rotate(180deg)}
+  .sdb-rank{font-size:.75rem;font-weight:800;letter-spacing:.02em}
+  .sdb-suit{font-size:.9rem}
+  .sdb-center{display:flex;flex-direction:column;align-items:center;gap:.3rem;text-align:center;pointer-events:none}
+  .sdb-emblem{width:52px;height:52px;opacity:.35;color:var(--deck-light,#eee)}
+  .sdb-emblem svg{width:100%;height:100%}
+  .sdb-path-name{font-size:.85rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--deck-light,#eee)}
+  .sdb-suit-name{font-size:.65rem;text-transform:uppercase;letter-spacing:.18em;opacity:.65;color:var(--deck-light,#eee)}
+  .sdb-count{font-size:.7rem;opacity:.75;color:var(--deck-light,#eee)}
+  .sdb-fading{color:var(--ember)}
+  .sk-deck-header.open{box-shadow:1px 1px 0 rgba(0,0,0,.3);opacity:.9}
+  /* Opened deck body */
   .sk-deck-body{display:none;padding-top:8px}
-  .sk-deck-body.open{display:block}
+  .sk-deck-body.open{display:flex;flex-wrap:wrap;gap:10px;padding:12px 8px}
+  /* Rank/suit corners on skill cards */
+  .spc-corner{position:absolute;display:flex;flex-direction:column;align-items:center;gap:.04rem;padding:.3rem .35rem;line-height:1;z-index:2}
+  .spc-corner.tl{top:0;left:0}
+  .spc-corner.br{bottom:0;right:0;transform:rotate(180deg)}
+  .spc-rank{font-size:.7rem;font-weight:800}
+  .spc-suit{font-size:.75rem}
+  /* Skill card face in opened deck */
+  .sk-deck-body .sk-card{flex:0 0 130px;width:130px;background:var(--deck-light,#f5f5f0);border:1.5px solid var(--deck-col,#555);margin-bottom:0}
+  .sk-deck-body .sk-card:has(.sk-card-detail[open]){flex:1 1 100%;width:100%}
+  .sk-deck-body .sk-card-header{display:none}
+  .sk-deck-body .sk-card-name,.sk-deck-body .sk-card-tier{color:#1a1a1a}
+  .sk-deck-body .sk-card-name .sk-auto{color:#555}
+  .sk-deck-body .sk-card-footer{background:rgba(0,0,0,.06);border-top:1px solid rgba(0,0,0,.1)}
+  .sk-deck-body .sk-fade-foot,.sk-deck-body .sk-prac-foot{color:#444}
+  .sk-deck-body .sk-fade-foot.warn{color:#c0392b}
+  .sk-deck-body .sk-card-detail>summary{color:#333}
+  /* Group suit symbol */
+  .sk-group-suit{font-size:1rem;margin-right:.3rem}
+  /* Mini playing cards inside groups */
+  .sk-mini-grid{display:flex;flex-wrap:wrap;gap:8px;padding:.5rem .25rem .25rem}
+  .sk-mini-card{position:relative;flex:0 0 110px;background:var(--deck-light,#f5f5f0);border:1.5px solid var(--deck-col,#555);border-radius:.5rem;padding:.5rem .4rem .4rem;display:flex;flex-direction:column;align-items:center;gap:.2rem;font-size:.75rem;overflow:hidden}
+  .sk-mini-card.sk-mini-atrisk{border-color:var(--ember);opacity:.85}
+  .sk-mini-card.sk-mini-unstarted{opacity:.5}
+  .sk-mini-emb{width:36px;height:36px;color:#1a1a1a}
+  .sk-mini-emb svg{width:100%;height:100%}
+  .sk-mini-name{font-size:.72rem;font-weight:700;text-align:center;color:#1a1a1a;line-height:1.2;max-width:100px;overflow:hidden}
+  .sk-mini-tier{font-size:.62rem;color:#555;text-align:center}
+  .sk-mini-bar{width:100%;height:.3rem;background:rgba(0,0,0,.15);border-radius:1rem;overflow:hidden;margin-top:.1rem}
+  .sk-mini-fill{height:100%;border-radius:1rem}
+  .sk-mini-lvl{font-size:.68rem;font-weight:700;color:#333}
+  .sk-mini-prac{font-size:.65rem;padding:.1rem .3rem;border:1px solid var(--jade);color:var(--jade);background:transparent;border-radius:.2rem;cursor:pointer;margin-top:.1rem}
+  /* Rarity borders on skill cards in an open deck */
+  .sk-deck-body .sk-card{border-color:var(--rar-col,var(--deck-col,#555))}
+  .sk-deck-body .sk-card.rarity-legendary{box-shadow:0 0 8px rgba(171,71,188,.35)}
+  .sk-deck-body .sk-card.rarity-mythic{box-shadow:0 0 12px rgba(255,215,0,.45)}
+  .sk-deck-body .sk-card.rarity-joker{box-shadow:0 0 12px rgba(239,83,80,.45)}
+  .sk-rarity-badge{font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;opacity:.8}
+  /* Foil shimmer — legendary + mythic cards get a subtle moving sheen */
+  @keyframes foilShimmer{0%{background-position:200% 50%}100%{background-position:-200% 50%}}
+  .sk-deck-body .sk-card.rarity-legendary::after,.sk-deck-body .sk-card.rarity-mythic::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);background-size:200% 100%;animation:foilShimmer 4s linear infinite;opacity:.7}
+  /* Face-down cards (unstarted / synthesis-locked) */
+  .sk-card-facedown{flex:0 0 120px;width:120px;min-height:160px;background:#1e1e1e;border:1.5px solid var(--rar-col,#555);border-radius:.55rem;position:relative;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+  .sk-card-facedown .spc-corner{color:var(--deck-col,#555)!important;opacity:.5}
+  .sk-fd-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.5rem .4rem;gap:.25rem;text-align:center}
+  .sk-fd-top{display:flex;align-items:center;gap:.3rem;width:100%;justify-content:center}
+  .sk-fd-rar{font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em}
+  .sk-fd-synth-tag{font-size:.45rem;background:rgba(255,255,255,.1);border-radius:.2rem;padding:.1rem .25rem;color:#aaa}
+  .sk-fd-name{font-size:.72rem;font-weight:700;color:#e0e0e0;line-height:1.2;padding:.1rem 0}
+  .sk-fd-synth-lbl{font-size:.52rem;color:#888;font-style:italic}
+  .sk-fd-hint{font-size:.5rem;color:#999;line-height:1.3;font-style:italic}
+  .sk-fd-setprog{width:100%;border:1px solid #333;border-radius:.25rem;height:6px;position:relative;overflow:visible;margin:.15rem 0;background:#111}
+  .sk-fd-setprog span{font-size:.45rem;color:#aaa;position:absolute;bottom:-14px;left:0;white-space:nowrap}
+  .sk-fd-prog-fill{position:absolute;inset:0;background:linear-gradient(90deg,var(--jade),var(--gold));transition:width .3s}
+  .sk-fd-unlocked{font-size:.52rem;color:var(--gold);font-weight:700;text-align:center}
+  .sk-fd-start-btn{font-size:.5rem;padding:.2rem .4rem;border:1px solid var(--jade);color:var(--jade);background:transparent;border-radius:.3rem;cursor:pointer;margin-top:.2rem;white-space:nowrap}
+  .sk-fd-start-btn:hover{background:rgba(0,168,107,.15)}
+  .sk-combine-btn{font-size:.55rem;padding:.25rem .5rem;border:1px solid var(--gold);color:var(--gold);background:rgba(255,215,0,.08);border-radius:.3rem;cursor:pointer;margin-top:.25rem;font-weight:700}
+  .sk-combine-btn:hover{background:rgba(255,215,0,.18)}
+  /* Side deck collapsible section */
+  .sk-side-deck{margin-top:12px;width:100%;border-top:1px dashed rgba(255,255,255,.1)}
+  .sk-side-deck-hdr{display:flex;align-items:center;gap:.5rem;padding:.4rem .5rem;cursor:pointer;list-style:none;font-size:.72rem;color:#999;user-select:none}
+  .sk-side-deck-hdr::-webkit-details-marker{display:none}
+  .sk-side-deck-icon{font-size:.85rem;opacity:.5}
+  .sk-side-deck-title{font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:.6rem}
+  .sk-side-deck-count{font-size:.55rem;color:#666;margin-left:auto}
+  .sk-side-deck-body{display:flex;flex-wrap:wrap;gap:8px;padding:.5rem .25rem .75rem}
+  /* Collection stats in summary bar */
+  .sk-summary-stat.discovered{font-weight:700;color:var(--gold)}
+  .sk-stat-sep{opacity:.4;margin:0 .1rem}
+  .sk-stat-label{font-weight:400;opacity:.7;font-size:.75em}
+  /* Path completion badges */
+  .sk-path-badge{font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:.1rem .3rem;border-radius:.25rem;margin-left:.3rem;vertical-align:middle}
+  .sk-path-badge.discovered{background:rgba(0,168,107,.2);color:var(--jade);border:1px solid rgba(0,168,107,.4)}
+  .sk-path-badge.mastered{background:rgba(255,215,0,.2);color:var(--gold);border:1px solid rgba(255,215,0,.4)}
+  /* Synergy indicator */
+  .sk-synergy-foot{font-size:.58rem;color:var(--gold);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+  /* Urgent focal skill */
+  .sk-focal-urgent{background:rgba(192,57,43,.15);color:#c0392b;font-weight:700;padding:.05rem .3rem;border-radius:.25rem;font-size:.8em}
+  .sk-focal-urgent-row{background:rgba(192,57,43,.08);border-left:3px solid #c0392b;padding-left:.4rem;border-radius:.2rem}
+  /* Sub-decks inside an opened path deck */
+  .sk-subdeck{margin-bottom:8px}
+  .sk-subdeck-hdr{position:relative;display:flex;align-items:center;justify-content:center;min-height:76px;cursor:pointer;border-radius:.5rem;background:var(--deck-col,#444);border:1.5px solid color-mix(in srgb,var(--deck-col,#444) 60%,#fff 40%);overflow:hidden;user-select:none;transition:box-shadow .12s,opacity .12s}
+  .sk-subdeck-hdr::before{content:'';position:absolute;inset:4px;border:1px solid rgba(255,255,255,.1);border-radius:.3rem;pointer-events:none}
+  .sk-subdeck-hdr.open{opacity:.85}
+  .sk-subdeck-body{display:none;padding:8px}
+  .sk-subdeck-body.open{display:flex;flex-wrap:wrap;gap:10px}
+  .sdb-subdeck-tag{color:rgba(255,255,255,.65);margin-left:.3rem}
+  /* Joker deck — deep violet gradient */
+  .sk-joker-deck .sk-deck-header{background:linear-gradient(135deg,#4a148c 0%,#7b1fa2 50%,#4a148c 100%)}
+  /* Wildcard (Joker) label in skill form */
+  .sk-joker-lbl{font-size:.8rem;color:var(--ink-faint);display:flex;align-items:center;gap:.4rem;cursor:pointer;margin-top:6px;padding:6px 0}
   /* Card face — full redesign */
   .sk-card{border-radius:12px;border:1px solid var(--sk-col,var(--line));background:var(--panel);position:relative;padding:0;margin-bottom:10px;box-shadow:0 4px 16px rgba(0,0,0,.45)}
   .sk-card.started::before{content:"";position:absolute;top:5px;left:5px;width:13px;height:13px;border-top:2px solid var(--sk-col,var(--line));border-left:2px solid var(--sk-col,var(--line));border-radius:2px 0 0 0;opacity:.65;pointer-events:none}
@@ -520,6 +640,9 @@
   .sk-tgt-tick-next{position:absolute;top:0;bottom:0;width:2px;background:var(--gold);opacity:.25;pointer-events:none;transform:translateX(-50%);border-right:1px dashed var(--gold)}
   .sk-tgt-foot{font-size:10px;color:var(--gold);margin-left:6px}
   .sk-tgt-foot.reached{color:var(--jade)}
+  .sk-trend-wrap{margin-top:8px;padding-top:6px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:3px}
+  .sk-trend-label{font-size:10px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em}
+  .sk-trend-wrap svg{border-radius:4px;background:var(--panel-2);width:100%;height:28px}
   .sk-tgt-set{margin-top:8px;padding-top:6px;border-top:1px solid var(--line)}
   .sk-tgt-set-label{font-size:11px;color:var(--ink-faint);display:flex;flex-direction:column;gap:3px}
   .sk-tgt-inp-work{width:70px;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);padding:3px 6px;border-radius:5px;font-family:inherit;text-align:center;margin-top:2px}
@@ -778,6 +901,15 @@
     border-radius:9px;padding:10px 13px;font-size:12.5px;color:var(--ink-dim);
   }
   .path-alert-go{margin-left:auto;flex:none}
+  /* Day log */
+  .dl-form{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.6rem;}
+  .dl-input{background:var(--panel-2);border:1px solid var(--line);border-radius:.4rem;padding:.45rem .65rem;color:var(--ink);font-size:.83rem;font-family:inherit;}
+  .dl-input::placeholder{color:var(--ink-faint);}
+  .dl-save-btn{align-self:flex-end;padding:.3rem 1rem;background:var(--jade);color:#000;border:none;border-radius:.4rem;cursor:pointer;font-size:.8rem;font-weight:600;}
+  .dl-past-row{display:flex;align-items:baseline;gap:.5rem;font-size:.8rem;padding:.25rem 0;border-top:1px solid var(--line);}
+  .dl-past-date{font-size:.72rem;color:var(--ink-faint);min-width:3rem;}
+  .dl-past-text{flex:1;color:var(--ink-dim);}
+  .dl-past-win{color:var(--jade);font-size:.75rem;}
   /* Field notes card — compact secondary info */
   .fn-card{padding:11px 14px}
   .fn-h{margin-bottom:7px;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);font-weight:700}
@@ -1187,6 +1319,24 @@
   .dawn-ck.done{background:rgba(101,160,97,.18);border-color:var(--jade);color:var(--jade)}
   .dawn-order-name{font-size:13.5px;flex:1;line-height:1.3}
 
+  /* ── Today's Hand — daily 5-card draw ── */
+  .th-hand{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+  .th-card{flex:0 0 90px;width:90px;background:#1a1a1a;border:1px solid rgba(255,255,255,.1);border-radius:.5rem;padding:.5rem .4rem;display:flex;flex-direction:column;align-items:center;gap:.25rem;position:relative}
+  .th-suit{font-size:1rem;opacity:.6}
+  .th-name{font-size:.6rem;font-weight:700;color:#e0e0e0;text-align:center;line-height:1.2}
+  .th-level{font-size:.55rem;color:var(--gold);font-weight:700}
+  .th-bar{width:100%;height:4px;background:#333;border-radius:2px;overflow:hidden}
+  .th-bar-fill{height:100%;border-radius:2px;transition:width .3s}
+  .th-urgent{font-size:.48rem;font-weight:800;color:#c0392b;background:rgba(192,57,43,.15);border-radius:.2rem;padding:.05rem .25rem}
+
+  /* ── Quick PT Log ── */
+  .ql-form{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .ql-type{background:#120d07;border:1px solid var(--line);color:var(--ink);padding:8px;border-radius:7px;font-size:13px;flex:0 0 auto}
+  .ql-dur{background:#120d07;border:1px solid var(--line);color:var(--ink);padding:8px;border-radius:7px;font-size:13px;width:56px}
+  .ql-note{background:#120d07;border:1px solid var(--line);color:var(--ink);padding:8px;border-radius:7px;font-size:13px;flex:1;min-width:80px}
+  .ql-save{padding:8px 14px;background:var(--jade);color:#fff;border:none;border-radius:7px;font-weight:700;cursor:pointer;font-size:13px;white-space:nowrap}
+  .ql-save:hover{background:color-mix(in srgb,var(--jade) 80%,#fff 20%)}
+
   /* ── v95: Streak protection alert ── */
   .streak-alert{background:rgba(255,140,0,.1);border-left:3px solid #ff8c00;border-radius:8px;padding:10px 13px;font-size:13px;color:#ffaa44;line-height:1.4}
 
@@ -1315,6 +1465,10 @@
   .q-update-form{display:flex;gap:5px;margin-top:5px}
   .q-update-input{flex:1;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);padding:4px 8px;border-radius:6px;font-family:inherit;font-size:11px}
   .q-update-add{background:none;border:1px solid var(--line);color:var(--jade);border-radius:6px;padding:3px 9px;cursor:pointer;font-size:12px}
+  .q-skilllink{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;margin-top:.4rem;padding-top:.4rem;border-top:1px solid var(--line);}
+  .q-skilllink-sel{flex:1;min-width:0;font-size:.78rem;background:var(--panel-2);border:1px solid var(--line);border-radius:.3rem;color:var(--ink);padding:.25rem .4rem;font-family:inherit;}
+  .q-skilllink-type{display:flex;gap:.5rem;font-size:.75rem;color:var(--ink-faint);}
+  .q-skilllink-type label{display:flex;align-items:center;gap:.2rem;cursor:pointer;}
 
   /* ── v97: PT calendar ── */
   .pt-cal-wrap{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-bottom:14px}
@@ -1817,6 +1971,20 @@
     background: linear-gradient(160deg, rgba(156,74,52,.12), var(--panel));
     border-color: rgba(156,74,52,.38);
   }
+  /* Commissioning readiness dashboard */
+  .comm-ready-bar{display:flex;align-items:center;gap:.7rem;padding:.7rem 1rem;background:var(--panel);border:1px solid var(--line);border-radius:.5rem;margin-bottom:.5rem;}
+  .comm-ready-score{font-size:1.6rem;font-weight:700;color:var(--jade);}
+  .comm-ready-label{font-size:.8rem;color:var(--ink-faint);}
+  .comm-ready-list{display:flex;flex-direction:column;gap:.3rem;margin-bottom:1rem;}
+  .comm-ready-row{display:grid;grid-template-columns:1rem 1fr auto;align-items:center;gap:.4rem .5rem;padding:.5rem .8rem;border-radius:.4rem;font-size:.82rem;}
+  .comm-ready-row.cr-ok{background:color-mix(in srgb,var(--jade) 8%,transparent);}
+  .comm-ready-row.cr-behind{background:color-mix(in srgb,var(--ember) 10%,transparent);}
+  .cr-dot{font-size:.55rem;}
+  .cr-ok .cr-dot{color:var(--jade);}
+  .cr-behind .cr-dot{color:var(--ember);}
+  .cr-label{font-weight:600;}
+  .cr-value{color:var(--ink-faint);font-size:.78rem;}
+  .cr-hint{color:var(--ember);font-size:.75rem;grid-column:2/-1;}
 
   /* === WEIGHT TAB THEME (view-weight) ===
      Sacred oath on vellum — solemn, binding */

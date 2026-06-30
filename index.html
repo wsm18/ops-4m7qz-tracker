@@ -357,6 +357,17 @@
   .aft-focus b{color:var(--ember)}
   .aft-hist-row{display:flex;justify-content:space-between;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:11px 13px;margin-bottom:7px;font-size:13.5px}
   .aft-hist-row .ttl{font-weight:700;color:var(--gold)}
+  /* AFT Goal setter */
+  .aft-goal-row{display:flex;align-items:center;gap:8px;padding:10px 0;flex-wrap:wrap}
+  .aft-goal-lbl{font-size:12px;color:var(--ink-faint);white-space:nowrap}
+  .aft-goal-inp{background:#120d07;border:1px solid var(--line);color:var(--ink);padding:8px 10px;border-radius:7px;font-family:inherit;font-size:14px;width:80px}
+  .aft-goal-inp:focus{outline:none;border-color:var(--gold)}
+  .aft-goal-set-btn{padding:8px 14px;background:var(--gold);color:#000;border:none;border-radius:7px;font-weight:700;cursor:pointer;font-size:13px}
+  .aft-goal-clear{cursor:pointer;color:var(--ink-faint);font-size:13px;padding:4px}
+  .aft-goal-progress{margin-bottom:10px}
+  .aft-goal-bar{height:8px;background:#2a2a2a;border-radius:4px;position:relative;overflow:hidden;margin-bottom:4px}
+  .aft-goal-fill{height:100%;background:linear-gradient(90deg,var(--ember),var(--gold));border-radius:4px;transition:width .3s}
+  .aft-goal-gap{font-size:12px;color:var(--ink-dim)}
 
   /* ---- Workout Log ---- */
   .lg-label{font-size:11.5px;color:var(--ink-faint);letter-spacing:.04em;display:flex;flex-direction:column;gap:5px;margin-bottom:4px}
@@ -503,20 +514,129 @@
   .sk-pass{background:rgba(111,158,84,.16);border-color:var(--jade);color:var(--jade)}
   .sk-pass:hover{background:rgba(111,158,84,.28)}
   .sk-skip{background:transparent;border-color:var(--line);color:var(--ink-faint)}
-  /* skill list cards — Phase 1 deck layout */
+  /* skill list — card table felt */
+  #view-skills{background:linear-gradient(160deg,#0d2214 0%,#0a1a0f 100%);}
   /* Deck wrappers */
-  .sk-deck{margin-bottom:18px}
-  .sk-deck-header{display:flex;align-items:center;gap:9px;cursor:pointer;padding:11px 14px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-left:4px solid var(--deck-col,var(--line));border-radius:10px;user-select:none;transition:background .15s}
-  .sk-deck-header:hover{background:rgba(255,255,255,.055)}
-  .sk-deck-icon{font-size:17px;flex:none}
-  .sk-deck-name{font-size:13px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink);flex:1}
-  .sk-deck-lv{font-size:12px;color:var(--gold);font-weight:700;background:rgba(184,160,106,.12);border:1px solid var(--gold);padding:2px 9px;border-radius:14px;flex:none}
-  .sk-deck-count{font-size:11px;color:var(--ink-faint);flex:none}
-  .sk-deck-fading{font-size:11px;color:var(--ember);font-weight:600;flex:none}
-  .sk-deck-arrow{font-size:11px;color:var(--ink-faint);transition:transform .2s;display:inline-block}
-  .sk-deck-header.open .sk-deck-arrow{transform:rotate(180deg)}
+  .sk-deck{margin-bottom:.75rem}
+  /* Deck header = card back */
+  .sk-deck-header{
+    position:relative;display:flex;align-items:center;justify-content:center;
+    min-height:160px;cursor:pointer;border-radius:.6rem;
+    background:var(--deck-col,#444);
+    box-shadow:3px 3px 0 rgba(0,0,0,.35),6px 6px 0 rgba(0,0,0,.2),9px 9px 0 rgba(0,0,0,.1);
+    transition:box-shadow .15s,transform .15s;
+    border:1.5px solid color-mix(in srgb,var(--deck-col,#444) 60%,#fff 40%);
+    overflow:hidden;user-select:none;
+  }
+  .sk-deck-header:active{transform:translateY(2px);box-shadow:1px 1px 0 rgba(0,0,0,.35)}
+  .sk-deck-header::before{content:'';position:absolute;inset:6px;border:1px solid rgba(255,255,255,.12);border-radius:.35rem;pointer-events:none}
+  .sdb-corner{position:absolute;display:flex;flex-direction:column;align-items:center;gap:.05rem;padding:.45rem .55rem;line-height:1;color:color-mix(in srgb,var(--deck-light,#eee) 90%,transparent)}
+  .sdb-corner.tl{top:0;left:0}
+  .sdb-corner.br{bottom:0;right:0;transform:rotate(180deg)}
+  .sdb-rank{font-size:.75rem;font-weight:800;letter-spacing:.02em}
+  .sdb-suit{font-size:.9rem}
+  .sdb-center{display:flex;flex-direction:column;align-items:center;gap:.3rem;text-align:center;pointer-events:none}
+  .sdb-emblem{width:52px;height:52px;opacity:.35;color:var(--deck-light,#eee)}
+  .sdb-emblem svg{width:100%;height:100%}
+  .sdb-path-name{font-size:.85rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--deck-light,#eee)}
+  .sdb-suit-name{font-size:.65rem;text-transform:uppercase;letter-spacing:.18em;opacity:.65;color:var(--deck-light,#eee)}
+  .sdb-count{font-size:.7rem;opacity:.75;color:var(--deck-light,#eee)}
+  .sdb-fading{color:var(--ember)}
+  .sk-deck-header.open{box-shadow:1px 1px 0 rgba(0,0,0,.3);opacity:.9}
+  /* Opened deck body */
   .sk-deck-body{display:none;padding-top:8px}
-  .sk-deck-body.open{display:block}
+  .sk-deck-body.open{display:flex;flex-wrap:wrap;gap:10px;padding:12px 8px}
+  /* Rank/suit corners on skill cards */
+  .spc-corner{position:absolute;display:flex;flex-direction:column;align-items:center;gap:.04rem;padding:.3rem .35rem;line-height:1;z-index:2}
+  .spc-corner.tl{top:0;left:0}
+  .spc-corner.br{bottom:0;right:0;transform:rotate(180deg)}
+  .spc-rank{font-size:.7rem;font-weight:800}
+  .spc-suit{font-size:.75rem}
+  /* Skill card face in opened deck */
+  .sk-deck-body .sk-card{flex:0 0 130px;width:130px;background:var(--deck-light,#f5f5f0);border:1.5px solid var(--deck-col,#555);margin-bottom:0}
+  .sk-deck-body .sk-card:has(.sk-card-detail[open]){flex:1 1 100%;width:100%}
+  .sk-deck-body .sk-card-header{display:none}
+  .sk-deck-body .sk-card-name,.sk-deck-body .sk-card-tier{color:#1a1a1a}
+  .sk-deck-body .sk-card-name .sk-auto{color:#555}
+  .sk-deck-body .sk-card-footer{background:rgba(0,0,0,.06);border-top:1px solid rgba(0,0,0,.1)}
+  .sk-deck-body .sk-fade-foot,.sk-deck-body .sk-prac-foot{color:#444}
+  .sk-deck-body .sk-fade-foot.warn{color:#c0392b}
+  .sk-deck-body .sk-card-detail>summary{color:#333}
+  /* Group suit symbol */
+  .sk-group-suit{font-size:1rem;margin-right:.3rem}
+  /* Mini playing cards inside groups */
+  .sk-mini-grid{display:flex;flex-wrap:wrap;gap:8px;padding:.5rem .25rem .25rem}
+  .sk-mini-card{position:relative;flex:0 0 110px;background:var(--deck-light,#f5f5f0);border:1.5px solid var(--deck-col,#555);border-radius:.5rem;padding:.5rem .4rem .4rem;display:flex;flex-direction:column;align-items:center;gap:.2rem;font-size:.75rem;overflow:hidden}
+  .sk-mini-card.sk-mini-atrisk{border-color:var(--ember);opacity:.85}
+  .sk-mini-card.sk-mini-unstarted{opacity:.5}
+  .sk-mini-emb{width:36px;height:36px;color:#1a1a1a}
+  .sk-mini-emb svg{width:100%;height:100%}
+  .sk-mini-name{font-size:.72rem;font-weight:700;text-align:center;color:#1a1a1a;line-height:1.2;max-width:100px;overflow:hidden}
+  .sk-mini-tier{font-size:.62rem;color:#555;text-align:center}
+  .sk-mini-bar{width:100%;height:.3rem;background:rgba(0,0,0,.15);border-radius:1rem;overflow:hidden;margin-top:.1rem}
+  .sk-mini-fill{height:100%;border-radius:1rem}
+  .sk-mini-lvl{font-size:.68rem;font-weight:700;color:#333}
+  .sk-mini-prac{font-size:.65rem;padding:.1rem .3rem;border:1px solid var(--jade);color:var(--jade);background:transparent;border-radius:.2rem;cursor:pointer;margin-top:.1rem}
+  /* Rarity borders on skill cards in an open deck */
+  .sk-deck-body .sk-card{border-color:var(--rar-col,var(--deck-col,#555))}
+  .sk-deck-body .sk-card.rarity-legendary{box-shadow:0 0 8px rgba(171,71,188,.35)}
+  .sk-deck-body .sk-card.rarity-mythic{box-shadow:0 0 12px rgba(255,215,0,.45)}
+  .sk-deck-body .sk-card.rarity-joker{box-shadow:0 0 12px rgba(239,83,80,.45)}
+  .sk-rarity-badge{font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;opacity:.8}
+  /* Foil shimmer — legendary + mythic cards get a subtle moving sheen */
+  @keyframes foilShimmer{0%{background-position:200% 50%}100%{background-position:-200% 50%}}
+  .sk-deck-body .sk-card.rarity-legendary::after,.sk-deck-body .sk-card.rarity-mythic::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);background-size:200% 100%;animation:foilShimmer 4s linear infinite;opacity:.7}
+  /* Face-down cards (unstarted / synthesis-locked) */
+  .sk-card-facedown{flex:0 0 120px;width:120px;min-height:160px;background:#1e1e1e;border:1.5px solid var(--rar-col,#555);border-radius:.55rem;position:relative;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+  .sk-card-facedown .spc-corner{color:var(--deck-col,#555)!important;opacity:.5}
+  .sk-fd-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.5rem .4rem;gap:.25rem;text-align:center}
+  .sk-fd-top{display:flex;align-items:center;gap:.3rem;width:100%;justify-content:center}
+  .sk-fd-rar{font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em}
+  .sk-fd-synth-tag{font-size:.45rem;background:rgba(255,255,255,.1);border-radius:.2rem;padding:.1rem .25rem;color:#aaa}
+  .sk-fd-name{font-size:.72rem;font-weight:700;color:#e0e0e0;line-height:1.2;padding:.1rem 0}
+  .sk-fd-synth-lbl{font-size:.52rem;color:#888;font-style:italic}
+  .sk-fd-hint{font-size:.5rem;color:#999;line-height:1.3;font-style:italic}
+  .sk-fd-setprog{width:100%;border:1px solid #333;border-radius:.25rem;height:6px;position:relative;overflow:visible;margin:.15rem 0;background:#111}
+  .sk-fd-setprog span{font-size:.45rem;color:#aaa;position:absolute;bottom:-14px;left:0;white-space:nowrap}
+  .sk-fd-prog-fill{position:absolute;inset:0;background:linear-gradient(90deg,var(--jade),var(--gold));transition:width .3s}
+  .sk-fd-unlocked{font-size:.52rem;color:var(--gold);font-weight:700;text-align:center}
+  .sk-fd-start-btn{font-size:.5rem;padding:.2rem .4rem;border:1px solid var(--jade);color:var(--jade);background:transparent;border-radius:.3rem;cursor:pointer;margin-top:.2rem;white-space:nowrap}
+  .sk-fd-start-btn:hover{background:rgba(0,168,107,.15)}
+  .sk-combine-btn{font-size:.55rem;padding:.25rem .5rem;border:1px solid var(--gold);color:var(--gold);background:rgba(255,215,0,.08);border-radius:.3rem;cursor:pointer;margin-top:.25rem;font-weight:700}
+  .sk-combine-btn:hover{background:rgba(255,215,0,.18)}
+  /* Side deck collapsible section */
+  .sk-side-deck{margin-top:12px;width:100%;border-top:1px dashed rgba(255,255,255,.1)}
+  .sk-side-deck-hdr{display:flex;align-items:center;gap:.5rem;padding:.4rem .5rem;cursor:pointer;list-style:none;font-size:.72rem;color:#999;user-select:none}
+  .sk-side-deck-hdr::-webkit-details-marker{display:none}
+  .sk-side-deck-icon{font-size:.85rem;opacity:.5}
+  .sk-side-deck-title{font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:.6rem}
+  .sk-side-deck-count{font-size:.55rem;color:#666;margin-left:auto}
+  .sk-side-deck-body{display:flex;flex-wrap:wrap;gap:8px;padding:.5rem .25rem .75rem}
+  /* Collection stats in summary bar */
+  .sk-summary-stat.discovered{font-weight:700;color:var(--gold)}
+  .sk-stat-sep{opacity:.4;margin:0 .1rem}
+  .sk-stat-label{font-weight:400;opacity:.7;font-size:.75em}
+  /* Path completion badges */
+  .sk-path-badge{font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:.1rem .3rem;border-radius:.25rem;margin-left:.3rem;vertical-align:middle}
+  .sk-path-badge.discovered{background:rgba(0,168,107,.2);color:var(--jade);border:1px solid rgba(0,168,107,.4)}
+  .sk-path-badge.mastered{background:rgba(255,215,0,.2);color:var(--gold);border:1px solid rgba(255,215,0,.4)}
+  /* Synergy indicator */
+  .sk-synergy-foot{font-size:.58rem;color:var(--gold);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+  /* Urgent focal skill */
+  .sk-focal-urgent{background:rgba(192,57,43,.15);color:#c0392b;font-weight:700;padding:.05rem .3rem;border-radius:.25rem;font-size:.8em}
+  .sk-focal-urgent-row{background:rgba(192,57,43,.08);border-left:3px solid #c0392b;padding-left:.4rem;border-radius:.2rem}
+  /* Sub-decks inside an opened path deck */
+  .sk-subdeck{margin-bottom:8px}
+  .sk-subdeck-hdr{position:relative;display:flex;align-items:center;justify-content:center;min-height:76px;cursor:pointer;border-radius:.5rem;background:var(--deck-col,#444);border:1.5px solid color-mix(in srgb,var(--deck-col,#444) 60%,#fff 40%);overflow:hidden;user-select:none;transition:box-shadow .12s,opacity .12s}
+  .sk-subdeck-hdr::before{content:'';position:absolute;inset:4px;border:1px solid rgba(255,255,255,.1);border-radius:.3rem;pointer-events:none}
+  .sk-subdeck-hdr.open{opacity:.85}
+  .sk-subdeck-body{display:none;padding:8px}
+  .sk-subdeck-body.open{display:flex;flex-wrap:wrap;gap:10px}
+  .sdb-subdeck-tag{color:rgba(255,255,255,.65);margin-left:.3rem}
+  /* Joker deck — deep violet gradient */
+  .sk-joker-deck .sk-deck-header{background:linear-gradient(135deg,#4a148c 0%,#7b1fa2 50%,#4a148c 100%)}
+  /* Wildcard (Joker) label in skill form */
+  .sk-joker-lbl{font-size:.8rem;color:var(--ink-faint);display:flex;align-items:center;gap:.4rem;cursor:pointer;margin-top:6px;padding:6px 0}
   /* Card face — full redesign */
   .sk-card{border-radius:12px;border:1px solid var(--sk-col,var(--line));background:var(--panel);position:relative;padding:0;margin-bottom:10px;box-shadow:0 4px 16px rgba(0,0,0,.45)}
   .sk-card.started::before{content:"";position:absolute;top:5px;left:5px;width:13px;height:13px;border-top:2px solid var(--sk-col,var(--line));border-left:2px solid var(--sk-col,var(--line));border-radius:2px 0 0 0;opacity:.65;pointer-events:none}
@@ -536,6 +656,9 @@
   .sk-tgt-tick-next{position:absolute;top:0;bottom:0;width:2px;background:var(--gold);opacity:.25;pointer-events:none;transform:translateX(-50%);border-right:1px dashed var(--gold)}
   .sk-tgt-foot{font-size:10px;color:var(--gold);margin-left:6px}
   .sk-tgt-foot.reached{color:var(--jade)}
+  .sk-trend-wrap{margin-top:8px;padding-top:6px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:3px}
+  .sk-trend-label{font-size:10px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em}
+  .sk-trend-wrap svg{border-radius:4px;background:var(--panel-2);width:100%;height:28px}
   .sk-tgt-set{margin-top:8px;padding-top:6px;border-top:1px solid var(--line)}
   .sk-tgt-set-label{font-size:11px;color:var(--ink-faint);display:flex;flex-direction:column;gap:3px}
   .sk-tgt-inp-work{width:70px;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);padding:3px 6px;border-radius:5px;font-family:inherit;text-align:center;margin-top:2px}
@@ -794,6 +917,15 @@
     border-radius:9px;padding:10px 13px;font-size:12.5px;color:var(--ink-dim);
   }
   .path-alert-go{margin-left:auto;flex:none}
+  /* Day log */
+  .dl-form{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.6rem;}
+  .dl-input{background:var(--panel-2);border:1px solid var(--line);border-radius:.4rem;padding:.45rem .65rem;color:var(--ink);font-size:.83rem;font-family:inherit;}
+  .dl-input::placeholder{color:var(--ink-faint);}
+  .dl-save-btn{align-self:flex-end;padding:.3rem 1rem;background:var(--jade);color:#000;border:none;border-radius:.4rem;cursor:pointer;font-size:.8rem;font-weight:600;}
+  .dl-past-row{display:flex;align-items:baseline;gap:.5rem;font-size:.8rem;padding:.25rem 0;border-top:1px solid var(--line);}
+  .dl-past-date{font-size:.72rem;color:var(--ink-faint);min-width:3rem;}
+  .dl-past-text{flex:1;color:var(--ink-dim);}
+  .dl-past-win{color:var(--jade);font-size:.75rem;}
   /* Field notes card — compact secondary info */
   .fn-card{padding:11px 14px}
   .fn-h{margin-bottom:7px;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);font-weight:700}
@@ -1203,6 +1335,24 @@
   .dawn-ck.done{background:rgba(101,160,97,.18);border-color:var(--jade);color:var(--jade)}
   .dawn-order-name{font-size:13.5px;flex:1;line-height:1.3}
 
+  /* ── Today's Hand — daily 5-card draw ── */
+  .th-hand{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+  .th-card{flex:0 0 90px;width:90px;background:#1a1a1a;border:1px solid rgba(255,255,255,.1);border-radius:.5rem;padding:.5rem .4rem;display:flex;flex-direction:column;align-items:center;gap:.25rem;position:relative}
+  .th-suit{font-size:1rem;opacity:.6}
+  .th-name{font-size:.6rem;font-weight:700;color:#e0e0e0;text-align:center;line-height:1.2}
+  .th-level{font-size:.55rem;color:var(--gold);font-weight:700}
+  .th-bar{width:100%;height:4px;background:#333;border-radius:2px;overflow:hidden}
+  .th-bar-fill{height:100%;border-radius:2px;transition:width .3s}
+  .th-urgent{font-size:.48rem;font-weight:800;color:#c0392b;background:rgba(192,57,43,.15);border-radius:.2rem;padding:.05rem .25rem}
+
+  /* ── Quick PT Log ── */
+  .ql-form{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .ql-type{background:#120d07;border:1px solid var(--line);color:var(--ink);padding:8px;border-radius:7px;font-size:13px;flex:0 0 auto}
+  .ql-dur{background:#120d07;border:1px solid var(--line);color:var(--ink);padding:8px;border-radius:7px;font-size:13px;width:56px}
+  .ql-note{background:#120d07;border:1px solid var(--line);color:var(--ink);padding:8px;border-radius:7px;font-size:13px;flex:1;min-width:80px}
+  .ql-save{padding:8px 14px;background:var(--jade);color:#fff;border:none;border-radius:7px;font-weight:700;cursor:pointer;font-size:13px;white-space:nowrap}
+  .ql-save:hover{background:color-mix(in srgb,var(--jade) 80%,#fff 20%)}
+
   /* ── v95: Streak protection alert ── */
   .streak-alert{background:rgba(255,140,0,.1);border-left:3px solid #ff8c00;border-radius:8px;padding:10px 13px;font-size:13px;color:#ffaa44;line-height:1.4}
 
@@ -1331,6 +1481,10 @@
   .q-update-form{display:flex;gap:5px;margin-top:5px}
   .q-update-input{flex:1;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);padding:4px 8px;border-radius:6px;font-family:inherit;font-size:11px}
   .q-update-add{background:none;border:1px solid var(--line);color:var(--jade);border-radius:6px;padding:3px 9px;cursor:pointer;font-size:12px}
+  .q-skilllink{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;margin-top:.4rem;padding-top:.4rem;border-top:1px solid var(--line);}
+  .q-skilllink-sel{flex:1;min-width:0;font-size:.78rem;background:var(--panel-2);border:1px solid var(--line);border-radius:.3rem;color:var(--ink);padding:.25rem .4rem;font-family:inherit;}
+  .q-skilllink-type{display:flex;gap:.5rem;font-size:.75rem;color:var(--ink-faint);}
+  .q-skilllink-type label{display:flex;align-items:center;gap:.2rem;cursor:pointer;}
 
   /* ── v97: PT calendar ── */
   .pt-cal-wrap{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-bottom:14px}
@@ -1833,6 +1987,20 @@
     background: linear-gradient(160deg, rgba(156,74,52,.12), var(--panel));
     border-color: rgba(156,74,52,.38);
   }
+  /* Commissioning readiness dashboard */
+  .comm-ready-bar{display:flex;align-items:center;gap:.7rem;padding:.7rem 1rem;background:var(--panel);border:1px solid var(--line);border-radius:.5rem;margin-bottom:.5rem;}
+  .comm-ready-score{font-size:1.6rem;font-weight:700;color:var(--jade);}
+  .comm-ready-label{font-size:.8rem;color:var(--ink-faint);}
+  .comm-ready-list{display:flex;flex-direction:column;gap:.3rem;margin-bottom:1rem;}
+  .comm-ready-row{display:grid;grid-template-columns:1rem 1fr auto;align-items:center;gap:.4rem .5rem;padding:.5rem .8rem;border-radius:.4rem;font-size:.82rem;}
+  .comm-ready-row.cr-ok{background:color-mix(in srgb,var(--jade) 8%,transparent);}
+  .comm-ready-row.cr-behind{background:color-mix(in srgb,var(--ember) 10%,transparent);}
+  .cr-dot{font-size:.55rem;}
+  .cr-ok .cr-dot{color:var(--jade);}
+  .cr-behind .cr-dot{color:var(--ember);}
+  .cr-label{font-weight:600;}
+  .cr-value{color:var(--ink-faint);font-size:.78rem;}
+  .cr-hint{color:var(--ember);font-size:.75rem;grid-column:2/-1;}
 
   /* === WEIGHT TAB THEME (view-weight) ===
      Sacred oath on vellum — solemn, binding */
@@ -2265,6 +2433,10 @@
   <section class="view on" id="view-today">
     <div class="sec-h"><h2 id="todayGreeting">Today</h2><span class="hint" id="todayDate"></span></div>
     <div id="todayDash"></div>
+    <div class="td-card fn-card" id="dayLogCard">
+      <div class="td-h fn-h">Day Log</div>
+      <div id="dayLogWrap"></div>
+    </div>
   </section>
 
   <section class="view" id="view-quests">
@@ -2438,6 +2610,7 @@
       </div>
       <button class="btn-add" id="aftSave">Log AFT Scores</button>
     </div>
+    <div id="aftGoalWrap"></div>
     <div id="aftResult"></div>
     <div class="sec-h" style="margin-top:18px"><h2>Score History</h2></div>
     <div id="aftHistory"></div>
@@ -2445,6 +2618,8 @@
 
   <section class="view" id="view-profile">
     <div class="sec-h"><h2>Profile</h2><span class="hint">your record & dimensions</span></div>
+    <div class="sec-h" style="margin-top:0"><h2>Commissioning Readiness</h2><span class="hint">real-time — tap any indicator for context</span></div>
+    <div id="commReadyWrap"></div>
     <div class="adder">
       <div class="sk-form-title">Identity</div>
       <div class="bl-grid">
@@ -2681,6 +2856,7 @@
       </div>
       <label class="lg-label" style="margin-top:9px">Make this a sub-skill of (optional)</label>
       <select id="skParent"><option value="">— top-level skill —</option></select>
+      <label class="sk-joker-lbl"><input type="checkbox" id="skJoker"> Wildcard (Joker) — cross-path skill, appears in all decks</label>
       <div class="sk-levels-help">Define each level as an ability you can test (level 1 first). Add as many as you want.</div>
       <div id="skLevelInputs"></div>
       <button class="sk-addlevel" id="skAddLevel">+ add a level</button>
@@ -3191,6 +3367,7 @@
 
     <div class="sec-h" style="margin-top:20px"><h2>Your Saga</h2><span class="hint">the long arc — where you have been</span></div>
     <button class="rpt-btn" id="battleBuddyBtn">📋 Generate Battle Buddy Report</button>
+    <button class="rpt-btn" id="skHistExport">📋 Copy skill history</button>
     <div id="historyArea"></div>
 
     <div class="sec-h" style="margin-top:20px"><h2>Counseling Log</h2><span class="hint">leadership events (4856-style)</span></div>
@@ -3422,6 +3599,7 @@ const DEFAULT = {
   lifts:{ deadliftLb:null, squatLb:null, benchLb:null, liftDate:null },  // best lifts for bodyweight-relative skills
   aftEventTargets:{hrp:null,sdc:null,run:null,dl:null,plank:null},
   aftStandard:"general",  // "general" (sex+age normed, 300 min) or "combat" (sex-neutral, 350 min)
+  aftGoal:null,           // target total AFT score (e.g. 500); shown as a gap line on the score display
   hasGym:false,           // equipment mode: false = no-equipment (bodyweight) plans, true = gym versions
   weather:"clear",        // manual weather: clear|rain|snow|heat|cold|wind|air|dark — bad conditions swap outdoor work indoors
   donations:[],           // blood donations: [{id, date, type}]
@@ -3437,6 +3615,7 @@ const DEFAULT = {
   studyPlans:[],          // [{id, title, testDate, topics:[], created, done:[]}]
   counseling:[],          // DA 4856-style: [{id, date, type, people, summary, plan, followUp}]
   checklists:[],          // packing/gear: [{id, name, items:[{text,done}], template}]
+  dayLog:[],              // [{date:"YYYY-MM-DD", trained, wins, notes}]
   _seeded:false,     // whether starter skills have been seeded
   _skillLadderVer:0, // bumped whenever seed ladders change; forces a full ladder resync on load
   boardTasks:[
@@ -4186,12 +4365,22 @@ function renderQuests(){
       const updatesHtml=(q.updates&&q.updates.length)?`<div class="q-updates">${q.updates.slice().reverse().map(u=>`<div class="q-update-item"><span class="q-update-ts">${new Date(u.ts).toLocaleDateString()}</span>${esc(u.text)}</div>`).join("")}</div>`:"";
       const updateForm=`<div class="q-update-form"><input class="q-update-input" data-qupdateid="${q.id}" placeholder="Log a dispatch…" maxlength="120"><button class="q-update-add" data-qupdateadd="${q.id}">→</button></div>`;
       const stepsProg=q.steps>=2&&!q.done?`<div class="q-steps-row"><div class="q-steps-bar"><div class="q-steps-fill" style="width:${Math.round((q.progress||0)/q.steps*100)}%"></div></div><span class="q-steps-count">${q.progress||0}/${q.steps}</span><button class="q-step-btn" data-qprogress="${q.id}">+1 step</button></div>`:'';
+      const startedSkills=!q.done?(S.lifeSkills||[]).filter(s=>!s.group&&(s.currentLevel||0)>0):[];
+      const skillLinkHtml=!q.done&&startedSkills.length?`<div class="q-skilllink">
+        <select class="q-skilllink-sel" data-qsklink="${q.id}">
+          <option value="">link to skill…</option>${startedSkills.map(s=>`<option value="${s.id}"${q.linkedSkillId===s.id?' selected':''}>${esc(s.name)}</option>`).join('')}
+        </select>
+        <span class="q-skilllink-type">
+          <label><input type="radio" name="qlt${q.id}" value="practice"${q.linkedSkillType!=='level'?' checked':''}> practice</label>
+          <label><input type="radio" name="qlt${q.id}" value="level"${q.linkedSkillType==='level'?' checked':''}> level up</label>
+        </span>
+      </div>`:'';
       return `<li class="card ${q.done?'done':''}${overdue?' overdue':''}">
         <div class="check" data-q="${q.id}">${q.done?'✓':''}</div>
         <div class="c-body"><div class="c-name">${esc(q.name)}</div>
           ${q.notes?`<div class="q-notes">${esc(q.notes)}</div>`:''}
           <div class="c-meta">${diffTag('quest',q.diff)}${pathTag(q.path)}${dueTag}${ageTag}</div>
-          ${stepsProg}${updatesHtml}${updateForm}</div>
+          ${stepsProg}${updatesHtml}${updateForm}${skillLinkHtml}</div>
         ${snoozeBtn}
         <button class="del" data-dq="${q.id}">✕</button>
       </li>`;
@@ -4421,6 +4610,7 @@ document.body.addEventListener("click",e=>{
     const q=S.quests.find(x=>x.id===t.dataset.q);
     if(q&&!q.done){
       q.done=true;
+      if(q.linkedSkillId){const _lsk=(S.lifeSkills||[]).find(s=>s.id===q.linkedSkillId);if(_lsk){if(q.linkedSkillType==='level')skReachLevel(_lsk.id,(_lsk.currentLevel||0)+1,`Oath completed: ${q.name||''}`);else skPractice(_lsk.id);}}
       if(!S.questArchive) S.questArchive=[];
       S.questArchive.unshift({...q, completedDate:new Date().toLocaleDateString()});
       if(S.questArchive.length>200) S.questArchive=S.questArchive.slice(0,200);
@@ -4437,6 +4627,7 @@ document.body.addEventListener("click",e=>{
       q.progress=(q.progress||0)+1;
       if(q.progress>=q.steps){
         q.done=true;
+        if(q.linkedSkillId){const _lsk=(S.lifeSkills||[]).find(s=>s.id===q.linkedSkillId);if(_lsk){if(q.linkedSkillType==='level')skReachLevel(_lsk.id,(_lsk.currentLevel||0)+1,`Oath completed: ${q.name||''}`);else skPractice(_lsk.id);}}
         if(!S.questArchive) S.questArchive=[];
         S.questArchive.unshift({...q,completedDate:new Date().toLocaleDateString()});
         if(S.questArchive.length>200) S.questArchive=S.questArchive.slice(0,200);
@@ -4543,6 +4734,8 @@ document.body.addEventListener("click",e=>{
   }
   // mark skill as practiced — resets fade timer without level change
   if(t.dataset.skpractice){ if(typeof skPractice==="function") skPractice(t.dataset.skpractice); return; }
+  // synthesis: combine a complete set into the next-rarity card
+  if(t.dataset.skcombine){ if(typeof skCombineSet==="function") skCombineSet(t.dataset.skcombine); return; }
   // copy daily brief
   if(t.dataset.copybriefbtn){ if(typeof copyDailyBrief==="function") copyDailyBrief(); return; }
   // copy skills summary
@@ -4559,6 +4752,18 @@ document.body.addEventListener("click",e=>{
       const sess=goBtn.dataset.logsess;
       setTimeout(()=>{ const sel=document.getElementById("lgSession"); if(sel&&sel.value!==sess){sel.value=sess;if(sel.onchange)sel.onchange();} }, 80);
     }
+    return;
+  }
+});
+
+// Persist skill link selection on quest cards
+document.body.addEventListener("change",e=>{
+  const sel=e.target.closest("[data-qsklink]");
+  if(sel){const q=S.quests.find(x=>x.id===sel.dataset.qsklink);if(q){q.linkedSkillId=sel.value||null;save();}return;}
+  if(e.target.type==="radio"&&e.target.name&&e.target.name.startsWith("qlt")){
+    const qid=e.target.name.slice(3);
+    const q=S.quests.find(x=>x.id===qid);
+    if(q){q.linkedSkillType=e.target.value;save();}
     return;
   }
 });
@@ -5041,6 +5246,33 @@ function renderAftStandardBar(){
     <div class="std-note">Scored from the official AFT tables (HQDA EXORD 218-25, Annex B, eff 1 Jun 2025). Cyber (17-series) is general/enabling, so General is the default; switch to Combat if your role requires it.</div>
   </div>`;
 }
+function renderAftGoal(el){
+  if(!el) return;
+  const last=S.aft&&S.aft.length?S.aft[S.aft.length-1]:null;
+  const current=last?last.total:null;
+  const goal=S.aftGoal||null;
+  const gap=goal&&current!==null?goal-current:null;
+  const pct=goal&&current!==null?Math.min(100,Math.round(current/goal*100)):null;
+  const gapStr=gap!==null?(gap>0?`${gap} pts to go`:(gap===0?'Goal reached!':`${Math.abs(gap)} pts over goal`)):'';
+  const barFill=pct!==null?`<div class="aft-goal-fill" style="width:${pct}%"></div>`:'';
+  const barGoalLine=goal?`<div class="aft-goal-line" title="Goal: ${goal}" style="left:100%"></div>`:'';
+  el.innerHTML=`<div class="aft-goal-row">
+    <label class="aft-goal-lbl">AFT Score Goal</label>
+    <input class="aft-goal-inp" id="aftGoalInp" type="number" min="0" max="600" step="5" placeholder="e.g. 450" value="${goal||''}">
+    <button class="aft-goal-set-btn" id="aftGoalSetBtn">Set</button>
+    ${goal?`<span class="aft-goal-clear" id="aftGoalClear" title="Clear goal">✕</span>`:''}
+  </div>
+  ${goal&&current!==null?`<div class="aft-goal-progress">
+    <div class="aft-goal-bar">${barFill}${barGoalLine}</div>
+    <div class="aft-goal-gap">${current} / ${goal} — ${gapStr}</div>
+  </div>`:''}`;
+  document.getElementById("aftGoalSetBtn").onclick=()=>{
+    const v=parseInt((document.getElementById("aftGoalInp")||{}).value)||null;
+    S.aftGoal=v&&v>0?v:null; save(); renderAft();
+  };
+  const clr=document.getElementById("aftGoalClear");
+  if(clr) clr.onclick=()=>{ S.aftGoal=null; save(); renderAft(); };
+}
 function renderAft(){
   const hist=document.getElementById("aftHistory");
   if(!hist) return;
@@ -5070,6 +5302,9 @@ function renderAft(){
     }).join("");
   }
   if(S.aft.length){ showAftResult(S.aft[S.aft.length-1]); }
+  // AFT Goal setter
+  const goalEl=document.getElementById("aftGoalWrap");
+  if(goalEl) renderAftGoal(goalEl);
   // mini trend sparkline — insert before history element, replacing any previous one
   const _prevTrend=document.querySelector('.aft-trend-wrap');
   if(_prevTrend) _prevTrend.remove();
@@ -6755,9 +6990,47 @@ function renderMilestones(){
     return `<div class="milestone-row"><span class="milestone-date">${m.date}</span><span class="milestone-label">${esc(m.label)}</span><span class="milestone-when" style="color:${past?"var(--ink-faint)":"var(--jade)"}">${when}</span><button class="milestone-del" data-msdel="${m.id}">✕</button></div>`;
   }).join("");
 }
+function renderCommReadiness(){
+  const el=document.getElementById("commReadyWrap"); if(!el) return;
+  const items=[];
+  const lastAft=(S.aftHistory||[]).slice(-1)[0];
+  const aftTotal=lastAft&&lastAft.scores?Object.values(lastAft.scores).reduce((a,b)=>a+(+b||0),0):0;
+  const aftOk=aftTotal>=270;
+  items.push({label:"AFT total",value:lastAft?aftTotal+"pts":"no record",ok:aftOk,hint:"target ≥270 total"});
+  const gpas=S.gpaHistory||[];
+  const curGpa=gpas.length?gpas[gpas.length-1].gpa:null;
+  const gpaOk=curGpa!=null&&curGpa>=2.0;
+  items.push({label:"GPA",value:curGpa!=null?curGpa.toFixed(2):"no record",ok:gpaOk,hint:"min 2.0 to commission"});
+  const withTgt=(S.lifeSkills||[]).filter(s=>!s.group&&(s.currentLevel||0)>0&&s.targetLevel!=null);
+  const atTgt=withTgt.filter(s=>skEffectiveLevel(s)>=(s.targetLevel||0)).length;
+  const skillOk=withTgt.length>0&&atTgt>=withTgt.length*0.7;
+  items.push({label:"Skills at target",value:withTgt.length?atTgt+"/"+withTgt.length:"no targets set",ok:skillOk,hint:"advance lagging skills"});
+  const quals=S.qualifications||[];
+  const expired=quals.filter(q=>q.expDate&&new Date(q.expDate).getTime()<Date.now()).length;
+  const qualOk=expired===0&&quals.length>0;
+  items.push({label:"Qualifications",value:quals.length?quals.length+" held"+(expired?" · "+expired+" expired":""):"none logged",ok:qualOk,hint:"renew expired quals"});
+  const rr=S.rotcRecord;
+  const hasRecord=rr&&((rr.positions&&rr.positions.length)||(rr.competitions&&rr.competitions.length));
+  items.push({label:"ROTC record",value:hasRecord?"entries logged":"none logged",ok:!!hasRecord,hint:"add positions & competition results"});
+  const hasClear=S.profile&&S.profile.clearance&&S.profile.clearance.level;
+  items.push({label:"Clearance status",value:hasClear?S.profile.clearance.level:"not logged",ok:!!hasClear,hint:"log clearance in Profile"});
+  const passing=items.filter(i=>i.ok).length;
+  el.innerHTML=`<div class="comm-ready-bar">
+    <div class="comm-ready-score">${passing}/${items.length}</div>
+    <div class="comm-ready-label">readiness indicators on track</div>
+  </div>
+  <div class="comm-ready-list">
+    ${items.map(i=>`<div class="comm-ready-row ${i.ok?'cr-ok':'cr-behind'}">
+      <span class="cr-dot">${i.ok?'●':'○'}</span>
+      <span class="cr-label">${esc(i.label)}</span>
+      <span class="cr-value">${esc(i.value)}</span>
+      ${!i.ok?`<span class="cr-hint">${esc(i.hint)}</span>`:''}
+    </div>`).join('')}
+  </div>`;
+}
 function renderProfile(){
   if(!document.getElementById("pfWt")) return;
-  renderGpaHistory(); renderMilestones();
+  renderCommReadiness(); renderGpaHistory(); renderMilestones();
   const p=S.profile||{}, l=S.lifts||{};
   const setv=(id,v)=>{const el=document.getElementById(id); if(el&&document.activeElement!==el) el.value=(v??"");};
   setv("pfName",S.name); setv("pfRank",S.rank); setv("pfPos",S.position); setv("pfBranch",S.branchGoal);
@@ -8224,6 +8497,32 @@ ${counselRows?`<h2>Counseling Log (last 5)</h2><ul>${counselRows}</ul>`:""}
 }
 const _rptBtn=document.getElementById("battleBuddyBtn");
 if(_rptBtn) _rptBtn.onclick=exportBattleBuddyReport;
+function copySkillHistory(){
+  const started=(S.lifeSkills||[]).filter(s=>!s.group&&s.currentLevel>0&&s.levels&&s.levels.length);
+  if(!started.length){ toast("No skill history to export"); return; }
+  const lines=["# Skill History Export","","Date: "+new Date().toLocaleDateString(),""];
+  const byPath={};
+  started.forEach(s=>{ (byPath[s.cat]=byPath[s.cat]||[]).push(s); });
+  (typeof SK_CAT_ORDER!=="undefined"?SK_CAT_ORDER:Object.keys(byPath)).forEach(cat=>{
+    if(!byPath[cat]) return;
+    const catName=(typeof SK_CAT!=="undefined"&&SK_CAT[cat])||cat;
+    lines.push(`## ${catName}`);
+    byPath[cat].sort((a,b)=>b.currentLevel-a.currentLevel).forEach(s=>{
+      const eff=typeof skEffectiveLevel==="function"?skEffectiveLevel(s):s.currentLevel;
+      const peak=s.peakLevel||eff;
+      const maxLv=(s.levels||[]).length;
+      const hist=(s.history||[]).filter(h=>h.type==="promote").slice(-5).map(h=>`${new Date(h.ts).toLocaleDateString()} L${h.level}`).join(" → ");
+      lines.push(`- ${s.name}: L${eff}/${maxLv}${peak>eff?` (peak L${peak})`:''}${hist?` | ${hist}`:''}`);
+    });
+    lines.push("");
+  });
+  const txt=lines.join("\n");
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(()=>toast("📋 Skill history copied to clipboard")).catch(()=>toast("Copy failed"));
+  } else { toast("Clipboard unavailable in this browser"); }
+}
+const _skHistExportBtn=document.getElementById("skHistExport");
+if(_skHistExportBtn) _skHistExportBtn.onclick=copySkillHistory;
 
 /* ---- Counseling bulk import ---- */
 {
@@ -8404,6 +8703,65 @@ function weekTrainCardHtml(){
     <div class="dawn-week-bar"><span class="dawn-week-blocks">${bar}</span><button class="td-go-sm" style="margin-left:auto" data-gototab="plan">Plan →</button></div>
   </div>`;
 }
+// Simple deterministic string hash (djb2-style, integer result)
+function hashStr(s){
+  let h=5381;
+  for(let i=0;i<s.length;i++) h=((h*33)^s.charCodeAt(i))>>>0;
+  return h;
+}
+// Seeded shuffle: Fisher-Yates with deterministic seed
+function seededShuffle(arr, seed){
+  const a=arr.slice();
+  let s=seed>>>0;
+  for(let i=a.length-1;i>0;i--){
+    s=(s*1664525+1013904223)>>>0;
+    const j=s%(i+1);
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+// Today's Hand — 5 started skills drawn from deterministic daily shuffle
+function renderTodaysHand(){
+  const started=(S.lifeSkills||[]).filter(s=>!s.group&&s.currentLevel>0&&s.levels&&s.levels.length);
+  if(started.length<2) return '';
+  const dateKey=new Date().toISOString().slice(0,10);
+  const seed=hashStr(dateKey+"hand");
+  const hand=seededShuffle(started,seed).slice(0,5);
+  const cardHtml=hand.map(sk=>{
+    const eff=typeof skEffectiveLevel==="function"?skEffectiveLevel(sk):sk.currentLevel;
+    const max=(sk.levels||[]).length||1;
+    const pct=Math.round(eff/max*100);
+    const col=typeof skLeafColor==="function"?skLeafColor(eff,max):"#6e7459";
+    const dl=typeof skDaysLeft==="function"?skDaysLeft(sk):null;
+    const fadeTag=dl!==null&&dl<=3?`<span class="th-urgent">⚠${dl}d</span>`:'';
+    const suit=(typeof SK_SUIT!=="undefined"&&SK_SUIT[sk.cat])||{sym:"★",col:"#555"};
+    return `<div class="th-card" style="--th-col:${col};--th-suit-col:${suit.col}">
+      <div class="th-suit">${suit.sym}</div>
+      <div class="th-name">${esc(sk.name)}</div>
+      <div class="th-level">L${eff}/${max}</div>
+      <div class="th-bar"><div class="th-bar-fill" style="width:${pct}%;background:${col}"></div></div>
+      ${fadeTag}
+      <button class="td-go-sm" data-skpractice="${esc(sk.id)}" title="Mark practiced">✓</button>
+    </div>`;
+  }).join('');
+  return `<div class="td-card fn-card"><div class="td-h fn-h">Today's Hand <span style="font-size:11px;color:var(--muted)">daily draw</span></div><div class="th-hand">${cardHtml}</div></div>`;
+}
+// Quick PT Log — lightweight workout entry without opening Log tab
+function renderQuickLog(){
+  return `<div class="td-card fn-card" id="quickLogCard">
+    <div class="td-h fn-h">Quick PT Log</div>
+    <div class="ql-form">
+      <select class="ql-type" id="qlType">
+        <option value="">Type…</option>
+        <option>Run</option><option>Ruck</option><option>Lift</option><option>Swim</option><option>PT</option><option>Other</option>
+      </select>
+      <input class="ql-dur" id="qlDur" type="number" min="1" max="360" placeholder="min" style="width:56px">
+      <input class="ql-note" id="qlNote" placeholder="Notes / details" style="flex:1">
+      <button class="ql-save" id="qlSave">+ Log</button>
+    </div>
+  </div>`;
+}
+
 function renderToday(){
   const el=document.getElementById("todayDash"); if(!el) return;
   const hour=new Date().getHours();
@@ -8627,17 +8985,24 @@ function renderToday(){
       notes.push(`<div class="fn-row"><span class="fn-dot">🏋️</span><span><b>This week:</b> ${_parts.join(' · ')} logged</span><button class="td-go-sm" data-gototab="log">Log →</button></div>`);
     }
   }
-  // skill of the day — deterministic daily focal skill (soonest-to-fade first, then cycled by day)
+  // skill of the day — urgency-first: skills ≤3 days from fade shown first with ⚠ label
   const _skElig=(S.lifeSkills||[]).filter(s=>!s.group&&s.currentLevel>0&&!s.auto);
   if(_skElig.length>0){
     const _dayIdx=Math.floor(Date.now()/864e5);
+    // Urgency: any skill at risk within 3 days takes priority
+    const _urgentSks=_skElig.filter(s=>{ const d=typeof skDaysLeft==="function"?skDaysLeft(s):null; return d!==null&&d<=3; });
+    const _urgentFocal=_urgentSks.length>0?_urgentSks.sort((a,b)=>(typeof skDaysLeft==="function"?skDaysLeft(a)||999:999)-(typeof skDaysLeft==="function"?skDaysLeft(b)||999:999))[0]:null;
+    // Normal cycle: sort soonest-to-fade first then cycle by day
     const _sortedElig=_skElig.slice().sort((a,b)=>(typeof skDaysLeft==="function"?skDaysLeft(a)||999:999)-(typeof skDaysLeft==="function"?skDaysLeft(b)||999:999));
-    const _focal=_sortedElig[_dayIdx%_sortedElig.length];
+    const _focal=_urgentFocal||_sortedElig[_dayIdx%_sortedElig.length];
     if(_focal){
       const _eff=typeof skEffectiveLevel==="function"?skEffectiveLevel(_focal):_focal.currentLevel;
       const _dl=typeof skDaysLeft==="function"?skDaysLeft(_focal):null;
-      const _dlStr=_dl!==null?`, ${_dl}d until fade`:'';
-      notes.push(`<div class="fn-row"><span class="fn-dot">🎯</span><span><b>Skill of the day:</b> ${esc(_focal.name)} — L${_eff}${_dlStr}</span><button class="td-go-sm" data-skpractice="${esc(_focal.id)}" title="Mark as practiced — resets fade timer">✓ practiced</button><button class="td-go-sm" data-gototab="skills">→</button></div>`);
+      const _isUrgent=_dl!==null&&_dl<=3;
+      const _urgentBadge=_isUrgent?` <span class="sk-focal-urgent">⚠ ${_dl}d left</span>`:'';
+      const _dlStr=!_isUrgent&&_dl!==null?`, ${_dl}d until fade`:'';
+      const _label=_isUrgent?`<b>Urgent — practice now:</b>`:`<b>Skill of the day:</b>`;
+      notes.push(`<div class="fn-row${_isUrgent?' sk-focal-urgent-row':''}"><span class="fn-dot">🎯</span><span>${_label} ${esc(_focal.name)} — L${_eff}${_dlStr}${_urgentBadge}</span><button class="td-go-sm" data-skpractice="${esc(_focal.id)}" title="Mark as practiced — resets fade timer">✓ practiced</button><button class="td-go-sm" data-gototab="skills">→</button></div>`);
     }
   }
   const notesHtml=notes.length?`<div class="td-card fn-card"><div class="td-h fn-h">Field Notes</div>${notes.join("")}</div>`:"";
@@ -8807,14 +9172,64 @@ function renderToday(){
   // ── Copy daily brief button (compact row)
   const briefBtnHtml=`<div class="brief-row"><button class="brief-btn" data-copybriefbtn="1">📋 Copy field brief</button></div>`;
 
+  // ── Today's Hand (daily 5-card draw)
+  const todaysHandHtml=typeof renderTodaysHand==="function"?renderTodaysHand():'';
+  // ── Quick PT Log
+  const quickLogHtml=typeof renderQuickLog==="function"?renderQuickLog():'';
   // ── Assemble — creed always first, then guided flow
-  const flow=[startHtml, sessHtml, weekCardHtml, ordersHtml, recoveryHtml, discHtml, bossHtml, streakHtml, commissionHtml, milestoneHtml, pathSummaryHtml, focusHtml, adaptHtml, neglectHtml, pathPips, notesHtml, academicHtml, omlHtml, cnAlertHtml, qualAlertHtml, fmHtml, briefBtnHtml, installHtml, notifPromptHtml].filter(Boolean).join("");
+  const flow=[startHtml, todaysHandHtml, sessHtml, weekCardHtml, ordersHtml, recoveryHtml, discHtml, bossHtml, streakHtml, commissionHtml, milestoneHtml, pathSummaryHtml, focusHtml, adaptHtml, neglectHtml, pathPips, notesHtml, academicHtml, omlHtml, cnAlertHtml, qualAlertHtml, fmHtml, quickLogHtml, briefBtnHtml, installHtml, notifPromptHtml].filter(Boolean).join("");
 
   el.innerHTML=`<div class="td-creed">🌲 <span>${creed}</span></div>`+(
     flow
       ? `<div class="td-flow">${flow}</div>`
       : `<div class="aw-empty"><span class="big">🌱</span>The ground is bare. Swear your oaths, plant your daily orders — and this becomes the soil your tree grows from.</div>`
   );
+  renderDayLog();
+}
+
+function renderDayLog(){
+  const el=document.getElementById("dayLogWrap"); if(!el) return;
+  const today=new Date().toISOString().slice(0,10);
+  const log=S.dayLog||[];
+  const todayEntry=log.find(e=>e.date===today)||{date:today,trained:'',wins:'',notes:''};
+  const recent=log.filter(e=>e.date!==today).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
+  el.innerHTML=`<div class="dl-form">
+    <input class="dl-input" id="dlTrained" placeholder="What did you train today?" value="${esc(todayEntry.trained||'')}">
+    <input class="dl-input" id="dlWins" placeholder="Win of the day" value="${esc(todayEntry.wins||'')}">
+    <input class="dl-input" id="dlNotes" placeholder="Notes" value="${esc(todayEntry.notes||'')}">
+    <button class="dl-save-btn" id="dlSave">Save</button>
+  </div>
+  ${recent.map(e=>`<div class="dl-past-row">
+    <span class="dl-past-date">${e.date.slice(5)}</span>
+    <span class="dl-past-text">${esc(e.trained||'—')}</span>
+    ${e.wins?`<span class="dl-past-win">✓ ${esc(e.wins)}</span>`:''}
+  </div>`).join('')}`;
+  document.getElementById("dlSave").onclick=()=>{
+    const entry={date:today,
+      trained:(document.getElementById("dlTrained").value||'').trim(),
+      wins:(document.getElementById("dlWins").value||'').trim(),
+      notes:(document.getElementById("dlNotes").value||'').trim()};
+    S.dayLog=(S.dayLog||[]).filter(e=>e.date!==today);
+    if(entry.trained||entry.wins||entry.notes) S.dayLog.push(entry);
+    save(); toast("Day logged");
+  };
+  // Quick PT log save handler
+  const qlSave=document.getElementById("qlSave");
+  if(qlSave){
+    qlSave.onclick=()=>{
+      const type=(document.getElementById("qlType")||{}).value||"";
+      const dur=parseInt((document.getElementById("qlDur")||{}).value)||0;
+      const note=((document.getElementById("qlNote")||{}).value||"").trim();
+      if(!type&&!dur&&!note){ toast("Add at least a type or duration"); return; }
+      if(!S.workouts) S.workouts=[];
+      S.workouts.push({id:id(), date:today, session:type||"PT", durationMin:dur||null, notes:note, ts:Date.now()});
+      save();
+      const qlType=document.getElementById("qlType"); if(qlType) qlType.value="";
+      const qlDur=document.getElementById("qlDur"); if(qlDur) qlDur.value="";
+      const qlNote=document.getElementById("qlNote"); if(qlNote) qlNote.value="";
+      toast(`Logged: ${type||"PT"}${dur?" "+dur+"min":""}`);
+    };
+  }
 }
 
 function makeStudyPlan(title,testDate,topics){
@@ -11790,7 +12205,7 @@ const SEED_SKILLS=[
    maintain:[
    "Hold L1: log recovery daily.","Hold L2: keep the 30-day habit.","Hold L3: maintain objective tracking.","Hold L4: review correlations monthly.","Hold L5: keep using data to adjust load.","Hold L6: plan recovery cycles before every major event."]},
 
-  {name:"Injury prevention & prehab", cat:"physiological", fadeDays:45,
+  {name:"Injury prevention & prehab", cat:"physiological", parent:"Daily inputs", fadeDays:45,
    tiers:[{label:"Aware",upTo:1},{label:"Consistent",upTo:3},{label:"Self-directed",upTo:5},{label:"Coach",upTo:7}],
    why:"Stress fractures and shin splints end ROTC careers. Proactive prehab — calf raises, hip flexor work, ankle stability — is its own learnable protocol with clear measurable levels.",
    howTo:"Start with the most common Army training injuries (tibial stress syndrome, IT band, plantar fasciitis) and their causes. Build a personal prehab sequence you do before every run. Progress to movement screening over time.",
@@ -12444,7 +12859,7 @@ const SEED_SKILLS=[
    "Hold L1: keep PM vocabulary current.","Hold L2: build a schedule for every event.","Hold L3: run kickoffs for every project.","Hold L4: execute to scope consistently.","Hold L5: keep risk registers current.","Hold L6: stay on budget.","Hold L7: keep managing multi-org projects.","Hold L8: write close-out reports for every project."]},
 
   // ── v122: Academic skills batch ──
-  {name:"Statistics & data analysis", cat:"academic", fadeDays:45,
+  {name:"Statistics & data analysis", cat:"academic", parent:"Knowledge", fadeDays:45,
    tiers:[{label:"Beginner",upTo:2},{label:"Applied",upTo:4},{label:"Practitioner",upTo:6},{label:"Analyst",upTo:8},{label:"Researcher",upTo:9}],
    targets:{MS2:2,MS3:4,commission:6,O1:8},
    why:"Statistics is essential for Cyber (log analysis, threat modeling), research, and evidence-based decision making. It's its own cognitive domain distinct from higher mathematics.",
@@ -12498,7 +12913,7 @@ const SEED_SKILLS=[
    maintain:[
    "Hold L1: verify source type on everything you read.","Hold L2: cite correctly in every paper.","Hold L3: evaluate source credibility habitually.","Hold L4: write lit reviews for every research project.","Hold L5: design methodology for any original claim.","Hold L6: conduct studies when you have research questions.","Hold L7: keep publishing and presenting."]},
 
-  {name:"Geopolitics & foreign policy", cat:"academic", fadeDays:45,
+  {name:"Geopolitics & foreign policy", cat:"academic", parent:"Knowledge", fadeDays:45,
    tiers:[{label:"Aware",upTo:2},{label:"Informed",upTo:4},{label:"Analyst",upTo:6},{label:"Strategist",upTo:7}],
    targets:{MS2:2,MS3:3,LDAC:4,commission:5,O1:7},
    why:"Cyber operations exist in a geopolitical context. Officers are expected to understand strategic competitors, alliances, and the political environment of any operational theater.",
@@ -12653,7 +13068,7 @@ const SEED_SKILLS=[
    maintain:[
    "Hold L1: keep Cyrillic reading active.","Hold L2: listen and speak simple Russian daily.","Hold L3: read basic Russian texts.","Hold L4: consume Russian media daily.","Hold L5: read Russian news.","Hold L6: engage professionally in Russian.","Hold L7: maintain formal precision.","Hold L8: total immersion."]},
 
-  {name:"Philosophy & ethics", cat:"academic", fadeDays:90,
+  {name:"Philosophy & ethics", cat:"academic", parent:"Knowledge", fadeDays:90,
    tiers:[{label:"Aware",upTo:2},{label:"Student",upTo:4},{label:"Thinker",upTo:6},{label:"Scholar",upTo:7}],
    targets:{MS2:2,MS3:3,commission:5},
    why:"Ethical theory (not just military ethics) is foundational for moral leadership and clear thinking. Distinct from the leadership ethics skill — this is the academic/theoretical side.",
@@ -12678,7 +13093,7 @@ const SEED_SKILLS=[
    maintain:[
    "Hold L1: keep three frameworks current.","Hold L2: revisit primary text summaries.","Hold L3: analyze current dilemmas with frameworks.","Hold L4: keep writing philosophical arguments.","Hold L5: keep facilitating discussions.","Hold L6: keep reading primary texts.","Hold L7: keep writing applied ethics papers."]},
 
-  {name:"Economics fundamentals", cat:"academic", fadeDays:90,
+  {name:"Economics fundamentals", cat:"academic", parent:"Knowledge", fadeDays:90,
    tiers:[{label:"Aware",upTo:2},{label:"Student",upTo:4},{label:"Applied",upTo:6},{label:"Analyst",upTo:7}],
    targets:{MS2:2,MS3:3,commission:5,O1:6},
    why:"Defense budgeting, contractor relationships, and acquisition all require economic literacy. Micro and macro fundamentals are testable and carry into defense policy understanding.",
@@ -13098,7 +13513,97 @@ const SEED_SKILLS=[
    advance:[
    "Reach L1: understand the wilderness medicine framework and the Patient Assessment System.","Reach L2: run a scene assessment and produce a structured SOAP note.","Reach L3: treat the three most common field emergencies: fractures, hypothermia, and dehydration.","Reach L4: complete WFA — a 16-hour graded course is the baseline credential.","Reach L5: improvise a litter and carry a patient — the most physically demanding and tactically realistic skill in this ladder.","Reach L6: earn your WFR — 80 hours, patient simulations, sign-off on real skills.","Reach L7: lead your element through a planned and rehearsed CASEVAC, managing 2+ casualties — the leadership ceiling of this skill."],
    maintain:[
-   "Hold L1: review the patient assessment framework annually.","Hold L2: practice SOAP notes in field exercises.","Hold L3: review treatment protocols annually.","Hold L4: keep WFA current (3-year recert).","Hold L5: practice litter carries at training events.","Hold L6: keep WFR current (3-year recert) and practice patient simulations.","Hold L7: run a CASEVAC rehearsal at every major training event."]}
+   "Hold L1: review the patient assessment framework annually.","Hold L2: practice SOAP notes in field exercises.","Hold L3: review treatment protocols annually.","Hold L4: keep WFA current (3-year recert).","Hold L5: practice litter carries at training events.","Hold L6: keep WFR current (3-year recert) and practice patient simulations.","Hold L7: run a CASEVAC rehearsal at every major training event."]},
+
+  // ── Utility skills ────────────────────────────────────────────────────────
+
+  {name:"Land navigation", cat:"tactical", fadeDays:90,
+   tiers:[{label:"Basics",upTo:2},{label:"Proficient",upTo:5},{label:"Expert",upTo:8}],
+   targets:{MS2:2, MS3:4, LDAC:5, MS4:6, commission:6, O1:7},
+   why:"Land navigation is a foundational combat skill and a major ROTC evaluation point at LDAC. A leader who cannot navigate cannot lead in GPS-denied environments.",
+   howTo:"Practice with map, compass, and protractor. Time yourself on pace counts. Do orienteering events, night navigation, and declination corrections until it is automatic.",
+   safety:"Always carry a backup nav method and tell someone your route before solo land nav practice.",
+   levels:["Orient a map to terrain using a compass and identify your position within 200m using 2+ terrain features","Plot a 6-digit grid coordinate and measure a magnetic azimuth with a lensatic compass; understand declination","Navigate a 5-km land nav course using dead reckoning and terrain association, finding 4/5 points","Complete a timed 5-point day land nav course in under 2 hours (LDAC standard)","Complete a 5-point night land nav course unaided; use resection to confirm position","Navigate in GPS-denied conditions with a complete ops order; teach land nav to a peer","Plan and execute a patrol route incorporating alternate routes, checkpoints, and link-up procedures","Demonstrate expert-level land nav in any terrain and condition; serve as primary navigator for a platoon-level OPORD"],
+   roadmap:["orient map + ID position","6-digit grid + azimuth","5km course 4/5","LDAC timed standard","night nav + resection","GPS-denied patrol + teach","full patrol planning","platoon navigator"],
+   advance:["Study map reading FM 3-25.26; practice with MGRS grids.","Drill azimuth + distance measurement daily.","Join an orienteering event or walk a local nav course.","Time yourself on a 5-point course — aim under 2 hrs.","Do a night land nav session with a buddy.","Plan a movement route with OPORD format.","Integrate nav into a full patrol plan.","Lead a platoon movement with nav responsibility."],
+   maintain:["Hold L1: review map orientation annually.","Hold L2: set up and measure an azimuth at each field event.","Hold L3: do at least one orienteering course per semester.","Hold L4: keep LDAC timing sharp; practice once a month.","Hold L5: do one night nav session per semester.","Hold L6: lead patrol movement planning at each FTX.","Hold L7: review patrol planning FM annually.","Hold L8: take a platoon nav leadership role at least once per year."]},
+
+  {name:"9-line MEDEVAC", cat:"tactical", fadeDays:60,
+   tiers:[{label:"Aware",upTo:2},{label:"Proficient",upTo:4},{label:"Expert",upTo:6}],
+   targets:{MS2:2, MS3:3, LDAC:4, MS4:5, commission:5, O1:6},
+   why:"A correct 9-line MEDEVAC request gets a casualty out faster and reduces mortality. Mistakes under stress cost lives — this must be automatic.",
+   howTo:"Memorize the 9 lines in order. Practice saying them out loud from memory. Simulate scenarios with a partner as the radio operator. Do it under time pressure.",
+   safety:"A bad MEDEVAC call (wrong grid, wrong LZ size, wrong security) delays extraction. Accuracy under pressure is the entire skill.",
+   levels:["Recite all 9 lines of the MEDEVAC request from memory in correct order","Transmit a complete 9-line from a written scenario in under 90 seconds with no errors","Transmit a 9-line from a verbal scenario (no notes) in under 60 seconds with no errors","Execute a correct 9-line under simulated stress (noise, time pressure) in an FTX context","Coach a Soldier through their first 9-line transmission; correct errors and confirm accuracy","Lead a platoon-level CASEVAC drill including correct 9-line, LZ marking, and patient hand-off"],
+   roadmap:["memorize 9 lines","written scenario <90s","verbal scenario <60s","FTX stress test","teach a peer","lead platoon CASEVAC drill"],
+   advance:["Memorize using any mnemonic; write it 10 times from memory.","Practice with a written casualty scenario.","Practice verbal transmission with a partner.","Do a stress drill — sprint then transmit.","Help a peer learn all 9 lines.","Run a CASEVAC lane at your next FTX."],
+   maintain:["Hold L1: recite 9 lines monthly.","Hold L2: do one written transmission drill per month.","Hold L3: do one verbal drill per month.","Hold L4: include in every FTX after-action review.","Hold L5: teach at least one Soldier per semester.","Hold L6: run a CASEVAC drill at least once per semester."]},
+
+  {name:"Personal finance", cat:"personal", fadeDays:180,
+   tiers:[{label:"Basics",upTo:2},{label:"Building",upTo:4},{label:"Invested",upTo:7}],
+   targets:{MS2:2, MS3:3, LDAC:3, MS4:4, commission:5, O1:6},
+   why:"Financial readiness is a military readiness issue (AFR 40-301). Officers who enter service without financial literacy lose years of compounding wealth — and financial stress degrades performance.",
+   howTo:"Read 'The Simple Path to Wealth' (JL Collins) or 'I Will Teach You to Be Rich' (Sethi). Use Army OneSource financial counselors. Max TSP contribution as an O1.",
+   safety:"Do not take financial advice from anyone with a product to sell. No variable annuities. No crypto tips from peers.",
+   levels:["Build and follow a monthly zero-based budget; eliminate all consumer debt within 6 months","Establish a 3-month emergency fund (3× monthly expenses) in a HYSA; know your net worth","Max Roth IRA ($7,000/yr) and open a Roth TSP (BRS); understand tax-advantaged account order","Invest in low-cost index funds (total market + international); understand expense ratios","Reach 20% gross savings rate; understand BAH, BAS, and CZTE tax exclusions","Build a net worth of 1× annual gross pay; have term life insurance and a will","Reach financial independence runway (25× annual expenses invested); understand the 4% rule"],
+   roadmap:["zero-based budget + no debt","3mo emergency fund + net worth","Roth IRA + Roth TSP","index fund portfolio","20% savings rate","1× NW + will + term life","FI runway 25×"],
+   advance:["Track every dollar this month.","Open a HYSA and transfer 3 months of expenses into it.","Open and max a Roth IRA this year.","Open a Roth TSP and set contribution rate.","Calculate your current savings rate; close the gap.","Get term life insurance and sign a will.","Calculate your FI number (25× expenses) and track monthly."],
+   maintain:["Hold L1: review budget monthly.","Hold L2: verify emergency fund monthly.","Hold L3: max Roth IRA each April.","Hold L4: rebalance annually.","Hold L5: recalculate savings rate quarterly.","Hold L6: review will and insurance annually.","Hold L7: review net worth monthly against FI target."]},
+
+  // ── Physical Path Pyramid ─────────────────────────────────────────────────
+  // 1 Mythic ← 5 Legendaries ← 25 Rares (each Rare synthesized from 5 Uncommons)
+  // Uncommons (125) and Commons (625) are added in future sessions.
+  // synthesizedFrom key must match the setKey of the 5 members that combine into it.
+
+  // MYTHIC
+  {name:"Physical Mastery", cat:"physical", rarity:"mythic", fadeDays:365,
+   synthesizedFrom:"phys_leg",
+   unlockHint:"Forge all 5 Physical Legendaries to unlock this card.",
+   why:"The crown of the Physical path — every dimension of physical excellence integrated and sustained.",
+   howTo:"Achieved automatically when all 5 Physical Legendary cards are synthesized and mastered.",
+   levels:["All 5 Physical Legendaries synthesized","AFT score ≥450 sustained for 12 months","Sub-6:30 mile and 2× BW deadlift held simultaneously","12-mile ruck <3 hrs + marathon finish in same 12-month window","Zero missed training days due to injury for 18 months","Body fat ≤12% (M) / ≤20% (F) + FFMI ≥22 (M) / ≥18 (F) sustained","Lead a unit PT program for 6+ months with measurable results","Complete Ranger School or equivalent selection course","AFT score ≥480 — top 5% Army-wide","Coach 3 peers to AFT 400+","Train and compete at a sanctioned athletic event","Hold all 5 Physical Legendaries at peak for 12 months","Sustain Physical Mastery through a 6-month deployment","Peak: the integration of every Physical path dimension, held continuously"]},
+
+  // LEGENDARIES (5)
+  {name:"Foundation of Iron", cat:"physical", rarity:"legendary", fadeDays:180, setKey:"phys_leg", synthesizedFrom:"phys_r_strength", unlockHint:"Master all 5 Strength Rares to forge this card.", why:"The legendary synthesis of your strength foundation — all primary movement patterns mastered and integrated.", howTo:"Achieved automatically by synthesizing the 5 Strength Rare cards.", levels:["All 5 Strength Rares mastered","Deadlift 2× BW, squat 1.5× BW, bench 1.25× BW","3 strength sessions per week for 6 months unbroken","Compete in a powerlifting or weightlifting meet","Complete a 12-week strength program at prescribed %1RM","Coach a peer through a 12-week strength progression","Sustain all Strength Rares at peak for 6 months","Program a yearly mesocycle with periodization and peaks","Lead a strength programming workshop for your unit","Hold all 5 Strength Rares at L5+ for 12 months","Peak: strength is unconscious competence — integrated into every PT session automatically","","",""]},
+  {name:"Endurance Engine", cat:"physical", rarity:"legendary", fadeDays:180, setKey:"phys_leg", synthesizedFrom:"phys_r_endurance", unlockHint:"Master all 5 Endurance Rares to forge this card.", why:"The legendary synthesis of your endurance engine — VO2, threshold, pace, and recovery all integrated.", howTo:"Achieved automatically by synthesizing the 5 Endurance Rare cards.", levels:["All 5 Endurance Rares mastered","Run a sub-15:00 2-mile and sub-6:00 1-mile","Complete 50+ mile run week for 8 consecutive weeks","Finish a half-marathon under 1:45","Complete a full marathon","Maintain VO2max >55 mL/kg/min for 6 months","Run 1,000 miles in a calendar year","Coach a peer from 0 to half-marathon finish","Pace a unit run and hold the slowest Soldier at target pace","Complete a 50km trail race","Peak: aerobic capacity never limits you","","",""]},
+  {name:"Body Composition Mastery", cat:"physical", rarity:"legendary", fadeDays:180, setKey:"phys_leg", synthesizedFrom:"phys_r_composition", unlockHint:"Master all 5 Composition Rares to forge this card.", why:"Legendary synthesis of body composition — lean mass built, fat managed, and recovery optimized.", howTo:"Achieved automatically by synthesizing the 5 Composition Rare cards.", levels:["All 5 Composition Rares mastered","Body fat ≤12% (M) or ≤20% (F) for 6 months","FFMI ≥22 (M) or ≥18 (F) at healthy body fat","Complete a 16-week body recomposition phase with tracking","No APFT tape failure for 24 consecutive months","Sleep 7+ hrs per night for 3 consecutive months","Maintain lean mass within 3 lbs of peak for 6 months","Coach a peer through a 12-week recomposition","Build a nutrition plan from scratch for an 8-week cut","Sustain military fitness standards through a deployment cycle","Peak: composition is automatic — eating and recovery are instinctual","","",""]},
+  {name:"Combat Conditioning", cat:"physical", rarity:"legendary", fadeDays:180, setKey:"phys_leg", synthesizedFrom:"phys_r_combat", unlockHint:"Master all 5 Combat Conditioning Rares to forge this card.", why:"Legendary synthesis of combat-specific fitness — rucking, swimming, combatives, and field endurance.", howTo:"Achieved automatically by synthesizing the 5 Combat Conditioning Rare cards.", levels:["All 5 Combat Conditioning Rares mastered","Complete a 12-mile ruck in under 3 hours (45 lbs)","Earn Combat Water Survival Level 3 certification","Earn Combatives Level 2 (MACP)","Complete a 24-hour field exercise without performance degradation","Complete a Ranger Challenge event or equivalent","Plan and execute a 3-day foot movement (50+ miles total)","Lead a field conditioning program for your platoon","Earn Airborne or Air Assault badge","Complete a Ranger School phase","Peak: combat-ready in any environment","","",""]},
+  {name:"Movement Quality", cat:"physical", rarity:"legendary", fadeDays:180, setKey:"phys_leg", synthesizedFrom:"phys_r_movement", unlockHint:"Master all 5 Movement Quality Rares to forge this card.", why:"Legendary synthesis of movement quality — mobility, stability, mechanics, and injury resistance.", howTo:"Achieved automatically by synthesizing the 5 Movement Quality Rare cards.", levels:["All 5 Movement Quality Rares mastered","Zero movement compensations on FMS screen (score 14+)","12 months injury-free while training 5+ days/week","Overhead squat to full depth unweighted — perfect mechanics","Pass a return-to-training screen after any injury","Complete a yoga or movement course (30+ hours)","Teach movement mechanics to a peer group","Earn a mobility or movement coaching certification","Program movement prep into a unit PT cycle","Zero missed training days due to injury in a calendar year","Peak: movement is automatic and pain-free — longevity secured","","",""]},
+
+  // RARES — phys_r_strength set (→ Foundation of Iron)
+  {name:"Strength Foundation", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_strength", synthesizedFrom:"phys_u_strength_basics", unlockHint:"Master 5 Strength Uncommons to unlock this.", why:"The synthesis of your foundational strength work — compound lifts established.", howTo:"Achieved by synthesizing the 5 Strength Foundation Uncommon cards.", levels:["5 Strength Uncommons mastered","Deadlift 1.5× BW, squat 1.25× BW, bench 1× BW","Complete a 12-week beginner linear progression","Log 3 strength sessions/week for 12 consecutive weeks","Max AFT Deadlift event (100 pts)","Coach a peer through a 4-week beginner program","Complete a meet or lift test with witnessed maxes","Sustain all 5 Strength Uncommons at peak for 6 months","Program a 6-week peaking cycle for yourself","Lift at prescribed %1RM for 8 weeks without missed sessions","Peak: primary compound lifts are established and loading is systematic"]},
+  {name:"Power Development", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_strength", synthesizedFrom:"phys_u_strength_power", unlockHint:"Master 5 Power Uncommons to unlock this.", why:"Rate of force development and explosive movement mastered.", howTo:"Achieved by synthesizing the 5 Power Uncommon cards.", levels:["5 Power Uncommons mastered","Vertical jump ≥28 in (M) or ≥22 in (F)","Broad jump ≥7 ft (M) or ≥6 ft (F)","10m sprint ≤1.75s from standing","Power clean 0.75× BW","Complete an Olympic weightlifting cycle (8 weeks)","Box jump from floor to 36\" platform","Sustain power training 2×/week for 6 months","Coach power development to a peer","Hold all 5 Power Uncommons at peak for 3 months","Peak: explosive power is a trained and reproducible asset"]},
+  {name:"Accessory Work", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_strength", synthesizedFrom:"phys_u_strength_accessory", unlockHint:"Master 5 Accessory Uncommons to unlock this.", why:"Weak points addressed, imbalances corrected.", howTo:"Achieved by synthesizing the 5 Accessory Uncommon cards.", levels:["5 Accessory Uncommons mastered","Zero muscular imbalances on a bilateral movement screen","20 strict pull-ups (M) or 10 (F) dead hang","60-second L-sit on parallel bars","One-arm row 0.5× BW for 10 reps","Complete a 6-week accessory block (2×/week)","Identify and correct one weak-point in 8 weeks","Hold all 5 Accessory Uncommons at peak for 3 months","Program an accessory block for a peer","Sustain accessory training 2×/week for 6 months","Peak: every major muscle group trained, balanced, and maintained"]},
+  {name:"Strength Periodization", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_strength", synthesizedFrom:"phys_u_strength_programming", unlockHint:"Master 5 Programming Uncommons to unlock this.", why:"You can design, execute, and adjust your own mesocycles.", howTo:"Achieved by synthesizing the 5 Programming Uncommon cards.", levels:["5 Programming Uncommons mastered","Design and complete a 12-week mesocycle with defined blocks","Use RPE/RIR to auto-regulate loading for 8 weeks","Calculate and apply 1RM percentages correctly","Deload correctly after every 4-6 week block","Track and analyze training data over 12 weeks","Write a program for a peer and coach them through it","Complete 3 full mesocycles over a year","Demonstrate linear, undulating, and block periodization","Sustain periodized training for 12 months without a plateau","Peak: programming is a skill — you own your progress"]},
+  {name:"Recovery Science", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_strength", synthesizedFrom:"phys_u_strength_recovery", unlockHint:"Master 5 Recovery Uncommons to unlock this.", why:"Sleep, nutrition, and active recovery all practiced and systematized.", howTo:"Achieved by synthesizing the 5 Recovery Uncommon cards.", levels:["5 Recovery Uncommons mastered","7+ hrs sleep/night for 8 consecutive weeks","HRV monitored to guide training load for 4 weeks","Post-workout nutrition protocol followed for 8 weeks","Active recovery routine 5×/week for 4 weeks","Planned deload every 4-6 weeks for 6 months","Zero missed training days due to poor recovery for 3 months","Coach a peer on recovery protocols","Hold all 5 Recovery Uncommons at peak for 3 months","Log and analyze sleep quality for 12 weeks","Peak: recovery is as trained as performance — you optimize both"]},
+
+  // RARES — phys_r_endurance set (→ Endurance Engine)
+  {name:"Running Foundation", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_endurance", synthesizedFrom:"phys_u_running_basics", unlockHint:"Master 5 Running Uncommons to unlock this.", why:"Form, pacing, and base volume established.", howTo:"Achieved by synthesizing the 5 Running Foundation Uncommon cards.", levels:["5 Running Uncommons mastered","Run 20 miles/week for 8 consecutive weeks","Sub-7:30 min/mile easy for 5 miles","Complete a 10km race","HR below 145 bpm at 8:00 pace","3 runs/week for 12 consecutive weeks","Log 200 miles in a single quarter","Complete a structured 8-week base-building plan","Coach a peer from beginner to 5km finish","Hold all 5 Running Uncommons at peak for 3 months","Peak: running base is established — pacing, form, and volume are automatic"]},
+  {name:"Running Performance", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_endurance", synthesizedFrom:"phys_u_running_speed", unlockHint:"Master 5 Speed Uncommons to unlock this.", why:"Speed, threshold, and lactate capacity developed.", howTo:"Achieved by synthesizing the 5 Speed/Threshold Uncommon cards.", levels:["5 Speed Uncommons mastered","Sub-6:00 min/mile for 1 mile","Sub-14:00 2-mile","Lactate threshold run: 85% max HR for 20 min","10×400m at 5km race pace","8-week speed block (interval + tempo) completed","Race a 5km in under 20:00","Coach a peer to a 5km PR","Hold all 5 Speed Uncommons at peak for 3 months","Sustain weekly track workouts for 6 months","Peak: speed and threshold are developed, reproducible assets"]},
+  {name:"Aerobic Base", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_endurance", synthesizedFrom:"phys_u_endurance_aerobic", unlockHint:"Master 5 Aerobic Base Uncommons to unlock this.", why:"VO2max, cardiac output, and fat oxidation all developed.", howTo:"Achieved by synthesizing the 5 Aerobic Base Uncommon cards.", levels:["5 Aerobic Base Uncommons mastered","VO2max ≥50 mL/kg/min (Cooper test estimate)","HR recovery: drop >25 bpm in 1 min after max effort","Nasal breathing at 9:00 pace for 3 miles","Complete a 180-min continuous aerobic session","8-week Zone 2 base block (4×/week)","Log 40 hrs Zone 2 in 12 weeks","Sustain VO2max >50 for 6 months","Coach a peer through a 4-week Zone 2 block","Hold all 5 Aerobic Base Uncommons at peak for 3 months","Peak: aerobic base is a true asset — it powers everything else"]},
+  {name:"Durability Training", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_endurance", synthesizedFrom:"phys_u_endurance_durability", unlockHint:"Master 5 Durability Uncommons to unlock this.", why:"High volume, long efforts, and repetition without breakdown.", howTo:"Achieved by synthesizing the 5 Durability Uncommon cards.", levels:["5 Durability Uncommons mastered","Complete a 20-mile training run","40+ miles/week for 4 consecutive weeks","Complete a 6-hour continuous cardio effort","Zero injury while in a 50+ mile week for 3 months","Complete a 12-week high-mileage training block","Finish a half-marathon without a training break in 16 weeks","Sustain 5-day/week cardio for 6 months","Coach a peer through long run progression","Hold all 5 Durability Uncommons at peak for 3 months","Peak: your body tolerates and recovers from high training volume"]},
+  {name:"Ruck Mastery", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_endurance", synthesizedFrom:"phys_u_rucking", unlockHint:"Master 5 Rucking Uncommons to unlock this.", why:"Load, pace, distance, and field endurance all established.", howTo:"Achieved by synthesizing the 5 Rucking Uncommon cards.", levels:["5 Rucking Uncommons mastered","12-mile ruck at 45 lbs under 3 hours","6 miles at 35 lbs under 90 minutes","Back-to-back ruck day (2 consecutive days, 8+ miles each)","Log 50 ruck miles in 8 weeks","Lead a platoon ruck march (12+ miles)","Complete a GORUCK Light or equivalent","Coach a peer from first ruck to 6-mile standard","Hold all 5 Rucking Uncommons at peak for 3 months","Ruck 100 miles in a quarter without injury","Peak: load and distance are no longer limiting factors"]},
+
+  // RARES — phys_r_composition set (→ Body Composition Mastery)
+  {name:"Lean Mass Building", cat:"physical", rarity:"rare", fadeDays:120, setKey:"phys_r_composition", synthesizedFrom:"phys_u_lean_mass", unlockHint:"Master 5 Lean Mass Uncommons to unlock this.", why:"Muscle built systematically and measurably.", howTo:"Achieved by synthesizing the 5 Lean Mass Uncommon cards.", levels:["5 Lean Mass Uncommons mastered","Gain 5 lbs lean mass in 12 weeks (confirmed by dexa or calipers)","FFMI ≥20 (M) or ≥16 (F)","Caloric surplus 250-500 kcal/day for 8 weeks","Protein ≥0.8g/lb BW for 60 consecutive days","Complete a 16-week mass-building block","Sustain lean mass within 3 lbs of peak for 6 months","Hold all 5 Lean Mass Uncommons at peak for 3 months","Teach a peer to track macros for a bulk phase","Zero body composition failures for 12 months","Peak: lean mass is built and sustained"]},
+  {name:"Fat Loss Protocol", cat:"physical", rarity:"rare", fadeDays:120, setKey:"phys_r_composition", synthesizedFrom:"phys_u_fat_loss", unlockHint:"Master 5 Fat Loss Uncommons to unlock this.", why:"Calorie deficit, adherence, and body composition managed measurably.", howTo:"Achieved by synthesizing the 5 Fat Loss Uncommon cards.", levels:["5 Fat Loss Uncommons mastered","Lose 1 lb/week for 8 consecutive weeks (>0.5 lb lean mass retained)","Body fat ≤15% (M) or ≤22% (F) sustained 3 months","Track calories within ±100 kcal/day for 30 days","Maintain lean mass through a 10-lb cut","Complete a 12-week cut phase with weekly check-ins","Body fat ≤12% (M) or ≤20% (F) sustained 3 months","Hold all 5 Fat Loss Uncommons at peak for 3 months","Coach a peer through an 8-week cut","No APFT tape failure for 18 consecutive months","Peak: fat management is systematic and sustainable"]},
+  {name:"Nutrition System", cat:"physical", rarity:"rare", fadeDays:120, setKey:"phys_r_composition", synthesizedFrom:"phys_u_nutrition", unlockHint:"Master 5 Nutrition Uncommons to unlock this.", why:"Macros, meal timing, and food quality all understood and applied.", howTo:"Achieved by synthesizing the 5 Nutrition Uncommon cards.", levels:["5 Nutrition Uncommons mastered","Track macros within ±10g protein / ±20g carbs / ±10g fat for 30 days","5 servings of vegetables per day for 30 consecutive days","Meal prep for 7 days without a restaurant meal","Hydration ≥3L/day for 30 consecutive days","Complete a whole-foods nutrition challenge (30 days)","Teach a peer to build and track a meal plan","Hold nutrition standards through a major stressor","Hold all 5 Nutrition Uncommons at peak for 3 months","Design a nutrition protocol from scratch for 8 weeks","Peak: nutrition is automatic and adaptive"]},
+  {name:"Sleep Mastery", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_composition", synthesizedFrom:"phys_u_sleep", unlockHint:"Master 5 Sleep Uncommons to unlock this.", why:"Sleep hygiene, duration, and recovery quality all optimized.", howTo:"Achieved by synthesizing the 5 Sleep Uncommon cards.", levels:["5 Sleep Uncommons mastered","7+ hrs sleep/night for 30 consecutive days","Sleep efficiency >85% for 4 weeks (wearable or log)","No screens 30 min before bed for 30 days","Fixed wake time (±15 min) for 30 consecutive days","4-week sleep protocol (bedtime + blackout + no caffeine <6 hrs)","RHR drops 5+ bpm from baseline after 8-week protocol","Hold all 5 Sleep Uncommons at peak for 3 months","Coach a peer on sleep hygiene","Sustain sleep standards through a field rotation","Peak: sleep is a tool — automatic, consistent, and restorative"]},
+  {name:"Injury Resilience", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_composition", synthesizedFrom:"phys_u_prehab", unlockHint:"Master 5 Prehab Uncommons to unlock this.", why:"Prehab, mobility, and load management all established.", howTo:"Achieved by synthesizing the 5 Prehab Uncommon cards.", levels:["5 Prehab Uncommons mastered","Zero overuse injuries for 12 months while training 5+/week","Daily prehab routine (10 min) for 60 consecutive days","Pass FMS or movement screen with score ≥14","Identify and address one asymmetry in 8 weeks","Complete a 6-week prehab program from a certified PT","Sustain load management principles for 6 months","Coach a peer on injury prevention","Hold all 5 Prehab Uncommons at peak for 3 months","Return from one injury using structured rehab protocol","Peak: injury is rare and recovery is fast"]},
+
+  // RARES — phys_r_combat set (→ Combat Conditioning)
+  {name:"Combat Swim Cert", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_combat", synthesizedFrom:"phys_u_swimming", unlockHint:"Master 5 Swimming Uncommons to unlock this.", why:"Survival and combat water skills established.", howTo:"Achieved by synthesizing the 5 Swimming Uncommon cards.", levels:["5 Swimming Uncommons mastered","Pass Army CWST Level 3","Swim 500m continuous in under 12 minutes","Tread water 5 min in BDU and boots","Swim 25m underwater without surfacing","Complete a 4-week swim conditioning block (3×/week)","Lead a pool-based training session for a peer group","Coach a non-swimmer to 100m continuous swim","Hold all 5 Swimming Uncommons at peak for 3 months","Complete an open-water swim of 1 mile","Peak: combat water survival is automatic and confident"]},
+  {name:"Combatives Level 2", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_combat", synthesizedFrom:"phys_u_combatives", unlockHint:"Master 5 Combatives Uncommons to unlock this.", why:"MACP fundamentals and sparring established.", howTo:"Achieved by synthesizing the 5 Combatives Uncommon cards.", levels:["5 Combatives Uncommons mastered","Earn Army Combatives Level 2 (MACP)","Win 3 sparring rounds against a resisting partner","Complete a 4-week combatives training block (3×/week)","Execute proper takedown, mount, and submission from mount","Complete a BJJ fundamentals course (8+ hrs)","Spar 20+ rounds without a break in form","Coach a peer through Level 1 MACP","Hold all 5 Combatives Uncommons at peak for 3 months","Attend a combatives competition or open mat","Peak: close-quarters is comfortable, not an emergency"]},
+  {name:"Field Hardening", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_combat", synthesizedFrom:"phys_u_field", unlockHint:"Master 5 Field Endurance Uncommons to unlock this.", why:"You can sustain combat performance over 24+ hour continuous operations.", howTo:"Achieved by synthesizing the 5 Field Endurance Uncommon cards.", levels:["5 Field Endurance Uncommons mastered","Complete a 24-hour FTX without performance degradation","Maintain cognitive function after 20+ hrs without sleep in the field","Sustain 5-meal-per-day field ration plan for 5 days","Complete back-to-back land nav and ruck on the same day","Complete Ranger Challenge or equivalent multi-event competition","Lead a 48-hour field problem as primary patrol leader","Complete a 72-hour exercise with <4 hrs sleep/night","Coach a peer through a first FTX","Hold all 5 Field Endurance Uncommons at peak for 3 months","Peak: field conditions are a baseline — performance does not degrade under them"]},
+  {name:"Explosive Athleticism", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_combat", synthesizedFrom:"phys_u_power_combat", unlockHint:"Master 5 Combat Power Uncommons to unlock this.", why:"Sprints, jumps, and force application mastered for combat tasks.", howTo:"Achieved by synthesizing the 5 Combat Power Uncommon cards.", levels:["5 Combat Power Uncommons mastered","Sprint-Drag-Carry in under 1:30","Broad jump ≥8 ft (M) or ≥6.5 ft (F)","10m sprint ≤1.65s","Box jump ≥40\" (M) or ≥30\" (F)","Complete a 6-week sprint and power block","SDC score of 100 pts on AFT","Coach a peer to sub-1:40 SDC","Hold all 5 Combat Power Uncommons at peak for 3 months","Sustain explosive power 2×/week for 6 months","Peak: explosive power is automatic and reproducible under stress"]},
+  {name:"Stress Inoculation", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_combat", synthesizedFrom:"phys_u_mentaltoughness", unlockHint:"Master 5 Mental Toughness Uncommons to unlock this.", why:"Voluntary discomfort, stress inoculation, and psychological resilience synthesized.", howTo:"Achieved by synthesizing the 5 Mental Toughness Uncommon cards.", levels:["5 Mental Toughness Uncommons mastered","Complete a cold exposure protocol for 4 consecutive weeks","Maintain composure in 3 consecutive high-stress training events","Complete a deliberate discomfort challenge (72-hr without comfort items)","Pass a mock board or high-stakes evaluation without performance anxiety","Complete a 4-week cognitive performance journaling practice","Lead a team through a stressful event without emotional contagion","Complete SERE training or equivalent stress inoculation course","Hold all 5 Mental Toughness Uncommons at peak for 3 months","Coach a peer through a mental toughness challenge","Peak: stress is information, not threat — automatic regulation under pressure"]},
+
+  // RARES — phys_r_movement set (→ Movement Quality)
+  {name:"Joint Mobility", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_movement", synthesizedFrom:"phys_u_mobility", unlockHint:"Master 5 Mobility Uncommons to unlock this.", why:"Full range of motion established in all major joints.", howTo:"Achieved by synthesizing the 5 Mobility Uncommon cards.", levels:["5 Mobility Uncommons mastered","Pass overhead squat assessment (depth + vertical torso + arms overhead)","Hip flexion ≥120°","Thoracic rotation ≥45° each side","Ankle dorsiflexion: knee-to-wall ≥4 inches","Complete a 4-week daily mobility routine","Score ≥14 on FMS","Coach a peer through a joint mobility protocol","Hold all 5 Mobility Uncommons at peak for 3 months","Sustain daily mobility for 6 months","Peak: full range of motion in all planes is automatic and maintained"]},
+  {name:"Core Stability", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_movement", synthesizedFrom:"phys_u_stability", unlockHint:"Master 5 Stability Uncommons to unlock this.", why:"Core, balance, and single-leg control established.", howTo:"Achieved by synthesizing the 5 Stability Uncommon cards.", levels:["5 Stability Uncommons mastered","2-min plank with perfect form","Single-leg RDL 0.5× BW, 10 reps each side","2-min side plank each side","Single-leg balance ≥60s eyes closed on unstable surface","Complete a 6-week core stability block","Integrate stability drills into every warm-up for 8 weeks","Coach a peer on core and balance training","Hold all 5 Stability Uncommons at peak for 3 months","Zero instability-related injury for 12 months","Peak: stability is the foundation under every athletic movement"]},
+  {name:"Movement Literacy", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_movement", synthesizedFrom:"phys_u_mechanics", unlockHint:"Master 5 Mechanics Uncommons to unlock this.", why:"You understand and can correct human movement patterns.", howTo:"Achieved by synthesizing the 5 Movement Mechanics Uncommon cards.", levels:["5 Mechanics Uncommons mastered","Demonstrate perfect squat, hinge, push, pull, and carry on video review","Identify and correct one movement fault in a peer in under 10 min","Complete a NASM, CSCS, or FMS Level 1 course","Coach 3 peers through movement screens with documented corrections","Film and analyze your own movement in 5 foundational exercises","Pass a movement quality assessment from a certified coach","Hold all 5 Mechanics Uncommons at peak for 3 months","Run a unit movement clinic (30+ min)","Complete a coaching mentorship (10+ hrs observed coaching)","Peak: you see movement — correction is automatic and effective"]},
+  {name:"Soft Tissue Recovery", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_movement", synthesizedFrom:"phys_u_flexibility", unlockHint:"Master 5 Flexibility Uncommons to unlock this.", why:"Active recovery, stretching, and tissue health all established.", howTo:"Achieved by synthesizing the 5 Flexibility Uncommon cards.", levels:["5 Flexibility Uncommons mastered","Touch toes from standing with locked knees","Middle split: hips ≤12 inches from floor","Active recovery (foam roll + stretch) 5×/week for 4 weeks","Sauna or contrast shower recovery 3×/week for 4 weeks","Complete a 30-day yoga or mobility challenge","Zero stiffness-related missed sessions for 3 months","Coach a peer on active recovery","Hold all 5 Flexibility Uncommons at peak for 3 months","Sustain flexibility 5 days/week for 6 months","Peak: recovery is as disciplined as training — longevity is the result"]},
+  {name:"Athletic Locomotion", cat:"physical", rarity:"rare", fadeDays:90, setKey:"phys_r_movement", synthesizedFrom:"phys_u_locomotion", unlockHint:"Master 5 Locomotion Uncommons to unlock this.", why:"Running mechanics, loaded carry, and multi-planar movement mastered.", howTo:"Achieved by synthesizing the 5 Locomotion Uncommon cards.", levels:["5 Locomotion Uncommons mastered","Run with correct mechanics at any pace (filmed and coach-reviewed)","Farmer carry 0.5× BW per hand for 100m","Sprint with forward lean and full hip extension at max speed","Lateral shuffle 20m in ≤4.5s","Backpedal 10m with controlled deceleration","Complete an agility ladder series without errors at 80% speed","Coach a peer on running form","Hold all 5 Locomotion Uncommons at peak for 3 months","Sustain locomotion training 2×/week for 6 months","Peak: all movement patterns are efficient, powerful, and injury-resistant"]}
 ];
 function seedSkillsIfEmpty(){
   // If any hierarchical skills exist, leave them alone — but still add any NEW seed
@@ -13125,7 +13630,7 @@ function seedSkillsIfEmpty(){
 // CONTENT from the seed on load — while preserving the user's progress numbers
 // (currentLevel/peakLevel/history). This is the safety net for stale autosave files.
 
-const SKILL_LADDER_VER=94;
+const SKILL_LADDER_VER=96;
 // Returns the user's current ROTC/Army career stage based on S.rank.
 function careerStage(){
   const r=((S.profile&&S.profile.rank)||S.rank||"").toUpperCase();
@@ -13458,9 +13963,10 @@ function skCreate(){
   const parent=document.getElementById("skParent").value||null;
   const levels=_skLevels.map(s=>s.trim()).filter(Boolean).map((ability,i)=>({n:i+1,ability}));
   if(!levels.length){toast("Define at least one level (an ability)");return;}
+  const joker=!!(document.getElementById("skJoker")||{}).checked;
   if(_skEditId){
     const sk=S.lifeSkills.find(x=>x.id===_skEditId);
-    if(sk){ sk.name=name; sk.cat=cat; sk.fadeDays=fadeDays; sk.levels=levels; sk.parent=parent;
+    if(sk){ sk.name=name; sk.cat=cat; sk.fadeDays=fadeDays; sk.levels=levels; sk.parent=parent; sk.joker=joker||undefined;
       if(sk.currentLevel>levels.length) sk.currentLevel=levels.length; }
     _skEditId=null; document.getElementById("skSave").textContent="Create skill"; toast("✎ Skill updated");
   } else {
@@ -13479,6 +13985,7 @@ function skEdit(skId){
   _skLevels=sk.levels.map(l=>l.ability);
   if(!_skLevels.length) _skLevels=[""];
   renderSkLevelInputs();
+  const jEl=document.getElementById("skJoker"); if(jEl) jEl.checked=!!sk.joker;
   _skEditId=skId; document.getElementById("skSave").textContent="Save changes";
   document.getElementById("skName").scrollIntoView({behavior:"smooth",block:"center"}); document.getElementById("skName").focus();
 }
@@ -13503,6 +14010,89 @@ function catRolledLevel(cat){
   return tops.reduce((s,x)=>s+skRolledLevel(x),0)/tops.length;
 }
 function fmtLvl(n){ return (Math.round(n*10)/10).toFixed(1); }
+// Rarity tier — explicit `rarity` field on seed takes priority; falls back to level-count inference
+const _RARITY_MAP={
+  common:    {name:"Common",   col:"#757575",light:"#f5f5f5",sym:"♠",border:"#9e9e9e"},
+  uncommon:  {name:"Uncommon", col:"#2e7d32",light:"#e8f5e9",sym:"♣",border:"#4caf50"},
+  rare:      {name:"Rare",     col:"#1565c0",light:"#e3f2fd",sym:"♦",border:"#42a5f5"},
+  legendary: {name:"Legendary",col:"#6a1b9a",light:"#f3e5f5",sym:"♥",border:"#ab47bc"},
+  mythic:    {name:"Mythic",   col:"#b8860b",light:"#fffde7",sym:"✦",border:"#ffd700"},
+};
+function skRarity(sk){
+  if(sk.joker||sk.auto) return {name:"Joker",col:"#c62828",light:"#fff0f0",sym:"🃏",border:"#ef5350"};
+  if(sk.rarity&&_RARITY_MAP[sk.rarity.toLowerCase()]) return _RARITY_MAP[sk.rarity.toLowerCase()];
+  const n=(sk.levels||[]).length;
+  if(n<=4) return _RARITY_MAP.common;
+  if(n<=7) return _RARITY_MAP.uncommon;
+  if(n<=10) return _RARITY_MAP.rare;
+  if(n<=13) return _RARITY_MAP.legendary;
+  return _RARITY_MAP.mythic;
+}
+// ── Pyramid / Set mechanics ──────────────────────────────────────────────────
+// Look up a SEED_SKILLS entry by name+cat (for reading pyramid fields at runtime)
+function skSeedOf(name, cat){
+  if(typeof SEED_SKILLS==="undefined") return null;
+  return SEED_SKILLS.find(s=>s.name===name&&s.cat===cat)||null;
+}
+// All SEED_SKILLS belonging to a set (by setKey), excluding group entries
+function skSetMembers(setKey){
+  if(!setKey||typeof SEED_SKILLS==="undefined") return [];
+  return SEED_SKILLS.filter(s=>s.setKey===setKey&&!s.group);
+}
+// How many of a set are fully mastered (currentLevel >= levels.length) in S.lifeSkills
+function skSetMasteredCount(setKey){
+  const members=skSetMembers(setKey);
+  return members.filter(m=>{
+    const live=(S.lifeSkills||[]).find(s=>s.name===m.name&&s.cat===m.cat);
+    return live&&(live.levels||[]).length>0&&live.currentLevel>=(live.levels||[]).length;
+  }).length;
+}
+// True when all 5 (or all present) members of a set are fully mastered
+function skSetCanCombine(setKey){
+  const members=skSetMembers(setKey);
+  return members.length>=2&&skSetMasteredCount(setKey)>=members.length;
+}
+// Trigger synthesis: mark the skill whose synthesizedFrom===setKey as synthesisUnlocked
+function skCombineSet(setKey){
+  if(!skSetCanCombine(setKey)) return false;
+  const synthSeed=(typeof SEED_SKILLS!=="undefined"?SEED_SKILLS:[]).find(s=>s.synthesizedFrom===setKey);
+  if(!synthSeed) return false;
+  const live=(S.lifeSkills||[]).find(s=>s.name===synthSeed.name&&s.cat===synthSeed.cat);
+  if(!live) return false;
+  live.synthesisUnlocked=true;
+  save(); render();
+  toast(`⚡ Synthesis complete — <b>${esc(synthSeed.name)}</b> is now active!`);
+  return true;
+}
+// ── Synergy combos — complementary pairs that unlock ⚡ indicator at L4+ ───
+const SYNERGY_PAIRS=[
+  ["2-mile run","Rucking"],
+  ["Marksmanship (M4)","Land navigation"],
+  ["Leadership presence","Decision-making under pressure"],
+  ["Push-ups / muscular endurance","Deadlift"],
+  ["Deadlift","Rucking"],
+  ["Swimming","Combat water survival"],
+  ["ROTC knowledge (quizzes)","Land navigation"],
+  ["Critical thinking","Decision-making under pressure"],
+  ["Sleep quality","Resting heart rate"],
+  ["Compound lifting mastery","Strength programming & periodization"],
+  ["Running mastery","Aerobic base development"],
+  ["Combatives foundation","Combat water survival"],
+  ["Rucking mastery","Field endurance"],
+  ["Mental toughness training","Field endurance"],
+  ["Joint mobility","Injury prevention & prehab"],
+];
+// Returns the synergy partner's name if sk is at L4+ and its partner is also L4+, else null
+function skHasSynergy(sk){
+  if(!sk||sk.currentLevel<4) return null;
+  for(const pair of SYNERGY_PAIRS){
+    const otherName=pair[0]===sk.name?pair[1]:pair[1]===sk.name?pair[0]:null;
+    if(!otherName) continue;
+    const other=(S.lifeSkills||[]).find(s=>s.name===otherName&&s.currentLevel>=4);
+    if(other) return otherName;
+  }
+  return null;
+}
 
 function skEffectiveLevel(sk){
   if(sk.currentLevel<=0) return 0;
@@ -13623,6 +14213,18 @@ function skStreak(sk){
   return streak;
 }
 // "Work on this" — route a skill to the right trainer/plan/protocol
+function skTrendSparkline(sk){
+  if(!sk.history||sk.history.length<2) return '';
+  const now=Date.now(); const day=86400000; const days=30;
+  const pts=[];
+  for(let d=days-1;d>=0;d--){
+    const ts=now-d*day;
+    const entries=sk.history.filter(h=>h.ts<=ts);
+    pts.push(entries.length?(entries[entries.length-1].level||0):0);
+  }
+  if(pts.every(p=>p===pts[0])) return '';
+  return typeof miniSparkline==="function"?miniSparkline(pts,220,28):'';
+}
 function skWorkGuidance(sk){
   if(!sk) return "";
   const go=(tab,label)=>`<button class="sk-work-go" data-gototab="${tab}">${label} →</button>`;
@@ -13632,20 +14234,22 @@ function skWorkGuidance(sk){
   const placeholder=sk.advance&&sk.advance[nextLvl-1]?sk.advance[nextLvl-1]:"What did you practice? Add a brief note for your own record.";
   const noteInput=!sk.auto?`<div class="sk-note-wrap"><label class="sk-tgt-set-label">Practice note (optional — saved with next level-up)<textarea class="sk-note-input" data-sknote="${sk.id}" rows="2" placeholder="${esc(placeholder)}" maxlength="300"></textarea></label></div>`:"";
   const tgtInput=`<div class="sk-tgt-set"><label class="sk-tgt-set-label">Target level (optional)<input type="number" class="sk-tgt-inp-work" data-sktgtlv="${sk.id}" min="1" max="${maxLv}" value="${sk.targetLevel||''}"></label></div>`;
+  const _spark=skTrendSparkline(sk);
+  const tgtBlock=tgtInput+(_spark?`<div class="sk-trend-wrap"><span class="sk-trend-label">30-day</span>${_spark}</div>`:'');
   // cognitive skills with a test trainer
   const testMap={"Reaction speed":"reaction","Cognitive / processing speed":"procspeed","Working memory (n-back)":"nback","Memory span":"digitspan","Attention / sustained focus":"gonogo","Mental math":"mathsprint","Pattern recognition":"patterns","Typing speed & accuracy":"typing"};
-  if(testMap[sk.name]) return `<div class="sk-work-body">Train this directly in the Test tab — run the <b>${esc(sk.name)}</b> test, and your level updates from the result.${go("test","Open Test tab")}</div>${noteInput}${tgtInput}`;
-  if(sk.name==="Memory technique") return `<div class="sk-work-body">Use the <b>Memory Track</b> in the Test tab: build a memory palace and run spaced-repetition decks. Practicing either keeps this skill sharp.${go("test","Open Memory Track")}</div>${noteInput}${tgtInput}`;
-  if(sk.name==="ROTC knowledge (quizzes)") return `<div class="sk-work-body">Pass quiz banks in the Quiz tab — each one you pass raises this skill. Build a study plan there for any graded test.${go("quizzes","Open Quiz tab")}</div>${noteInput}${tgtInput}`;
-  if(sk.cat==="academic") return `<div class="sk-work-body">Study with active recall and spacing: make a spaced-repetition deck in the Test tab's Memory Track, and build a study plan in the Quiz tab if you have a graded test coming.${go("test","Memory Track")} ${go("quizzes","Study plans")}</div>${noteInput}${tgtInput}`;
-  if(sk.cat==="cognitive") return `<div class="sk-work-body">Practice in the Test tab — pick the closest trainer and run it regularly.${go("test","Open Test tab")}</div>${noteInput}${tgtInput}`;
+  if(testMap[sk.name]) return `<div class="sk-work-body">Train this directly in the Test tab — run the <b>${esc(sk.name)}</b> test, and your level updates from the result.${go("test","Open Test tab")}</div>${noteInput}${tgtBlock}`;
+  if(sk.name==="Memory technique") return `<div class="sk-work-body">Use the <b>Memory Track</b> in the Test tab: build a memory palace and run spaced-repetition decks. Practicing either keeps this skill sharp.${go("test","Open Memory Track")}</div>${noteInput}${tgtBlock}`;
+  if(sk.name==="ROTC knowledge (quizzes)") return `<div class="sk-work-body">Pass quiz banks in the Quiz tab — each one you pass raises this skill. Build a study plan there for any graded test.${go("quizzes","Open Quiz tab")}</div>${noteInput}${tgtBlock}`;
+  if(sk.cat==="academic") return `<div class="sk-work-body">Study with active recall and spacing: make a spaced-repetition deck in the Test tab's Memory Track, and build a study plan in the Quiz tab if you have a graded test coming.${go("test","Memory Track")} ${go("quizzes","Study plans")}</div>${noteInput}${tgtBlock}`;
+  if(sk.cat==="cognitive") return `<div class="sk-work-body">Practice in the Test tab — pick the closest trainer and run it regularly.${go("test","Open Test tab")}</div>${noteInput}${tgtBlock}`;
   if(sk.cat==="physiological"){
-    if(sk.name==="Resting heart rate") return `<div class="sk-work-body">This improves with cardio over time. Log your resting pulse in Profile → Vitals to track it; lower over months = fitter.${go("profile","Log vitals")}</div>${noteInput}${tgtInput}`;
-    return `<div class="sk-work-body">${esc(sk.whatYouDo||"Practice the self-test described above regularly and log your progress.")}</div>${noteInput}${tgtInput}`;
+    if(sk.name==="Resting heart rate") return `<div class="sk-work-body">This improves with cardio over time. Log your resting pulse in Profile → Vitals to track it; lower over months = fitter.${go("profile","Log vitals")}</div>${noteInput}${tgtBlock}`;
+    return `<div class="sk-work-body">${esc(sk.whatYouDo||"Practice the self-test described above regularly and log your progress.")}</div>${noteInput}${tgtBlock}`;
   }
-  if(sk.cat==="physical") return `<div class="sk-work-body">Train this in your PT sessions — the FM tab tells you what to prioritize, and logging workouts in the Log tab keeps the skill from fading.${go("plan","Open FM plan")} ${go("log","Log a workout")}</div>${noteInput}${tgtInput}`;
+  if(sk.cat==="physical") return `<div class="sk-work-body">Train this in your PT sessions — the FM tab tells you what to prioritize, and logging workouts in the Log tab keeps the skill from fading.${go("plan","Open FM plan")} ${go("log","Log a workout")}</div>${noteInput}${tgtBlock}`;
   // generic practice protocol
-  return `<div class="sk-work-body"><b>Practice protocol:</b> ${esc(sk.whatYouDo||"Find a real situation to practice the next level's ability, do it deliberately, then mark the level reached on its rung when you can do it reliably.")} When you can perform the next level reliably, tap that level's rung above to mark it.</div>${tgtInput}`;
+  return `<div class="sk-work-body"><b>Practice protocol:</b> ${esc(sk.whatYouDo||"Find a real situation to practice the next level's ability, do it deliberately, then mark the level reached on its rung when you can do it reliably.")} When you can perform the next level reliably, tap that level's rung above to mark it.</div>${tgtBlock}`;
 }
 // ============ THE TREE VIEW — a living branching diagram of the whole skill tree ============
 // Trunk = the cadet. Limbs = Paths. Boughs = sub-path branches. Leaves = skills.
@@ -14351,6 +14955,20 @@ const skEmblemSvg = (function(){
   };
 })();
 
+const SK_SUIT={
+  tactical:      {sym:"⚔",  name:"Swords",    col:"#78909c", light:"#eceff1"},
+  physical:      {sym:"🔥", name:"Wands",     col:"#bf5b30", light:"#fbe9e7"},
+  cognitive:     {sym:"🌊", name:"Cups",      col:"#4a7fad", light:"#e3f2fd"},
+  physiological: {sym:"🌿", name:"Pentacles", col:"#4caf70", light:"#e8f5e9"},
+  technical:     {sym:"⚡", name:"Circuits",  col:"#7e57c2", light:"#ede7f6"},
+  leadership:    {sym:"🛡", name:"Shields",   col:"#b58900", light:"#fff8e1"},
+  academic:      {sym:"📜", name:"Scrolls",   col:"#00796b", light:"#e0f2f1"},
+  personal:      {sym:"✦",  name:"Stars",     col:"#af8c00", light:"#fffde7"},
+  hearth:        {sym:"🗝", name:"Keys",      col:"#8d6e63", light:"#efebe9"},
+  roots:         {sym:"🌳", name:"Roots",     col:"#558b2f", light:"#f1f8e9"},
+};
+const CARD_RANKS=["A","2","3","4","5","6","7","8","9","10","Page","Knight","Queen","King"];
+
 let _skSearchTerm = "";
 let _skHeatmapVisible = false;
 
@@ -14441,10 +15059,11 @@ function renderSkillsTab(){
     const decayed=started.filter(s=>skEffectiveLevel(s)<s.currentLevel);
     const atRisk=started.filter(s=>!decayed.includes(s)&&skFadeState(s)==="at-risk");
     const maxed=started.filter(s=>s.currentLevel>=s.levels.length);
-    if(started.length){
+    const totalCollectable=allLeaves.length;
+    if(started.length||totalCollectable>0){
       sbEl.innerHTML=`<div class="sk-summary-bar">
-        <span class="sk-summary-stat">${started.length} active</span>
-        ${maxed.length?`<span class="sk-summary-stat maxed">⭐ ${maxed.length} maxed</span>`:''}
+        <span class="sk-summary-stat discovered">${started.length}<span class="sk-stat-sep">/</span>${totalCollectable} <span class="sk-stat-label">collected</span></span>
+        ${maxed.length?`<span class="sk-summary-stat maxed">⭐ ${maxed.length} mastered</span>`:''}
         ${atRisk.length?`<span class="sk-summary-stat atrisk">🔶 ${atRisk.length} at risk</span>`:''}
         ${decayed.length?`<span class="sk-summary-stat decayed">🍂 ${decayed.length} decayed</span>`:''}
       </div>`;
@@ -14493,7 +15112,42 @@ function skProgressBlock(sk, eff){
   return out;
 }
 
-  const leafCard=(sk,isSub)=>{
+  // Face-down card for unstarted skills
+  const faceDownCard=(sk,suit,rank,isSynthPending)=>{
+    const s=suit||(SK_SUIT[sk.cat]||{sym:"★",col:"#555",light:"#ddd"});
+    const rar=typeof skRarity==="function"?skRarity(sk):{name:"",col:"#555",border:"#555"};
+    const pathCol=PATH_COL[sk.cat]||"#3a3a3a";
+    // Synthesis cards: show set progress + combine button
+    const seed=typeof skSeedOf==="function"?skSeedOf(sk.name,sk.cat):null;
+    const setKey=seed&&seed.setKey;
+    const synthFrom=seed&&seed.synthesizedFrom;
+    const members=synthFrom&&typeof skSetMembers==="function"?skSetMembers(synthFrom):[];
+    const mastCount=synthFrom&&typeof skSetMasteredCount==="function"?skSetMasteredCount(synthFrom):0;
+    const canCombine=synthFrom&&typeof skSetCanCombine==="function"?skSetCanCombine(synthFrom):false;
+    const hint=seed&&seed.unlockHint?`<div class="sk-fd-hint">${esc(seed.unlockHint)}</div>`:'';
+    const setProBar=members.length>1?`<div class="sk-fd-setprog"><div class="sk-fd-prog-fill" style="width:${Math.round(mastCount/members.length*100)}%"></div><span>${mastCount}/${members.length} mastered</span></div>`:'';
+    const combineBtn=canCombine&&sk.synthesisUnlocked!==true?`<button class="sk-combine-btn" data-skcombine="${esc(synthFrom)}">⚡ Combine all ${members.length}</button>`:'';
+    const typeTag=isSynthPending?`<span class="sk-fd-synth-tag">Synthesis card</span>`:'';
+    return `<div class="sk-card sk-card-facedown rarity-${rar.name.toLowerCase()}" style="--sk-col:${pathCol};--deck-col:${s.col};--deck-light:${s.light};--rar-col:${rar.border}">
+      <div class="spc-corner tl" style="color:${s.col}"><div class="spc-rank">${rank||""}</div><div class="spc-suit">${s.sym}</div></div>
+      <div class="sk-fd-body">
+        <div class="sk-fd-top"><span class="sk-fd-rar" style="color:${rar.col}">${esc(rar.name)}</span>${typeTag}</div>
+        <div class="sk-fd-name">${esc(sk.name)}</div>
+        ${isSynthPending&&members.length>1?`<div class="sk-fd-synth-lbl">Requires mastery of a set</div>`:``}
+        ${hint}
+        ${setProBar}
+        ${combineBtn}
+        ${!isSynthPending&&!sk.synthesisUnlocked?`<button class="sk-fd-start-btn" data-skreach="${sk.id}" data-skreachlvl="1">Unlock → set level 1</button>`:''}
+        ${sk.synthesisUnlocked?`<div class="sk-fd-unlocked">⚡ Synthesis unlocked — set level 1 to start</div><button class="sk-fd-start-btn" data-skreach="${sk.id}" data-skreachlvl="1">Start training</button>`:''}
+      </div>
+      <div class="spc-corner br" style="color:${s.col}"><div class="spc-rank">${rank||""}</div><div class="spc-suit">${s.sym}</div></div>
+    </div>`;
+  };
+
+  const leafCard=(sk,isSub,suit,rank)=>{
+    const suitInfo=suit||(SK_SUIT[sk.cat]||{sym:"★",col:"#555",light:"#ddd"});
+    const cardRank=rank||"";
+    const rar=typeof skRarity==="function"?skRarity(sk):{name:"",col:"#555",border:"#555"};
     const eff=skEffectiveLevel(sk), maxed=sk.currentLevel>=sk.levels.length && eff>=sk.levels.length;
     const days=skDaysLeft(sk);
     const pathCol=PATH_COL[sk.cat]||"#3a3a3a";
@@ -14550,6 +15204,8 @@ function skProgressBlock(sk, eff){
     const pracFoot=pracDays!==null?(pracDays===0?"practiced today":`practiced ${pracDays}d ago`):"";
     const streak=typeof skStreak==="function"?skStreak(sk):0;
     const streakFoot=streak>=2?`<span class="sk-streak">🔥 ${streak}-day streak</span>`:"";
+    const synergyWith=typeof skHasSynergy==="function"?skHasSynergy(sk):null;
+    const synergyFoot=synergyWith?`<span class="sk-synergy-foot">⚡ ${esc(synergyWith)}</span>`:'';
 
     // Target level tick + footer
     const tgt=sk.targetLevel&&sk.targetLevel>0&&sk.targetLevel<=maxLv?sk.targetLevel:null;
@@ -14565,7 +15221,8 @@ function skProgressBlock(sk, eff){
     // Level / max badge in header
     const lvBadge=maxed ? `Lv ${eff} / ${maxLv} <span class="sk-max-badge">MAX</span>` : (peak>eff&&peak>0 ? `Lv ${eff} / ${maxLv} <span class="sk-peak-badge">peak L${peak}</span>` : `Lv ${eff} / ${maxLv}`);
 
-    return `<div class="sk-card ${isSub?'sk-sub':''} ${eff>0?'started':''}" style="--sk-col:${leafCol};--sk-fill:${fillPct}%">
+    return `<div class="sk-card ${isSub?'sk-sub':''} ${eff>0?'started':''} rarity-${rar.name.toLowerCase()}" style="--sk-col:${leafCol};--sk-fill:${fillPct}%;--deck-col:${suitInfo.col};--deck-light:${suitInfo.light||'#eee'};--rar-col:${rar.border}">
+      <div class="spc-corner tl" style="color:${suitInfo.col}"><div class="spc-rank">${cardRank}</div><div class="spc-suit">${suitInfo.sym}</div></div>
       <div class="sk-card-header" style="background:${pathCol}22;border-bottom:1px solid ${pathCol}55">
         <span class="sk-card-path-icon">${pathIcon}</span>
         <span class="sk-card-path-label">PATH OF ${esc(pathName.toUpperCase())}</span>
@@ -14577,11 +15234,11 @@ function skProgressBlock(sk, eff){
         ${skEmblemSvg(sk,eff,maxLv)||`<div class="sk-emblem-placeholder" style="border-color:${leafCol}"></div>`}
       </div>
       <div class="sk-card-name">${esc(sk.name)}${sk.auto?' <span class="sk-auto">auto</span>':''}</div>
-      <div class="sk-card-tier">${esc(tierLabel)}</div>
+      <div class="sk-card-tier">${esc(tierLabel)} <span class="sk-rarity-badge" style="color:${rar.col}">${esc(rar.name)}</span></div>
       <div class="sk-level-bar"><div class="sk-level-fill" style="background:${leafCol}"></div>${tgtPct?`<div class="sk-tgt-tick" style="left:${tgtPct}%"></div>`:''}${_nextPct?`<div class="sk-tgt-tick-next" style="left:${_nextPct}%" title="${_nextStage} target: L${_nextTgt}"></div>`:''}</div>
       ${(()=>{const noted=(sk.history||[]).filter(h=>h.note).slice(-3).reverse();return noted.length?`<div class="sk-log-recent">${noted.map(h=>`<div class="sk-log-entry"><span class="sk-log-entry-ts">${new Date(h.ts).toLocaleDateString()}</span> ${esc(h.note.slice(0,80))}</div>`).join('')}</div>`:'';})()}
       <div class="sk-card-footer">
-        <div class="sk-card-footer-left">${fadeFoot}${pracFoot?`<span class="sk-prac-foot">${pracFoot}</span>`:''}${streakFoot}${tgtFoot}</div>
+        <div class="sk-card-footer-left">${fadeFoot}${pracFoot?`<span class="sk-prac-foot">${pracFoot}</span>`:''}${streakFoot}${tgtFoot}${synergyFoot}</div>
         <div class="sk-footer-actions">
           ${!sk.auto && sk.currentLevel>0 ? `<button class="sk-practice-btn" data-skpractice="${esc(sk.id)}" title="Reset fade timer — mark as practiced outside the app">practiced</button>` : ''}
           <button class="sk-copy-btn" data-skcopy="${sk.id}" title="Copy skill card">⧉ copy</button>
@@ -14599,20 +15256,41 @@ function skProgressBlock(sk, eff){
           <div class="sk-work-panel" id="skwork-${sk.id}"></div>
         </div>
       </details>
+      <div class="spc-corner br" style="color:${suitInfo.col}"><div class="spc-rank">${cardRank}</div><div class="spc-suit">${suitInfo.sym}</div></div>
     </div>`;
   };
 
-  const groupCard=sk=>{
+  const groupCard=(sk,suit,rankMap)=>{
     const subs=skSubsOf(sk);
     const rolled=skRolledLevel(sk);
+    const s=suit||{sym:"★",col:"#555",light:"#ddd"};
+    const miniCard=sub=>{
+      const eff=skEffectiveLevel(sub); const max=(sub.levels||[]).length||10;
+      const pct=Math.min(100,Math.round(eff/max*100));
+      const col=skLeafColor(eff,max,sub);
+      const tier=skTier(sub,eff); const tierLabel=tier&&eff>0?tier.label:(eff>0?"L"+eff:"—");
+      const state=skFadeState(sub);
+      const r=rankMap&&rankMap[sub.id]||"";
+      return `<div class="sk-mini-card${state!=='current'?' sk-mini-atrisk':''}${eff===0?' sk-mini-unstarted':''}" style="--deck-col:${s.col};--deck-light:${s.light}">
+        <div class="spc-corner tl" style="color:${s.col}"><div class="spc-rank">${r}</div><div class="spc-suit">${s.sym}</div></div>
+        <div class="sk-mini-emb">${skEmblemSvg(sub,eff,max)||''}</div>
+        <div class="sk-mini-name">${esc(sub.name)}</div>
+        <div class="sk-mini-tier">${esc(tierLabel)}</div>
+        <div class="sk-mini-bar"><div class="sk-mini-fill" style="width:${pct}%;background:${col}"></div></div>
+        <div class="sk-mini-lvl">L${eff}/${max}</div>
+        ${sub.auto?'':`<button class="sk-mini-prac" data-skpractice="${sub.id}" title="practiced">✓</button>`}
+        <div class="spc-corner br" style="color:${s.col}"><div class="spc-rank">${r}</div><div class="spc-suit">${s.sym}</div></div>
+      </div>`;
+    };
     return `<div class="sk-group">
       <div class="sk-group-top">
-        <div class="sk-group-name">${esc(sk.name)} <span class="sk-group-sub">${subs.length} sub-skill${subs.length!==1?'s':''}</span></div>
+        <span class="sk-group-suit">${s.sym}</span>
+        <div class="sk-group-name">${esc(sk.name)} <span class="sk-group-sub">${subs.length} skill${subs.length!==1?'s':''}</span></div>
         <span class="sk-level-badge group">Lv ${fmtLvl(rolled)}</span>
         <button class="sk-card-edit" data-skedit="${sk.id}">✎</button>
         <button class="sk-card-del" data-skdel="${sk.id}">✕</button>
       </div>
-      <div class="sk-subs">${subs.map(s=>leafCard(s,true)).join("")}</div>
+      <div class="sk-subs sk-mini-grid">${subs.map(miniCard).join("")}</div>
     </div>`;
   };
 
@@ -14634,27 +15312,110 @@ function skProgressBlock(sk, eff){
     const pathCol=PATH_COL[cat]||"#3a3a3a";
     const pathIcon=(typeof SK_PATH_ICON!=="undefined"&&SK_PATH_ICON[cat])||"🌿";
     const pathName=(typeof SK_CAT!=="undefined"&&SK_CAT[cat])||cat||"";
-    const isOpen=cat===maxPxCat;
+    const isOpen=false;
     // fading skill count for this category
     const catLeaves=S.lifeSkills.filter(s=>s.cat===cat&&!s.group&&s.levels&&s.levels.length&&s.currentLevel>0);
     const fadingCount=catLeaves.filter(s=>{ const d=skDaysLeft(s); return d!==null && d<=Math.ceil((s.fadeDays||30)*0.34); }).length;
-    const fadingBadge=fadingCount>0?`<span class="sk-deck-fading">🍂 ${fadingCount}</span>`:"";
-    const cardsHtml=tops.map(sk=> sk.group ? groupCard(sk) : leafCard(sk,false)).join("");
+    const suit=SK_SUIT[cat]||{sym:"★",name:cat,col:"#555",light:"#ddd"};
+    const rankMap={};
+    // importance-ranked: most important leaf → King (highest face), least → Ace/2
+    const _stage=typeof careerStage==="function"?careerStage():"MS2";
+    const _allLeaves=[];
+    tops.forEach(sk=>{ if(sk.group) _allLeaves.push(...skSubsOf(sk)); else _allLeaves.push(sk); });
+    _allLeaves.sort((a,b)=>{
+      const tA=(a.targets&&a.targets[_stage])||a.targetLevel||a.currentLevel||0;
+      const tB=(b.targets&&b.targets[_stage])||b.targetLevel||b.currentLevel||0;
+      return tB-tA;
+    });
+    _allLeaves.forEach((sk,i)=>{ rankMap[sk.id]=CARD_RANKS[Math.max(0,CARD_RANKS.length-1-i)]; });
+    const deckEmblemSvg=skEmblemSvg({id:cat+"-deck",cat:cat},5,10)||'';
+    const pathAllLeaves=S.lifeSkills.filter(s=>s.cat===cat&&!s.group&&s.levels&&s.levels.length);
+    const totalLeaves=pathAllLeaves.length;
+    const pathStartedCount=pathAllLeaves.filter(s=>s.currentLevel>0).length;
+    const pathMaxedCount=pathAllLeaves.filter(s=>s.currentLevel>0&&s.currentLevel>=s.levels.length).length;
+    const allStartedBadge=pathStartedCount===totalLeaves&&totalLeaves>0?`<span class="sk-path-badge discovered">All Collected</span>`:'';
+    const allMaxedBadge=pathMaxedCount===totalLeaves&&totalLeaves>0?`<span class="sk-path-badge mastered">★ All Mastered</span>`:'';
+    const pathBadges=allMaxedBadge||allStartedBadge;
+    // Split tops: groups always in main deck; leaves split by started vs unstarted
+    const mainTops=tops.filter(sk=>sk.group||(sk.currentLevel>0));
+    const sideTops=tops.filter(sk=>!sk.group&&sk.currentLevel===0);
+    const _roman=["I","II","III","IV","V","VI","VII","VIII"];
+    const _SUBDECK=13;
+    const chunks=[];
+    for(let i=0;i<mainTops.length;i+=_SUBDECK) chunks.push(mainTops.slice(i,i+_SUBDECK));
+    const bodyContent=mainTops.length===0?'':(chunks.length>1
+      ? chunks.map((chunk,ci)=>{
+          const chCards=chunk.map(sk=>sk.group?groupCard(sk,suit,rankMap):leafCard(sk,false,suit,rankMap[sk.id])).join("");
+          const num=_roman[ci]||String(ci+1);
+          const sdCount=chunk.reduce((a,sk)=>a+(sk.group?skSubsOf(sk).length:1),0);
+          return `<div class="sk-subdeck" style="--deck-col:${suit.col};--deck-light:${suit.light}">
+            <div class="sk-subdeck-hdr" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+              <div class="sdb-corner tl"><div class="sdb-rank">${num}</div><div class="sdb-suit">${suit.sym}</div></div>
+              <div class="sdb-center"><div class="sdb-path-name" style="font-size:.72rem">${esc(suit.name)} ${num}</div><div class="sdb-count">${sdCount} skill${sdCount!==1?'s':''}</div></div>
+              <div class="sdb-corner br"><div class="sdb-rank">${num}</div><div class="sdb-suit">${suit.sym}</div></div>
+            </div>
+            <div class="sk-subdeck-body">${chCards}</div>
+          </div>`;
+        }).join("")
+      : mainTops.map(sk=>sk.group?groupCard(sk,suit,rankMap):leafCard(sk,false,suit,rankMap[sk.id])).join(""));
+    const multiTag=chunks.length>1?` · <span class="sdb-subdeck-tag">${chunks.length} decks</span>`:"";
+    // Side Deck — face-down cards for unstarted skills
+    let sideDeckHtml='';
+    if(sideTops.length>0){
+      const sideCards=sideTops.map((sk,i)=>{
+        const seed=typeof skSeedOf==="function"?skSeedOf(sk.name,sk.cat):null;
+        const isSynth=!!(seed&&seed.synthesizedFrom)&&!sk.synthesisUnlocked;
+        return faceDownCard(sk,suit,rankMap[sk.id],isSynth);
+      }).join("");
+      sideDeckHtml=`<details class="sk-side-deck">
+        <summary class="sk-side-deck-hdr">
+          <span class="sk-side-deck-icon">${suit.sym}</span>
+          <span class="sk-side-deck-title">Side Deck</span>
+          <span class="sk-side-deck-count">${sideTops.length} unstarted</span>
+        </summary>
+        <div class="sk-side-deck-body">${sideCards}</div>
+      </details>`;
+    }
 
-    html+=`<div class="sk-deck" id="skcat-${cat}">
-      <div class="sk-deck-header${isOpen?' open':''}" style="--deck-col:${pathCol}" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
-        <span class="sk-deck-icon">${pathIcon}</span>
-        <span class="sk-deck-name">${esc(pathName)}</span>
-        <span class="sk-deck-lv">Lv ${fmtLvl(catLvl)}</span>
-        <span class="sk-deck-count">${tops.length} skill${tops.length!==1?'s':''}</span>
-        ${fadingBadge}
-        <span class="sk-deck-arrow">▼</span>
+    html+=`<div class="sk-deck" id="skcat-${cat}" style="--deck-col:${suit.col};--deck-light:${suit.light}">
+      <div class="sk-deck-header${isOpen?' open':''}" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+        <div class="sdb-corner tl"><div class="sdb-rank">Lv${fmtLvl(catLvl)}</div><div class="sdb-suit">${suit.sym}</div></div>
+        <div class="sdb-center">
+          <div class="sdb-emblem">${deckEmblemSvg}</div>
+          <div class="sdb-path-name">${esc(pathName)}${pathBadges?` ${pathBadges}`:''}</div>
+          <div class="sdb-suit-name">${esc(suit.name)}</div>
+          <div class="sdb-count">${pathStartedCount}/${totalLeaves} skill${totalLeaves!==1?'s':''}${fadingCount?` · <span class="sdb-fading">🍂${fadingCount}</span>`:''}${multiTag}</div>
+        </div>
+        <div class="sdb-corner br"><div class="sdb-rank">Lv${fmtLvl(catLvl)}</div><div class="sdb-suit">${suit.sym}</div></div>
       </div>
       <div class="sk-deck-body${isOpen?' open':''}">
-        ${cardsHtml}
+        ${bodyContent}
+        ${sideDeckHtml}
       </div>
     </div>`;
   });
+  // Jokers deck — auto skills + user-tagged jokers from all paths
+  const _jokers=(S.lifeSkills||[]).filter(s=>!s.group&&(s.auto||s.joker)&&s.levels&&s.levels.length);
+  if(_jokers.length){
+    const _jSuit={sym:"🃏",name:"Wildcards",col:"#7b1fa2",light:"#fce4ec"};
+    _jokers.sort((a,b)=>{ const tA=(a.targets&&a.targets[_stage])||a.targetLevel||a.currentLevel||0; const tB=(b.targets&&b.targets[_stage])||b.targetLevel||b.currentLevel||0; return tB-tA; });
+    const _jRankMap={};
+    _jokers.forEach((sk,i)=>{ _jRankMap[sk.id]=CARD_RANKS[Math.max(0,CARD_RANKS.length-1-i)]; });
+    const _jCards=_jokers.map(sk=>leafCard(sk,false,_jSuit,_jRankMap[sk.id])).join("");
+    html=`<div class="sk-deck sk-joker-deck" id="skcat-joker" style="--deck-col:#7b1fa2;--deck-light:#fce4ec">
+      <div class="sk-deck-header" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+        <div class="sdb-corner tl"><div class="sdb-rank">★</div><div class="sdb-suit">🃏</div></div>
+        <div class="sdb-center">
+          <div class="sdb-path-name">WILDCARDS</div>
+          <div class="sdb-suit-name">Jokers</div>
+          <div class="sdb-count">${_jokers.length} card${_jokers.length!==1?'s':''}</div>
+        </div>
+        <div class="sdb-corner br"><div class="sdb-rank">★</div><div class="sdb-suit">🃏</div></div>
+      </div>
+      <div class="sk-deck-body">${_jCards}</div>
+    </div>`+html;
+  }
+
   listEl.innerHTML=html;
   // wire search input — persist term across re-renders, filter immediately
   const srchEl=document.getElementById("skSearch");
@@ -14703,7 +15464,8 @@ function skProgressBlock(sk, eff){
   const jb=document.getElementById("skJumpbar");
   if(jb){
     const icons={tactical:"⚔️",physical:"💪",cognitive:"🧠",physiological:"❤️",technical:"⚙️",leadership:"⭐",academic:"📚",personal:"🌱"};
-    jb.innerHTML=SK_CAT_ORDER.filter(c=>skTopLevelInCat(c).length).map(c=>
+    const jokerBtn=_jokers&&_jokers.length?`<button data-skjump="joker">🃏<span class="jb-tip">Wildcards</span></button>`:"";
+    jb.innerHTML=jokerBtn+SK_CAT_ORDER.filter(c=>skTopLevelInCat(c).length).map(c=>
       `<button data-skjump="${c}">${icons[c]||"•"}<span class="jb-tip">${SK_CAT[c]}</span></button>`).join("");
   }
 }

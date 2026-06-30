@@ -151,6 +151,65 @@ function weekTrainCardHtml(){
     <div class="dawn-week-bar"><span class="dawn-week-blocks">${bar}</span><button class="td-go-sm" style="margin-left:auto" data-gototab="plan">Plan →</button></div>
   </div>`;
 }
+// Simple deterministic string hash (djb2-style, integer result)
+function hashStr(s){
+  let h=5381;
+  for(let i=0;i<s.length;i++) h=((h*33)^s.charCodeAt(i))>>>0;
+  return h;
+}
+// Seeded shuffle: Fisher-Yates with deterministic seed
+function seededShuffle(arr, seed){
+  const a=arr.slice();
+  let s=seed>>>0;
+  for(let i=a.length-1;i>0;i--){
+    s=(s*1664525+1013904223)>>>0;
+    const j=s%(i+1);
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+// Today's Hand — 5 started skills drawn from deterministic daily shuffle
+function renderTodaysHand(){
+  const started=(S.lifeSkills||[]).filter(s=>!s.group&&s.currentLevel>0&&s.levels&&s.levels.length);
+  if(started.length<2) return '';
+  const dateKey=new Date().toISOString().slice(0,10);
+  const seed=hashStr(dateKey+"hand");
+  const hand=seededShuffle(started,seed).slice(0,5);
+  const cardHtml=hand.map(sk=>{
+    const eff=typeof skEffectiveLevel==="function"?skEffectiveLevel(sk):sk.currentLevel;
+    const max=(sk.levels||[]).length||1;
+    const pct=Math.round(eff/max*100);
+    const col=typeof skLeafColor==="function"?skLeafColor(eff,max):"#6e7459";
+    const dl=typeof skDaysLeft==="function"?skDaysLeft(sk):null;
+    const fadeTag=dl!==null&&dl<=3?`<span class="th-urgent">⚠${dl}d</span>`:'';
+    const suit=(typeof SK_SUIT!=="undefined"&&SK_SUIT[sk.cat])||{sym:"★",col:"#555"};
+    return `<div class="th-card" style="--th-col:${col};--th-suit-col:${suit.col}">
+      <div class="th-suit">${suit.sym}</div>
+      <div class="th-name">${esc(sk.name)}</div>
+      <div class="th-level">L${eff}/${max}</div>
+      <div class="th-bar"><div class="th-bar-fill" style="width:${pct}%;background:${col}"></div></div>
+      ${fadeTag}
+      <button class="td-go-sm" data-skpractice="${esc(sk.id)}" title="Mark practiced">✓</button>
+    </div>`;
+  }).join('');
+  return `<div class="td-card fn-card"><div class="td-h fn-h">Today's Hand <span style="font-size:11px;color:var(--muted)">daily draw</span></div><div class="th-hand">${cardHtml}</div></div>`;
+}
+// Quick PT Log — lightweight workout entry without opening Log tab
+function renderQuickLog(){
+  return `<div class="td-card fn-card" id="quickLogCard">
+    <div class="td-h fn-h">Quick PT Log</div>
+    <div class="ql-form">
+      <select class="ql-type" id="qlType">
+        <option value="">Type…</option>
+        <option>Run</option><option>Ruck</option><option>Lift</option><option>Swim</option><option>PT</option><option>Other</option>
+      </select>
+      <input class="ql-dur" id="qlDur" type="number" min="1" max="360" placeholder="min" style="width:56px">
+      <input class="ql-note" id="qlNote" placeholder="Notes / details" style="flex:1">
+      <button class="ql-save" id="qlSave">+ Log</button>
+    </div>
+  </div>`;
+}
+
 function renderToday(){
   const el=document.getElementById("todayDash"); if(!el) return;
   const hour=new Date().getHours();
@@ -374,17 +433,24 @@ function renderToday(){
       notes.push(`<div class="fn-row"><span class="fn-dot">🏋️</span><span><b>This week:</b> ${_parts.join(' · ')} logged</span><button class="td-go-sm" data-gototab="log">Log →</button></div>`);
     }
   }
-  // skill of the day — deterministic daily focal skill (soonest-to-fade first, then cycled by day)
+  // skill of the day — urgency-first: skills ≤3 days from fade shown first with ⚠ label
   const _skElig=(S.lifeSkills||[]).filter(s=>!s.group&&s.currentLevel>0&&!s.auto);
   if(_skElig.length>0){
     const _dayIdx=Math.floor(Date.now()/864e5);
+    // Urgency: any skill at risk within 3 days takes priority
+    const _urgentSks=_skElig.filter(s=>{ const d=typeof skDaysLeft==="function"?skDaysLeft(s):null; return d!==null&&d<=3; });
+    const _urgentFocal=_urgentSks.length>0?_urgentSks.sort((a,b)=>(typeof skDaysLeft==="function"?skDaysLeft(a)||999:999)-(typeof skDaysLeft==="function"?skDaysLeft(b)||999:999))[0]:null;
+    // Normal cycle: sort soonest-to-fade first then cycle by day
     const _sortedElig=_skElig.slice().sort((a,b)=>(typeof skDaysLeft==="function"?skDaysLeft(a)||999:999)-(typeof skDaysLeft==="function"?skDaysLeft(b)||999:999));
-    const _focal=_sortedElig[_dayIdx%_sortedElig.length];
+    const _focal=_urgentFocal||_sortedElig[_dayIdx%_sortedElig.length];
     if(_focal){
       const _eff=typeof skEffectiveLevel==="function"?skEffectiveLevel(_focal):_focal.currentLevel;
       const _dl=typeof skDaysLeft==="function"?skDaysLeft(_focal):null;
-      const _dlStr=_dl!==null?`, ${_dl}d until fade`:'';
-      notes.push(`<div class="fn-row"><span class="fn-dot">🎯</span><span><b>Skill of the day:</b> ${esc(_focal.name)} — L${_eff}${_dlStr}</span><button class="td-go-sm" data-skpractice="${esc(_focal.id)}" title="Mark as practiced — resets fade timer">✓ practiced</button><button class="td-go-sm" data-gototab="skills">→</button></div>`);
+      const _isUrgent=_dl!==null&&_dl<=3;
+      const _urgentBadge=_isUrgent?` <span class="sk-focal-urgent">⚠ ${_dl}d left</span>`:'';
+      const _dlStr=!_isUrgent&&_dl!==null?`, ${_dl}d until fade`:'';
+      const _label=_isUrgent?`<b>Urgent — practice now:</b>`:`<b>Skill of the day:</b>`;
+      notes.push(`<div class="fn-row${_isUrgent?' sk-focal-urgent-row':''}"><span class="fn-dot">🎯</span><span>${_label} ${esc(_focal.name)} — L${_eff}${_dlStr}${_urgentBadge}</span><button class="td-go-sm" data-skpractice="${esc(_focal.id)}" title="Mark as practiced — resets fade timer">✓ practiced</button><button class="td-go-sm" data-gototab="skills">→</button></div>`);
     }
   }
   const notesHtml=notes.length?`<div class="td-card fn-card"><div class="td-h fn-h">Field Notes</div>${notes.join("")}</div>`:"";
@@ -554,14 +620,64 @@ function renderToday(){
   // ── Copy daily brief button (compact row)
   const briefBtnHtml=`<div class="brief-row"><button class="brief-btn" data-copybriefbtn="1">📋 Copy field brief</button></div>`;
 
+  // ── Today's Hand (daily 5-card draw)
+  const todaysHandHtml=typeof renderTodaysHand==="function"?renderTodaysHand():'';
+  // ── Quick PT Log
+  const quickLogHtml=typeof renderQuickLog==="function"?renderQuickLog():'';
   // ── Assemble — creed always first, then guided flow
-  const flow=[startHtml, sessHtml, weekCardHtml, ordersHtml, recoveryHtml, discHtml, bossHtml, streakHtml, commissionHtml, milestoneHtml, pathSummaryHtml, focusHtml, adaptHtml, neglectHtml, pathPips, notesHtml, academicHtml, omlHtml, cnAlertHtml, qualAlertHtml, fmHtml, briefBtnHtml, installHtml, notifPromptHtml].filter(Boolean).join("");
+  const flow=[startHtml, todaysHandHtml, sessHtml, weekCardHtml, ordersHtml, recoveryHtml, discHtml, bossHtml, streakHtml, commissionHtml, milestoneHtml, pathSummaryHtml, focusHtml, adaptHtml, neglectHtml, pathPips, notesHtml, academicHtml, omlHtml, cnAlertHtml, qualAlertHtml, fmHtml, quickLogHtml, briefBtnHtml, installHtml, notifPromptHtml].filter(Boolean).join("");
 
   el.innerHTML=`<div class="td-creed">🌲 <span>${creed}</span></div>`+(
     flow
       ? `<div class="td-flow">${flow}</div>`
       : `<div class="aw-empty"><span class="big">🌱</span>The ground is bare. Swear your oaths, plant your daily orders — and this becomes the soil your tree grows from.</div>`
   );
+  renderDayLog();
+}
+
+function renderDayLog(){
+  const el=document.getElementById("dayLogWrap"); if(!el) return;
+  const today=new Date().toISOString().slice(0,10);
+  const log=S.dayLog||[];
+  const todayEntry=log.find(e=>e.date===today)||{date:today,trained:'',wins:'',notes:''};
+  const recent=log.filter(e=>e.date!==today).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
+  el.innerHTML=`<div class="dl-form">
+    <input class="dl-input" id="dlTrained" placeholder="What did you train today?" value="${esc(todayEntry.trained||'')}">
+    <input class="dl-input" id="dlWins" placeholder="Win of the day" value="${esc(todayEntry.wins||'')}">
+    <input class="dl-input" id="dlNotes" placeholder="Notes" value="${esc(todayEntry.notes||'')}">
+    <button class="dl-save-btn" id="dlSave">Save</button>
+  </div>
+  ${recent.map(e=>`<div class="dl-past-row">
+    <span class="dl-past-date">${e.date.slice(5)}</span>
+    <span class="dl-past-text">${esc(e.trained||'—')}</span>
+    ${e.wins?`<span class="dl-past-win">✓ ${esc(e.wins)}</span>`:''}
+  </div>`).join('')}`;
+  document.getElementById("dlSave").onclick=()=>{
+    const entry={date:today,
+      trained:(document.getElementById("dlTrained").value||'').trim(),
+      wins:(document.getElementById("dlWins").value||'').trim(),
+      notes:(document.getElementById("dlNotes").value||'').trim()};
+    S.dayLog=(S.dayLog||[]).filter(e=>e.date!==today);
+    if(entry.trained||entry.wins||entry.notes) S.dayLog.push(entry);
+    save(); toast("Day logged");
+  };
+  // Quick PT log save handler
+  const qlSave=document.getElementById("qlSave");
+  if(qlSave){
+    qlSave.onclick=()=>{
+      const type=(document.getElementById("qlType")||{}).value||"";
+      const dur=parseInt((document.getElementById("qlDur")||{}).value)||0;
+      const note=((document.getElementById("qlNote")||{}).value||"").trim();
+      if(!type&&!dur&&!note){ toast("Add at least a type or duration"); return; }
+      if(!S.workouts) S.workouts=[];
+      S.workouts.push({id:id(), date:today, session:type||"PT", durationMin:dur||null, notes:note, ts:Date.now()});
+      save();
+      const qlType=document.getElementById("qlType"); if(qlType) qlType.value="";
+      const qlDur=document.getElementById("qlDur"); if(qlDur) qlDur.value="";
+      const qlNote=document.getElementById("qlNote"); if(qlNote) qlNote.value="";
+      toast(`Logged: ${type||"PT"}${dur?" "+dur+"min":""}`);
+    };
+  }
 }
 
 function makeStudyPlan(title,testDate,topics){

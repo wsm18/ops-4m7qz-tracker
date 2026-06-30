@@ -82,6 +82,7 @@ document.body.addEventListener("click",e=>{
     const q=S.quests.find(x=>x.id===t.dataset.q);
     if(q&&!q.done){
       q.done=true;
+      if(q.linkedSkillId){const _lsk=(S.lifeSkills||[]).find(s=>s.id===q.linkedSkillId);if(_lsk){if(q.linkedSkillType==='level')skReachLevel(_lsk.id,(_lsk.currentLevel||0)+1,`Oath completed: ${q.name||''}`);else skPractice(_lsk.id);}}
       if(!S.questArchive) S.questArchive=[];
       S.questArchive.unshift({...q, completedDate:new Date().toLocaleDateString()});
       if(S.questArchive.length>200) S.questArchive=S.questArchive.slice(0,200);
@@ -98,6 +99,7 @@ document.body.addEventListener("click",e=>{
       q.progress=(q.progress||0)+1;
       if(q.progress>=q.steps){
         q.done=true;
+        if(q.linkedSkillId){const _lsk=(S.lifeSkills||[]).find(s=>s.id===q.linkedSkillId);if(_lsk){if(q.linkedSkillType==='level')skReachLevel(_lsk.id,(_lsk.currentLevel||0)+1,`Oath completed: ${q.name||''}`);else skPractice(_lsk.id);}}
         if(!S.questArchive) S.questArchive=[];
         S.questArchive.unshift({...q,completedDate:new Date().toLocaleDateString()});
         if(S.questArchive.length>200) S.questArchive=S.questArchive.slice(0,200);
@@ -204,6 +206,8 @@ document.body.addEventListener("click",e=>{
   }
   // mark skill as practiced — resets fade timer without level change
   if(t.dataset.skpractice){ if(typeof skPractice==="function") skPractice(t.dataset.skpractice); return; }
+  // synthesis: combine a complete set into the next-rarity card
+  if(t.dataset.skcombine){ if(typeof skCombineSet==="function") skCombineSet(t.dataset.skcombine); return; }
   // copy daily brief
   if(t.dataset.copybriefbtn){ if(typeof copyDailyBrief==="function") copyDailyBrief(); return; }
   // copy skills summary
@@ -220,6 +224,18 @@ document.body.addEventListener("click",e=>{
       const sess=goBtn.dataset.logsess;
       setTimeout(()=>{ const sel=document.getElementById("lgSession"); if(sel&&sel.value!==sess){sel.value=sess;if(sel.onchange)sel.onchange();} }, 80);
     }
+    return;
+  }
+});
+
+// Persist skill link selection on quest cards
+document.body.addEventListener("change",e=>{
+  const sel=e.target.closest("[data-qsklink]");
+  if(sel){const q=S.quests.find(x=>x.id===sel.dataset.qsklink);if(q){q.linkedSkillId=sel.value||null;save();}return;}
+  if(e.target.type==="radio"&&e.target.name&&e.target.name.startsWith("qlt")){
+    const qid=e.target.name.slice(3);
+    const q=S.quests.find(x=>x.id===qid);
+    if(q){q.linkedSkillType=e.target.value;save();}
     return;
   }
 });
