@@ -72,8 +72,14 @@ const _RARITY_MAP={
 };
 function skRarity(sk){
   if(sk.joker||sk.auto) return {name:"Joker",col:"#c62828",light:"#fff0f0",sym:"🃏",border:"#ef5350"};
+  // Explicit rarity on the live skill object (rare — only set if manually copied)
   if(sk.rarity&&_RARITY_MAP[sk.rarity.toLowerCase()]) return _RARITY_MAP[sk.rarity.toLowerCase()];
-  const n=(sk.levels||[]).length;
+  // Explicit rarity on the seed — live skill objects don't copy rarity, so check the seed
+  const _seed=typeof skSeedOf==="function"?skSeedOf(sk.name,sk.cat):null;
+  if(_seed&&_seed.rarity&&_RARITY_MAP[_seed.rarity.toLowerCase()]) return _RARITY_MAP[_seed.rarity.toLowerCase()];
+  // Level-count fallback — filter empty-string levels so padded ladders don't over-count
+  const _lvls=sk.levels||[];
+  const n=_lvls.filter(l=>typeof l==="object"?!!(l.ability):!!l).length||_lvls.length;
   if(n<=4) return _RARITY_MAP.common;
   if(n<=7) return _RARITY_MAP.uncommon;
   if(n<=10) return _RARITY_MAP.rare;

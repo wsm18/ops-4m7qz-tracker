@@ -1,5 +1,3 @@
-# Next Session Prompt — Operations PWA
-
 Paste this into a new Claude Code session to resume work.
 
 ---
@@ -8,64 +6,101 @@ You are continuing work on **Operations**, a gamified ROTC life-tracker PWA buil
 
 1. `CLAUDE.md` — the binding rulebook (hard rules, workflow, file layout)
 2. `planning/FINISHED-FEATURES.md` — design language, color palette, completed features, project identity
-3. `planning/IMPROVEMENTS-v140.md` — the features to implement this session, with full rationale, implementation sketches, and CSS snippets
+3. `planning/IMPROVEMENTS-v145.md` — the features to implement this session, with full rationale, implementation sketches, and CSS snippets
 4. `planning/IMPROVEMENTS-skills-expansion.md` — the comprehensive skills backlog (60+ new skills across all paths, with ladder sketches and tier names); consult this whenever adding skills so you don't duplicate effort or miss obvious gaps
 
-**Read `IMPROVEMENTS-v140.md` in full before writing a single line of code.** It is the authoritative spec for everything below. The implementation sketches, CSS, and data structures in that file are the designs to follow — do not improvise around them.
+**Read `IMPROVEMENTS-v145.md` in full before writing a single line of code.** It is the authoritative spec for everything below. The implementation sketches, CSS, and data structures in that file are the designs to follow — do not improvise around them.
 
-**Current version: v139.** The service worker is at `operations-v139` in `sw.js`. `SKILL_LADDER_VER` is currently **108** (in `src/core/migration.js`).
+**Current version: v144.** The service worker is at `operations-v144` in `sw.js`. `SKILL_LADDER_VER` is currently **113** (in `src/core/migration.js`).
 
 ---
 
 ## What's already done
 
-Full history is in `planning/FINISHED-FEATURES.md`. Do not re-implement anything listed there. Current skill total: **1201**.
+Full history is in `planning/FINISHED-FEATURES.md`. Do not re-implement anything listed there. Current skill total: **1648**.
 
 ### Pyramid state (the active multi-session workstream)
 
-The app has a card-game pyramid system where skills form a 5-tier synthesis chain: Common → Uncommon → Rare → Legendary → Mythic. Five paths have complete pyramid builds through the Uncommon layer:
+The app has a card-game pyramid system where skills form a 5-tier synthesis chain: Common → Uncommon → Rare → Legendary → Mythic. All 10 paths now have complete pyramid builds through the Uncommon layer:
 
-**Physical pyramid — complete through Uncommon layer (v126–v130):**
-- 1 Mythic, 5 Legendaries, 25 Rares, 125 Uncommons across 5 clusters. All Uncommons have `synthesizedFrom:"phys_c_*"` for future Common layer.
+**Physical pyramid — complete through Uncommon layer (v126–v130, extended v143):**
+- 1 Mythic, 6 Legendaries (incl. new Close-Quarters Combat Mastery from v143), 30 Rares (incl. AFT Mastery, Soldier Fitness Standards, Field Physical Readiness, CQC Striking, CQC Grappling from v143), 125+ Uncommons across clusters. All Uncommons have `synthesizedFrom:"phys_c_*"` for future Common layer.
+- Misc deck: `phys_misc` Rare header created (Flexibility & mobility, Gymnastics/bodyweight, Strength programming, Restraint/detain)
 
 **Tactical pyramid — complete through Uncommon layer (v131–v135):**
 - 1 Mythic ("Tactical Mastery"), 5 Legendaries, 25 Rares, 125 Uncommons across 5 clusters. All Uncommons have `synthesizedFrom:"tac_c_*"`.
+- Misc deck: `tac_misc` Rare header created (10 core tactical skills including Land navigation, Marksmanship, Tactical movement, TLPs, Radio, TCCC, Fieldcraft, CBRN, Military law, Battle drills). Land navigation 8L duplicate deleted.
 
 **Leadership pyramid — complete through Uncommon layer (v135):**
 - 1 Mythic ("Battlefield Commander"), 5 Legendaries, 25 Rares, ~121 Uncommons across 5 clusters. All have `synthesizedFrom:"lead_c_*"`.
+- Misc deck: `lead_misc` Rare header created (Parliamentary procedure, Negotiation & influence, Project management)
 
 **Technical pyramid — complete through Uncommon layer (v136):**
-- 1 Mythic ("Cyberspace Operations Officer"), 5 Legendaries, 25 Rares, 125 Uncommons across 5 clusters. All Uncommons have `synthesizedFrom:"tech_c_*"`. 21 existing technical skills wired.
+- 1 Mythic ("Cyberspace Operations Officer"), 5 Legendaries, 25 Rares, 125 Uncommons across 5 clusters. All Uncommons have `synthesizedFrom:"tech_c_*"`.
+- Misc deck: `tech_misc` Rare header created (Web application development, Malware analysis, Reverse engineering)
 
 **Cognitive pyramid — complete through Uncommon layer (v137):**
-- 1 Mythic ("Master of the Mind"), 5 Legendaries, 25 Rares, ~124 Uncommons across 5 clusters. All Uncommons have `synthesizedFrom:"cog_c_*"`. 11 existing cognitive skills wired as Rares; 2 as Uncommons. Memory technique, Memory retention, Typing speed & accuracy, and Second language retention left standalone.
+- 1 Mythic ("Master of the Mind"), 5 Legendaries, 25 Rares, ~124 Uncommons across 5 clusters. All Uncommons have `synthesizedFrom:"cog_c_*"`.
+- Misc deck: `cog_misc` Rare header created (Memory technique, Memory retention, Typing speed & accuracy, Second language retention)
 
-**Physiological pyramid — complete through Uncommon layer (v138):**
-- 1 Mythic ("Vital Operator"), 5 Legendaries, 25 Rares, 125 Uncommons across 5 clusters. All Uncommons have `synthesizedFrom:"phys2_c_*"`. 7 existing physiological skills wired.
+**Physiological pyramid — complete through Uncommon layer (v138), Stress Physiology wired v143:**
+- 1 Mythic ("Vital Operator"), 5 Legendaries (Stress Physiology now wired as 5th with `setKey:"phys2_leg", synthesizedFrom:"phys2_r_stress"`), 25 Rares, 125 Uncommons across 5 clusters. All Uncommons have `synthesizedFrom:"phys2_c_*"`.
 
 **Academic pyramid — complete through Uncommon layer (v139):**
 - 1 Mythic ("Scholar-Warrior"), 5 Legendaries, 25 Rares, 125 Uncommons across 5 clusters. All Uncommons have `synthesizedFrom:"acad_c_*"`. 17 existing academic skills wired.
 
-**3 paths with NO pyramid yet:** personal, hearth, roots.
+**Personal pyramid — complete through Uncommon layer (v140):**
+- 1 Mythic ("Sovereign Self"), 5 Legendaries, 25 Rares, 125 Uncommons across 5 clusters. All Uncommons have `synthesizedFrom:"pers_c_*"`. 20 existing personal skills wired.
+- Misc deck: `pers_misc` Rare header created (Personal finance)
 
-**Active workstream:** Build Mythic + Legendaries + Rares + Uncommons for all 3 remaining paths, **one path per session**, before adding Commons to any path. Commons come after all paths are complete.
+**Hearth pyramid — complete through Uncommon layer (v141):**
+- 1 Mythic ("Keeper of the Flame"), 5 Legendaries, 25 Rares, ~119 Uncommons across 5 clusters. All Uncommons have `synthesizedFrom:"hearth_c_*"`. 6 existing hearth skills wired.
+
+**Roots pyramid — complete through Uncommon layer (v142):**
+- 1 Mythic ("The Living Root"), 5 Legendaries, 25 Rares, ~122 Uncommons across 5 clusters. All Uncommons have `synthesizedFrom:"roots_c_*"`. 6 existing roots skills wired.
+
+**v143 Straggler Audit — COMPLETE:**
+- All 63 stragglers across 7 paths assigned to clusters or misc decks
+- Zero stragglers remain (badCount:0 confirmed by regress)
+- 6 new Rare/Legendary seeds inserted for physical CQC + AFT + Soldier Strength + Field Readiness clusters
+- 6 misc Rare headers created (phys, tac, lead, tech, cog, pers)
+
+**v144 Misc Deck Elimination + Soldier Athlete Mythic — COMPLETE:**
+- All 6 misc decks eliminated; every skill now in a proper synthesis chain
+- 10 new Uncommon seeds generated to fill sets to 5 (Yoga & mindful movement; Conflict resolution & mediation; Resource management; Vulnerability research; Penetration testing methodology; Cognitive flexibility & task-switching; Career planning & development; Legal literacy; Healthcare navigation; Side income & entrepreneurship)
+- 8 new Rare seeds: Movement Arts (physb), Field Operations Mastery (tac), Combat Task Mastery (tac), Leadership Operations (lead), Advanced Cyber Tradecraft (tech), Cognitive Enhancement Toolkit (cog), Life Administration (pers)
+- 9 new Legendary seeds: Army Fitness Excellence, Physical Versatility (physb_leg); Soldier Fundamentals (tac_leg); Organizational Excellence (lead_leg); Cyber Operations Mastery (tech_leg); Cognitive Versatility (cog_leg); Life Mastery (pers_leg)
+- Soldier Athlete Mythic added (physb_mythic) — 3 Legendaries: CQC Mastery, Army Fitness Excellence, Physical Versatility
+- Tactical, Leadership, Technical, Cognitive, Personal Mythics updated to "6 Legendaries"
+- Total skills after v144: **1667**
+
+**Active workstream:** Commons layer for all paths (v145+).
 
 **Session sequence:**
-- v139: academic path ✓ done
-- v140: personal path ← **this session**
-- v141: hearth path
-- v142: roots path
-- v143+: Common layers for all paths
+- v142: roots path ✓ done
+- v143: full pyramid audit + straggler cleanup + misc deck creation ✓ done
+- v144: misc deck elimination + Soldier Athlete Mythic ✓ done
+- v145: Physical path Commons (125 seeds — 25 Uncommon sets × 5 Commons each) ← **this session**
+- v146+: Commons for remaining paths
 
 ---
 
 ## Features to implement this session
 
-*See `planning/IMPROVEMENTS-v140.md` for the full spec.*
+*See `planning/IMPROVEMENTS-v144.md` for the full spec.*
 
-**This session goal:** Build the complete Personal path pyramid (Mythic + 5 Legendaries + 25 Rares + 125 Uncommons), then wire 20 existing personal skills into the pyramid by adding setKey + synthesizedFrom. One path per session — do not start Hearth until Personal is fully done and verified.
+**This session goal:** Pyramid structural repair — every Mythic must have exactly 5 Legendaries → 25 Rares → 125 Uncommons before Commons work begins. Full spec in `planning/IMPROVEMENTS-v145.md`.
 
-At the end of the session, write `planning/IMPROVEMENTS-v141.md` for the Hearth path (template is at the bottom of IMPROVEMENTS-v140.md).
+Summary of work:
+- Fix 2 missing Uncommons in Vital Operator
+- Revert 5 Mythic unlockHints from "6" back to "5 Legendaries"
+- Move 5 "6th Legendaries" (Soldier Fundamentals, Organizational Excellence, Cyber Operations Mastery, Cognitive Versatility, Life Mastery) from their current `X_leg` setKey to new `X2_leg` setKey
+- Fill all Legendary clusters to 5 Rares (28 new Rares: 19 for the moved Legendaries, 9 for Soldier Athlete)
+- Write 5 Uncommons for every new Rare (140 Uncommons)
+- Write 5 Uncommons for existing Soldier Athlete physb Rares that have 0 (50 Uncommons)
+- Seed 5 new Mythics + 20 new Legendaries + 100 new Rares + as many of the 500 new Uncommons as the session allows
+
+At the end of the session, write `planning/IMPROVEMENTS-v146.md` for continued pyramid repair or the first Commons session (whichever is appropriate).
 
 ---
 
@@ -77,7 +112,7 @@ Follow this exactly, in order:
 **Each session targets 100–200 new skills.** The improvements doc specifies multiple clusters or entire path layers per session — not a single 25-skill cluster. Do not stop after the first cluster. The total skill goal is 1000+; getting there requires batching aggressively.
 
 ### Phase 0 — Orient before writing a single line
-1. Read `CLAUDE.md`, `planning/FINISHED-FEATURES.md`, and `planning/IMPROVEMENTS-v139.md` in full.
+1. Read `CLAUDE.md`, `planning/FINISHED-FEATURES.md`, and `planning/IMPROVEMENTS-v144.md` in full.
 2. For each cluster or feature block, read the **specific source files** that will be touched before editing them:
    - Grep `src/core/skills-data.js` for existing skills in the relevant cat before writing seeds.
    - Use `Read` with `offset` + `limit` to read the exact surrounding code.
@@ -98,12 +133,12 @@ Follow this exactly, in order:
 12. If a build or check fails: read the error, find the source file that's wrong, fix it, rebuild.
 
 ### Phase 3 — Ship
-13. Bump `sw.js`: `operations-v139` → `operations-v140` (increment once per session; increment again if you ship a second batch).
-14. Bump `SKILL_LADDER_VER` in `src/core/migration.js` (currently **108**) if any ladder changed.
+13. Bump `sw.js`: `operations-v144` → `operations-v145` (increment once per session; increment again if you ship a second batch).
+14. Bump `SKILL_LADDER_VER` in `src/core/migration.js` (currently **113**) if any ladder changed.
 15. `npm run package` — produces `dist/operations.zip`. Must complete without error.
-16. Delete the now-implemented improvements doc: `rm planning/IMPROVEMENTS-v140.md`. It has been recorded in `FINISHED-FEATURES.md` — no need to keep the draft.
-17. **Create the next session's improvements doc** — write `planning/IMPROVEMENTS-v141.md` for the next batch.
-18. **Update `NEXT-SESSION-PROMPT.md`** — change every `v139`/`v140` reference to the new version numbers so the next session prompt is self-consistent.
+16. Delete the now-implemented improvements doc: `rm planning/IMPROVEMENTS-v145.md`. It has been recorded in `FINISHED-FEATURES.md` — no need to keep the draft.
+17. **Create the next session's improvements doc** — write `planning/IMPROVEMENTS-v146.md` for the next batch.
+18. **Update `NEXT-SESSION-PROMPT.md`** — change every `v144`/`v145` reference to the new version numbers so the next session prompt is self-consistent.
 19. Tell Wyatt to **hard-refresh / reopen the app** so the new service worker activates and any migrations run.
 
 ### What not to do
@@ -124,7 +159,7 @@ npm run check                 # must say SYNTAX OK
 npm run regress               # must say PAGEERRORS 0
 
 # After all features, before reporting done:
-# bump sw.js: operations-v139 → operations-v140
+# bump sw.js: operations-v143 → operations-v144
 npm run package               # produces dist/operations.zip
 ```
 
@@ -183,3 +218,6 @@ When an existing skill gains a `setKey`, its live progress is wiped (`currentLev
 ## Tone constraints
 
 Wyatt values: honesty, measurability, privacy, preserved progress, Yggdrasil symbolism. Keep copy plain and honest — no hype, no fake metrics. Ask before large architectural changes. Small surgical diffs.
+
+
+be aware, this has already been started, and the previous instance crashed with an API Error, please split up the uncommon construction a bit more than you have been
