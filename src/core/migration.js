@@ -1,4 +1,4 @@
-const SKILL_LADDER_VER=113;
+const SKILL_LADDER_VER=116;
 const PYRAMID_RESET_VER=1;
 // Returns the user's current ROTC/Army career stage based on S.rank.
 function careerStage(){
@@ -14,10 +14,6 @@ function careerStage(){
 // onto existing seeded skills. Never touches level/history/peak.
 function mergeNewSeedSkills(){
   let changed=false;
-  // A save from an older version may carry stale, shorter ladders that would otherwise
-  // shadow the current seed. If its ladder version is behind, we force a full resync of
-  // every skill's ladder content below (progress numbers are always preserved).
-  const ladderStale = (S._skillLadderVer||0) < SKILL_LADDER_VER;
   // ---- RENAME MERGES: skills that were renamed in later versions. An old save still
   // carries the OLD name as an orphaned duplicate sitting next to the new-named skill.
   // For each {from->to}, carry the higher progress (level/peak/history) onto the new
@@ -63,41 +59,25 @@ function mergeNewSeedSkills(){
   const have=new Set(S.lifeSkills.map(s=>s.name));
   SEED_SKILLS.forEach(s=>{
     if(!have.has(s.name)){
+      // Guidance text and the level ladder are resolved live from SEED_SKILLS via
+      // skHydrateAll() below — not copied here, so they're never persisted.
       S.lifeSkills.push({
         id:id(), name:s.name, cat:s.cat, parent:s.parent||null, group:!!s.group,
         fadeDays:s.fadeDays, auto:s.auto||null,
-        why:s.why||null, whatYouDo:s.whatYouDo||null, howTo:s.howTo||null, prep:s.prep||null, recover:s.recover||null, safety:s.safety||null,
-        roadmap:s.roadmap||null, advance:s.advance||null, maintain:s.maintain||null, tiers:s.tiers||null,
         targetLevel:(s.targets&&s.targets[careerStage()]!=null?s.targets[careerStage()]:null),
         currentLevel:0, lastQuestTs:Date.now(), peakLevel:0,
-        levels:(s.levels||[]).map((ability,i)=>({n:i+1,ability})), history:[], seeded:true
+        history:[], seeded:true
       });
       changed=true;
-    } else if(s.why||s.whatYouDo||s.howTo||s.safety||s.prep||s.recover||s.roadmap||s.advance||s.maintain||s.levels){
-      // backfill transparency copy + progression guidance onto an existing skill that lacks it
+    } else if(s.levels||s.targets){
+      // Existing skill: guidance text/ladder content are always live via skHydrate — nothing
+      // to resync. Only reconcile things that depend on the user's own progress numbers:
+      // clamp currentLevel/peakLevel if the seed's ladder length changed, and backfill a
+      // target level the user never set.
       const ex=S.lifeSkills.find(x=>x.name===s.name);
       if(ex){
-        if((ex.why==null) && s.why){ ex.why=s.why; changed=true; }
-        if((ex.whatYouDo==null) && s.whatYouDo){ ex.whatYouDo=s.whatYouDo; changed=true; }
-        if((ex.howTo==null) && s.howTo){ ex.howTo=s.howTo; changed=true; }
-        if((ex.safety==null) && s.safety){ ex.safety=s.safety; changed=true; }
-        if((ex.prep==null) && s.prep){ ex.prep=s.prep; changed=true; }
-        if((ex.recover==null) && s.recover){ ex.recover=s.recover; changed=true; }
-        if((ex.roadmap==null) && s.roadmap){ ex.roadmap=s.roadmap; changed=true; }
-        if((ex.advance==null) && s.advance){ ex.advance=s.advance; changed=true; }
-        if((ex.maintain==null) && s.maintain){ ex.maintain=s.maintain; changed=true; }
-        if((ex.tiers==null) && s.tiers){ ex.tiers=s.tiers; changed=true; }
-        // Keep the ladder content in sync with the current seed (path length can change as
-        // fields are refined or right-sized — grow OR shrink). User progress is stored as
-        // numbers (currentLevel/peakLevel), so we preserve those and just clamp to the new length.
-        if(s.levels && ex.levels){
-          const seedAbilities=s.levels.map(l=>(typeof l==='string'?l:l.ability)).join("|");
-          const exAbilities=ex.levels.map(l=>(l&&l.ability!=null)?l.ability:String(l)).join("|");
-          if(ladderStale || seedAbilities!==exAbilities){
-            ex.levels=s.levels.map((l,i)=>({n:i+1, ability:(typeof l==='string'?l:l.ability)}));
-            changed=true;
-          }
-          const max=ex.levels.length;
+        if(s.levels){
+          const max=s.levels.length;
           // RECOVER lost progress: an earlier version could have shrunk this ladder and
           // destructively clamped currentLevel/peakLevel down. Now that the ladder is the
           // correct (often longer) length again, restore the true high-water mark from the
@@ -112,12 +92,6 @@ function mergeNewSeedSkills(){
           if(ex.currentLevel>max){ ex.currentLevel=max; changed=true; }
           if(ex.peakLevel>max){ ex.peakLevel=max; changed=true; }
         }
-        // Refresh roadmap/advance/maintain/tiers to the current seed when they differ
-        // (or unconditionally when the saved ladder version is stale).
-        if(s.roadmap && (ladderStale || JSON.stringify(ex.roadmap)!==JSON.stringify(s.roadmap))){ ex.roadmap=s.roadmap; changed=true; }
-        if(s.advance && (ladderStale || JSON.stringify(ex.advance)!==JSON.stringify(s.advance))){ ex.advance=s.advance; changed=true; }
-        if(s.maintain && (ladderStale || JSON.stringify(ex.maintain)!==JSON.stringify(s.maintain))){ ex.maintain=s.maintain; changed=true; }
-        if(s.tiers && (ladderStale || JSON.stringify(ex.tiers)!==JSON.stringify(s.tiers))){ ex.tiers=s.tiers; changed=true; }
         // Backfill targets from seed (never overwrite user's manual target)
         if(s.targets && ex.targetLevel==null){
           const stg=careerStage();
@@ -146,7 +120,12 @@ function mergeNewSeedSkills(){
       changed=true;
     }
   });
-  // stamp the current ladder version so the one-time forced resync doesn't repeat each load
+  // Strip any legacy duplicated guidance/ladder text still sitting on old saves (from
+  // before static content moved to live SEED_SKILLS lookups) and attach live getters in
+  // its place. This is what actually shrinks an existing user's save — force a save()
+  // below even if nothing else changed, so a save already at the quota ceiling gets
+  // relief on this very load instead of waiting for some unrelated future edit.
+  if(skHydrateAll(S.lifeSkills)) changed=true;
   if((S._skillLadderVer||0)!==SKILL_LADDER_VER){ S._skillLadderVer=SKILL_LADDER_VER; changed=true; }
   if(changed) save();
 }

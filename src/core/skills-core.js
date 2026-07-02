@@ -87,10 +87,69 @@ function skRarity(sk){
   return _RARITY_MAP.mythic;
 }
 // ── Pyramid / Set mechanics ──────────────────────────────────────────────────
-// Look up a SEED_SKILLS entry by name+cat (for reading pyramid fields at runtime)
+// Look up a SEED_SKILLS entry by name+cat (for reading pyramid fields at runtime).
+// Indexed once (O(1) per lookup) rather than SEED_SKILLS.find() (O(n)) — matters
+// once SEED_SKILLS runs into the thousands of entries.
+let _skSeedIndex=null;
+function skSeedIndex(){
+  if(_skSeedIndex) return _skSeedIndex;
+  _skSeedIndex=new Map();
+  if(typeof SEED_SKILLS!=="undefined") SEED_SKILLS.forEach(s=>{
+    const k=s.name+"|"+s.cat;
+    if(!_skSeedIndex.has(k)) _skSeedIndex.set(k,s); // first match wins, same as the old .find()
+  });
+  return _skSeedIndex;
+}
 function skSeedOf(name, cat){
-  if(typeof SEED_SKILLS==="undefined") return null;
-  return SEED_SKILLS.find(s=>s.name===name&&s.cat===cat)||null;
+  return skSeedIndex().get(name+"|"+cat)||null;
+}
+// ── Live-skill hydration ─────────────────────────────────────────────────────
+// A seeded skill's guidance text (why/whatYouDo/howTo/prep/recover/safety/roadmap/
+// advance/maintain/tiers) and level-ladder strings are static content that already
+// lives in SEED_SKILLS. Storing a full copy of it on every user's live save doesn't
+// scale — it's what pushed localStorage past its browser quota once the skill count
+// crossed ~2,500. Instead of persisting that text, skHydrate() attaches non-enumerable
+// getters that resolve it from SEED_SKILLS at read time:
+//  - every existing `sk.why` / `sk.levels` / etc. read site keeps working unchanged
+//    (property access behaves identically whether it's a plain value or a getter)
+//  - JSON.stringify(S) (localStorage save, cloud backup) automatically skips
+//    non-enumerable properties, so the text is never re-duplicated into storage
+//  - it self-heals old saves: the first time a bloated pre-refactor save loads, the
+//    literal fields are deleted and replaced with getters, shrinking it immediately
+// Custom (non-seeded) skills have no seed to defer to, so they keep their own
+// literal `levels` (the user's own ladder) — hydration is a no-op for them.
+const _SK_GUIDANCE_FIELDS=["why","whatYouDo","howTo","prep","recover","safety","roadmap","advance","maintain","tiers"];
+// Returns true if it stripped at least one legacy literal field (i.e. this object came
+// from a pre-refactor save and just shrank) — callers use this to force a save() even
+// when nothing else about the skill changed, since that's the whole point: get the
+// bloat out of localStorage on the very next load, not whenever some other edit happens to.
+function skHydrate(sk){
+  if(!sk||!sk.seeded) return false;
+  const seed=skSeedOf(sk.name,sk.cat);
+  if(!seed) return false; // orphaned seeded skill (renamed/removed from SEED_SKILLS) — leave as-is
+  let stripped=false;
+  _SK_GUIDANCE_FIELDS.forEach(f=>{
+    const desc=Object.getOwnPropertyDescriptor(sk,f);
+    if(desc&&desc.get) return; // already hydrated
+    if(desc) stripped=true;
+    delete sk[f];
+    Object.defineProperty(sk,f,{get(){ return seed[f]!=null?seed[f]:null; }, enumerable:false, configurable:true});
+  });
+  const lvlDesc=Object.getOwnPropertyDescriptor(sk,"levels");
+  if(!(lvlDesc&&lvlDesc.get)){
+    if(lvlDesc) stripped=true;
+    delete sk.levels;
+    Object.defineProperty(sk,"levels",{
+      get(){ return (seed.levels||[]).map((l,i)=>({n:i+1, ability:typeof l==="string"?l:l.ability})); },
+      enumerable:false, configurable:true
+    });
+  }
+  return stripped;
+}
+function skHydrateAll(list){
+  let strippedAny=false;
+  (list||[]).forEach(sk=>{ if(skHydrate(sk)) strippedAny=true; });
+  return strippedAny;
 }
 // All SEED_SKILLS belonging to a set (by setKey), excluding group entries
 function skSetMembers(setKey){

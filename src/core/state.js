@@ -93,7 +93,16 @@ function load(){
     return merged;
   }catch(e){return structuredClone(DEFAULT)}
 }
-function save(){localStorage.setItem(KEY,JSON.stringify(S)); try{ if(typeof window!=="undefined") window.S=S; }catch(_){} cloudWriteDebounced();}
+function save(){
+  try{ localStorage.setItem(KEY,JSON.stringify(S)); }
+  catch(e){
+    // Quota overflow (or any other storage failure): don't crash the app — the in-memory
+    // state still has the change, it just didn't persist. Surface it instead of silently
+    // losing data on the next reload.
+    if(typeof toast==="function") toast("⚠️ Couldn't save — device storage is full. This change may be lost on reload.");
+  }
+  try{ if(typeof window!=="undefined") window.S=S; }catch(_){} cloudWriteDebounced();
+}
 // skill level from xp: rising cost curve
 function skillLevel(xp){let lvl=1,need=80,acc=0;while(xp>=acc+need){acc+=need;lvl++;need+=40;}return{lvl,into:xp-acc,need};}
 
