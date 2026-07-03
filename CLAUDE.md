@@ -105,6 +105,16 @@ npm run package      # runs build, regenerates icons, builds dist/operations.zip
 
 ---
 
+## Session time logging
+
+Every substantive work session (a feature build, a Commons tree, a phase from any planning doc) gets its wall-clock time logged in `planning/SESSION-TIMES.md`, so future time estimates are based on measured data instead of inferred from git history — commits here often bundle multiple unrelated versions into one, which makes retroactive timing estimates unreliable (see that file's seeded historical row for a worked example of why).
+
+- **At the start** of substantive work, run `date "+%Y-%m-%d %H:%M %Z"` and note the timestamp.
+- **At the end** of that session (part of the definition of done above), run `date` again, compute elapsed wall-clock time, and append one row to `planning/SESSION-TIMES.md`: date, what was worked on, start, end, elapsed, and any notes (interruptions, whether the session was a resume of a prior cutoff, etc. — log these as real signal, not noise to hide).
+- This is local dev-process bookkeeping only — it never leaves the repo and isn't user-facing telemetry, so it doesn't conflict with the offline/no-telemetry hard rule above.
+
+---
+
 ## Where things live (source file → key code)
 
 | What you want to change | Edit this file |
