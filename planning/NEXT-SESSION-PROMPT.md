@@ -8,9 +8,11 @@ You are continuing work on **Operations**, a gamified ROTC life-tracker PWA buil
 2. `planning/FINISHED-FEATURES.md` — design language, color palette, completed features, project identity
 3. `planning/IMPROVEMENTS-skills-expansion.md` — the comprehensive skills backlog; consult whenever adding skills so you don't duplicate effort or miss obvious gaps
 
-**Current version: v154.** The service worker is at `operations-v154` in `sw.js`. `SKILL_LADDER_VER` is currently **116** (in `src/core/migration.js`). Total skills: **5649**.
+**Current version: v155.** The service worker is at `operations-v155` in `sw.js`. `SKILL_LADDER_VER` is currently **117** (in `src/core/migration.js` — bumped in v155 because existing guidance text was fixed on pre-existing skills, not just added). Total skills: **5649** (unchanged from v154 — v155 was a pure content-quality fix pass, no additions).
 
 **IMPORTANT: commit this work to git before starting anything new.** v153 and v154 both sat uncommitted in the working tree for an entire session each — this is exactly what turned a routine file-corruption incident during v154 into a multi-hour recovery instead of a trivial `git checkout`. Confirm `git status` is clean (or at least that `src/core/skills-data.js` and `sw.js` are committed) before dispatching any new agent wave.
+
+**v155 found real, previously-undetected defects in v151 and v152** by retroactively running the required-field validator (only introduced mid-v153) against the earlier trees — see the v155 entry in `FINISHED-FEATURES.md`. **Lesson: a validator introduced partway through a workstream doesn't retroactively apply itself.** When you introduce a new check, consider whether it should also run once against everything that predates it, not just new work going forward.
 
 There is no `IMPROVEMENTS-vNNN.md` file right now. **Read the v148 through v154 entries in `FINISHED-FEATURES.md` before doing any pyramid-completeness auditing or Commons-layer work** — they document real mistakes from prior sessions:
 - v148: miscounting set membership by filtering out Joker/auto skills, which led to writing and then fully reverting 54 unnecessary skills. Lesson: **when checking whether a pyramid set is complete, count ALL members of its `setKey` (matching `skSetMembers()`'s own rarity-agnostic definition), never a rarity-filtered subset.**
@@ -97,7 +99,7 @@ npm run check                 # must say SYNTAX OK
 npm run regress                # must say PAGEERRORS 0
 
 # After all features, before reporting done:
-# bump sw.js: operations-v154 -> operations-v155 (or whatever's next)
+# bump sw.js: operations-v155 -> operations-v156 (or whatever's next)
 # bump SKILL_LADDER_VER in src/core/migration.js only if you changed an EXISTING ladder/tier/guidance text (currently 116) — pure additions don't need it, mergeNewSeedSkills() picks up new seed names on any old save regardless of ladder version
 npm run package               # produces dist/operations.zip
 ```
