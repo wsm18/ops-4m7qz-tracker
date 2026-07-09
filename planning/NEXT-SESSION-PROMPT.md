@@ -8,7 +8,9 @@ You are continuing work on **Operations**, a gamified ROTC life-tracker PWA buil
 2. `planning/FINISHED-FEATURES.md` — design language, color palette, completed features, project identity
 3. `planning/IMPROVEMENTS-skills-expansion.md` — the comprehensive skills backlog; consult whenever adding skills so you don't duplicate effort or miss obvious gaps
 
-**Current version: v155.** The service worker is at `operations-v155` in `sw.js`. `SKILL_LADDER_VER` is currently **117** (in `src/core/migration.js` — bumped in v155 because existing guidance text was fixed on pre-existing skills, not just added). Total skills: **5649** (unchanged from v154 — v155 was a pure content-quality fix pass, no additions).
+**Current version: v156.** The service worker is at `operations-v156` in `sw.js`. `SKILL_LADDER_VER` is currently **117** (in `src/core/migration.js` — unchanged since v155; v156 didn't touch `SEED_SKILLS`). Total skills: **5649** (unchanged since v154 — v155 and v156 were both content-quality/gap-fill passes, no skill additions).
+
+**v156 note (unrelated to the pyramid workstream below):** fixed a real content gap in the FM training plan (`src/core/constants.js` `SESSIONS`) — Sessions 1, 3, and 4 had no warm-up/cool-down stretch content at all, despite the coach-tip copy promising it. Added real content, see the v156 `FINISHED-FEATURES.md` entry. This is a separate data structure (`SESSIONS`, not `SEED_SKILLS`) and doesn't affect the Commons-layer work below.
 
 **IMPORTANT: commit this work to git before starting anything new.** v153 and v154 both sat uncommitted in the working tree for an entire session each — this is exactly what turned a routine file-corruption incident during v154 into a multi-hour recovery instead of a trivial `git checkout`. Confirm `git status` is clean (or at least that `src/core/skills-data.js` and `sw.js` are committed) before dispatching any new agent wave.
 
@@ -99,7 +101,7 @@ npm run check                 # must say SYNTAX OK
 npm run regress                # must say PAGEERRORS 0
 
 # After all features, before reporting done:
-# bump sw.js: operations-v155 -> operations-v156 (or whatever's next)
+# bump sw.js: operations-v156 -> operations-v157 (or whatever's next)
 # bump SKILL_LADDER_VER in src/core/migration.js only if you changed an EXISTING ladder/tier/guidance text (currently 116) — pure additions don't need it, mergeNewSeedSkills() picks up new seed names on any old save regardless of ladder version
 npm run package               # produces dist/operations.zip
 ```

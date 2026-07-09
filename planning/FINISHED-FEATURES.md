@@ -1038,3 +1038,22 @@ Also re-verified, since finding real gaps warranted not trusting old claims at f
 - **Total skill count** — confirmed still exactly 5649 before and after (pure content fixes, no insertions/deletions), and a universal `why`/`howTo`/`levels` presence check across all 5621 pyramid-tier skills (any rarity) now shows zero gaps anywhere in the file.
 
 **Lesson:** a validator introduced partway through a multi-session workstream doesn't retroactively apply itself — the trees that existed before it was written need an explicit retroactive pass, or they silently carry whatever the old, weaker checks missed forever. Worth doing this kind of retroactive audit periodically, not just once. `npm run build` → OK, `npm run check` → SYNTAX OK, `npm run regress` → `PAGEERRORS 0`, `badCount:0`, `total:5649`. `npm run package` → produced `dist/operations.zip`.
+
+### v156 — FM plan: real warm-up + cool-down stretches for Sessions 1, 3, and 4
+
+**Files changed:** `src/core/constants.js`, `src/tabs/plan.html`, `sw.js`
+
+SW bumped to `operations-v156`. No `SKILL_LADDER_VER` bump (this touches `SESSIONS`, an entirely separate data structure from `SEED_SKILLS` with no migration mechanism tied to that version). Total skills unchanged at 5649 — this is FM training-plan content, not a skill-pyramid change.
+
+Surfaced from real dogfooding: Wyatt did the actual Session 3 (Upper + Core, gym variant) workout and reported the FM tab had no before/after stretches, suspecting a bug. Investigation found it wasn't a rendering bug — `SESSIONS.s1`, `s3`, and `s4` (the three strength/circuit sessions) had genuinely never had any warm-up or stretch content authored, ever, while the coach-tip copy on those sessions' pages promised "the full how-to, warm-up, and stretches" regardless. Only `SESSIONS.s5` (the dedicated Mobility + Balance recovery day) had real stretch content.
+
+**Fix:** added a `5-min easy cardio warm-up (don't stretch cold)` entry (prepended) and 3 session-appropriate static cool-down stretches (appended) to both the `bw` and `gym` variants of Sessions 1, 3, and 4 in `SESSIONS` (`src/core/constants.js`):
+- **Session 1 (Lower + Push):** quad stretch, standing hamstring stretch, doorway chest/shoulder stretch
+- **Session 3 (Upper + Core):** doorway chest/shoulder stretch, thoracic rotations + cat-cow, figure-4 glute stretch
+- **Session 4 (AFT Circuit):** standing hamstring stretch, calf stretch, doorway chest/shoulder stretch
+
+Deliberately reused the exact exercise name strings already established by Session 5 (e.g. `"Quad stretch (hold 30s ×2/side)"`) rather than inventing new ones — `exHowto()` (`src/core/training.js`) matches exercise names against `EX_HOWTO` by substring, so every new entry automatically resolves correct how-to text with **zero new `EX_HOWTO` entries needed**. Verified this directly: loaded `SESSIONS`/`exHowto` in a Node sandbox and confirmed all 64 exercises across the 6 modified session/variant combinations (s1/s3/s4 × bw/gym) resolve non-empty how-to text.
+
+Also updated `src/tabs/plan.html`: each session's write-up intro now mentions the warm-up/cool-down, and the glossary section gained matching bullet entries for the new exercises (short descriptions that point to Session 5's glossary for the full version, matching the existing cross-reference pattern already used there, e.g. "Hand-release push-ups: (see Session 1)").
+
+Verified: `node --check` on `constants.js` after edits, exercise counts confirmed correct (s1: 7→11, s3: 7→11, s4: 6→10, each ×2 for bw/gym), `npm run build` → OK, `npm run check` → SYNTAX OK, `npm run regress` → `PAGEERRORS 0`, `badCount:0`, `total:5649` (unchanged, confirming no skill-pyramid side effects). `npm run package` → produced `dist/operations.zip`.
