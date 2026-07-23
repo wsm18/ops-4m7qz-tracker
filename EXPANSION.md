@@ -168,3 +168,7 @@ _Open forks — raise each when you build its phase, not before. Pick the defaul
 - ⚠️ P3 Rite catalog: your actual commissioning milestones + each rite's evidence bar (AFT/GPA/quals/board).
 - P4 Readiness weights: which Paths matter most for a Cyber/17-series branch.
 - Priority: ahead of / after / interleaved with your live Commons + FM workstreams.
+
+## In the web
+- **Needs <-** your real ROTC data.
+- **Feeds ->** personal (a life-saga toward commissioning).
