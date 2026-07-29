@@ -56797,6 +56797,158 @@ const SEED_SKILLS=[
    advance:["Reach L1: pick a technology and state a sourced technical fact.","Reach L2: identify a related policy gap.","Reach L3: write a paragraph on why the gap matters.","Reach L4: write a complete, reviewed one-page policy brief."],
    maintain:["Hold L1: keep tracking sourced facts on the chosen technology.","Hold L2: keep reassessing the policy gap as regulation changes.","Hold L3: keep the why-it-matters reasoning sharp.","Hold L4: write a new brief periodically to keep the skill current."]},
 
+  // ══ Commons layer: Soldier Athlete Mythic tree (v158) ══
+  // ── GROUP 1 | Leg: Close-Quarters Combat Mastery | Rare: CQC Striking ──
+  // SLOT:phys_c_cqc_striking:Stance & footwork:physical
+  // SLOT:phys_c_cqc_punch:Punch:physical
+  // SLOT:phys_c_cqc_elbow:Elbow:physical
+  // SLOT:phys_c_cqc_knee:Knee:physical
+  // SLOT:phys_c_cqc_kick:Kick:physical
+  // ── GROUP 2 | Leg: Close-Quarters Combat Mastery | Rare: CQC Grappling ──
+  // SLOT:phys_c_cqc_grappling:Graded force:physical
+  // SLOT:phys_c_cqc_composure:Composure & de-escalation:physical
+  // SLOT:phys_c_cqc_clinch:Clinch / control position:physical
+  // SLOT:phys_c_cqc_takedown:Takedown:physical
+  // SLOT:phys_c_cqc_ground_control:Ground control:physical
+  // ── GROUP 3 | Leg: Close-Quarters Combat Mastery | Rare: CQC Weapons Retention ──
+  // SLOT:physb_c_holster_security:Holster security:physical
+  // SLOT:physb_c_strip_defense:Weapon strip defense:physical
+  // SLOT:physb_c_retention_strikes:Retention strikes:physical
+  // SLOT:physb_c_one_handed_weapon:One-handed weapon use:physical
+  // SLOT:physb_c_retention_recovery:Recovery after retention breach:physical
+  // ── GROUP 4 | Leg: Close-Quarters Combat Mastery | Rare: CQC Ground Defense ──
+  // SLOT:physb_c_guard_position:Guard position:physical
+  // SLOT:physb_c_hip_escape:Hip escape:physical
+  // SLOT:physb_c_getting_to_feet:Getting to feet:physical
+  // SLOT:physb_c_back_take_defense:Back-take defense:physical
+  // SLOT:physb_c_ground_and_pound_defense:Ground-and-pound defense:physical
+  // ── GROUP 5 | Leg: Close-Quarters Combat Mastery | Rare: CQC Scenario Integration ──
+  // SLOT:physb_c_force_continuum:Force continuum decision-making:physical
+  // SLOT:physb_c_leaps_deescalation:LEAPS verbal de-escalation:physical
+  // SLOT:physb_c_scenario_based_training:Scenario-based training:physical
+  // SLOT:physb_c_after_action_assessment:After-action assessment:physical
+  // SLOT:physb_c_legal_justification:Legal justification awareness:physical
+  // ── GROUP 6 | Leg: Army Fitness Excellence | Rare: AFT Mastery ──
+  // SLOT:phys_c_aft_hrp:Push-ups in 2 minutes:physical
+  // SLOT:phys_c_aft_mdl:Deadlift:physical
+  // SLOT:phys_c_aft_tmr:Run (2-mile):physical
+  // SLOT:phys_c_aft_sdc:Sprint-Drag-Carry:physical
+  // SLOT:phys_c_aft_plk:Plank:physical
+  // ── GROUP 7 | Leg: Army Fitness Excellence | Rare: Soldier Fitness Standards ──
+  // SLOT:phys_c_soldier_push:Push-ups in one continuous set:physical
+  // SLOT:phys_c_soldier_pull:Pull-ups (max strict / weighted):physical
+  // SLOT:phys_c_soldier_squat:Squat:physical
+  // SLOT:phys_c_soldier_carry:Loaded carries:physical
+  // SLOT:phys_c_soldier_lunge:Lunges:physical
+  // ── GROUP 8 | Leg: Army Fitness Excellence | Rare: Field Physical Readiness ──
+  // SLOT:phys_c_field_long_run:Longest continuous run:physical
+  // SLOT:phys_c_field_ruck:Ruck:physical
+  // SLOT:phys_c_field_comp_run:Competitive distance running:physical
+  // SLOT:phys_c_field_swim:Swimming:physical
+  // SLOT:phys_c_field_balance:Balance training:physical
+  // ── GROUP 9 | Leg: Army Fitness Excellence | Rare: Tactical Athleticism ──
+  // SLOT:physb_c_reactive_agility:Reactive agility:physical
+  // SLOT:physb_c_kit_sprint:Short-burst sprinting in kit:physical
+  // SLOT:physb_c_direction_change:Direction change mechanics:physical
+  // SLOT:physb_c_loaded_jump:Explosive jumping under load:physical
+  // SLOT:physb_c_multidir_accel:Multi-directional acceleration:physical
+  // ── GROUP 10 | Leg: Army Fitness Excellence | Rare: Physical Testing & Benchmarking ──
+  // SLOT:physb_c_baseline_metrics:Establishing baseline metrics:physical
+  // SLOT:physb_c_test_protocols:Testing protocols:physical
+  // SLOT:physb_c_tracking_tools:Tracking tools:physical
+  // SLOT:physb_c_limiters:Identifying limiters:physical
+  // SLOT:physb_c_trend_interp:Trend interpretation:physical
+  // ── GROUP 11 | Leg: Physical Versatility | Rare: Movement Arts ──
+  // SLOT:physb_c_flexibility:Flexibility & mobility:physical
+  // SLOT:physb_c_restraint:Restraint / detain:physical
+  // SLOT:physb_c_str_programming:Strength programming:physical
+  // SLOT:physb_c_gymnastics:Gymnastics / bodyweight skills:physical
+  // SLOT:physb_c_yoga:Yoga & mindful movement:physical
+  // ── GROUP 12 | Leg: Physical Versatility | Rare: Primal Movement Patterns ──
+  // SLOT:physb_c_crawling:Crawling patterns:physical
+  // SLOT:physb_c_climbing:Climbing technique:physical
+  // SLOT:physb_c_jump_mechanics:Jumping mechanics:physical
+  // SLOT:physb_c_hanging_grip:Hanging & grip:physical
+  // SLOT:physb_c_carry_patterns:Object carry patterns:physical
+  // ── GROUP 13 | Leg: Physical Versatility | Rare: Acrobatic Control ──
+  // SLOT:physb_c_forward_roll:Forward roll:physical
+  // SLOT:physb_c_backward_roll:Backward roll:physical
+  // SLOT:physb_c_breakfall:Breakfall:physical
+  // SLOT:physb_c_lateral_roll:Lateral roll:physical
+  // SLOT:physb_c_tumbling:Controlled tumbling:physical
+  // ── GROUP 14 | Leg: Physical Versatility | Rare: Loaded Movement Arts ──
+  // SLOT:physb_c_sandbag_carries:Sandbag carries:physical
+  // SLOT:physb_c_ruck_quality:Ruck movement quality:physical
+  // SLOT:physb_c_weighted_carries:Weighted carries:physical
+  // SLOT:physb_c_vest_mobility:Vest mobility:physical
+  // SLOT:physb_c_load_in_motion:Load management in motion:physical
+  // ── GROUP 15 | Leg: Physical Versatility | Rare: Environmental Movement ──
+  // SLOT:physb_c_rope_climb:Rope climbing:physical
+  // SLOT:physb_c_obstacle_crossing:Obstacle crossing:physical
+  // SLOT:physb_c_terrain_running:Terrain running:physical
+  // SLOT:physb_c_open_water:Open water movement:physical
+  // SLOT:physb_c_cross_terrain_nav:Cross-terrain navigation:physical
+  // ── GROUP 16 | Leg: Operational Endurance | Rare: Back-to-Back Performance ──
+  // SLOT:physb_c_bb_pacing:Back-to-back day pacing:physical
+  // SLOT:physb_c_recovery_nutrition:Recovery nutrition:physical
+  // SLOT:physb_c_training_density:Training density management:physical
+  // SLOT:physb_c_cumulative_fatigue:Cumulative fatigue monitoring:physical
+  // SLOT:physb_c_multiday_programming:Multi-day programming:physical
+  // ── GROUP 17 | Leg: Operational Endurance | Rare: Sleep Deprivation Tolerance ──
+  // SLOT:physb_c_sleep_debt:Sleep debt awareness:physical
+  // SLOT:physb_c_cog_perf_sleep:Cognitive performance under sleep restriction:physical
+  // SLOT:physb_c_stimulant_mgmt:Stimulant management:physical
+  // SLOT:physb_c_strategic_napping:Strategic napping:physical
+  // SLOT:physb_c_post_deprivation_recovery:Post-deprivation recovery:physical
+  // ── GROUP 18 | Leg: Operational Endurance | Rare: Environmental Adaptation ──
+  // SLOT:physb_c_heat_acclim:Heat acclimatization protocol:physical
+  // SLOT:physb_c_cold_ops:Cold weather operation:physical
+  // SLOT:physb_c_altitude_adj:Altitude adjustment:physical
+  // SLOT:physb_c_humidity_mgmt:Humidity management:physical
+  // SLOT:physb_c_hydration_stress:Hydration under environmental stress:physical
+  // ── GROUP 19 | Leg: Operational Endurance | Rare: Sustained Physical Output ──
+  // SLOT:physb_c_event_pacing:Long-event pacing:physical
+  // SLOT:physb_c_energy_mgmt:Energy management (4-8 hrs):physical
+  // SLOT:physb_c_caloric_intake:Caloric intake during sustained effort:physical
+  // SLOT:physb_c_mental_pacing:Mental pacing strategies:physical
+  // SLOT:physb_c_load_effort_balance:Load/effort balance:physical
+  // ── GROUP 20 | Leg: Operational Endurance | Rare: Occupational Load Management ──
+  // SLOT:physb_c_load_distribution:Load distribution principles:physical
+  // SLOT:physb_c_hotspot_prevention:Hot-spot prevention:physical
+  // SLOT:physb_c_kit_packing:Kit packing discipline:physical
+  // SLOT:physb_c_gait_adaptation:Gait adaptation under load:physical
+  // SLOT:physb_c_injury_prevention_load:Injury prevention under load:physical
+  // ── GROUP 21 | Leg: Physical Leadership | Rare: Unit PT Design ──
+  // SLOT:physb_c_unit_fit_assess:Unit fitness assessment:physical
+  // SLOT:physb_c_pt_periodization:PT periodization:physical
+  // SLOT:physb_c_collective_events:Collective event selection:physical
+  // SLOT:physb_c_safety_planning:Safety planning:physical
+  // SLOT:physb_c_group_overload:Progressive overload for groups:physical
+  // ── GROUP 22 | Leg: Physical Leadership | Rare: Physical Standards Coaching ──
+  // SLOT:physb_c_technique_coaching:Event-specific technique coaching:physical
+  // SLOT:physb_c_perf_limiters:Identifying performance limiters:physical
+  // SLOT:physb_c_remediation_program:Remediation programming:physical
+  // SLOT:physb_c_feedback_delivery:Feedback delivery:physical
+  // SLOT:physb_c_motivation_accountability:Motivation & accountability:physical
+  // ── GROUP 23 | Leg: Physical Leadership | Rare: Athlete Development ──
+  // SLOT:physb_c_ind_dev_plan:Individual development planning:physical
+  // SLOT:physb_c_benchmark_setting:Benchmark setting:physical
+  // SLOT:physb_c_failure_analysis:Failure analysis:physical
+  // SLOT:physb_c_school_selection_prep:School/selection preparation:physical
+  // SLOT:physb_c_long_term_progression:Long-term progression:physical
+  // ── GROUP 24 | Leg: Physical Leadership | Rare: Fitness Assessment & Evaluation ──
+  // SLOT:physb_c_aft_admin:AFT event administration:physical
+  // SLOT:physb_c_score_recording:Score recording & documentation:physical
+  // SLOT:physb_c_trend_analysis:Trend analysis:physical
+  // SLOT:physb_c_body_comp_eval:Body composition evaluation:physical
+  // SLOT:physb_c_objection_handling:Objection handling:physical
+  // ── GROUP 25 | Leg: Physical Leadership | Rare: Physical Mentorship ──
+  // SLOT:physb_c_opening_conversation:Opening conversation & baseline:physical
+  // SLOT:physb_c_cycle_management:Mentorship cycle management:physical
+  // SLOT:physb_c_setback_coaching:Setback coaching:physical
+  // SLOT:physb_c_long_distance_mentor:Long-distance mentorship:physical
+  // SLOT:physb_c_physical_culture:Building physical culture:physical
+
 ];
 function seedSkillsIfEmpty(){
   // If any hierarchical skills exist, leave them alone — but still add any NEW seed
