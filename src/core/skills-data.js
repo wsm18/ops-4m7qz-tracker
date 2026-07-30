@@ -61407,6 +61407,158 @@ const SEED_SKILLS=[
    advance:["Reach L1: ask 3+ people across fitness levels.","Reach L2: include a disengaged or quiet person specifically.","Reach L3: record honest answers without softening them.","Reach L4: survey 6+ people and identify a pattern to act on."],
    maintain:["Hold L1: cross-section-asking habit held.","Hold L2: inclusion-of-disengaged habit held.","Hold L3: honest-recording discipline held.","Hold L4: pattern-to-action habit held."]}
 
+  // ══ Commons layer: Sovereign Self Mythic tree (v159) ══
+  // ── GROUP 1 | Leg: Life Operations | Rare: Time management ──
+  // SLOT:pers_c_focus_blocks:Focus block scheduling:personal
+  // SLOT:pers_c_priority_matrix:Priority matrix:personal
+  // SLOT:pers_c_task_batching:Task batching:personal
+  // SLOT:pers_c_friction_reduction:Friction reduction:personal
+  // SLOT:pers_c_deadline_mgmt:Deadline management:personal
+  // ── GROUP 2 | Leg: Life Operations | Rare: Driving / vehicle ops ──
+  // SLOT:pers_c_defensive_driving:Defensive driving technique:personal
+  // SLOT:pers_c_vehicle_maint:Vehicle maintenance basics:personal
+  // SLOT:pers_c_navigation:Navigation & route planning:personal
+  // SLOT:pers_c_emergency_vehicle:Emergency vehicle procedures:personal
+  // SLOT:pers_c_convoy_ops:Convoy & tactical vehicle ops:personal
+  // ── GROUP 3 | Leg: Life Operations | Rare: Home Operations ──
+  // SLOT:pers_c_cooking:Cooking:personal
+  // SLOT:pers_c_home_maintenance:Home & life maintenance:personal
+  // SLOT:pers_c_meal_planning:Meal planning:personal
+  // SLOT:pers_c_home_repair:Home repair basics:personal
+  // SLOT:pers_c_household_supply:Household supply management:personal
+  // ── GROUP 4 | Leg: Life Operations | Rare: Administrative Competence ──
+  // SLOT:pers_c_legal_literacy:Legal literacy:personal
+  // SLOT:pers_c_doc_mgmt:Documentation management:personal
+  // SLOT:pers_c_record_keeping:Record-keeping system:personal
+  // SLOT:pers_c_govt_services:Government services navigation:personal
+  // SLOT:pers_c_paperwork:Essential paperwork mastery:personal
+  // ── GROUP 5 | Leg: Life Operations | Rare: Logistics & Transition ──
+  // SLOT:pers_c_packing:Packing & travel prep:personal
+  // SLOT:pers_c_errand_batching:Errand batching:personal
+  // SLOT:pers_c_supply_chain:Supply chain thinking:personal
+  // SLOT:pers_c_move_planning:Move planning:personal
+  // SLOT:pers_c_life_transition:Life transition management:personal
+  // ── GROUP 6 | Leg: Inner Discipline | Rare: Discipline / habits ──
+  // SLOT:pers_c_morning_routine:Morning routine design:personal
+  // SLOT:pers_c_habit_stacking:Habit stacking:personal
+  // SLOT:pers_c_temptation_bundling:Temptation bundling:personal
+  // SLOT:pers_c_environment_design:Environment design:personal
+  // SLOT:pers_c_habit_tracking:Habit tracking & review:personal
+  // ── GROUP 7 | Leg: Inner Discipline | Rare: Emotional Regulation ──
+  // SLOT:pers_c_digital_discipline:Digital discipline:personal
+  // SLOT:pers_c_mental_health_lit:Mental health literacy:personal
+  // SLOT:pers_c_emotional_labeling:Emotional labeling:personal
+  // SLOT:pers_c_reframing:Cognitive reframing:personal
+  // SLOT:pers_c_self_compassion:Self-compassion practice:personal
+  // ── GROUP 8 | Leg: Inner Discipline | Rare: Identity & Values Clarity ──
+  // SLOT:pers_c_values_clarification:Values clarification:personal
+  // SLOT:pers_c_purpose_statement:Purpose statement:personal
+  // SLOT:pers_c_identity_anchoring:Identity anchoring:personal
+  // SLOT:pers_c_role_definition:Role definition:personal
+  // SLOT:pers_c_core_principles:Core principles articulation:personal
+  // ── GROUP 9 | Leg: Inner Discipline | Rare: Goal Architecture ──
+  // SLOT:pers_c_smart_goals:Goal architecture (SMART+):personal
+  // SLOT:pers_c_okr_setting:OKR setting:personal
+  // SLOT:pers_c_milestone_planning:Milestone planning:personal
+  // SLOT:pers_c_progress_review:Progress review cadence:personal
+  // SLOT:pers_c_course_correction:Course correction method:personal
+  // ── GROUP 10 | Leg: Inner Discipline | Rare: Resilience & Adaptability ──
+  // SLOT:pers_c_failure_recovery:Post-failure recovery:personal
+  // SLOT:pers_c_adversity_reframing:Adversity reframing:personal
+  // SLOT:pers_c_anti_fragility:Anti-fragility practice:personal
+  // SLOT:pers_c_identity_stability:Identity stability under pressure:personal
+  // SLOT:pers_c_stress_inoculation:Stress inoculation:personal
+  // ── GROUP 11 | Leg: Financial Sovereignty | Rare: Personal finance ──
+  // SLOT:pers_c_budgeting:Budgeting method:personal
+  // SLOT:pers_c_net_worth:Net worth tracking:personal
+  // SLOT:pers_c_emergency_fund:Emergency fund discipline:personal
+  // SLOT:pers_c_expense_audit:Expense audit:personal
+  // SLOT:pers_c_cash_flow:Cash flow management:personal
+  // ── GROUP 12 | Leg: Financial Sovereignty | Rare: Investing & wealth building ──
+  // SLOT:pers_c_index_funds:Index fund principles:personal
+  // SLOT:pers_c_asset_allocation:Asset allocation:personal
+  // SLOT:pers_c_brokerage_setup:Brokerage account setup:personal
+  // SLOT:pers_c_dca:Dollar-cost averaging:personal
+  // SLOT:pers_c_lt_st_framing:Long-term vs short-term framing:personal
+  // ── GROUP 13 | Leg: Financial Sovereignty | Rare: Tax Strategy ──
+  // SLOT:pers_c_tax_prep:Tax preparation:personal
+  // SLOT:pers_c_deductions:Deduction identification:personal
+  // SLOT:pers_c_military_tax:Military tax benefits:personal
+  // SLOT:pers_c_tax_advantaged:Tax-advantaged accounts:personal
+  // SLOT:pers_c_tax_filing:Filing process optimization:personal
+  // ── GROUP 14 | Leg: Financial Sovereignty | Rare: Debt Management ──
+  // SLOT:pers_c_debt_snowball:Debt snowball vs avalanche:personal
+  // SLOT:pers_c_interest_mgmt:Interest rate management:personal
+  // SLOT:pers_c_loan_payoff:Loan payoff math:personal
+  // SLOT:pers_c_credit_score:Credit score management:personal
+  // SLOT:pers_c_debt_free_plan:Debt-free planning:personal
+  // ── GROUP 15 | Leg: Financial Sovereignty | Rare: Long-Term Financial Planning ──
+  // SLOT:pers_c_retirement_accounts:Retirement accounts (TSP, Roth IRA):personal
+  // SLOT:pers_c_insurance:Insurance basics:personal
+  // SLOT:pers_c_estate_basics:Estate planning basics:personal
+  // SLOT:pers_c_fin_milestones:Financial goal milestones:personal
+  // SLOT:pers_c_pension_math:Military pension math:personal
+  // ── GROUP 16 | Leg: Social Fluency | Rare: Professional Presence ──
+  // SLOT:pers_c_pro_networking:Professional networking:personal
+  // SLOT:pers_c_interview_skills:Interview skills:personal
+  // SLOT:pers_c_linkedin:LinkedIn & career presence:personal
+  // SLOT:pers_c_references:Reference cultivation:personal
+  // SLOT:pers_c_mentorship:Mentorship navigation:personal
+  // ── GROUP 17 | Leg: Social Fluency | Rare: Relationship Depth ──
+  // SLOT:pers_c_relationships:Relationships & connection:personal
+  // SLOT:pers_c_family_comm:Family communication:personal
+  // SLOT:pers_c_friendship:Friendship maintenance:personal
+  // SLOT:pers_c_partnership:Romantic partnership skills:personal
+  // SLOT:pers_c_conflict_resolution:Conflict resolution:personal
+  // ── GROUP 18 | Leg: Social Fluency | Rare: Communication Mastery ──
+  // SLOT:pers_c_active_listening:Active listening:personal
+  // SLOT:pers_c_assertive_comm:Assertive communication:personal
+  // SLOT:pers_c_feedback_delivery:Feedback delivery:personal
+  // SLOT:pers_c_nonverbal:Nonverbal communication:personal
+  // SLOT:pers_c_written_social:Written social communication:personal
+  // ── GROUP 19 | Leg: Social Fluency | Rare: Social Presence ──
+  // SLOT:pers_c_first_impression:First impression management:personal
+  // SLOT:pers_c_body_language:Body language awareness:personal
+  // SLOT:pers_c_speaking_confidence:Speaking confidence:personal
+  // SLOT:pers_c_professional_bearing:Professional bearing:personal
+  // SLOT:pers_c_social_reading:Social reading:personal
+  // ── GROUP 20 | Leg: Social Fluency | Rare: Community & Mentorship ──
+  // SLOT:pers_c_volunteer_lead:Volunteer leadership:personal
+  // SLOT:pers_c_community_contrib:Community contribution:personal
+  // SLOT:pers_c_peer_mentorship:Peer mentorship:personal
+  // SLOT:pers_c_brotherhood:Brotherhood/sisterhood maintenance:personal
+  // SLOT:pers_c_alumni_network:Alumni network cultivation:personal
+  // ── GROUP 21 | Leg: Physical Resilience | Rare: First aid ──
+  // SLOT:pers_c_cpr:CPR & AED:personal
+  // SLOT:pers_c_wound_care:Wound care & bleeding control:personal
+  // SLOT:pers_c_shock_mgmt:Shock recognition & management:personal
+  // SLOT:pers_c_sick_call:Sick call decision-making:personal
+  // SLOT:pers_c_medevac:Medical evacuation planning:personal
+  // ── GROUP 22 | Leg: Physical Resilience | Rare: Stress Mastery ──
+  // SLOT:pers_c_stress_reg:Stress regulation:personal
+  // SLOT:pers_c_mindfulness:Mindfulness & meditation:personal
+  // SLOT:pers_c_breathing:Breathing protocols:personal
+  // SLOT:pers_c_recovery_blocks:Recovery blocks:personal
+  // SLOT:pers_c_deployment_stress:Deployment stress management:personal
+  // ── GROUP 23 | Leg: Physical Resilience | Rare: Sleep & Recovery Mastery ──
+  // SLOT:pers_c_sleep_opt:Sleep optimization:personal
+  // SLOT:pers_c_sleep_hygiene:Sleep hygiene audit:personal
+  // SLOT:pers_c_nap_strategy:Nap strategy:personal
+  // SLOT:pers_c_circadian:Circadian rhythm management:personal
+  // SLOT:pers_c_sleep_tracking:Sleep tracking & feedback:personal
+  // ── GROUP 24 | Leg: Physical Resilience | Rare: Health Maintenance ──
+  // SLOT:pers_c_health_literacy:Health literacy:personal
+  // SLOT:pers_c_preventive_care:Preventive care schedule:personal
+  // SLOT:pers_c_sick_care:Sick care navigation:personal
+  // SLOT:pers_c_dental:Dental health basics:personal
+  // SLOT:pers_c_vision:Vision & sensory health:personal
+  // ── GROUP 25 | Leg: Physical Resilience | Rare: Digital & Information Hygiene ──
+  // SLOT:pers_c_opsec:OPSEC / digital security:personal
+  // SLOT:pers_c_screen_time:Screen time management:personal
+  // SLOT:pers_c_social_media:Social media discipline:personal
+  // SLOT:pers_c_info_diet:Information diet curation:personal
+  // SLOT:pers_c_cyber_hygiene:Cyber hygiene maintenance:personal
+
 ];
 function seedSkillsIfEmpty(){
   // If any hierarchical skills exist, leave them alone — but still add any NEW seed
