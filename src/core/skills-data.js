@@ -21999,6 +21999,186 @@ const SEED_SKILLS=[
    maintain:["Hold L1: checklist reviews active.","Hold L2: security engineering principles.","Hold L3: risk prioritization.","Hold L4: pre-code review discipline.","Hold L5: process maintained."]},
 
   // ════════════════════════════════════════════════════════════════
+  // TECHNICAL PYRAMID (Cyberspace Operations Officer) — COMMONS LAYER — v163 STAGED
+  // 25 groups x 5 setKeys = 125 Commons slots. One agent per group (5 setKeys/25 skills).
+  // ════════════════════════════════════════════════════════════════
+
+  // ── GROUP 1 | Leg: Computing Foundations | Rare: Data structures & algorithms ──
+  // SLOT:tech_c_algo_analysis:technical
+  // SLOT:tech_c_sort_search:technical
+  // SLOT:tech_c_graph_algo:technical
+  // SLOT:tech_c_dp:technical
+  // SLOT:tech_c_dsa_problem_solving:technical
+
+  // ── GROUP 2 | Leg: Computing Foundations | Rare: Systems programming (C / C++) ──
+  // SLOT:tech_c_memory_mgmt:technical
+  // SLOT:tech_c_pointers:technical
+  // SLOT:tech_c_c_systems:technical
+  // SLOT:tech_c_cpp_oop:technical
+  // SLOT:tech_c_perf_profiling:technical
+
+  // ── GROUP 3 | Leg: Computing Foundations | Rare: Computer Architecture ──
+  // SLOT:tech_c_binary:technical
+  // SLOT:tech_c_cpu_arch:technical
+  // SLOT:tech_c_mem_hierarchy:technical
+  // SLOT:tech_c_assembly:technical
+  // SLOT:tech_c_io_interrupts:technical
+
+  // ── GROUP 4 | Leg: Computing Foundations | Rare: Operating Systems Concepts ──
+  // SLOT:tech_c_proc_thread:technical
+  // SLOT:tech_c_virtual_mem:technical
+  // SLOT:tech_c_file_systems:technical
+  // SLOT:tech_c_concurrency:technical
+  // SLOT:tech_c_os_security:technical
+
+  // ── GROUP 5 | Leg: Computing Foundations | Rare: Computational Thinking ──
+  // SLOT:tech_c_decomposition:technical
+  // SLOT:tech_c_pattern_abstraction:technical
+  // SLOT:tech_c_algo_design:technical
+  // SLOT:tech_c_complexity:technical
+  // SLOT:tech_c_modeling:technical
+
+  // ── GROUP 6 | Leg: Software Craftsman | Rare: Version control (Git) ──
+  // SLOT:tech_c_branching:technical
+  // SLOT:tech_c_commit_hygiene:technical
+  // SLOT:tech_c_rebasing:technical
+  // SLOT:tech_c_git_collab:technical
+  // SLOT:tech_c_cicd_git:technical
+
+  // ── GROUP 7 | Leg: Software Craftsman | Rare: SQL & databases ──
+  // SLOT:tech_c_sql_queries:technical
+  // SLOT:tech_c_schema_design:technical
+  // SLOT:tech_c_sql_index:technical
+  // SLOT:tech_c_transactions:technical
+  // SLOT:tech_c_db_security:technical
+
+  // ── GROUP 8 | Leg: Software Craftsman | Rare: Programming Languages ──
+  // SLOT:tech_c_python:technical
+  // SLOT:tech_c_java:technical
+  // SLOT:tech_c_js_ts:technical
+  // SLOT:tech_c_rust:technical
+  // SLOT:tech_c_go:technical
+
+  // ── GROUP 9 | Leg: Software Craftsman | Rare: API Design & Web Services ──
+  // SLOT:tech_c_javascript:technical
+  // SLOT:tech_c_rest_design:technical
+  // SLOT:tech_c_auth_oauth:technical
+  // SLOT:tech_c_graphql:technical
+  // SLOT:tech_c_api_testing:technical
+
+  // ── GROUP 10 | Leg: Software Craftsman | Rare: Software Quality & Testing ──
+  // SLOT:tech_c_software_testing:technical
+  // SLOT:tech_c_unit_integration:technical
+  // SLOT:tech_c_tdd:technical
+  // SLOT:tech_c_code_review:technical
+  // SLOT:tech_c_static_analysis:technical
+
+  // ── GROUP 11 | Leg: Cyber Operator | Rare: Penetration testing methodology ──
+  // SLOT:tech_c_ctf:technical
+  // SLOT:tech_c_recon:technical
+  // SLOT:tech_c_web_exploit:technical
+  // SLOT:tech_c_privesc:technical
+  // SLOT:tech_c_postex:technical
+
+  // ── GROUP 12 | Leg: Cyber Operator | Rare: Digital forensics & incident response ──
+  // SLOT:tech_c_log_analysis:technical
+  // SLOT:tech_c_mem_forensics:technical
+  // SLOT:tech_c_disk_forensics:technical
+  // SLOT:tech_c_net_traffic:technical
+  // SLOT:tech_c_incident_docs:technical
+
+  // ── GROUP 13 | Leg: Cyber Operator | Rare: Vulnerability Research ──
+  // SLOT:tech_c_cve_research:technical
+  // SLOT:tech_c_vuln_scanning:technical
+  // SLOT:tech_c_cvss:technical
+  // SLOT:tech_c_patch_mgmt:technical
+  // SLOT:tech_c_disclosure:technical
+
+  // ── GROUP 14 | Leg: Cyber Operator | Rare: Malware & Reverse Engineering ──
+  // SLOT:tech_c_static_malware:technical
+  // SLOT:tech_c_dynamic_analysis:technical
+  // SLOT:tech_c_pe_elf:technical
+  // SLOT:tech_c_asm_reading:technical
+  // SLOT:tech_c_ioc_extraction:technical
+
+  // ── GROUP 15 | Leg: Cyber Operator | Rare: Cyber Operations Planning ──
+  // SLOT:tech_c_kill_chain:technical
+  // SLOT:tech_c_threat_actor:technical
+  // SLOT:tech_c_mission_planning:technical
+  // SLOT:tech_c_roe:technical
+  // SLOT:tech_c_opsec:technical
+
+  // ── GROUP 16 | Leg: Infrastructure Mastery | Rare: Bash / shell scripting ──
+  // SLOT:tech_c_bash_basics:technical
+  // SLOT:tech_c_text_processing:technical
+  // SLOT:tech_c_file_proc_auto:technical
+  // SLOT:tech_c_cron:technical
+  // SLOT:tech_c_script_debug:technical
+
+  // ── GROUP 17 | Leg: Infrastructure Mastery | Rare: Cloud computing ──
+  // SLOT:tech_c_cloud_basics:technical
+  // SLOT:tech_c_iam:technical
+  // SLOT:tech_c_iac_intro:technical
+  // SLOT:tech_c_containers:technical
+  // SLOT:tech_c_cloud_cost:technical
+
+  // ── GROUP 18 | Leg: Infrastructure Mastery | Rare: Linux Systems Administration ──
+  // SLOT:tech_c_linux_admin:technical
+  // SLOT:tech_c_powershell:technical
+  // SLOT:tech_c_user_perms:technical
+  // SLOT:tech_c_service_mgmt:technical
+  // SLOT:tech_c_sys_monitoring:technical
+
+  // ── GROUP 19 | Leg: Infrastructure Mastery | Rare: Networking & Protocols ──
+  // SLOT:tech_c_networking:technical
+  // SLOT:tech_c_tcp_ip:technical
+  // SLOT:tech_c_dns_dhcp:technical
+  // SLOT:tech_c_firewall_acl:technical
+  // SLOT:tech_c_net_troubleshoot:technical
+
+  // ── GROUP 20 | Leg: Infrastructure Mastery | Rare: DevOps & Automation ──
+  // SLOT:tech_c_devops:technical
+  // SLOT:tech_c_docker_mgmt:technical
+  // SLOT:tech_c_cicd_design:technical
+  // SLOT:tech_c_terraform:technical
+  // SLOT:tech_c_monitoring:technical
+
+  // ── GROUP 21 | Leg: Technical Intelligence | Rare: Cryptography (applied) ──
+  // SLOT:tech_c_symmetric:technical
+  // SLOT:tech_c_asymmetric:technical
+  // SLOT:tech_c_hashing:technical
+  // SLOT:tech_c_tls:technical
+  // SLOT:tech_c_crypto_protocols:technical
+
+  // ── GROUP 22 | Leg: Technical Intelligence | Rare: Network defense / blue team ──
+  // SLOT:tech_c_cybersec_fund:technical
+  // SLOT:tech_c_siem:technical
+  // SLOT:tech_c_ids_ips:technical
+  // SLOT:tech_c_threat_hunting:technical
+  // SLOT:tech_c_hardening:technical
+
+  // ── GROUP 23 | Leg: Technical Intelligence | Rare: Threat Intelligence Analysis ──
+  // SLOT:tech_c_ml_ai:technical
+  // SLOT:tech_c_actor_profiling:technical
+  // SLOT:tech_c_ioc_mgmt:technical
+  // SLOT:tech_c_osint_ti:technical
+  // SLOT:tech_c_intel_products:technical
+
+  // ── GROUP 24 | Leg: Technical Intelligence | Rare: OSINT & Technical Recon ──
+  // SLOT:tech_c_search_ops:technical
+  // SLOT:tech_c_socmedia_osint:technical
+  // SLOT:tech_c_domain_ip:technical
+  // SLOT:tech_c_metadata:technical
+  // SLOT:tech_c_osint_tools:technical
+
+  // ── GROUP 25 | Leg: Technical Intelligence | Rare: Security Architecture ──
+  // SLOT:tech_c_did:technical
+  // SLOT:tech_c_zero_trust:technical
+  // SLOT:tech_c_sec_reqs:technical
+  // SLOT:tech_c_threat_modeling:technical
+  // SLOT:tech_c_arch_review:technical
+
+  // ════════════════════════════════════════════════════════════════
   // COGNITIVE PYRAMID — v137
   // Mythic → 5 Legendaries → 25 Rares → 125 Uncommons
   // ════════════════════════════════════════════════════════════════
