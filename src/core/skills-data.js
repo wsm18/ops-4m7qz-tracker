@@ -28253,14 +28253,6 @@ const SEED_SKILLS=[
    advance:["Reach L1: recovery time documented.","Reach L2: deliberate rest effect.","Reach L3: nap effect.","Reach L4: 2 best restoratives.","Reach L5: high-demand schedule."],
    maintain:["Hold L1: recovery time tracked.","Hold L2: deliberate rest.","Hold L3: napping practice.","Hold L4: restoratives applied.","Hold L5: schedule discipline."]},
 
-  // ── Uncommons: cog_u_choice_reaction ──
-  // ── Uncommons: cog_u_perceptual_motor ──
-  // ── Uncommons: cog_u_prospective_mem ──
-  // ── Uncommons: cog_u_sleep_consolidation ──
-  // ── Uncommons: cog_u_vigilance ──
-  // ── Uncommons: cog_u_orienting ──
-  // ── Uncommons: cog_u_analogical ──
-  // ── Uncommons: cog_u_estimation ──
   // ── v138: Physiological Path Pyramid ──
 
   // ── Mythic ──
@@ -33590,7 +33582,6 @@ const SEED_SKILLS=[
    advance:["Reach L1: start from never logging lighting conditions.","Reach L2: log the lighting condition for one session.","Reach L3: log lighting for 5 consecutive sessions using a consistent method.","Reach L4: establish a dedicated fixed-lighting setup and use it for 10+ consecutive sessions."],
    maintain:["Hold L1: keep the idea of logging lighting in mind.","Hold L2: keep the single logged session on file.","Hold L3: keep the consistent method going.","Hold L4: keep using the fixed setup as the standard."]},
 
-  // ── Uncommons: phys2_u_metabolic_biomarkers ──
   // ── Uncommons: phys2_u_autonomic ──
   {name:"Parasympathetic activation", cat:"physiological", rarity:"uncommon",
    setKey:"phys2_u_autonomic", synthesizedFrom:"phys2_c_parasympathetic", fadeDays:21,
