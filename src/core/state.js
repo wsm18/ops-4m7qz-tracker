@@ -238,6 +238,7 @@ function render(){
   if(typeof renderSectionPicker==="function") renderSectionPicker();
   if(typeof renderPT==="function") renderPT();
   if(typeof renderPlanRec==="function") renderPlanRec();
+  if(typeof renderPlanPriorities==="function") renderPlanPriorities();
   if(typeof renderSkillBalance==="function") renderSkillBalance();
   if(typeof renderRecoveryAdvisory==="function") renderRecoveryAdvisory();
   if(typeof renderSessionLists==="function") renderSessionLists();

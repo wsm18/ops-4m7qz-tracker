@@ -181,6 +181,21 @@ function skCombineSet(setKey){
   toast(`⚡ Synthesis complete — <b>${esc(synthSeed.name)}</b> is now active!`);
   return true;
 }
+// Fraction (0-1) of all pyramid-tree skills in a category that are fully mastered —
+// drives the tree view's per-world insignia brightness. A category can hold more
+// than one Mythic tree (e.g. a legacy tree plus a later second-gen one); this counts
+// every pyramid-tagged card across all of them, not just one tree.
+function catPyramidCompletion(cat){
+  if(typeof SEED_SKILLS==="undefined") return 0;
+  const pyramidSeeds=SEED_SKILLS.filter(s=>s.cat===cat&&!s.group&&(s.setKey||s.synthesizedFrom));
+  if(!pyramidSeeds.length) return 0;
+  const getLive=(name)=>(S.lifeSkills||[]).find(s=>s.name===name&&s.cat===cat);
+  const maxedCount=pyramidSeeds.filter(s=>{
+    const live=getLive(s.name);
+    return live&&live.levels&&live.currentLevel>=live.levels.length;
+  }).length;
+  return maxedCount/pyramidSeeds.length;
+}
 // ── Synergy combos — complementary pairs that unlock ⚡ indicator at L4+ ───
 const SYNERGY_PAIRS=[
   ["2-mile run","Rucking"],

@@ -106,9 +106,8 @@ document.body.addEventListener("click",e=>{
   if(qb){startQuiz(qb.dataset.quiz);}
 });
 
-/* ---------------- AFT SCORECARD ---------------- */
-// Approx AFT scoring (general standard, male 17-21 ballpark). NOT official —
-// for relative tracking + weakest-event detection only. Verify on the real chart.
+// Shared "m:ss"/"mm:ss" -> seconds parser, used by AFT event entry (aft.js) and
+// the workout log's time-based exercises (log.js), not just this tab.
 function parseTime(str){ // "m:ss" or "mm:ss" -> seconds
   if(!str) return null;
   const p=String(str).split(":").map(s=>parseInt(s.trim()));

@@ -250,11 +250,27 @@ function renderSkillTree(){
     leaves.push(`<circle cx="${slot.rx.toFixed(1)}" cy="${slot.ry.toFixed(1)}" r="${(realmR-5).toFixed(1)}" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="1"/>`);
     // specular glint
     leaves.push(`<ellipse cx="${(slot.rx-realmR*0.28).toFixed(1)}" cy="${(slot.ry-realmR*0.34).toFixed(1)}" rx="${(realmR*0.34).toFixed(1)}" ry="${(realmR*0.2).toFixed(1)}" fill="rgba(255,255,255,.18)"/>`);
+    // --- Mastery insignia: a ring of studs around the realm rim that lights up and
+    // brightens as more of this world's pyramid-tree content is mastered. A world
+    // can hold more than one Mythic tree, so this reads across all of them together
+    // (catPyramidCompletion sums every pyramid-tagged card in the category).
+    const completion = typeof catPyramidCompletion==="function" ? catPyramidCompletion(cat) : 0;
+    const studCol = completion<0.34 ? "#b8772e" : completion<0.67 ? "#d4af37" : "#ffe58a";
+    const studN=8, studR=realmR+9;
+    for(let si=0; si<studN; si++){
+      const lit = si < Math.round(studN*completion);
+      const sa = (si/studN)*Math.PI*2 - Math.PI/2;
+      const sx = slot.rx + Math.cos(sa)*studR, sy = slot.ry + Math.sin(sa)*studR;
+      const op = lit ? (0.55+completion*0.45) : 0.14;
+      const rad = lit ? 3.2 : 2;
+      leaves.push(`<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="${rad}" fill="${lit?studCol:'#2a2f1c'}" opacity="${op.toFixed(2)}"${lit?` style="filter:drop-shadow(0 0 3px ${studCol})"`:''}/>`);
+    }
     // sigil + name + level
     leaves.push(`<text x="${slot.rx.toFixed(0)}" y="${(slot.ry+realmR*0.16).toFixed(0)}" text-anchor="middle" font-size="${Math.min(34,realmR*0.78).toFixed(0)}">${SK_PATH_ICON[cat]||""}</text>`);
     const nm=esc(SK_CAT[cat]||cat);
     leaves.push(`<text x="${slot.rx.toFixed(0)}" y="${(slot.ry+realmR+20).toFixed(0)}" text-anchor="middle" font-size="16" font-weight="700" fill="var(--gold-bright)" style="text-shadow:0 1px 4px #000,0 0 3px #000">${nm}</text>`);
     leaves.push(`<text x="${slot.rx.toFixed(0)}" y="${(slot.ry+realmR+37).toFixed(0)}" text-anchor="middle" font-size="12" fill="var(--ink-dim)" style="text-shadow:0 1px 3px #000">World Lv ${fmtLvl(catLvl)}</text>`);
+    if(completion>0) leaves.push(`<text x="${slot.rx.toFixed(0)}" y="${(slot.ry+realmR+52).toFixed(0)}" text-anchor="middle" font-size="10" fill="${studCol}" style="text-shadow:0 1px 3px #000">${Math.round(completion*100)}% pyramid mastered</text>`);
   });
 
   const defs=`<defs>

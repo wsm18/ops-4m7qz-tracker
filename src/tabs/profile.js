@@ -131,8 +131,8 @@ function renderMilestones(){
 function renderCommReadiness(){
   const el=document.getElementById("commReadyWrap"); if(!el) return;
   const items=[];
-  const lastAft=(S.aftHistory||[]).slice(-1)[0];
-  const aftTotal=lastAft&&lastAft.scores?Object.values(lastAft.scores).reduce((a,b)=>a+(+b||0),0):0;
+  const lastAft=(S.aft||[]).slice(-1)[0];
+  const aftTotal=lastAft?(lastAft.total||0):0;
   const aftOk=aftTotal>=270;
   items.push({label:"AFT total",value:lastAft?aftTotal+"pts":"no record",ok:aftOk,hint:"target ≥270 total"});
   const gpas=S.gpaHistory||[];

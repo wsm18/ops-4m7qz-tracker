@@ -10,6 +10,19 @@ function renderPlanRec(){
   el.innerHTML=`<div class="plan-rec">🎯 ${weeksLeft} week${weeksLeft!==1?'s':''} to AFT · gap: ${gap>0?'+'+gap+' pts needed':'on target'} · Recommendation: <b>${rec}</b></div>`;
 }
 
+// Live "your priorities" line — was previously a hardcoded prose block with
+// frozen AFT numbers that silently went stale the moment real scores changed.
+// Reuses fmFocusLine() (aft.js) so this stays consistent with the weakest-event
+// line shown on Today, instead of computing it a second, independent way.
+function renderPlanPriorities(){
+  const el=document.getElementById("planPriorities"); if(!el) return;
+  const focus=typeof fmFocusLine==="function"?fmFocusLine():null;
+  if(!focus){ el.innerHTML=""; return; }
+  const last=(S.aft||[])[S.aft.length-1];
+  const evts=[{k:"dl",label:"deadlift"},{k:"hrp",label:"push-ups"},{k:"sdc",label:"Sprint-Drag-Carry"},{k:"plank",label:"plank"},{k:"run",label:"2-mile run"}];
+  const solid=evts.filter(e=>last.scores[e.k]!=null&&last.scores[e.k]>=70).map(e=>e.label);
+  el.innerHTML=`<div class="phase">🎯 <b>Your priorities (from your AFT history):</b> ${esc(focus)}${solid.length?` The rest (${esc(solid.join(", "))}) are solid — maintain them.`:''}</div>`;
+}
 // Beginner starting prescriptions — sets/reps/weight/rest for each session
 // Bodyweight (bw) and gym variants match SESSIONS s1-s4
 const BEGINNER_RX = {

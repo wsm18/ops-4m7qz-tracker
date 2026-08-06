@@ -66,6 +66,8 @@ src/
     awards.html / awards.js       The Wall: awards, memberships, events, volunteer hours
     records.html / records.js     History/trends, counseling log, checklists, section export
     weight.html / weight.js       Promise ledger (read-only mirror of Weight app)
+    garden.html / garden.js       The Grove: read-only Path-XP idol visualization
+    trophies.html / trophies.js   Carved Rings: permanent record of every level ever reached
 ```
 
 ---
@@ -88,7 +90,7 @@ python scripts/build.py
 
 # 4. Verify (requires Node.js)
 npm run check        # syntax-check the assembled script (fast, no browser)
-npm run regress      # headless: load app, click all 16 tabs, assert ZERO pageerror
+npm run regress      # headless: load app, click all 18 tabs, assert ZERO pageerror
 #   (npm run verify runs build + check + regress)
 #   add a tree screenshot when you change the tree:
 npm run regress -- --shot   # writes dist/tree.png

@@ -351,6 +351,8 @@ const CARD_RANKS=["A","2","3","4","5","6","7","8","9","10","Page","Knight","Quee
 
 let _skSearchTerm = "";
 let _skHeatmapVisible = false;
+// Side Deck lazy-render cache, rebuilt every renderSkillsTab() pass: {cat: {buckets:{rarityKey:[skills]}, rankMap, suit}}
+let _skSideDeckCache = {};
 
 function renderHeatmap(){
   const el=document.getElementById("skHeatmap"); if(!el) return;
@@ -392,12 +394,33 @@ function _filterSkillDecks(){
   document.querySelectorAll("#skList .sk-deck").forEach(deck=>{
     if(!q){ deck.hidden=false; return; }
     const cards = deck.querySelectorAll(".sk-card-name");
-    const match = [...cards].some(n=>n.textContent.toLowerCase().includes(q));
+    let match = [...cards].some(n=>n.textContent.toLowerCase().includes(q));
+    // Unstarted skills live in lazy-rendered Side Deck tiers with no DOM cards yet
+    // to search — check the underlying data too, or a not-yet-started skill would
+    // be permanently unfindable by name (search only ever matched started skills).
+    const cat=(deck.id||"").replace(/^skcat-/,"");
+    const cache=_skSideDeckCache[cat];
+    const matchingTierKeys=[];
+    if(cache){
+      Object.keys(cache.buckets).forEach(k=>{
+        if(cache.buckets[k].some(sk=>sk.name.toLowerCase().includes(q))){ match=true; matchingTierKeys.push(k); }
+      });
+    }
     deck.hidden = !match;
     if(match){
       const body=deck.querySelector(".sk-deck-body");
       const hdr=deck.querySelector(".sk-deck-header");
       if(body&&!body.classList.contains("open")){ body.classList.add("open"); hdr&&hdr.classList.add("open"); }
+      // force-open the Side Deck and any tier that actually contains the match —
+      // otherwise a found-but-unstarted skill is still invisible, just not hidden.
+      if(matchingTierKeys.length){
+        const sideDeck=deck.querySelector(".sk-side-deck");
+        if(sideDeck&&!sideDeck.open) sideDeck.open=true;
+        matchingTierKeys.forEach(k=>{
+          const tierEl=deck.querySelector(`.sk-side-tier[data-sidetier="${cat}|${k}"]`);
+          if(tierEl&&!tierEl.open) tierEl.open=true; // fires the lazy-render toggle listener
+        });
+      }
     }
   });
 }
@@ -742,10 +765,28 @@ function skProgressBlock(sk, eff){
     // Side Deck — face-down cards for unstarted skills
     let sideDeckHtml='';
     if(sideTops.length>0){
-      const sideCards=sideTops.map((sk,i)=>{
-        const seed=typeof skSeedOf==="function"?skSeedOf(sk.name,sk.cat):null;
-        const isSynth=!!(seed&&seed.synthesizedFrom)&&!sk.synthesisUnlocked;
-        return faceDownCard(sk,suit,rankMap[sk.id],isSynth);
+      // A path can hold 700-1500+ unstarted skills once the full pyramid is seeded.
+      // Dumping them all into one flat list is both unusable (nothing to scan by)
+      // and expensive (thousands of face-down DOM cards even while collapsed).
+      // Group by rarity tier — a real dimension of the pyramid — and defer building
+      // each tier's cards until the user actually opens it.
+      const tierOrder=["mythic","legendary","rare","uncommon","common","joker"];
+      const buckets={};
+      sideTops.forEach(sk=>{
+        const rar=typeof skRarity==="function"?skRarity(sk):_RARITY_MAP.common;
+        const key=(rar.name||"common").toLowerCase();
+        (buckets[key]=buckets[key]||[]).push(sk);
+      });
+      _skSideDeckCache[cat]={buckets, rankMap, suit};
+      const tierRows=tierOrder.filter(k=>buckets[k]&&buckets[k].length).map(k=>{
+        const rarMeta=_RARITY_MAP[k]||{name:k,col:"#888"};
+        return `<details class="sk-side-tier" data-sidetier="${cat}|${k}">
+          <summary class="sk-side-tier-hdr" style="--rar-col:${rarMeta.col}">
+            <span class="sk-side-tier-name">${esc(rarMeta.name||k)}</span>
+            <span class="sk-side-tier-count">${buckets[k].length}</span>
+          </summary>
+          <div class="sk-side-tier-body" data-sidetierbody="${cat}|${k}"></div>
+        </details>`;
       }).join("");
       sideDeckHtml=`<details class="sk-side-deck">
         <summary class="sk-side-deck-hdr">
@@ -753,7 +794,7 @@ function skProgressBlock(sk, eff){
           <span class="sk-side-deck-title">Side Deck</span>
           <span class="sk-side-deck-count">${sideTops.length} unstarted</span>
         </summary>
-        <div class="sk-side-deck-body">${sideCards}</div>
+        <div class="sk-side-deck-body">${tierRows}</div>
       </details>`;
     }
 
@@ -799,6 +840,27 @@ function skProgressBlock(sk, eff){
   }
 
   listEl.innerHTML=html;
+  // Lazy-render Side Deck tiers only when the user actually opens one — with
+  // hundreds to over a thousand unstarted skills possible per path, pre-building
+  // every face-down card up front is the DOM cost the old flat Side Deck paid.
+  listEl.querySelectorAll(".sk-side-tier").forEach(det=>{
+    det.addEventListener("toggle",()=>{
+      if(!det.open) return;
+      const body=det.querySelector("[data-sidetierbody]");
+      if(!body||body.dataset.rendered) return;
+      body.dataset.rendered="1";
+      const [tcat,trar]=det.dataset.sidetier.split("|");
+      const cache=_skSideDeckCache[tcat];
+      const skillsForTier=(cache&&cache.buckets[trar])||[];
+      const rankMap=(cache&&cache.rankMap)||{};
+      const suitInfo=(cache&&cache.suit)||SK_SUIT[tcat]||{sym:"★",col:"#555",light:"#ddd"};
+      body.innerHTML=skillsForTier.map(sk=>{
+        const seed=typeof skSeedOf==="function"?skSeedOf(sk.name,sk.cat):null;
+        const isSynth=!!(seed&&seed.synthesizedFrom)&&!sk.synthesisUnlocked;
+        return faceDownCard(sk,suitInfo,rankMap[sk.id],isSynth);
+      }).join("");
+    });
+  });
   // wire search input — persist term across re-renders, filter immediately
   const srchEl=document.getElementById("skSearch");
   if(srchEl){
@@ -945,8 +1007,10 @@ function renderSkillGapMap(){
 }
 function renderSynthesisChain(cat){
   const seeds=(typeof SEED_SKILLS!=="undefined"?SEED_SKILLS:[]).filter(s=>s.cat===cat&&(s.synthesizedFrom||s.setKey));
-  const mythic=seeds.find(s=>s.rarity==="mythic"&&s.synthesizedFrom);
-  if(!mythic) return '<div class="synth-chain-empty">No synthesis chain defined for this path yet.</div>';
+  // A path can hold more than one Mythic tree (e.g. a legacy tree plus a later
+  // second-gen one) — render a chain block for every Mythic, not just the first.
+  const mythics=seeds.filter(s=>s.rarity==="mythic"&&s.synthesizedFrom);
+  if(!mythics.length) return '<div class="synth-chain-empty">No synthesis chain defined for this path yet.</div>';
   const getLive=(name)=>(S.lifeSkills||[]).find(s=>s.name===name&&s.cat===cat);
   const isMaxed=(name)=>{ const l=getLive(name); return l&&l.levels&&l.currentLevel>=l.levels.length; };
   const isStarted=(name)=>{ const l=getLive(name); return l&&l.currentLevel>0; };
@@ -954,37 +1018,39 @@ function renderSynthesisChain(cat){
     const members=seeds.filter(s=>s.setKey===setKey&&!s.group);
     return {total:members.length, mastered:members.filter(s=>isMaxed(s.name)).length, started:members.filter(s=>isStarted(s.name)).length};
   };
-  const legends=seeds.filter(s=>s.setKey===mythic.synthesizedFrom&&s.rarity==="legendary");
-  const rows=legends.map(leg=>{
-    const lc=setCount(leg.synthesizedFrom||"");
-    const rares=seeds.filter(s=>s.setKey===leg.synthesizedFrom&&s.rarity==="rare");
-    const rareRows=rares.map(r=>{
-      const rc=setCount(r.synthesizedFrom||"");
-      const status=isMaxed(r.name)?'maxed':isStarted(r.name)?'started':rc.mastered>=rc.total&&rc.total>0?'ready':'locked';
-      return `<div class="sc-rare sc-${status}">
-        <span class="sc-icon">${status==='maxed'?'★':status==='started'?'▶':status==='ready'?'⚡':'🔒'}</span>
-        <span class="sc-name">${esc(r.name)}</span>
-        <span class="sc-prog">${rc.mastered}/${rc.total} U</span>
-      </div>`;
+  return mythics.map(mythic=>{
+    const legends=seeds.filter(s=>s.setKey===mythic.synthesizedFrom&&s.rarity==="legendary");
+    const rows=legends.map(leg=>{
+      const lc=setCount(leg.synthesizedFrom||"");
+      const rares=seeds.filter(s=>s.setKey===leg.synthesizedFrom&&s.rarity==="rare");
+      const rareRows=rares.map(r=>{
+        const rc=setCount(r.synthesizedFrom||"");
+        const status=isMaxed(r.name)?'maxed':isStarted(r.name)?'started':rc.mastered>=rc.total&&rc.total>0?'ready':'locked';
+        return `<div class="sc-rare sc-${status}">
+          <span class="sc-icon">${status==='maxed'?'★':status==='started'?'▶':status==='ready'?'⚡':'🔒'}</span>
+          <span class="sc-name">${esc(r.name)}</span>
+          <span class="sc-prog">${rc.mastered}/${rc.total} U</span>
+        </div>`;
+      }).join('');
+      const legStatus=isMaxed(leg.name)?'maxed':isStarted(leg.name)?'started':lc.mastered>=lc.total&&lc.total>0?'ready':'locked';
+      return `<details class="sc-legend sc-${legStatus}">
+        <summary>
+          <span class="sc-icon">${legStatus==='maxed'?'★':legStatus==='started'?'▶':legStatus==='ready'?'⚡':'🔒'}</span>
+          <span class="sc-name">${esc(leg.name)}</span>
+          <span class="sc-prog">${lc.mastered}/${lc.total} Rares mastered</span>
+        </summary>
+        <div class="sc-rares">${rareRows}</div>
+      </details>`;
     }).join('');
-    const legStatus=isMaxed(leg.name)?'maxed':isStarted(leg.name)?'started':lc.mastered>=lc.total&&lc.total>0?'ready':'locked';
-    return `<details class="sc-legend sc-${legStatus}">
-      <summary>
-        <span class="sc-icon">${legStatus==='maxed'?'★':legStatus==='started'?'▶':legStatus==='ready'?'⚡':'🔒'}</span>
-        <span class="sc-name">${esc(leg.name)}</span>
-        <span class="sc-prog">${lc.mastered}/${lc.total} Rares mastered</span>
-      </summary>
-      <div class="sc-rares">${rareRows}</div>
-    </details>`;
+    const mythicStatus=isMaxed(mythic.name)?'maxed':isStarted(mythic.name)?'started':'locked';
+    return `<div class="synth-chain">
+      <div class="sc-mythic sc-${mythicStatus}">
+        <span class="sc-icon">✦</span><span class="sc-name">${esc(mythic.name)}</span>
+        <span class="sc-prog">${legends.filter(l=>isMaxed(l.name)).length}/${legends.length} Legendaries</span>
+      </div>
+      <div class="sc-legends">${rows}</div>
+    </div>`;
   }).join('');
-  const mythicStatus=isMaxed(mythic.name)?'maxed':isStarted(mythic.name)?'started':'locked';
-  return `<div class="synth-chain">
-    <div class="sc-mythic sc-${mythicStatus}">
-      <span class="sc-icon">✦</span><span class="sc-name">${esc(mythic.name)}</span>
-      <span class="sc-prog">${legends.filter(l=>isMaxed(l.name)).length}/${legends.length} Legendaries</span>
-    </div>
-    <div class="sc-legends">${rows}</div>
-  </div>`;
 }
 function renderSkillAssessment(){
   const el=document.getElementById("skAssessWrap"); if(!el) return;
