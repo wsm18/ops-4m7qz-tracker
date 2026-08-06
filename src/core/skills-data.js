@@ -93245,6 +93245,186 @@ const SEED_SKILLS=[
    roadmap:["1 day batched","5 days compared","8 comparisons confirmed","1 month sustained"],
    advance:["Reach L1: batch low-effort tasks in one day and compare fatigue to a non-batched day.","Reach L2: repeat across 5 workdays.","Reach L3: extend to 8 comparisons and confirm the fatigue reduction.","Reach L4: sustain the batching schedule for a full month."],
    maintain:["Hold L1: keep batching low-effort tasks when possible.","Hold L2: keep the comparison log updated.","Hold L3: keep the fatigue benefit from disappearing by not letting tasks scatter again.","Hold L4: keep the schedule running month to month."]},
+
+  // ════════════════════════════════════════════════════════════════
+  // PERSONAL PYRAMID (Life Architect) — COMMONS LAYER — v166 STAGED
+  // 25 groups x 5 setKeys = 125 Commons slots. One agent per group (5 setKeys/25 skills).
+  // ════════════════════════════════════════════════════════════════
+
+  // ── GROUP 1 | Leg: Life Mastery | Rare: Life Administration ──
+  // SLOT:pers_c_life_admin:personal
+  // SLOT:pers_c_career_planning:personal
+  // SLOT:pers_c_legal_nav:personal
+  // SLOT:pers_c_healthcare_nav:personal
+  // SLOT:pers_c_side_income:personal
+
+  // ── GROUP 2 | Leg: Life Mastery | Rare: Personal Brand & Reputation ──
+  // SLOT:pers_c_bio_writing:personal
+  // SLOT:pers_c_online_cleanup:personal
+  // SLOT:pers_c_network_building:personal
+  // SLOT:pers_c_earn_reference:personal
+  // SLOT:pers_c_referral_opportunity:personal
+
+  // ── GROUP 3 | Leg: Life Mastery | Rare: Systems Thinking in Daily Life ──
+  // SLOT:pers_c_habit_loop_mapping:personal
+  // SLOT:pers_c_env_design_friction:personal
+  // SLOT:pers_c_habit_anchor:personal
+  // SLOT:pers_c_schedule_audit:personal
+  // SLOT:pers_c_feedback_loop_design:personal
+
+  // ── GROUP 4 | Leg: Life Mastery | Rare: Risk Management & Insurance ──
+  // SLOT:pers_c_risk_inventory:personal
+  // SLOT:pers_c_sgli_life_insurance:personal
+  // SLOT:pers_c_property_insurance:personal
+  // SLOT:pers_c_disability_ides:personal
+  // SLOT:pers_c_will_poa_setup:personal
+
+  // ── GROUP 5 | Leg: Life Mastery | Rare: Long-Term Life Planning ──
+  // SLOT:pers_c_ten_year_vision:personal
+  // SLOT:pers_c_five_year_milestones:personal
+  // SLOT:pers_c_calendar_priorities_map:personal
+  // SLOT:pers_c_quarterly_life_review:personal
+  // SLOT:pers_c_plan_adjust_life_change:personal
+
+  // ── GROUP 6 | Leg: Wealth Architecture | Rare: Investment Fundamentals ──
+  // SLOT:pers2_c_wealth_brokerage_setup:personal
+  // SLOT:pers2_c_wealth_asset_classes:personal
+  // SLOT:pers2_c_wealth_risk_allocation:personal
+  // SLOT:pers2_c_wealth_auto_contrib:personal
+  // SLOT:pers2_c_wealth_compounding:personal
+
+  // ── GROUP 7 | Leg: Wealth Architecture | Rare: Tax Strategy ──
+  // SLOT:pers2_c_wealth_tax_filing:personal
+  // SLOT:pers2_c_wealth_taxable_pay:personal
+  // SLOT:pers2_c_wealth_state_residency:personal
+  // SLOT:pers2_c_wealth_tax_advantaged:personal
+  // SLOT:pers2_c_wealth_credits_deductions:personal
+
+  // ── GROUP 8 | Leg: Wealth Architecture | Rare: Debt Management ──
+  // SLOT:pers2_c_wealth_debt_inventory:personal
+  // SLOT:pers2_c_wealth_debt_targeting:personal
+  // SLOT:pers2_c_wealth_debt_payoff_exec:personal
+  // SLOT:pers2_c_wealth_debt_avoidance:personal
+  // SLOT:pers2_c_wealth_credit_scra:personal
+
+  // ── GROUP 9 | Leg: Wealth Architecture | Rare: Retirement Planning (TSP/Pension) ──
+  // SLOT:pers2_c_wealth_brs_structure:personal
+  // SLOT:pers2_c_wealth_tsp_match:personal
+  // SLOT:pers2_c_wealth_tsp_allocation:personal
+  // SLOT:pers2_c_wealth_retirement_projection:personal
+  // SLOT:pers2_c_wealth_contrib_growth:personal
+
+  // ── GROUP 10 | Leg: Wealth Architecture | Rare: Net Worth Tracking ──
+  // SLOT:pers2_c_wealth_networth_calc:personal
+  // SLOT:pers2_c_wealth_networth_habit:personal
+  // SLOT:pers2_c_wealth_networth_trend:personal
+  // SLOT:pers2_c_wealth_networth_drivers:personal
+  // SLOT:pers2_c_wealth_networth_milestone:personal
+
+  // ── GROUP 11 | Leg: Purpose & Identity | Rare: Values Clarification ──
+  // SLOT:pers2_c_purpose_values_list:personal
+  // SLOT:pers2_c_purpose_values_action_log:personal
+  // SLOT:pers2_c_purpose_values_conflict:personal
+  // SLOT:pers2_c_purpose_values_inherited:personal
+  // SLOT:pers2_c_purpose_values_costly:personal
+
+  // ── GROUP 12 | Leg: Purpose & Identity | Rare: Personal Mission Statement ──
+  // SLOT:pers2_c_purpose_mission_draft:personal
+  // SLOT:pers2_c_purpose_mission_test:personal
+  // SLOT:pers2_c_purpose_mission_decision:personal
+  // SLOT:pers2_c_purpose_mission_peer_review:personal
+  // SLOT:pers2_c_purpose_mission_annual:personal
+
+  // ── GROUP 13 | Leg: Purpose & Identity | Rare: Identity Beyond Rank/Role ──
+  // SLOT:pers2_c_purpose_identity_source:personal
+  // SLOT:pers2_c_purpose_identity_investment:personal
+  // SLOT:pers2_c_purpose_identity_intro:personal
+  // SLOT:pers2_c_purpose_identity_mood_audit:personal
+  // SLOT:pers2_c_purpose_identity_transition:personal
+
+  // ── GROUP 14 | Leg: Purpose & Identity | Rare: Meaning-Making Practices ──
+  // SLOT:pers2_c_purpose_meaning_source:personal
+  // SLOT:pers2_c_purpose_meaning_onboarding:personal
+  // SLOT:pers2_c_purpose_meaning_sustain:personal
+  // SLOT:pers2_c_purpose_meaning_effect:personal
+  // SLOT:pers2_c_purpose_meaning_disruption:personal
+
+  // ── GROUP 15 | Leg: Purpose & Identity | Rare: Legacy Planning ──
+  // SLOT:pers2_c_purpose_legacy_statement:personal
+  // SLOT:pers2_c_purpose_legacy_habit_audit:personal
+  // SLOT:pers2_c_purpose_legacy_habit_change:personal
+  // SLOT:pers2_c_purpose_legacy_documents:personal
+  // SLOT:pers2_c_purpose_legacy_conversation:personal
+
+  // ── GROUP 16 | Leg: Social Capital | Rare: Deep Friendship Maintenance ──
+  // SLOT:pers2_c_social_checkin_cadence:personal
+  // SLOT:pers2_c_social_substantive_convo:personal
+  // SLOT:pers2_c_social_distance_resilience:personal
+  // SLOT:pers2_c_social_friendship_repair:personal
+  // SLOT:pers2_c_social_showup_hardship:personal
+
+  // ── GROUP 17 | Leg: Social Capital | Rare: Family Relationship Investment ──
+  // SLOT:pers2_c_social_family_contact_rhythm:personal
+  // SLOT:pers2_c_social_family_substantive:personal
+  // SLOT:pers2_c_social_family_separation_resilience:personal
+  // SLOT:pers2_c_social_family_repair:personal
+  // SLOT:pers2_c_social_family_showup:personal
+
+  // ── GROUP 18 | Leg: Social Capital | Rare: Mentor Relationship Cultivation ──
+  // SLOT:pers2_c_social_mentor_seek:personal
+  // SLOT:pers2_c_social_mentor_actionable_convo:personal
+  // SLOT:pers2_c_social_mentor_sustain_contact:personal
+  // SLOT:pers2_c_social_mentor_give_back:personal
+  // SLOT:pers2_c_social_mentor_dual_role:personal
+
+  // ── GROUP 19 | Leg: Social Capital | Rare: Community Involvement ──
+  // SLOT:pers2_c_social_community_identify:personal
+  // SLOT:pers2_c_social_community_recurring:personal
+  // SLOT:pers2_c_social_community_contribute:personal
+  // SLOT:pers2_c_social_community_1to1:personal
+  // SLOT:pers2_c_social_community_rebuild:personal
+
+  // ── GROUP 20 | Leg: Social Capital | Rare: Social Support Network Design ──
+  // SLOT:pers2_c_social_network_map:personal
+  // SLOT:pers2_c_social_network_gap_id:personal
+  // SLOT:pers2_c_social_network_seek_under_stress:personal
+  // SLOT:pers2_c_social_network_overreliance_fix:personal
+  // SLOT:pers2_c_social_network_multidomain_sustain:personal
+
+  // ── GROUP 21 | Leg: Physical Sovereignty | Rare: Personal Health Advocacy ──
+  // SLOT:pers2_c_physsov_ask_questions:personal
+  // SLOT:pers2_c_physsov_understand_reasoning:personal
+  // SLOT:pers2_c_physsov_records_file:personal
+  // SLOT:pers2_c_physsov_second_opinion:personal
+  // SLOT:pers2_c_physsov_pushback:personal
+
+  // ── GROUP 22 | Leg: Physical Sovereignty | Rare: Preventive Care Discipline ──
+  // SLOT:pers2_c_physsov_checklist:personal
+  // SLOT:pers2_c_physsov_overdue_recovery:personal
+  // SLOT:pers2_c_physsov_annual_physical:personal
+  // SLOT:pers2_c_physsov_followthrough:personal
+  // SLOT:pers2_c_physsov_relocation_continuity:personal
+
+  // ── GROUP 23 | Leg: Physical Sovereignty | Rare: Body Autonomy & Informed Consent ──
+  // SLOT:pers2_c_physsov_consent_basics:personal
+  // SLOT:pers2_c_physsov_rba_questions:personal
+  // SLOT:pers2_c_physsov_form_literacy:personal
+  // SLOT:pers2_c_physsov_decline_practice:personal
+  // SLOT:pers2_c_physsov_support_others_consent:personal
+
+  // ── GROUP 24 | Leg: Physical Sovereignty | Rare: Independent Living Skills ──
+  // SLOT:pers2_c_physsov_cook_no_recipe:personal
+  // SLOT:pers2_c_physsov_budget_month:personal
+  // SLOT:pers2_c_physsov_home_repair:personal
+  // SLOT:pers2_c_physsov_vehicle_maint:personal
+  // SLOT:pers2_c_physsov_solo_household:personal
+
+  // ── GROUP 25 | Leg: Physical Sovereignty | Rare: Self-Sufficiency Under Adversity ──
+  // SLOT:pers2_c_physsov_kit_assembly:personal
+  // SLOT:pers2_c_physsov_vuln_assessment:personal
+  // SLOT:pers2_c_physsov_equipment_drill:personal
+  // SLOT:pers2_c_physsov_reduced_support:personal
+  // SLOT:pers2_c_physsov_comms_plan:personal
 ];
 function seedSkillsIfEmpty(){
   // If any hierarchical skills exist, leave them alone — but still add any NEW seed
