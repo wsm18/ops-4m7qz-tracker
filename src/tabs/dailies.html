@@ -1,49 +1,47 @@
   <section class="view" id="view-dailies">
-    <div class="sec-h"><h2>Daily Habits</h2><span class="hint" id="habitStreakHint">build the routine</span></div>
-    <div class="plan-intro">Habits are recurring daily quests with their own streaks. Completing one feeds its linked skill (refreshes its fade timer). Miss a day and your streak uses a one-time <b>grace day</b> before it resets — so a single slip doesn't erase months.</div>
-    <div id="habitQuests"></div>
-    <details class="habit-add-wrap">
-      <summary>+ Add a habit</summary>
-      <div class="adder" style="margin-top:10px">
-        <input id="hbName" placeholder="Habit — e.g. Read 20 minutes" maxlength="60">
-        <label class="lg-label" style="margin-top:9px;display:block">Feeds skill (optional)</label>
-        <select id="hbSkill"><option value="">— none —</option></select>
-        <button class="btn-add" id="hbAdd" style="margin-top:10px">Add habit</button>
-      </div>
-      <div class="habit-starter">
-        <div class="habit-starter-label">Or add a proven starter habit:</div>
-        <div id="hbStarters"></div>
-      </div>
-    </details>
-
-    <div class="sec-h" style="margin-top:20px">
-      <h2>Daily Orders</h2>
-      <span class="hint">one-off tasks · resets at midnight</span>
+    <div class="sec-h"><h2>Daily Tasks</h2><span class="hint" id="dtHint">recurring habits &amp; one-off orders, one list</span>
       <button id="dailyCalToggle" class="sk-hm-toggle" title="Toggle 60-day perfect-day calendar" style="margin-left:auto">📅</button>
     </div>
+    <div class="plan-intro">Every task here is recurring and tracks its own streak, with a one-time <b>grace day</b> so a single missed day doesn't erase it. <b>Orders</b> also earn XP/merit toward a Path and count toward the day's overall readiness; <b>Habits</b> earn a small flat reward and can feed a skill's fade timer directly, without pulling on the Path economy.</div>
     <div id="dailyCalWrap" class="sk-heatmap-wrap" style="display:none"></div>
-    <div class="adder">
-      <input id="dName" placeholder="New daily order — e.g. 30 min workout" maxlength="80">
-      <div class="row">
-        <select id="dDiff">
-          <option value="easy">Routine · 10 XP · 4 pts</option>
-          <option value="med" selected>Priority · 20 XP · 8 pts</option>
-          <option value="hard">High-Risk · 40 XP · 16 pts</option>
-        </select>
-        <select id="dPath">
-          <option value="tactical">⚔️ Path of War</option>
-          <option value="physical">🌿 Path of the Body</option>
-          <option value="cognitive">🌀 Path of the Mind</option>
-          <option value="physiological">💧 Path of Vitality</option>
-          <option value="technical">🔨 Path of the Craft</option>
-          <option value="leadership">🏴 Path of Command</option>
-          <option value="academic">📜 Path of Knowledge</option>
-          <option value="personal">🪞 Path of the Self</option>
-          <option value="hearth">🔥 Path of the Hearth</option>
-          <option value="roots">🌳 Path of Roots</option>
-        </select>
+    <div id="dtList"></div>
+
+    <details class="habit-add-wrap">
+      <summary>+ Add a task</summary>
+      <div class="adder" style="margin-top:10px">
+        <div class="dt-kind-toggle">
+          <button type="button" class="dt-kind-btn active" data-dtkind="order">Order</button>
+          <button type="button" class="dt-kind-btn" data-dtkind="habit">Habit</button>
+        </div>
+        <input id="dtName" placeholder="e.g. 30 min workout, or Read 20 minutes" maxlength="80">
+        <div class="row" id="dtOrderFields">
+          <select id="dtDiff">
+            <option value="easy">Routine · 10 XP · 4 pts</option>
+            <option value="med" selected>Priority · 20 XP · 8 pts</option>
+            <option value="hard">High-Risk · 40 XP · 16 pts</option>
+          </select>
+          <select id="dtPath">
+            <option value="tactical">⚔️ Path of War</option>
+            <option value="physical">🌿 Path of the Body</option>
+            <option value="cognitive">🌀 Path of the Mind</option>
+            <option value="physiological">💧 Path of Vitality</option>
+            <option value="technical">🔨 Path of the Craft</option>
+            <option value="leadership">🏴 Path of Command</option>
+            <option value="academic">📜 Path of Knowledge</option>
+            <option value="personal">🪞 Path of the Self</option>
+            <option value="hearth">🔥 Path of the Hearth</option>
+            <option value="roots">🌳 Path of Roots</option>
+          </select>
+        </div>
+        <div id="dtHabitFields" style="display:none">
+          <label class="lg-label" style="margin-top:9px;display:block">Feeds skill (optional)</label>
+          <select id="dtSkill"><option value="">— none —</option></select>
+          <div class="habit-starter">
+            <div class="habit-starter-label">Or add a proven starter habit:</div>
+            <div id="hbStarters"></div>
+          </div>
+        </div>
+        <button class="btn-add" id="dtAdd" style="margin-top:10px">Add task</button>
       </div>
-      <button class="btn-add" id="dAdd">Add Order</button>
-    </div>
-    <ul class="list" id="dList"></ul>
+    </details>
   </section>

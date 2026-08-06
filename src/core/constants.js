@@ -79,7 +79,7 @@ const DEFAULT = {
   healthImport:{lastImport:null},  // Apple Health export import stub
   installPromptDismissed:false,    // true once user dismisses the "add to home screen" nudge
   notifEnabled:false,              // true once user grants notification permission
-  habits:[],              // {id, name, linkedSkill, streak, bestStreak, lastDone, graceUsed, history:[]}
+  habits:[],              // legacy pre-v168 array; merged into `dailies` on load, always empty after that (see load()'s migration)
   tests:[],               // test results: [{id, type, date, score, raw, linkedSkill}]
   srsDecks:[],            // [{id, name, cards:[{id, front, back, due, interval, ease, reps}]}]
   palaces:[],             // memory palaces: [{id, name, loci:[{place, item}]}]
@@ -108,14 +108,14 @@ const DEFAULT = {
     {id:id(), name:"Set a phone reminder for morning meditation", diff:"easy", path:"personal", done:false},
     {id:id(), name:"Pick a book for your reward shelf", diff:"easy", path:"personal", done:false},
   ],
-  dailies:[
-    {id:id(), name:"🧘 Meditate 20–30 min (morning)", diff:"med", path:"personal", done:false, best:0},
-    {id:id(), name:"💪 Today's training session (see FM tab)", diff:"hard", path:"physical", done:false, best:0},
-    {id:id(), name:"📚 Study for an officer-knowledge quiz", diff:"med", path:"academic", done:false, best:0},
-    {id:id(), name:"📋 Plan top 3 priorities for the day", diff:"easy", path:"tactical", done:false, best:0},
-    {id:id(), name:"🎯 Deep-work block: 60 min, no phone", diff:"med", path:"cognitive", done:false, best:0},
-    {id:id(), name:"📵 Phone away 30 min before bed", diff:"easy", path:"personal", done:false, best:0},
-    {id:id(), name:"💧 Hydrate + 7+ hrs sleep target", diff:"easy", path:"physiological", done:false, best:0},
+  dailies:[               // kind:"order" (Path XP + readiness) or "habit" (flat reward, optional skill-feed) — merged v168
+    {id:id(), name:"🧘 Meditate 20–30 min (morning)", kind:"order", diff:"med", path:"personal", done:false, best:0, streak:0, lastDone:null, graceUsed:false, history:[]},
+    {id:id(), name:"💪 Today's training session (see FM tab)", kind:"order", diff:"hard", path:"physical", done:false, best:0, streak:0, lastDone:null, graceUsed:false, history:[]},
+    {id:id(), name:"📚 Study for an officer-knowledge quiz", kind:"order", diff:"med", path:"academic", done:false, best:0, streak:0, lastDone:null, graceUsed:false, history:[]},
+    {id:id(), name:"📋 Plan top 3 priorities for the day", kind:"order", diff:"easy", path:"tactical", done:false, best:0, streak:0, lastDone:null, graceUsed:false, history:[]},
+    {id:id(), name:"🎯 Deep-work block: 60 min, no phone", kind:"order", diff:"med", path:"cognitive", done:false, best:0, streak:0, lastDone:null, graceUsed:false, history:[]},
+    {id:id(), name:"📵 Phone away 30 min before bed", kind:"order", diff:"easy", path:"personal", done:false, best:0, streak:0, lastDone:null, graceUsed:false, history:[]},
+    {id:id(), name:"💧 Hydrate + 7+ hrs sleep target", kind:"order", diff:"easy", path:"physiological", done:false, best:0, streak:0, lastDone:null, graceUsed:false, history:[]},
   ],
   bosses:[
     {id:id(), name:"Hit 450+ AFT (raise DL & SDC)", hp:20, maxhp:20, path:"physical", checkpoints:[]},

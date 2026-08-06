@@ -76,7 +76,7 @@ function finishQuiz(){
     // add daily review order if not present
     const reviewName="🧠 Review: "+t.name+" (retake quiz)";
     if(!S.dailies.some(d=>d.review===QZ.key)){
-      S.dailies.push({id:id(),name:reviewName,diff:"easy",track:"knowledge",done:false,best:0,review:QZ.key});
+      S.dailies.push({id:id(),name:reviewName,kind:"order",diff:"easy",track:"knowledge",done:false,best:0,streak:0,lastDone:null,graceUsed:false,history:[],review:QZ.key});
     }
     // advance the "pass every quiz" objective
     const obj=S.bosses.find(b=>b.auto==="quizzes");

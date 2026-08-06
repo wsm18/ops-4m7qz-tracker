@@ -13,11 +13,11 @@ function getWarriorsFocus(){
   }
   // 2. Hardest incomplete daily order
   for(const diff of ["hard","med","easy"]){
-    const d=(S.dailies||[]).find(x=>!x.done && x.diff===diff);
+    const d=(S.dailies||[]).find(x=>x.kind==="order"&&!x.done && x.diff===diff);
     if(d) return {icon:"🎯", action:d.name, sub:"Daily order", btn:"All orders →", tab:"dailies"};
   }
   // 3. Habits due today
-  const habitDue=(S.habits||[]).find(h=>!habitDoneToday(h));
+  const habitDue=(S.dailies||[]).find(h=>h.kind==="habit"&&h.lastDone!==localYMD());
   if(habitDue) return {icon:"📋", action:habitDue.name, sub:"Habit due today", btn:"All habits →", tab:"dailies"};
   // 4. Fading skill
   const fading=(S.lifeSkills||[]).filter(s=>!s.group).map(s=>({s,q:typeof skQuest==="function"?skQuest(s):null})).filter(x=>x.q&&x.q.type==="decay")[0];
@@ -45,14 +45,14 @@ function getNeglectedPath(){
 
 // Inline daily orders card for Dawn — check off right here without switching tabs.
 function dawnOrdersHtml(){
-  const dailies=S.dailies||[];
+  const dailies=(S.dailies||[]).filter(d=>d.kind==="order");
   if(!dailies.length) return "";
   const done=dailies.filter(d=>d.done).length;
   const allDone=done===dailies.length;
   const sorted=dailies.slice().sort((a,b)=>(a.done?1:0)-(b.done?1:0));
   const show=sorted.slice(0,5);
   const extra=sorted.length>5?sorted.length-5:0;
-  const rows=show.map(d=>`<div class="dawn-order-row${d.done?" done":""}"><button class="dawn-ck${d.done?" done":""}" data-d="${d.id}">${d.done?"✓":""}</button><span class="dawn-order-name">${esc(d.name)}</span></div>`).join("");
+  const rows=show.map(d=>`<div class="dawn-order-row${d.done?" done":""}"><button class="dawn-ck${d.done?" done":""}" data-dtdo="${d.id}">${d.done?"✓":""}</button><span class="dawn-order-name">${esc(d.name)}</span></div>`).join("");
   const header=allDone
     ?`<div class="td-h fn-h" style="color:var(--jade)">✓ All orders complete</div>`
     :`<div class="td-h fn-h">Daily Orders <span style="color:var(--ember);font-size:12px">${done}/${dailies.length}</span></div>`;
@@ -103,7 +103,7 @@ function copyDailyBrief(){
   const aftLine=lastAft?`AFT: ${lastAft.total} pts (${lastAft.date})`:"AFT: not logged";
   const cd=S.profile&&S.profile.commissionDate;
   const commissLine=cd?`Commission: ${Math.max(0,Math.ceil((new Date(cd+"T12:00:00")-Date.now())/864e5))} days`:"Commission: date not set";
-  const done=(S.dailies||[]).filter(d=>d.done).length, total=(S.dailies||[]).length;
+  const done=(S.dailies||[]).filter(d=>d.kind==="order"&&d.done).length, total=(S.dailies||[]).filter(d=>d.kind==="order").length;
   const overdueCount=(S.quests||[]).filter(q=>!q.done&&q.due&&q.due<localYMD()).length;
   const activeQ=(S.quests||[]).filter(q=>!q.done).length;
   const brief=[
@@ -303,9 +303,11 @@ function renderToday(){
     </div>${restPills?`<div class="milestone-dawn">${restPills}</div>`:""}`;
   }
 
-  // ── Orders counts (used by both the inline card and streak protection)
-  const ordersLeft=(S.dailies||[]).filter(d=>!d.done).length;
-  const ordersTotal=(S.dailies||[]).length;
+  // ── Orders counts (used by both the inline card and streak protection) — kind:"order"
+  // only, since habit-kind items never set .done (their "done today" signal is
+  // lastDone===today instead) and shouldn't count toward the orders-remaining tally.
+  const ordersLeft=(S.dailies||[]).filter(d=>d.kind==="order"&&!d.done).length;
+  const ordersTotal=(S.dailies||[]).filter(d=>d.kind==="order").length;
 
   // ── Today's training session (always shown; compact card from plan.js)
   const sessHtml=typeof dawnSessionHtml==="function"?dawnSessionHtml():"";

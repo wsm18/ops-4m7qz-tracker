@@ -175,6 +175,7 @@
   .tag.diff-med{color:var(--gold);border-color:#5e4715}
   .tag.diff-hard{color:var(--ember);border-color:#5e2f1c}
   .tag.streakt{color:var(--ember);border-color:#5e2f1c;background:rgba(212,102,58,.08)}
+  .tag.habitt{color:var(--jade);border-color:#3c5230;background:rgba(111,158,84,.08)}
   .del{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:18px;padding:4px 6px;flex:none}
   .del:hover{color:var(--blood)}
 
@@ -703,6 +704,9 @@
   .ah-recovery.easy{background:rgba(156,74,52,.14);border-color:var(--blood)}
   .ah-recovery-detail{font-size:11px;color:var(--ink-faint);margin-top:4px;font-style:italic}
   /* Habits */
+  .dt-kind-toggle{display:flex;gap:6px;margin-bottom:9px}
+  .dt-kind-btn{flex:1;padding:7px;border-radius:7px;border:1px solid var(--line);background:var(--panel-2);color:var(--ink-dim);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s}
+  .dt-kind-btn.active{background:var(--jade);border-color:var(--jade);color:#0e1108}
   .habit-add-wrap{margin-top:12px;border:1px dashed var(--line);border-radius:10px;padding:10px 13px}
   .habit-add-wrap summary{cursor:pointer;font-size:13px;color:var(--ink-dim);font-weight:600}
   .habit-add-wrap summary:hover{color:var(--gold)}

@@ -398,10 +398,8 @@ document.body.addEventListener("click",e=>{
   const mbrrm=e.target.closest("[data-mbrrm]"); if(mbrrm){ _mbRoles.splice(+mbrrm.dataset.mbrrm,1); renderMbRoleInputs(); return; }
   const evdel=e.target.closest("[data-evdel]"); if(evdel){ if(confirm("Remove this event?")){ S.events=S.events.filter(x=>x.id!==evdel.dataset.evdel); save(); render(); } return; }
   const voldel=e.target.closest("[data-voldel]"); if(voldel){ S.volunteer=S.volunteer.filter(v=>v.id!==voldel.dataset.voldel); save(); render(); return; }
-  const hbdo=e.target.closest("[data-hbdo]"); if(hbdo){ habitDo(hbdo.dataset.hbdo); return; }
-  const hbdel=e.target.closest("[data-hbdel]"); if(hbdel){ if(confirm("Delete this habit? Its streak history will be lost.")){ S.habits=S.habits.filter(h=>h.id!==hbdel.dataset.hbdel); save(); render(); } return; }
-  const hbstart=e.target.closest("[data-hbstart]"); if(hbstart){ const st=HABIT_STARTERS.find(x=>x.name===hbstart.dataset.hbstart); if(st && !S.habits.some(h=>h.name===st.name)){ S.habits.push({id:id(),name:st.name,linkedSkill:st.skill,streak:0,bestStreak:0,lastDone:null,graceUsed:false,history:[]}); save(); render(); toast("📋 Added: "+st.name); } return; }
-  const hbview=e.target.closest("[data-hbview]"); if(hbview){ const hid=hbview.dataset.hbview; if(typeof _hbView!=="undefined"){ _hbView[hid]=(_hbView[hid]==='month')?'strip':'month'; if(typeof renderHabits==="function")renderHabits(); } return; }
+  // Habit done/delete/starter/calendar-toggle handlers now live in events.js and
+  // dailies.js — Habits merged into the unified S.dailies list in v168.
   const teststart=e.target.closest("[data-teststart]"); if(teststart){ const tid=teststart.dataset.teststart; if(tid==="reaction")startReaction(); else if(tid==="digitspan")startDigitSpan(); else if(tid==="typing")startTyping(); else if(tid==="nback")startNback(); else if(tid==="gonogo")startGoNoGo(); else if(tid==="procspeed")startProcSpeed(); else if(tid==="mathsprint")startMathSprint(); return; }
   const rdstart=e.target.closest("[data-rdstart]"); if(rdstart){ if(typeof startReading==="function") startReading(); return; }
   const srsReview=e.target.closest("[data-srsreview]"); if(srsReview){ startSrsReview(srsReview.dataset.srsreview); return; }

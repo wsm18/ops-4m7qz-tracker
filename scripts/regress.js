@@ -23,7 +23,7 @@ const server = http.createServer((req, res) => {
 
 // Primary tabs are always visible; secondary tabs live inside the .nav-more drawer (hidden until opened).
 const PRIMARY_TABS = ["today", "quests", "dailies", "plan", "aft", "log", "skills"];
-const SECONDARY_TABS = ["profile", "test", "quizzes", "bosses", "board", "shop", "awards", "records", "weight", "trophies"];
+const SECONDARY_TABS = ["profile", "test", "quizzes", "bosses", "board", "shop", "awards", "records", "weight", "trophies", "garden"];
 const TABS = [...PRIMARY_TABS, ...SECONDARY_TABS];
 
 (async () => {

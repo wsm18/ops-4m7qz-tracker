@@ -50,12 +50,8 @@ document.getElementById("qAdd").onclick=()=>{
   const qStepsEl=document.getElementById("qSteps"); if(qStepsEl) qStepsEl.value="";
   save();render();
 };
-document.getElementById("dAdd").onclick=()=>{
-  const n=document.getElementById("dName").value.trim();if(!n)return;
-  const path=document.getElementById("dPath").value||"tactical";
-  S.dailies.unshift({id:id(),name:n,diff:document.getElementById("dDiff").value,path:path,done:false,best:0});
-  document.getElementById("dName").value="";save();render();
-};
+// Old #dAdd Daily Order add-button removed v168 — superseded by dailies.js's unified
+// #dtAdd handler (Order/Habit kind toggle), which lives in dailies.html now.
 document.getElementById("bAdd").onclick=()=>{
   const n=document.getElementById("bName").value.trim();if(!n)return;
   const checksRaw=(document.getElementById("bChecks")||{}).value||"";
@@ -110,13 +106,44 @@ document.body.addEventListener("click",e=>{
     }
     return;
   }
-  // complete daily
-  if(t.dataset.d){const d=S.dailies.find(x=>x.id===t.dataset.d);if(d&&!d.done){d.done=true;d.doneTs=Date.now();const v=VALUES.daily[d.diff];grant(v.xp,v.g,"Order executed",d.path||"tactical");const allNow=S.dailies.filter(x=>!x.paused).every(x=>x.done);if(allNow){onPerfectDay();}}else if(d&&d.done){d.done=false;save();render();}return}
+  // complete a daily task (Order or Habit — both live in S.dailies since v168's merge)
+  if(t.dataset.dtdo){
+    const d=S.dailies.find(x=>x.id===t.dataset.dtdo);
+    if(d && d.kind==="habit"){
+      if(d.lastDone===todayStr()) return; // already done today
+      dailyTaskMarkDone(d);
+      S.gold=(S.gold||0)+3;
+      if(d.linkedSkill){ const sk=S.lifeSkills.find(s=>s.name===d.linkedSkill); if(sk && sk.currentLevel>0){ sk.lastQuestTs=Date.now(); } }
+      save(); render();
+      toast(`✅ ${esc(d.name)} — ${d.streak} day streak`);
+    } else if(d && !d.done){
+      dailyTaskMarkDone(d);
+      d.done=true; d.doneTs=Date.now();
+      const v=VALUES.daily[d.diff]; grant(v.xp,v.g,"Order executed",d.path||"tactical");
+      const allNow=S.dailies.filter(x=>x.kind==="order"&&!x.paused).every(x=>x.done);
+      if(allNow){ onPerfectDay(); }
+    } else if(d && d.done){
+      d.done=false; save(); render();
+    }
+    return;
+  }
+  if(t.dataset.dtdel){
+    const d=S.dailies.find(x=>x.id===t.dataset.dtdel);
+    const msg=d&&d.kind==="habit"?"Delete this habit? Its streak history will be lost.":"Delete this daily task? Its streak history will be lost.";
+    if(confirm(msg)){ S.dailies=S.dailies.filter(x=>x.id!==t.dataset.dtdel); save(); render(); }
+    return;
+  }
+  // toggle a per-task streak calendar between 60-day strip and month grid
+  if(t.dataset.hbview){
+    const hid=t.dataset.hbview;
+    if(typeof _hbView!=="undefined"){ _hbView[hid]=(_hbView[hid]==='month')?'strip':'month'; if(typeof renderDailyTasks==="function") renderDailyTasks(); }
+    return;
+  }
   // pause / resume daily order
-  if(t.dataset.dpause){const d=S.dailies.find(x=>x.id===t.dataset.dpause);if(d){d.paused=!!parseInt(t.dataset.dpausestate);save();renderDailies();}return}
-  // reorder daily orders
-  if(t.dataset.moveup){const idx=S.dailies.findIndex(d=>d.id===t.dataset.moveup);if(idx>0){[S.dailies[idx-1],S.dailies[idx]]=[S.dailies[idx],S.dailies[idx-1]];save();renderDailies();}return}
-  if(t.dataset.movedown){const idx=S.dailies.findIndex(d=>d.id===t.dataset.movedown);if(idx<S.dailies.length-1){[S.dailies[idx],S.dailies[idx+1]]=[S.dailies[idx+1],S.dailies[idx]];save();renderDailies();}return}
+  if(t.dataset.dpause){const d=S.dailies.find(x=>x.id===t.dataset.dpause);if(d){d.paused=!!parseInt(t.dataset.dpausestate);save();renderDailyTasks();}return}
+  // reorder daily tasks
+  if(t.dataset.moveup){const idx=S.dailies.findIndex(d=>d.id===t.dataset.moveup);if(idx>0){[S.dailies[idx-1],S.dailies[idx]]=[S.dailies[idx],S.dailies[idx-1]];save();renderDailyTasks();}return}
+  if(t.dataset.movedown){const idx=S.dailies.findIndex(d=>d.id===t.dataset.movedown);if(idx<S.dailies.length-1){[S.dailies[idx],S.dailies[idx+1]]=[S.dailies[idx+1],S.dailies[idx]];save();renderDailyTasks();}return}
   // boss checkpoint tick
   if(t.dataset.bcheck){
     const b=S.bosses.find(x=>x.id===t.dataset.bcheck);
@@ -170,7 +197,7 @@ document.body.addEventListener("click",e=>{
   }
   // deletes
   if(t.dataset.dq){S.quests=S.quests.filter(x=>x.id!==t.dataset.dq);save();render();return}
-  if(t.dataset.dd){S.dailies=S.dailies.filter(x=>x.id!==t.dataset.dd);save();render();return}
+  // (old data-dd Daily Order delete removed v168 — superseded by data-dtdel above)
   if(t.dataset.db){S.bosses=S.bosses.filter(x=>x.id!==t.dataset.db);save();render();return}
   if(t.dataset.dr){S.rewards=S.rewards.filter(x=>x.id!==t.dataset.dr);save();render();return}
   // install prompt dismiss / one-tap install
@@ -253,7 +280,7 @@ document.getElementById("editRankBtn").onclick=()=>{
 };
 
 // Enter-to-submit
-["qName","dName"].forEach(idn=>document.getElementById(idn).addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById(idn==="qName"?"qAdd":"dAdd").click();}));
+["qName","dtName"].forEach(idn=>document.getElementById(idn).addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById(idn==="qName"?"qAdd":"dtAdd").click();}));
 
 // oath archive search — filter the completed oaths details on keystroke
 document.body.addEventListener("input",e=>{

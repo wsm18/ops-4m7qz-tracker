@@ -1,4 +1,12 @@
-// ===== Habits (daily quests, per-habit streaks, skill feed, grace day) =====
+// ===== Daily Tasks — unified Habits + Daily Orders (merged in v168) =====
+// Both used to be separate lists with separate streak logic; they're now one array
+// (S.dailies) with a `kind:"order"|"habit"` discriminator. Every item gets its own
+// individual streak + one-time grace day (a feature that only Habits had before, and
+// which completes the `d.best` field Daily Orders always displayed but never actually
+// updated). Orders still grant Path XP/merit and count toward the day's overall
+// readiness/perfect-day streak; Habits still grant a flat reward and can feed a
+// linked skill's fade timer, deliberately kept off the Path-XP economy — that
+// distinction is preserved from the pre-merge design, just presented as one list now.
 const HABIT_STARTERS=[
   {name:"Sleep 7+ hours", skill:null},
   {name:"Drink water (hydrate)", skill:null},
@@ -16,30 +24,20 @@ const HABIT_STARTERS=[
 function localYMD(d){ d=d||new Date(); const z=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate()); }
 function todayStr(){ return localYMD(); }
 function dayDiff(aStr,bStr){ return Math.round((new Date(bStr)-new Date(aStr))/864e5); }
-function habitDoneToday(h){ return h.lastDone===todayStr(); }
-function habitDo(hid){
-  const h=S.habits.find(x=>x.id===hid); if(!h||habitDoneToday(h)) return;
+// Individual per-item streak/grace bookkeeping — same algorithm for every daily task
+// now, regardless of kind. Mutates d in place; caller handles the kind-specific reward.
+function dailyTaskMarkDone(d){
   const today=todayStr();
-  if(h.lastDone){
-    const gap=dayDiff(h.lastDone, today);
-    if(gap===1){ h.streak=(h.streak||0)+1; }                 // consecutive
-    else if(gap===2 && !h.graceUsed){ h.streak=(h.streak||0)+1; h.graceUsed=true; } // one miss, grace covers it
-    else { h.streak=1; h.graceUsed=false; }                  // streak broke
-  } else { h.streak=1; h.graceUsed=false; }
-  h.lastDone=today;
-  if(h.streak>(h.bestStreak||0)) h.bestStreak=h.streak;
-  h.history=h.history||[]; h.history.push(today); if(h.history.length>400) h.history=h.history.slice(-400);
-  // feed linked skill: refresh its fade timer (practiced today)
-  if(h.linkedSkill){
-    const sk=S.lifeSkills.find(s=>s.name===h.linkedSkill);
-    if(sk && sk.currentLevel>0){ sk.lastQuestTs=Date.now(); }
-  }
-  // light global momentum (habits count toward the day's effort)
-  S.gold=(S.gold||0)+3;
-  save(); render();
-  toast(`✅ ${esc(h.name)} — ${h.streak} day streak${h.graceUsed&&dayDiff(h.lastDone,today)===0?'':''}`);
+  if(d.lastDone){
+    const gap=dayDiff(d.lastDone, today);
+    if(gap===1){ d.streak=(d.streak||0)+1; }                 // consecutive
+    else if(gap===2 && !d.graceUsed){ d.streak=(d.streak||0)+1; d.graceUsed=true; } // one miss, grace covers it
+    else { d.streak=1; d.graceUsed=false; }                  // streak broke
+  } else { d.streak=1; d.graceUsed=false; }
+  d.lastDone=today;
+  if(d.streak>(d.best||0)) d.best=d.streak;
+  d.history=d.history||[]; d.history.push(today); if(d.history.length>400) d.history=d.history.slice(-400);
 }
-function habitReset(){ /* streaks are computed lazily via gap on next complete; nothing scheduled needed */ }
 // effective streak display: if more than 1 day missed and not done today, streak is stale → show at risk
 function habitStreakState(h){
   if(!h.lastDone) return {streak:0, state:"new"};
@@ -60,53 +58,7 @@ function habitHeatMap(h){
   }
   return `<div class="habit-heat-row">${squares.join('')}</div>`;
 }
-function renderHabits(){
-  const wrap=document.getElementById("habitQuests"); if(!wrap) return;
-  // populate skill dropdown + starters (once per render is fine)
-  const sel=document.getElementById("hbSkill");
-  if(sel){ const cur=sel.value; sel.innerHTML='<option value="">— none —</option>'+S.lifeSkills.filter(s=>!s.group).map(s=>`<option value="${esc(s.name)}">${esc(s.name)}</option>`).join(""); sel.value=cur; }
-  const starters=document.getElementById("hbStarters");
-  if(starters){ starters.innerHTML=HABIT_STARTERS.filter(st=>!S.habits.some(h=>h.name===st.name)).map(st=>`<button class="hb-starter-btn" data-hbstart="${esc(st.name)}">+ ${esc(st.name)}</button>`).join("")||'<span style="color:var(--ink-faint);font-size:12px">All starters added.</span>'; }
-  if(!S.habits.length){ wrap.innerHTML=`<div class="aw-empty"><span class="big">📋</span>No habits yet. Add one below to start building a daily routine.</div>`; return; }
-  // count done today for the hint
-  const doneCount=S.habits.filter(habitDoneToday).length;
-  const hint=document.getElementById("habitStreakHint"); if(hint) hint.textContent=`${doneCount}/${S.habits.length} done today`;
-  // 7-day consistency banner
-  const last7=Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()-i);return localYMD(d);});
-  const weekPcts=S.habits.map(h=>{const done=last7.filter(d=>(h.history||[]).includes(d)).length;return {name:h.name,pct:Math.round(done/7*100)};});
-  const avgWk=weekPcts.length?Math.round(weekPcts.reduce((s,h)=>s+h.pct,0)/weekPcts.length):0;
-  const atRisk=weekPcts.filter(h=>h.pct<57).map(h=>h.name);
-  const weekSummary=`<div class="orders-week-summary">7-day: <b>${avgWk}%</b>${atRisk.length?' · ⚠️ '+atRisk.slice(0,2).map(n=>esc(n)).join(', ')+' lagging':' · on pace'}</div>`;
-  wrap.innerHTML=weekSummary+S.habits.map(h=>{
-    const st=habitStreakState(h);
-    const done=st.state==="done";
-    const graceIcon=(st.state==="grace"&&!h.graceUsed)?' ⏰':(h.graceUsed&&st.state!=="done"?' ⚠️':'');
-    const streakBadge = st.streak>0 ? `<span class="hb-streak ${st.state}">🔥 ${st.streak}${graceIcon}</span>` : "";
-    let note="";
-    if(st.state==="grace") note=`<div class="hb-note warn">Missed yesterday — complete today to use your grace day and keep the streak.</div>`;
-    else if(st.state==="broken" && h.streak>0) note=`<div class="hb-note warn">Streak will reset — that's okay, just start again today.</div>`;
-    else if(h.linkedSkill) note=`<div class="hb-note">Feeds: ${esc(h.linkedSkill)}</div>`;
-    const best=h.bestStreak||0;
-    const cur=st.streak||0;
-    const atPeak=cur>=best&&cur>0&&best>0;
-    const bestHtml=best>0?`<div class="hb-best${atPeak?' at-peak':''}">Best: ${best} day${best!==1?'s':''} ${atPeak?' ⭐':''}</div>`:'';
-    const view=_hbView[h.id]||'strip';
-    const calView=view==='month'?habitMonthGrid(h):habitHeatMap(h);
-    const toggleBtn=(h.history&&h.history.length)?`<button class="hb-view-toggle ${view==='month'?'on':''}" data-hbview="${h.id}">${view==='month'?'60d':'Cal'}</button>`:'';
-    return `<div class="hb-card ${done?'done':''}">
-      <div class="hb-top-row">
-        <button class="hb-check ${done?'on':''}" data-hbdo="${h.id}" ${done?'disabled':''}>${done?'✓':''}</button>
-        <div class="hb-body"><div class="hb-name">${esc(h.name)}</div>${note}</div>
-        ${streakBadge}
-        ${toggleBtn}
-        <button class="hb-del" data-hbdel="${h.id}">✕</button>
-      </div>
-      ${calView}
-      ${bestHtml}
-    </div>`;
-  }).join("");
-}
-// per-habit UI view: "strip" (60-day heat map) or "month" (current month grid)
+// per-task UI view: "strip" (60-day heat map) or "month" (current month grid)
 const _hbView={};
 function habitMonthGrid(h){
   const doneSet=new Set(h.history||[]);
@@ -128,6 +80,62 @@ function habitMonthGrid(h){
     cells.push(`<div class="hb-month-cell ${cls}" title="${ds}"></div>`);
   }
   return `<div class="hb-month-header">${header}</div><div class="hb-month-grid">${cells.join('')}</div>`;
+}
+
+function renderDailyTasks(){
+  const el=document.getElementById("dtList"); if(!el) return;
+  // populate skill dropdown + starters (once per render is fine)
+  const sel=document.getElementById("dtSkill");
+  if(sel){ const cur=sel.value; sel.innerHTML='<option value="">— none —</option>'+S.lifeSkills.filter(s=>!s.group).map(s=>`<option value="${esc(s.name)}">${esc(s.name)}</option>`).join(""); sel.value=cur; }
+  const starters=document.getElementById("hbStarters");
+  if(starters){ starters.innerHTML=HABIT_STARTERS.filter(st=>!S.dailies.some(d=>d.name===st.name)).map(st=>`<button class="hb-starter-btn" data-hbstart="${esc(st.name)}">+ ${esc(st.name)}</button>`).join("")||'<span style="color:var(--ink-faint);font-size:12px">All starters added.</span>'; }
+  if(!S.dailies.length){ el.innerHTML=`<div class="aw-empty"><span class="big">📋</span>No daily tasks yet. Add an Order (Path XP + readiness) or a Habit (streak + skill-feed) below.</div>`; return; }
+  const activeLogDays=(S.streakLog||[]).filter(e=>e.pct>0).length;
+  const isStale=d=>{
+    if(d.paused) return false;
+    if(!d.doneTs) return activeLogDays>=7;
+    return (Date.now()-d.doneTs)/864e5>7;
+  };
+  el.innerHTML=S.dailies.map((d,i)=>{
+    const isHabit=d.kind==="habit";
+    const st=habitStreakState(d);
+    const doneToday=isHabit?(d.lastDone===todayStr()):!!d.done;
+    const graceIcon=(st.state==="grace"&&!d.graceUsed)?' ⏰':(d.graceUsed&&st.state!=="done"?' ⚠️':'');
+    const streakBadge = st.streak>0 ? `<span class="hb-streak ${st.state}">🔥 ${st.streak}${graceIcon}</span>` : "";
+    let note="";
+    if(st.state==="grace") note=`<div class="hb-note warn">Missed yesterday — complete today to use your grace day and keep the streak.</div>`;
+    else if(st.state==="broken" && (d.streak||0)>0) note=`<div class="hb-note warn">Streak will reset — that's okay, just start again today.</div>`;
+    else if(isHabit&&d.linkedSkill) note=`<div class="hb-note">Feeds: ${esc(d.linkedSkill)}</div>`;
+    const best=d.best||0;
+    const cur=st.streak||0;
+    const atPeak=cur>=best&&cur>0&&best>0;
+    const bestHtml=best>0?`<div class="hb-best${atPeak?' at-peak':''}">Best: ${best} day${best!==1?'s':''} ${atPeak?' ⭐':''}</div>`:'';
+    const view=_hbView[d.id]||'strip';
+    const calView=(d.history&&d.history.length)?(view==='month'?habitMonthGrid(d):habitHeatMap(d)):'';
+    const toggleBtn=(d.history&&d.history.length)?`<button class="hb-view-toggle ${view==='month'?'on':''}" data-hbview="${d.id}">${view==='month'?'60d':'Cal'}</button>`:'';
+    const kindTag=isHabit?`<span class="tag habitt">Habit</span>`:diffTag('daily',d.diff);
+    const meta=isHabit?kindTag:`${kindTag}${pathTag(d.path)}`;
+    const pausedHtml=(!isHabit&&d.paused)?`<span class="order-paused">⏸ paused</span><button class="order-pause-btn" data-dpause="${d.id}" data-dpausestate="0" title="Resume">Resume</button>`:(!isHabit?`<button class="order-pause-btn" data-dpause="${d.id}" data-dpausestate="1" title="Pause">⏸</button>`:'');
+    const upBtn=i>0?`<button class="daily-move-btn" data-moveup="${d.id}" title="Move up">▲</button>`:`<button class="daily-move-btn" style="visibility:hidden" aria-hidden="true">▲</button>`;
+    const downBtn=i<S.dailies.length-1?`<button class="daily-move-btn" data-movedown="${d.id}" title="Move down">▼</button>`:`<button class="daily-move-btn" style="visibility:hidden" aria-hidden="true">▼</button>`;
+    return `<div class="hb-card ${doneToday?'done':''}${d.paused?' paused':''}">
+      <div class="hb-top-row">
+        <div class="daily-move-col">${upBtn}${downBtn}</div>
+        <button class="hb-check ${doneToday?'on':''}" data-dtdo="${d.id}" ${doneToday?'disabled':''}>${doneToday?'✓':''}</button>
+        <div class="hb-body"><div class="hb-name">${esc(d.name)}</div>
+          <div class="c-meta">${meta}${bestHtml?'':''}${isStale(d)?`<span class="order-stale" title="Not done in 7+ days — consider revising">⚠ stale</span>`:''}</div>
+          ${note}
+        </div>
+        ${streakBadge}
+        ${toggleBtn}
+        ${pausedHtml}
+        <button class="hb-del" data-dtdel="${d.id}">✕</button>
+      </div>
+      ${calView}
+      ${bestHtml}
+    </div>`;
+  }).join("");
+  if(typeof setupDailyCalToggle==="function") setupDailyCalToggle();
 }
 
 let _dailyCalVisible=false;
@@ -152,13 +160,42 @@ function setupDailyCalToggle(){
   if(_dailyCalVisible) renderDailyCal();
   btn.onclick=()=>{ _dailyCalVisible=!_dailyCalVisible; btn.classList.toggle("active",_dailyCalVisible); wrap.style.display=_dailyCalVisible?"block":"none"; if(_dailyCalVisible) renderDailyCal(); };
 }
-const _hbAdd=document.getElementById("hbAdd");
-if(_hbAdd) _hbAdd.onclick=()=>{
-  const name=document.getElementById("hbName").value.trim(); if(!name){toast("Name the habit");return;}
-  const linkedSkill=document.getElementById("hbSkill").value||null;
-  S.habits.push({id:id(),name,linkedSkill,streak:0,bestStreak:0,lastDone:null,graceUsed:false,history:[]});
-  document.getElementById("hbName").value="";
-  save(); render();
-  toast("📋 Habit added");
-};
 
+// ---- unified add form: Kind toggle switches which extra fields show ----
+let _dtKind="order";
+const _dtKindBtns=document.querySelectorAll("[data-dtkind]");
+_dtKindBtns.forEach(btn=>{
+  btn.onclick=()=>{
+    _dtKind=btn.dataset.dtkind;
+    _dtKindBtns.forEach(b=>b.classList.toggle("active",b===btn));
+    const orderFields=document.getElementById("dtOrderFields");
+    const habitFields=document.getElementById("dtHabitFields");
+    if(orderFields) orderFields.style.display=_dtKind==="order"?"":"none";
+    if(habitFields) habitFields.style.display=_dtKind==="habit"?"":"none";
+  };
+});
+const _dtAdd=document.getElementById("dtAdd");
+if(_dtAdd) _dtAdd.onclick=()=>{
+  const name=document.getElementById("dtName").value.trim(); if(!name){toast("Name the task first");return;}
+  if(_dtKind==="habit"){
+    const linkedSkill=document.getElementById("dtSkill").value||null;
+    S.dailies.push({id:id(),name,kind:"habit",linkedSkill,diff:"easy",path:null,done:false,streak:0,best:0,lastDone:null,graceUsed:false,history:[]});
+    toast("📋 Habit added");
+  } else {
+    const diff=document.getElementById("dtDiff").value;
+    const path=document.getElementById("dtPath").value;
+    S.dailies.push({id:id(),name,kind:"order",diff,path,done:false,best:0,streak:0,lastDone:null,graceUsed:false,history:[]});
+    toast("📋 Order added");
+  }
+  document.getElementById("dtName").value="";
+  save(); render();
+};
+document.body.addEventListener("click",e=>{
+  const sb=e.target.closest("[data-hbstart]");
+  if(sb){
+    const st=HABIT_STARTERS.find(s=>s.name===sb.dataset.hbstart); if(!st) return;
+    S.dailies.push({id:id(),name:st.name,kind:"habit",linkedSkill:st.skill,diff:"easy",path:null,done:false,streak:0,best:0,lastDone:null,graceUsed:false,history:[]});
+    save(); render();
+    return;
+  }
+});

@@ -79,6 +79,35 @@ function load(){
     merged.vitals=r.vitals||[];
     merged.healthImport=Object.assign({lastImport:null}, r.healthImport||{});
     merged.habits=r.habits||[];
+    // v168: Habits and Daily Orders merged into one list (S.dailies) with a
+    // kind:"order"|"habit" discriminator — was two separate streak-tracking systems
+    // with no shared code. One-time, idempotent merge; never touches an already-
+    // migrated save (backfilling `kind` on old dailies items is safe to repeat, but
+    // re-pushing habits every load would duplicate them, hence the flag).
+    merged._habitsMerged=r._habitsMerged||false;
+    if(!merged._habitsMerged){
+      (merged.habits||[]).forEach(h=>{
+        merged.dailies.push({
+          id:h.id, name:h.name, kind:"habit", linkedSkill:h.linkedSkill||null,
+          diff:"easy", path:null, done:false, doneTs:null,
+          streak:h.streak||0, best:h.bestStreak||0, lastDone:h.lastDone||null,
+          graceUsed:!!h.graceUsed, history:h.history||[]
+        });
+      });
+      merged.habits=[];
+      merged._habitsMerged=true;
+    }
+    // Backfill kind:"order" + the new per-item streak fields onto any dailies item
+    // that predates the merge (including fresh DEFAULT.dailies seed items) — safe to
+    // run every load, only fills in what's missing.
+    merged.dailies.forEach(d=>{
+      if(!d.kind) d.kind="order";
+      if(d.streak===undefined) d.streak=0;
+      if(d.best===undefined) d.best=0;
+      if(d.lastDone===undefined) d.lastDone=null;
+      if(d.graceUsed===undefined) d.graceUsed=false;
+      if(!d.history) d.history=[];
+    });
     merged.tests=r.tests||[];
     merged.srsDecks=r.srsDecks||[];
     merged.palaces=r.palaces||[];
@@ -108,14 +137,22 @@ function skillLevel(xp){let lvl=1,need=80,acc=0;while(xp>=acc+need){acc+=need;lv
 
 /* ---------------- Daily reset & streak ---------------- */
 function today(){return new Date().toDateString()}
+// The master streak/perfect-day/readiness economy is scoped to kind:"order" items
+// only — this matches exactly how it worked before Habits and Daily Orders merged
+// into one S.dailies array (v168). Habits never counted toward this and still don't;
+// they track their own individual streak instead (see dailies.js). Since a habit's
+// `.done` never becomes true (its "done today" signal is lastDone===today, not
+// .done), including habit-kind items in an `every(d=>d.done)` check here would make
+// a perfect day permanently unreachable the moment any habit exists.
 function checkDailyReset(){
   const t=today();
   if(S.lastDaily===t) return;
+  const orders=S.dailies.filter(d=>d.kind==="order");
   if(S.lastDaily){
     // record yesterday's completion rate before resetting
-    if(S.dailies.length>0){
-      const done=S.dailies.filter(d=>d.done).length;
-      const pct=Math.round(done/S.dailies.length*100);
+    if(orders.length>0){
+      const done=orders.filter(d=>d.done).length;
+      const pct=Math.round(done/orders.length*100);
       if(!S.streakLog) S.streakLog=[];
       S.streakLog.push({date:S.lastDaily, pct});
       S.streakLog=S.streakLog.slice(-90);
@@ -129,15 +166,16 @@ function checkDailyReset(){
   }
   if(S.streak>=3) S.streakBrokenDate=null; // recovery complete
   if(S.streak>S.bestStreak) S.bestStreak=S.streak;
-  S._yesterdayComplete = S.dailies.length>0 && S.dailies.every(d=>d.done);
+  S._yesterdayComplete = orders.length>0 && orders.every(d=>d.done);
   S.dailies.forEach(d=>d.done=false);
   S.lastDaily=t;
   save();
 }
 // readiness status — degrades as undone dailies pile up; this is the "don't slip" signal
 function readiness(){
-  const total=S.dailies.length||1;
-  const done=S.dailies.filter(d=>d.done).length;
+  const orders=S.dailies.filter(d=>d.kind==="order");
+  const total=orders.length||1;
+  const done=orders.filter(d=>d.done).length;
   const pct=done/total;
   if(pct>=1) return {label:"FULLY MISSION READY",color:"var(--jade)",pct};
   if(pct>=0.66) return {label:"READY",color:"var(--gold)",pct};
@@ -197,7 +235,7 @@ function render(){
   document.getElementById("sBest").textContent=S.bestStreak||0;
   // readiness bar
   const rd=readiness();
-  const done=S.dailies.filter(d=>d.done).length, total=S.dailies.length;
+  const done=S.dailies.filter(d=>d.kind==="order"&&d.done).length, total=S.dailies.filter(d=>d.kind==="order").length;
   document.getElementById("rdLabel").textContent=rd.label;
   document.getElementById("rdLabel").style.color=rd.color;
   document.getElementById("rdPct").textContent=done+"/"+total+" orders today";
@@ -217,14 +255,13 @@ function render(){
   } else {
     warn.className="rd-warn"; warn.innerHTML="";
   }
-  renderQuests(); renderDailies(); renderBosses(); renderShop();
+  renderQuests(); if(typeof renderDailyTasks==="function") renderDailyTasks(); renderBosses(); renderShop();
   if(typeof renderQuizzes==="function") renderQuizzes();
   if(typeof renderAft==="function") renderAft();
   if(typeof renderLog==="function") renderLog();
   if(typeof renderProfile==="function") renderProfile();
   if(typeof renderEmergencyAndBlood==="function") renderEmergencyAndBlood();
   if(typeof renderVitals==="function") renderVitals();
-  if(typeof renderHabits==="function") renderHabits();
   if(typeof renderTests==="function") renderTests();
   if(typeof renderReadingTest==="function") renderReadingTest();
   if(typeof renderSRS==="function") renderSRS();
@@ -342,30 +379,6 @@ function renderQuests(){
     <summary>✓ Completed oaths (${fullArch.length})</summary>
     ${_archItemHtml(fullArch.slice(0,40))}
   </details>`;
-}
-function renderDailies(){
-  const el=document.getElementById("dList");
-  if(!S.dailies.length){el.innerHTML=`<div class="empty"><span class="big">📋</span>No orders standing. Lay your daily oaths — executed at dawn, every dawn.</div>`;return}
-  const activeLogDays=(S.streakLog||[]).filter(e=>e.pct>0).length;
-  const isStale=d=>{
-    if(d.paused) return false;
-    if(!d.doneTs) return activeLogDays>=7;
-    return (Date.now()-d.doneTs)/864e5>7;
-  };
-  el.innerHTML=S.dailies.map((d,i)=>{
-    const pausedHtml=d.paused?`<span class="order-paused">⏸ paused</span><button class="order-pause-btn" data-dpause="${d.id}" data-dpausestate="0" title="Resume">Resume</button>`:`<button class="order-pause-btn" data-dpause="${d.id}" data-dpausestate="1" title="Pause">⏸</button>`;
-    const upBtn=i>0?`<button class="daily-move-btn" data-moveup="${d.id}" title="Move up">▲</button>`:`<button class="daily-move-btn" style="visibility:hidden" aria-hidden="true">▲</button>`;
-    const downBtn=i<S.dailies.length-1?`<button class="daily-move-btn" data-movedown="${d.id}" title="Move down">▼</button>`:`<button class="daily-move-btn" style="visibility:hidden" aria-hidden="true">▼</button>`;
-    return `<li class="card ${d.done?'done':''}${d.paused?' paused':''}">
-      <div class="daily-move-col">${upBtn}${downBtn}</div>
-      <div class="check" data-d="${d.id}">${d.done?'✓':''}</div>
-      <div class="c-body"><div class="c-name">${esc(d.name)}</div>
-        <div class="c-meta">${diffTag('daily',d.diff)}${pathTag(d.path)}${d.best?`<span class="tag streakt">🔥 best ${d.best}</span>`:''}${isStale(d)?`<span class="order-stale" title="Not done in 7+ days — consider revising">⚠ stale</span>`:''}</div></div>
-      ${pausedHtml}
-      <button class="del" data-dd="${d.id}">✕</button>
-    </li>`;
-  }).join("");
-  if(typeof setupDailyCalToggle==="function") setupDailyCalToggle();
 }
 function renderBosses(){
   const el=document.getElementById("bList");
