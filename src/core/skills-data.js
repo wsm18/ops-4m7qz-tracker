@@ -97765,6 +97765,186 @@ const SEED_SKILLS=[
    roadmap:["plan combined, written","household walked through","1st combined drill timed","2nd drill, time met/beaten"],
    advance:["Reach L1: combine all three elements into one written plan.","Reach L2: walk every household member through it.","Reach L3: run one full timed combined drill.","Reach L4: repeat the drill 6+ months later, matching or beating the time."],
    maintain:["Hold L1: keep the combined plan document current.","Hold L2: re-walk new household members through it.","Hold L3: keep the drill timing log accessible.","Hold L4: keep repeating the combined drill roughly twice a year."]},
+
+  // ══════════ Cyber Operator (technical) — Commons layer staging, v167 ══════════
+  // 25 groups x 5 setKeys = 125 Commons slots. One agent per group (5 setKeys/25 skills).
+  // ══════════════════════════════════════════════════════════════════════════════
+
+  // ── GROUP 1 | Leg: Cyber Operations Mastery | Rare: Advanced Cyber Tradecraft ──
+  // SLOT:tech_c_advanced_cyber:technical
+  // SLOT:tech_c_malware_analysis:technical
+  // SLOT:tech_c_reverse_eng:technical
+  // SLOT:tech_c_vuln_research:technical
+  // SLOT:tech_c_pentest_method:technical
+
+  // ── GROUP 2 | Leg: Cyber Operations Mastery | Rare: Exploit Development ──
+  // SLOT:tech_c_mem_layout:technical
+  // SLOT:tech_c_bof_lab:technical
+  // SLOT:tech_c_rop_chains:technical
+  // SLOT:tech_c_fmt_string:technical
+  // SLOT:tech_c_shellcode_dev:technical
+
+  // ── GROUP 3 | Leg: Cyber Operations Mastery | Rare: Red Team Operations ──
+  // SLOT:tech_c_c2_lab:technical
+  // SLOT:tech_c_kill_chain_ctf:technical
+  // SLOT:tech_c_internal_assess:technical
+  // SLOT:tech_c_engagement_plan:technical
+  // SLOT:tech_c_debrief_facil:technical
+
+  // ── GROUP 4 | Leg: Cyber Operations Mastery | Rare: Digital Forensics & Incident Response ──
+  // SLOT:tech_c_disk_imaging:technical
+  // SLOT:tech_c_evtx_analysis:technical
+  // SLOT:tech_c_timeline_recon:technical
+  // SLOT:tech_c_persistence_id:technical
+  // SLOT:tech_c_ir_writing:technical
+
+  // ── GROUP 5 | Leg: Cyber Operations Mastery | Rare: Threat Intelligence Analysis ──
+  // SLOT:tech_c_attck_mapping:technical
+  // SLOT:tech_c_actor_profile2:technical
+  // SLOT:tech_c_finished_intel:technical
+  // SLOT:tech_c_sig_dev:technical
+  // SLOT:tech_c_nontech_brief:technical
+
+  // ── GROUP 6 | Leg: Offensive Cyber Mastery | Rare: Vulnerability Assessment ──
+  // SLOT:tech2_c_off_vuln_scan_tool:technical
+  // SLOT:tech2_c_off_vuln_falsepos:technical
+  // SLOT:tech2_c_off_vuln_prioritize:technical
+  // SLOT:tech2_c_off_vuln_manual:technical
+  // SLOT:tech2_c_off_vuln_report:technical
+
+  // ── GROUP 7 | Leg: Offensive Cyber Mastery | Rare: Network Penetration Testing ──
+  // SLOT:tech2_c_off_netpen_enum:technical
+  // SLOT:tech2_c_off_netpen_foothold:technical
+  // SLOT:tech2_c_off_netpen_privesc:technical
+  // SLOT:tech2_c_off_netpen_lateral:technical
+  // SLOT:tech2_c_off_netpen_report:technical
+
+  // ── GROUP 8 | Leg: Offensive Cyber Mastery | Rare: Web Application Security Testing ──
+  // SLOT:tech2_c_off_webapp_sqli:technical
+  // SLOT:tech2_c_off_webapp_xss:technical
+  // SLOT:tech2_c_off_webapp_authz:technical
+  // SLOT:tech2_c_off_webapp_surface:technical
+  // SLOT:tech2_c_off_webapp_chain_report:technical
+
+  // ── GROUP 9 | Leg: Offensive Cyber Mastery | Rare: Wireless Security Assessment ──
+  // SLOT:tech2_c_off_wifi_recon:technical
+  // SLOT:tech2_c_off_wifi_handshake:technical
+  // SLOT:tech2_c_off_wifi_authstrength:technical
+  // SLOT:tech2_c_off_wifi_rogueap:technical
+  // SLOT:tech2_c_off_wifi_report:technical
+
+  // ── GROUP 10 | Leg: Offensive Cyber Mastery | Rare: Social Engineering Assessment ──
+  // SLOT:tech2_c_off_soceng_vectors:technical
+  // SLOT:tech2_c_off_soceng_pretext:technical
+  // SLOT:tech2_c_off_soceng_analysis:technical
+  // SLOT:tech2_c_off_soceng_roe:technical
+  // SLOT:tech2_c_off_soceng_training:technical
+
+  // ── GROUP 11 | Leg: Defensive Cyber Operations | Rare: Network Defense Architecture ──
+  // SLOT:tech2_c_def_segmentation:technical
+  // SLOT:tech2_c_def_chokepoints:technical
+  // SLOT:tech2_c_def_layering:technical
+  // SLOT:tech2_c_def_firewall_rules:technical
+  // SLOT:tech2_c_def_arch_briefing:technical
+
+  // ── GROUP 12 | Leg: Defensive Cyber Operations | Rare: SIEM & Log Management ──
+  // SLOT:tech2_c_def_log_onboarding:technical
+  // SLOT:tech2_c_def_siem_query:technical
+  // SLOT:tech2_c_def_dashboard:technical
+  // SLOT:tech2_c_def_rule_tuning:technical
+  // SLOT:tech2_c_def_timeline_recon:technical
+
+  // ── GROUP 13 | Leg: Defensive Cyber Operations | Rare: Endpoint Detection & Response ──
+  // SLOT:tech2_c_def_edr_deploy:technical
+  // SLOT:tech2_c_def_edr_triage:technical
+  // SLOT:tech2_c_def_process_behavior:technical
+  // SLOT:tech2_c_def_containment:technical
+  // SLOT:tech2_c_def_ir_lead:technical
+
+  // ── GROUP 14 | Leg: Defensive Cyber Operations | Rare: Vulnerability Management Program ──
+  // SLOT:tech2_c_def_scan_schedule:technical
+  // SLOT:tech2_c_def_risk_prioritize:technical
+  // SLOT:tech2_c_def_remediation_tracking:technical
+  // SLOT:tech2_c_def_metrics_report:technical
+  // SLOT:tech2_c_def_stakeholder_coord:technical
+
+  // ── GROUP 15 | Leg: Defensive Cyber Operations | Rare: Security Operations Center Skills ──
+  // SLOT:tech2_c_def_soc_triage:technical
+  // SLOT:tech2_c_def_playbook_exec:technical
+  // SLOT:tech2_c_def_escalation_comm:technical
+  // SLOT:tech2_c_def_shift_queue:technical
+  // SLOT:tech2_c_def_playbook_improve:technical
+
+  // ── GROUP 16 | Leg: Cyber Intelligence | Rare: OSINT Collection ──
+  // SLOT:tech2_c_intel_footprint_map:technical
+  // SLOT:tech2_c_intel_search_tradecraft:technical
+  // SLOT:tech2_c_intel_public_records:technical
+  // SLOT:tech2_c_intel_source_reliability:technical
+  // SLOT:tech2_c_intel_osint_reporting:technical
+
+  // ── GROUP 17 | Leg: Cyber Intelligence | Rare: Cyber Threat Landscape Analysis ──
+  // SLOT:tech2_c_intel_threat_triage:technical
+  // SLOT:tech2_c_intel_attck_mapping:technical
+  // SLOT:tech2_c_intel_sector_trends:technical
+  // SLOT:tech2_c_intel_landscape_brief:technical
+  // SLOT:tech2_c_intel_emerging_technique:technical
+
+  // ── GROUP 18 | Leg: Cyber Intelligence | Rare: Attribution Analysis ──
+  // SLOT:tech2_c_intel_ttp_analysis:technical
+  // SLOT:tech2_c_intel_confidence_reasoning:technical
+  // SLOT:tech2_c_intel_alt_hypothesis:technical
+  // SLOT:tech2_c_intel_attrib_report:technical
+  // SLOT:tech2_c_intel_attrib_critique:technical
+
+  // ── GROUP 19 | Leg: Cyber Intelligence | Rare: Vulnerability Intelligence ──
+  // SLOT:tech2_c_intel_vuln_tracking:technical
+  // SLOT:tech2_c_intel_exploitability:technical
+  // SLOT:tech2_c_intel_asset_correlation:technical
+  // SLOT:tech2_c_intel_active_exploit:technical
+  // SLOT:tech2_c_intel_vuln_prioritize_brief:technical
+
+  // ── GROUP 20 | Leg: Cyber Intelligence | Rare: Strategic Cyber Assessment ──
+  // SLOT:tech2_c_intel_plain_translate:technical
+  // SLOT:tech2_c_intel_impact_linking:technical
+  // SLOT:tech2_c_intel_risk_matrix:technical
+  // SLOT:tech2_c_intel_decision_brief:technical
+  // SLOT:tech2_c_intel_competing_risk:technical
+
+  // ── GROUP 21 | Leg: Mission Command Integration | Rare: Cyber Effects Planning ──
+  // SLOT:tech2_c_mc_cyber_taxonomy:technical
+  // SLOT:tech2_c_mc_effects_request:technical
+  // SLOT:tech2_c_mc_effects_sequencing:technical
+  // SLOT:tech2_c_mc_authorities:technical
+  // SLOT:tech2_c_mc_coa_cyber:technical
+
+  // ── GROUP 22 | Leg: Mission Command Integration | Rare: Cyber-EW Integration ──
+  // SLOT:tech2_c_mc_ew_overlap:technical
+  // SLOT:tech2_c_mc_ew_tabletop:technical
+  // SLOT:tech2_c_mc_ew_order_draft:technical
+  // SLOT:tech2_c_mc_ew_deconflict:technical
+  // SLOT:tech2_c_mc_ems_impact:technical
+
+  // ── GROUP 23 | Leg: Mission Command Integration | Rare: Mission Command Systems ──
+  // SLOT:tech2_c_mc_sys_navigation:technical
+  // SLOT:tech2_c_mc_overlay_posting:technical
+  // SLOT:tech2_c_mc_event_tracking:technical
+  // SLOT:tech2_c_mc_key_terrain_graphic:technical
+  // SLOT:tech2_c_mc_cop_sustainment:technical
+
+  // ── GROUP 24 | Leg: Mission Command Integration | Rare: Cyber Support to Maneuver ──
+  // SLOT:tech2_c_mc_maneuver_fit:technical
+  // SLOT:tech2_c_mc_scenario_matching:technical
+  // SLOT:tech2_c_mc_sync_matrix:technical
+  // SLOT:tech2_c_mc_car_role:technical
+  // SLOT:tech2_c_mc_plan_adjust:technical
+
+  // ── GROUP 25 | Leg: Mission Command Integration | Rare: Cyber Battle Damage Assessment ──
+  // SLOT:tech2_c_mc_bda_framework:technical
+  // SLOT:tech2_c_mc_success_criteria:technical
+  // SLOT:tech2_c_mc_effect_assessment:technical
+  // SLOT:tech2_c_mc_bda_reporting:technical
+  // SLOT:tech2_c_mc_followon_rec:technical
+
 ];
 function seedSkillsIfEmpty(){
   // If any hierarchical skills exist, leave them alone — but still add any NEW seed
