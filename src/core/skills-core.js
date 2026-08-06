@@ -181,6 +181,34 @@ function skCombineSet(setKey){
   toast(`⚡ Synthesis complete — <b>${esc(synthSeed.name)}</b> is now active!`);
   return true;
 }
+// Pure structural walk of a category's pyramid tree(s), straight from SEED_SKILLS —
+// no live-state dependency, so it's safe to memoize (SEED_SKILLS never changes at
+// runtime). A category can hold more than one Mythic tree (e.g. a legacy tree plus
+// a later second-gen one); this returns every one, not just the first.
+// Shape: [{mythic, legendaries:[{legendary, rares:[{rare, uncommons:[{uncommon, commonSetKey}]}]}]}]
+let _skPyramidTreeCache={};
+function skPyramidTrees(cat){
+  if(_skPyramidTreeCache[cat]) return _skPyramidTreeCache[cat];
+  if(typeof SEED_SKILLS==="undefined") return [];
+  const seeds=SEED_SKILLS.filter(s=>s.cat===cat&&!s.group);
+  const bySetKey={};
+  seeds.forEach(s=>{ if(s.setKey) (bySetKey[s.setKey]=bySetKey[s.setKey]||[]).push(s); });
+  const mythics=seeds.filter(s=>skRarity(s).name==="Mythic"&&s.synthesizedFrom);
+  const trees=mythics.map(mythic=>{
+    const legendaries=(bySetKey[mythic.synthesizedFrom]||[]).map(legendary=>{
+      const rares=(bySetKey[legendary.synthesizedFrom]||[]).map(rare=>{
+        const uncommons=(bySetKey[rare.synthesizedFrom]||[]).map(uncommon=>({
+          uncommon, commonSetKey:uncommon.synthesizedFrom
+        }));
+        return {rare, uncommons};
+      });
+      return {legendary, rares};
+    });
+    return {mythic, legendaries};
+  });
+  _skPyramidTreeCache[cat]=trees;
+  return trees;
+}
 // Fraction (0-1) of all pyramid-tree skills in a category that are fully mastered —
 // drives the tree view's per-world insignia brightness. A category can hold more
 // than one Mythic tree (e.g. a legacy tree plus a later second-gen one); this counts

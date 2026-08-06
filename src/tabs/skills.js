@@ -353,6 +353,63 @@ let _skSearchTerm = "";
 let _skHeatmapVisible = false;
 // Side Deck lazy-render cache, rebuilt every renderSkillsTab() pass: {cat: {buckets:{rarityKey:[skills]}, rankMap, suit}}
 let _skSideDeckCache = {};
+// Pyramid tree cache + a reference to the current render's tier-body builder — both
+// rebuilt fresh every renderSkillsTab() pass. File-scope (not local to
+// renderSkillsTab) so search (_filterSkillDecks, a separate top-level function) can
+// walk the tree and lazily reveal a match the same way a manual click would.
+let _skPyrCache = {};
+let _pyrBuildTierBodyFn = null;
+// Find a search match anywhere in a category's pyramid tree; returns the index path
+// to it ([mythicIdx], [mythicIdx,legIdx], ... down to Uncommon) or null. Doesn't
+// address individual Commons (the leaf tier) — revealing their Uncommon is enough
+// for the user to see the match once that tier's 5 cards render.
+function pyrFindPath(cat, q){
+  const cache=_skPyrCache[cat]; if(!cache) return null;
+  q=q.toLowerCase();
+  for(let mi=0; mi<cache.trees.length; mi++){
+    const tree=cache.trees[mi];
+    if(tree.mythic.name.toLowerCase().includes(q)) return [mi];
+    for(let li=0; li<tree.legendaries.length; li++){
+      const leg=tree.legendaries[li];
+      if(leg.legendary.name.toLowerCase().includes(q)) return [mi,li];
+      for(let ri=0; ri<leg.rares.length; ri++){
+        const rareEntry=leg.rares[ri];
+        if(rareEntry.rare.name.toLowerCase().includes(q)) return [mi,li,ri];
+        for(let ui=0; ui<rareEntry.uncommons.length; ui++){
+          const uncEntry=rareEntry.uncommons[ui];
+          if(uncEntry.uncommon.name.toLowerCase().includes(q)) return [mi,li,ri,ui];
+          const commons=typeof skSetMembers==="function"?skSetMembers(uncEntry.commonSetKey):[];
+          if(commons.some(c=>c.name.toLowerCase().includes(q))) return [mi,li,ri,ui];
+        }
+      }
+    }
+  }
+  return null;
+}
+// Open + lazily render every tier down to a found match, mirroring what a user
+// clicking through each level by hand would produce.
+function pyrRevealPath(cat, path){
+  if(!_pyrBuildTierBodyFn) return;
+  const deck=document.getElementById("skcat-"+cat); if(!deck) return;
+  const openAndRender=det=>{
+    if(!det) return null;
+    det.open=true;
+    const body=det.querySelector("[data-pyrbody]");
+    if(body && !body.dataset.rendered){
+      body.dataset.rendered="1";
+      const parts=det.dataset.pyr.split("|");
+      body.innerHTML=_pyrBuildTierBodyFn(parts[0], parts.slice(1).map(Number));
+    }
+    return body;
+  };
+  let body=openAndRender(deck.querySelectorAll(".sk-pyr-mythic")[path[0]]);
+  if(path.length<2||!body) return;
+  body=openAndRender(body.querySelectorAll(".sk-pyr-legendary")[path[1]]);
+  if(path.length<3||!body) return;
+  body=openAndRender(body.querySelectorAll(".sk-pyr-rare")[path[2]]);
+  if(path.length<4||!body) return;
+  openAndRender(body.querySelectorAll(".sk-pyr-uncommon")[path[3]]);
+}
 
 function renderHeatmap(){
   const el=document.getElementById("skHeatmap"); if(!el) return;
@@ -406,6 +463,12 @@ function _filterSkillDecks(){
         if(cache.buckets[k].some(sk=>sk.name.toLowerCase().includes(q))){ match=true; matchingTierKeys.push(k); }
       });
     }
+    // Same problem, worse scale, for the pyramid tree — the vast majority of skills
+    // once a path is seeded (700-1500+) live there now, lazily rendered, so a search
+    // match has to be found in the underlying tree data and the whole chain down to
+    // it (Mythic -> Legendary -> Rare -> Uncommon) opened, or it's unfindable too.
+    const pyrPath=typeof pyrFindPath==="function"?pyrFindPath(cat,q):null;
+    if(pyrPath) match=true;
     deck.hidden = !match;
     if(match){
       const body=deck.querySelector(".sk-deck-body");
@@ -421,6 +484,7 @@ function _filterSkillDecks(){
           if(tierEl&&!tierEl.open) tierEl.open=true; // fires the lazy-render toggle listener
         });
       }
+      if(pyrPath&&typeof pyrRevealPath==="function") pyrRevealPath(cat,pyrPath);
     }
   });
 }
@@ -697,6 +761,109 @@ function skProgressBlock(sk, eff){
     </div>`;
   };
 
+  // ============ PYRAMID TREE BROWSER — Mythic → Legendary → Rare → Uncommon → Common ============
+  // Replaces the old "started vs unstarted, chunked by 13" browsing scheme for
+  // pyramid-tagged skills (the vast majority once a path is seeded — 700-1500+ per
+  // path). That scheme organized by "did you touch it," not by the pyramid structure
+  // the content was actually authored around, and dumped every unstarted skill into
+  // one flat list. This organizes by the authored tree instead, lazily rendering each
+  // tier only when opened (same reasoning as the Side Deck fix above — thousands of
+  // cards in the DOM even collapsed is real cost, not just visual clutter).
+  _skPyrCache={}; // file-scope cache reset fresh each render pass — see declaration above
+  const pyrLiveOf=seed=>(S.lifeSkills||[]).find(s=>s.name===seed.name&&s.cat===seed.cat);
+  const pyrCardFace=(seed,suit,rank)=>{
+    const live=pyrLiveOf(seed); if(!live) return '';
+    if(live.currentLevel>0) return leafCard(live,false,suit,rank);
+    const liveSeed=typeof skSeedOf==="function"?skSeedOf(live.name,live.cat):null;
+    const isSynth=!!(liveSeed&&liveSeed.synthesizedFrom)&&!live.synthesisUnlocked;
+    return faceDownCard(live,suit,rank,isSynth);
+  };
+  const pyrSetSummary=setKey=>{
+    const total=typeof skSetMembers==="function"?skSetMembers(setKey).length:0;
+    const mastered=typeof skSetMasteredCount==="function"?skSetMasteredCount(setKey):0;
+    return {mastered,total};
+  };
+  const pyrStatusIcon=(mastered,total)=>mastered>=total&&total>0?'★':mastered>0?'▶':'○';
+  // Build one tier's lazy body HTML from the cached tree structure, given a
+  // data-pyr path already split into indices: [mythicIdx, legIdx?, rareIdx?, uncIdx?]
+  function pyrBuildTierBody(cat,path){
+    const cache=_skPyrCache[cat]; if(!cache) return '';
+    const {trees,suit,rankMap}=cache;
+    const tree=trees[path[0]]; if(!tree) return '';
+    if(path.length===1){
+      // Mythic opened -> show its own card + the 5 Legendaries (lazy)
+      const mythicCardHtml=pyrCardFace(tree.mythic,suit,rankMap[tree.mythic.name]);
+      const rows=tree.legendaries.map((legEntry,li)=>{
+        const {mastered,total}=pyrSetSummary(legEntry.legendary.setKey||tree.mythic.synthesizedFrom);
+        const p=[cat,path[0],li].join("|");
+        return `<details class="sk-pyr-tier sk-pyr-legendary" data-pyr="${p}">
+          <summary class="sk-pyr-tier-hdr"><span class="sk-pyr-icon">${pyrStatusIcon(mastered,total)}</span><span class="sk-pyr-name">${esc(legEntry.legendary.name)}</span><span class="sk-pyr-prog">${mastered}/${total} Rares</span></summary>
+          <div class="sk-pyr-tier-body" data-pyrbody="${p}"></div>
+        </details>`;
+      }).join("");
+      return `<div class="sk-pyr-mythic-card">${mythicCardHtml}</div><div class="sk-pyr-children">${rows}</div>`;
+    }
+    const leg=tree.legendaries[path[1]]; if(!leg) return '';
+    if(path.length===2){
+      const rareCardHtml=leg.rares.map(()=>'').join(''); // rares rendered individually below
+      const rows=leg.rares.map((rareEntry,ri)=>{
+        const {mastered,total}=pyrSetSummary(rareEntry.rare.setKey||leg.legendary.synthesizedFrom);
+        const p=[cat,path[0],path[1],ri].join("|");
+        const cardHtml=pyrCardFace(rareEntry.rare,suit,rankMap[rareEntry.rare.name]);
+        return `<div class="sk-pyr-rare-block">${cardHtml}<details class="sk-pyr-tier sk-pyr-rare" data-pyr="${p}">
+          <summary class="sk-pyr-tier-hdr"><span class="sk-pyr-icon">${pyrStatusIcon(mastered,total)}</span><span class="sk-pyr-name">Uncommons</span><span class="sk-pyr-prog">${mastered}/${total}</span></summary>
+          <div class="sk-pyr-tier-body" data-pyrbody="${p}"></div>
+        </details></div>`;
+      }).join("");
+      return `<div class="sk-pyr-children">${rows}</div>`;
+    }
+    const rare=leg.rares[path[2]]; if(!rare) return '';
+    if(path.length===3){
+      const rows=rare.uncommons.map((uncEntry,ui)=>{
+        const {mastered,total}=pyrSetSummary(uncEntry.commonSetKey);
+        const p=[cat,path[0],path[1],path[2],ui].join("|");
+        const cardHtml=pyrCardFace(uncEntry.uncommon,suit,rankMap[uncEntry.uncommon.name]);
+        return `<div class="sk-pyr-unc-block">${cardHtml}<details class="sk-pyr-tier sk-pyr-uncommon" data-pyr="${p}">
+          <summary class="sk-pyr-tier-hdr"><span class="sk-pyr-icon">${pyrStatusIcon(mastered,total)}</span><span class="sk-pyr-name">Commons</span><span class="sk-pyr-prog">${mastered}/${total}</span></summary>
+          <div class="sk-pyr-tier-body" data-pyrbody="${p}"></div>
+        </details></div>`;
+      }).join("");
+      return `<div class="sk-pyr-children">${rows}</div>`;
+    }
+    const unc=rare.uncommons[path[3]]; if(!unc) return '';
+    // Uncommon opened -> the 5 Commons, leaf tier, no further nesting
+    const commonSeeds=(typeof skSetMembers==="function"?skSetMembers(unc.commonSetKey):[]);
+    const canCombine=typeof skSetCanCombine==="function"?skSetCanCombine(unc.commonSetKey):false;
+    const combineBtn=canCombine?`<button class="sk-combine-btn" data-skcombine="${esc(unc.commonSetKey)}">⚡ Combine all ${commonSeeds.length}</button>`:'';
+    const cards=commonSeeds.map(seed=>pyrCardFace(seed,suit,rankMap[seed.name])).join("");
+    return `${combineBtn}<div class="sk-pyr-common-grid">${cards}</div>`;
+  }
+  _pyrBuildTierBodyFn=pyrBuildTierBody; // expose this render's closure for search (pyrRevealPath)
+  function renderPyramidSection(cat,pyrTops,suit,rankMap){
+    if(!pyrTops.length) return '';
+    const trees=typeof skPyramidTrees==="function"?skPyramidTrees(cat):[];
+    if(!trees.length) return '';
+    _skPyrCache[cat]={trees,suit,rankMap};
+    const mythicRows=trees.map((tree,mi)=>{
+      const seeds=trees[mi].legendaries.flatMap(l=>l.rares.flatMap(r=>r.uncommons.flatMap(u=>(typeof skSetMembers==="function"?skSetMembers(u.commonSetKey):[]))));
+      const mastered=seeds.filter(s=>{ const live=pyrLiveOf(s); return live&&live.levels&&live.currentLevel>=live.levels.length; }).length;
+      const total=seeds.length||1;
+      const pct=Math.round(mastered/total*100);
+      const p=[cat,mi].join("|");
+      const mythicLive=pyrLiveOf(tree.mythic);
+      const mythicStatus=mythicLive&&mythicLive.currentLevel>0?(mythicLive.currentLevel>=mythicLive.levels.length?'maxed':'started'):'locked';
+      return `<details class="sk-pyr-tier sk-pyr-mythic" data-pyr="${p}">
+        <summary class="sk-pyr-mythic-hdr sk-pyr-${mythicStatus}">
+          <span class="sk-pyr-mythic-icon">✦</span>
+          <span class="sk-pyr-mythic-name">${esc(tree.mythic.name)}</span>
+          <span class="sk-pyr-mythic-pct">${pct}% mastered</span>
+        </summary>
+        <div class="sk-pyr-tier-body" data-pyrbody="${p}"></div>
+      </details>`;
+    }).join("");
+    return `<div class="sk-pyramid-section"><div class="sk-pyr-section-label">Pyramid trees · ${pyrTops.length} skills</div>${mythicRows}</div>`;
+  }
+
   // Determine the most recently active path to expand by default
   const px=S.pathXP||{};
   let maxPxCat=null, maxPxVal=-1;
@@ -739,9 +906,23 @@ function skProgressBlock(sk, eff){
     const allStartedBadge=pathStartedCount===totalLeaves&&totalLeaves>0?`<span class="sk-path-badge discovered">All Collected</span>`:'';
     const allMaxedBadge=pathMaxedCount===totalLeaves&&totalLeaves>0?`<span class="sk-path-badge mastered">★ All Mastered</span>`:'';
     const pathBadges=allMaxedBadge||allStartedBadge;
-    // Split tops: groups always in main deck; leaves split by started vs unstarted
-    const mainTops=tops.filter(sk=>sk.group||(sk.currentLevel>0));
-    const sideTops=tops.filter(sk=>!sk.group&&sk.currentLevel===0);
+    // Split tops three ways: groups (Core Skills, own section), pyramid-tagged skills
+    // (the vast majority once a path is seeded — routed to the new nested tree
+    // browser below), and custom/non-pyramid top-level skills (whatever's left —
+    // typically small, user-added skills with no setKey — kept on the old flat
+    // main/side/subdeck rendering, which remains a fine fit at that scale).
+    const groupTops=tops.filter(sk=>sk.group);
+    const isPyramidSk=sk=>{
+      if(sk.group) return false;
+      const seed=typeof skSeedOf==="function"?skSeedOf(sk.name,sk.cat):null;
+      return !!(seed&&(seed.setKey||seed.synthesizedFrom));
+    };
+    const pyramidTops=tops.filter(isPyramidSk);
+    const customTops=tops.filter(sk=>!sk.group&&!isPyramidSk(sk));
+    const coreSkillsHtml=groupTops.length?`<div class="sk-core-section"><div class="sk-pyr-section-label">Core skills</div>${groupTops.map(sk=>groupCard(sk,suit,rankMap)).join("")}</div>`:'';
+    const pyramidSectionHtml=renderPyramidSection(cat,pyramidTops,suit,rankMap);
+    const mainTops=customTops.filter(sk=>sk.currentLevel>0);
+    const sideTops=customTops.filter(sk=>sk.currentLevel===0);
     const _roman=["I","II","III","IV","V","VI","VII","VIII"];
     const _SUBDECK=13;
     const chunks=[];
@@ -811,6 +992,8 @@ function skProgressBlock(sk, eff){
         <button class="sc-toggle" data-sctoggle="${cat}">⛓ Chain</button>
       </div>
       <div class="sk-deck-body${isOpen?' open':''}">
+        ${coreSkillsHtml}
+        ${pyramidSectionHtml}
         ${bodyContent}
         ${sideDeckHtml}
       </div>
@@ -861,6 +1044,21 @@ function skProgressBlock(sk, eff){
       }).join("");
     });
   });
+  // Lazy-render pyramid tree tiers (Mythic/Legendary/Rare/Uncommon) the same way —
+  // deeper tiers don't exist in the DOM until their parent is opened, so a simple
+  // querySelectorAll-once pass can't wire them. <details>'s `toggle` event also
+  // doesn't bubble, so a single delegated listener needs the capture phase to see
+  // toggles from dynamically-injected descendants at any depth.
+  listEl.addEventListener("toggle",e=>{
+    const det=e.target;
+    if(!det.classList||!det.classList.contains("sk-pyr-tier")||!det.open) return;
+    const body=det.querySelector("[data-pyrbody]");
+    if(!body||body.dataset.rendered) return;
+    body.dataset.rendered="1";
+    const parts=det.dataset.pyr.split("|");
+    const pcat=parts[0], path=parts.slice(1).map(Number);
+    body.innerHTML=pyrBuildTierBody(pcat,path);
+  },true);
   // wire search input — persist term across re-renders, filter immediately
   const srchEl=document.getElementById("skSearch");
   if(srchEl){

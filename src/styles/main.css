@@ -603,6 +603,29 @@
   .sk-side-tier-name{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--rar-col,#999)}
   .sk-side-tier-count{font-size:.58rem;color:#777;margin-left:auto}
   .sk-side-tier-body{display:flex;flex-wrap:wrap;gap:8px;padding:.4rem .5rem .6rem}
+  /* Pyramid tree browser — Mythic -> Legendary -> Rare -> Uncommon -> Common */
+  .sk-pyr-section-label{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint);margin:10px 4px 6px}
+  .sk-core-section{margin-bottom:6px}
+  .sk-pyramid-section{margin-top:4px}
+  .sk-pyr-tier{border-radius:.4rem;margin-bottom:6px}
+  .sk-pyr-mythic{border:1px solid rgba(255,215,0,.25);background:rgba(255,215,0,.04)}
+  .sk-pyr-mythic-hdr{display:flex;align-items:center;gap:.5rem;padding:.55rem .7rem;cursor:pointer;list-style:none}
+  .sk-pyr-mythic-hdr::-webkit-details-marker{display:none}
+  .sk-pyr-mythic-icon{font-size:1rem;color:var(--gold)}
+  .sk-pyr-mythic-name{flex:1;font-weight:700;font-size:.82rem}
+  .sk-pyr-mythic-pct{font-size:.62rem;color:var(--ink-faint)}
+  .sk-pyr-mythic.sk-pyr-maxed .sk-pyr-mythic-pct{color:var(--gold)}
+  .sk-pyr-mythic-card{padding:.4rem .5rem 0}
+  .sk-pyr-children{padding:.3rem .5rem .5rem 1rem;display:flex;flex-direction:column;gap:5px}
+  .sk-pyr-legendary,.sk-pyr-rare,.sk-pyr-uncommon{border:1px solid var(--line);background:var(--panel-2)}
+  .sk-pyr-tier-hdr{display:flex;align-items:center;gap:.45rem;padding:.4rem .55rem;cursor:pointer;list-style:none;font-size:.72rem}
+  .sk-pyr-tier-hdr::-webkit-details-marker{display:none}
+  .sk-pyr-icon{flex:none;font-size:.8rem;color:var(--ink-faint)}
+  .sk-pyr-name{flex:1;font-weight:600}
+  .sk-pyr-prog{font-size:.6rem;color:var(--ink-faint)}
+  .sk-pyr-tier-body{padding:.4rem .5rem .5rem}
+  .sk-pyr-rare-block,.sk-pyr-unc-block{display:flex;flex-direction:column;gap:4px}
+  .sk-pyr-common-grid{display:flex;flex-wrap:wrap;gap:8px;padding-top:4px}
   /* Collection stats in summary bar */
   .sk-summary-stat.discovered{font-weight:700;color:var(--gold)}
   .sk-stat-sep{opacity:.4;margin:0 .1rem}
