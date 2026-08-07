@@ -66,7 +66,7 @@ const TABS = [...PRIMARY_TABS, ...SECONDARY_TABS];
   if (SHOT) {
     await page.click('#sideNav button[data-tab="skills"]');
     await page.waitForTimeout(250);
-    await page.evaluate(() => { const b = [...document.querySelectorAll("button")].find((x) => /tree/i.test(x.textContent || "")); if (b) b.click(); });
+    await page.click('#skViewTree');
     await page.waitForTimeout(600);
     const tree = await page.$("#skTree");
     if (tree) { fs.mkdirSync(path.join(ROOT, "dist"), { recursive: true }); await tree.screenshot({ path: path.join(ROOT, "dist", "tree.png") }); }

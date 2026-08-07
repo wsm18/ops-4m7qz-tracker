@@ -5,38 +5,33 @@ Paste this into a new Claude Code session to resume work.
 You are continuing work on **Operations**, a gamified ROTC life-tracker PWA built for an Army ROTC cadet (Wyatt, MS2, Cyber branch goal). **Read all of these before touching any code:**
 
 1. `CLAUDE.md` — the binding rulebook (hard rules, workflow, file layout)
-2. `planning/FINISHED-FEATURES.md` — design language, color palette, completed features, project identity (see the v150–v167 entries for the full history of the pyramid Commons-layer workstream, now complete)
+2. `planning/FINISHED-FEATURES.md` — design language, color palette, completed features, project identity (see the v172 entry for what just shipped, and v150–v167 for the pyramid Commons-layer workstream history)
 3. `planning/IDEAS-gui-revamp.md` — **the active workstream**, read this in full before starting
 
-**Current version: v167.** The service worker is at `operations-v167` in `sw.js`. `SKILL_LADDER_VER` is **117** (unchanged since v155). Total skills: **12524**.
+**Current version: v172.** The service worker is at `operations-v172` in `sw.js`. `SKILL_LADDER_VER` is **117** (unchanged since v155). Total skills: **12524**.
 
 ---
 
-## The pyramid Commons-layer workstream (v150–v167) is DONE
+## The pyramid Commons-layer workstream (v150–v167) is DONE — do not restart it
 
-All **16 of 16 Mythic trees** now have complete Commons layers — 10,000 Commons skills (16 × 625) on top of the pre-existing Mythic/Legendary/Rare/Uncommon structure, verified 5/5/5/5/5 with zero orphans across the entire pyramid. This was confirmed by a full recursive whole-tree sweep at the end of v167 (walking Mythic → Legendaries → Rares → Uncommons → Commons for all 16 trees) and matches `npm run regress`'s skill audit (`total:12524`, `badCount:0`).
-
-**Do not start another Commons-layer session.** If you're ever unsure whether this is really finished, re-derive it yourself the same way v148–v167 did — walk `SEED_SKILLS` with a Node script replicating `skRarity()`, find every Mythic, and confirm all 16 have exactly 625 Commons. See the v167 entry in `FINISHED-FEATURES.md` for the exact approach if you need it, but this should not be necessary — it's a closed, shipped, verified body of work.
-
-**If you want the detailed lessons-learned history of that workstream** (file-corruption incidents, collision-detection discipline, concurrency limits, verification patterns) — it's preserved in the `FINISHED-FEATURES.md` entries for v144 through v167, and is genuinely useful institutional memory if a future large-scale multi-agent bulk-content workstream ever comes up again (the "Writing seeds at scale" pattern is reusable). It is NOT reproduced in this file anymore — this doc used to carry the full blow-by-blow, but that made it enormous and mostly irrelevant now that the workstream is closed. Go to `FINISHED-FEATURES.md` if you need it.
+All 16 of 16 Mythic trees have complete Commons layers (10,000 Commons skills), verified 5/5/5/5/5 with zero orphans. See the v167 entry in `FINISHED-FEATURES.md` if you ever need to re-derive that this is really finished.
 
 ---
 
-## What's next: the GUI revamp
+## GUI revamp — skills tab (v172) is DONE, visual/nav/mobile still queued
 
-Wyatt requested this mid-session during v167, via `AskUserQuestion`. Full scope is captured in **`planning/IDEAS-gui-revamp.md`** — read it before doing anything. Short version: he wants **all of**:
+Wyatt requested a whole-app GUI revamp mid-session during v167: visual/theme refresh, layout/navigation restructuring, mobile/responsive overhaul, and a specifically-flagged skills-tab redesign. **v172 closed out the skills-tab priority.** Full detail in the v172 entry of `FINISHED-FEATURES.md`; short version:
 
-1. **Visual/theme refresh** — colors, typography, spacing, polish, keeping the Yggdrasil symbolism intact.
-2. **Layout/navigation restructuring** — not just visual, how tabs/nav/screen layout are organized.
-3. **Mobile/responsive overhaul.**
-4. **Skills tab specifically** (his explicit priority, in his own words): skills are "not looking like they could," some are invisible/unreachable in the current layout, the tab gets cluttered, and neither the skill organization nor the pyramid unlock mechanic is laid out in a way that's actually useful day-to-day.
+- **Tree view (`src/core/tree.js`) was rewritten.** It used to draw every top-level skill (up to 1500+ per Path) as an individual leaf, which is what made skills "not visible" — they overlapped into an unreadable mess. It now draws **only the 10 realm worlds**, each lit up by `catProgressFraction(cat)` (a new helper in `skills-core.js`: sum of every leaf's effective level ÷ sum of max level, 0–1). Individual skill browsing lives entirely in the List view now. Tapping a world navigates to that Path's deck in the list.
+- **List view (`src/tabs/skills.js`/`skills.html`) was NOT restructured** — Wyatt explicitly said he likes the current card/deck/pyramid layout. Two things were added on top of it: a new always-visible **Focus strip** (`renderFocusStrip()` — decaying soon / behind target / ready to combine, backed by a new `skReadyToCombine()` helper) above the toolbar, and a collapsed **pyramid explainer** (`<details class="sk-pyramid-explainer">`) near the top explaining the Common→Uncommon→Rare→Legendary→Mythic mechanic.
+- `scripts/regress.js --shot`'s tree-screenshot selector had a pre-existing bug (matched the sidebar's "🌳The Tree" nav button instead of the actual view toggle) — fixed to click `#skViewTree` directly. Unrelated to the tree.js rewrite; found while verifying it.
 
-**This has NOT been scoped into a build plan yet.** Per `CLAUDE.md`'s "ask before large architectural shifts" rule, and this project's standing "Feature intake method" (verify what's built → question → design → confirm with the user → capture in a planning doc → then implement), the first session on this workstream should be an **audit and design pass**, not straight implementation:
+**Still queued, still NOT scoped into a build plan:** visual/theme refresh, layout/navigation restructuring, mobile/responsive overhaul (items 1–3 in `IDEAS-gui-revamp.md`). Wyatt confirmed these get their own dedicated session. When picked up, follow the same audit-first approach the skills-tab pass used (per `CLAUDE.md`'s "ask before large architectural shifts" rule and the project's standing feature-intake method):
 
-1. Read the current skills tab implementation end to end: `src/tabs/skills.html` / `src/tabs/skills.js` (list view), `src/core/tree.js` (Yggdrasil SVG tree view), `src/core/skills-core.js` (the pyramid mechanics — `skSetMembers`, `skSetCanCombine`, `skCombineSet`, the Side Deck, Chain view). Understand what's actually built before proposing changes — the mechanics may already support what's needed and this may be a presentation problem, not a mechanics problem.
-2. Audit specifically against Wyatt's 4 named pain points in `IDEAS-gui-revamp.md`: skill visibility (why can't he see some skills?), clutter (what's actually cluttering it — raw count? lack of grouping? no filtering?), organization (what scheme would be both "logical" AND "useful for what to work on next" — these are two different bars), and unlock clarity (is the Common→Uncommon→Rare→Legendary→Mythic synthesis flow explained anywhere, or does the user have to infer it?).
-3. Bring back concrete findings and design options to Wyatt — likely via `AskUserQuestion` for the open design decisions (e.g. list view vs. tree view as default, how aggressive a visual restructuring he wants, whether the mobile work is a separate pass or bundled) — before writing any implementation plan or touching CSS/HTML.
-4. Once scope is confirmed, this is likely a multi-phase build (visual pass, then structural/nav pass, then mobile pass, then the skills-tab-specific redesign, or some other order Wyatt prefers) — write a phased plan doc once the shape is clear, the same way `planning/IDEAS-tests-fm-workouts.md` did for the FM/test features workstream.
+1. Read what's actually built and how responsive/themed it already is (`src/styles/main.css` has ~12 `@media` queries as of v172 — check current count, it may have grown) before assuming what needs to change.
+2. Identify concrete pain points, not just "make it nicer" — ask Wyatt what specifically bothers him about the current visuals/nav/mobile experience if it's not already clear.
+3. Bring design options back via `AskUserQuestion` before touching CSS/HTML at scale.
+4. Write a phased plan doc once the shape is clear (the way `planning/IDEAS-tests-fm-workouts.md` did), then implement.
 
 **After the GUI revamp** (or if Wyatt wants to defer it), the previously-queued workstream is still valid and waiting: `planning/IDEAS-tests-fm-workouts.md` — a fully-designed, Wyatt-confirmed set of FM/test features (gym-schedule-aware training planning, equipment-aware exercise selection, stealth-assessment cognitive/quiz games, card-game workouts) plus four additional green-lit ideas (cross-tab deadline timeline, AAR-style reflection journal, cross-domain data-insight engine, whole-tree "smart focus" recommender), with a recommended 8-phase build order at the bottom of that doc.
 
@@ -62,20 +57,21 @@ npm run package               # produces dist/operations.zip
 2. `npm run check` → `SYNTAX OK`
 3. `npm run regress` → `PAGEERRORS 0`
 4. If you touched `SEED_SKILLS`, run a duplicate `name`+`cat` sweep and a member-count sweep (regress won't catch either) — see `FINISHED-FEATURES.md`'s pyramid-era entries for the exact script approach if you ever need it again.
-5. Bump `sw.js` cache version — only if something actually shipped.
-6. Bump `SKILL_LADDER_VER` only if an existing ladder/tier/guidance changed.
-7. `npm run package` → produces `dist/operations.zip`.
-8. Add a `planning/FINISHED-FEATURES.md` entry — including an honest one if the session's net result was "investigated, found nothing to do."
-9. Update `planning/NEXT-SESSION-PROMPT.md` (this file) with the new state.
-10. Tell Wyatt to **hard-refresh / reopen the app** so the new service worker activates and any migration runs (skip if nothing shipped).
-11. Run `date` again, compute elapsed time, and append a row to `planning/SESSION-TIMES.md`.
-12. **Commit the session's work to git** — don't let a finished feature sit uncommitted.
+5. If you touched `src/core/tree.js`, run `npm run regress -- --shot` and look at `dist/tree.png` to confirm it renders as expected.
+6. Bump `sw.js` cache version — only if something actually shipped.
+7. Bump `SKILL_LADDER_VER` only if an existing ladder/tier/guidance changed.
+8. `npm run package` → produces `dist/operations.zip`.
+9. Add a `planning/FINISHED-FEATURES.md` entry — including an honest one if the session's net result was "investigated, found nothing to do."
+10. Update `planning/NEXT-SESSION-PROMPT.md` (this file) with the new state.
+11. Tell Wyatt to **hard-refresh / reopen the app** so the new service worker activates and any migration runs (skip if nothing shipped).
+12. Run `date` again, compute elapsed time, and append a row to `planning/SESSION-TIMES.md`.
+13. **Commit the session's work to git** — don't let a finished feature sit uncommitted.
 
 ### What not to do (general, still applies)
 - Don't add error handling, fallbacks, or validation for scenarios that can't happen.
 - Don't add comments explaining what the code does — only the why if it's non-obvious.
 - Don't restructure or reformat unrelated code while making a targeted change.
-- Don't over-format the app or invent scope beyond what's asked — this applies with extra force to the GUI revamp, which is exactly the kind of open-ended request that's easy to over-scope. Confirm design decisions with Wyatt before implementing them.
+- Don't over-format the app or invent scope beyond what's asked — this applies with extra force to the remaining GUI-revamp work, which is exactly the kind of open-ended request that's easy to over-scope. Confirm design decisions with Wyatt before implementing them.
 
 ---
 
@@ -90,13 +86,17 @@ npm run package               # produces dist/operations.zip
 - `skPractice(skId)` → resets fade timer without level change (non-auto, started skills only).
 - `skReachLevel(skId, targetLevel, note?)` → levels up to targetLevel, stores optional note in history.
 - `skEmblemSvg(sk, eff, max)` — sigil generator in `skills.js`, also used in `trophies.js`.
+- `catRolledLevel(cat)` → average rolled level across a Path's top-level skills (level-space, not 0-1).
+- `catProgressFraction(cat)` → **new in v172** — 0-1 fraction of overall progress across every leaf in a Path (sum eff / sum max); drives the Tree view's world-lighting.
+- `catPyramidCompletion(cat)` → 0-1 fraction of pyramid-tagged skills *fully mastered* (stricter than the above); drives the Tree view's rim-stud ring.
+- `skReadyToCombine()` → **new in v172**, in `skills-core.js` — every synthesis-target seed whose set is fully mastered but not yet combined; backs the Focus strip's "Ready to combine" column.
 - `PATH_META` — path metadata (name, icon, color, world, lore), in `constants.js`.
 - `SK_PATH_ICON` — path → emoji map, in `tree.js`.
 - All CSS in `src/styles/main.css` — no per-tab CSS files.
 - Regression covers 18 tabs (see `scripts/regress.js`).
 - No network calls, no CDN fonts, no telemetry — ever.
 
-**Pyramid system (for reference — the content workstream is done, but the mechanics are directly relevant to the GUI revamp's unlock-clarity pain point):**
+**Pyramid system:**
 - `skRarity(sk)` — rarity from explicit `rarity` field or ladder depth.
 - `skSeedOf(name, cat)` — find a skill's seed in `SEED_SKILLS` (O(1) via memoized Map).
 - `skSetMembers(setKey)` — all non-group seeds with matching setKey (rarity-agnostic — includes Jokers). This is the authoritative "how many members does this set have" definition.
@@ -105,7 +105,7 @@ npm run package               # produces dist/operations.zip
 - `SYNERGY_PAIRS` — 15 complementary skill pairs; `skHasSynergy(sk)`.
 - Side Deck (unstarted leaves): collapsible `<details class="sk-side-deck">` in `skills.js`.
 - Face-down card function: `faceDownCard(sk, suit, rank, isSynthPending)` in `skills.js`.
-- Combine button handler: `data-skcombine` in `events.js` delegation.
+- Combine button handler: `data-skcombine` in `events.js` delegation (works anywhere in the document, not just `#skList` — the Focus strip's Combine buttons reuse it).
 - Chain view: `renderSynthesisChain(cat)` in `skills.js`; toggle `.sc-toggle[data-sctoggle]`; output in `.sc-wrap#sc-{cat}`.
 
 ---

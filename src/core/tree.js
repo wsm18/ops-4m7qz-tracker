@@ -142,17 +142,20 @@ function renderSkillTree(){
   let palDefs="";
   paths.forEach((cat,i)=>{
     const slot=SLOT_BY_CAT[cat] || fallbackSlots[i%fallbackSlots.length];
-    const tops=skTopLevelInCat(cat);
-    const groups=tops.filter(s=>s.group);
-    const looseLeaves=tops.filter(s=>!s.group);
-    const nodes=[...groups, ...looseLeaves];
+    const totalCatSkills=skTopLevelInCat(cat).length;
     const catLvl=catRolledLevel(cat);
     const pal=realmPal[cat]||{core:"#9ec46a",edge:"#4f6a2c"};
+    // How far along this whole Path is (0-1) — drives how brightly the world is lit.
+    // A category can hold 700-1500+ skills once its pyramid is seeded, far too many
+    // to hang as individual leaves on the tree (they overlapped into an unreadable
+    // mess). The tree now shows only the ten worlds themselves, each lit by overall
+    // progress; browsing individual skills lives in the List view.
+    const progress = typeof catProgressFraction==="function" ? catProgressFraction(cat) : 0;
 
     // --- the great branch (or root) from the trunk to this realm.
     // Compute the realm radius up front so the limb can run all the way INTO the
     // disc edge (not stop short in empty space) and plug into it with real width.
-    const realmR = 36 + Math.min(20, nodes.length*2.4);
+    const realmR = 36 + Math.min(20, totalCatSkills*2.4);
     if(!slot.rootLimb){
       // direction from fork toward realm
       let ldx=slot.rx-slot.ax, ldy=slot.ry-slot.ay; const llen=Math.hypot(ldx,ldy)||1; ldx/=llen; ldy/=llen;
@@ -169,91 +172,26 @@ function renderSkillTree(){
     }
     // for root-tip worlds the connecting root is already drawn (the world sits at its tip)
 
-    // --- skills hang from the realm as boughs. Crown worlds radiate outward from
-    // the fork; root worlds fan their boughs DOWNWARD into the deep (rootlets).
-    const isCanopy = slot.tier==="canopy";
-    let baseAng;
-    if(slot.rootLimb){
-      baseAng = Math.PI/2;               // straight down — roots reach deeper
-    } else {
-      let bdx=slot.rx-slot.ax, bdy=slot.ry-slot.ay; const blen=Math.hypot(bdx,bdy)||1; bdx/=blen; bdy/=blen;
-      baseAng=Math.atan2(bdy,bdx);
-    }
-    const m=nodes.length;
-    // draw boughs+leaves FIRST so the glowing realm disc sits on top of bough roots
-    nodes.forEach((node,j)=>{
-      const spread = Math.PI*(slot.rootLimb?1.4:(slot.tier==="root"?1.25:1.0));
-      const a = baseAng + (m<=1?0:((j/(m-1))-0.5)*spread);
-      const boughLen = 78 + (j%3)*18;            // longer boughs => fuller crown
-      const fx = slot.rx + Math.cos(a)*(realmR-4);
-      const fy = slot.ry + Math.sin(a)*(realmR-4);
-      const tx = slot.rx + Math.cos(a)*(realmR+boughLen);
-      const ty = slot.ry + Math.sin(a)*(realmR+boughLen);
-      parts.push(limb(fx,fy,tx,ty,4.2,1.6,barkLite,0.12));
-
-      // helper: push a fade-countdown arc onto a leaf if it's about to decay
-      function pushFadeRing(cx,cy,baseRad,sk){
-        const eff=skEffectiveLevel(sk);
-        if(eff<=0) return;
-        const days=skDaysLeft(sk);
-        if(days===null) return;
-        const fadeState=typeof skFadeState==="function"?skFadeState(sk):"current";
-        const threshold=sk.fadeDays?sk.fadeDays*0.5:15;
-        // show ring when below threshold OR in at-risk grace period
-        if(days>=threshold && fadeState!=="at-risk") return;
-        const frac=fadeState==="at-risk"?1:Math.max(0,days/threshold);
-        const rr=baseRad+2.8;
-        const circ=2*Math.PI*rr;
-        const dash=(circ*frac).toFixed(1);
-        const offset=(circ*0.25).toFixed(1); // start at 12 o'clock
-        // at-risk = amber ring; urgent = ember; normal fade = gold
-        const col=fadeState==="at-risk"?"rgb(204,138,45)":days<=Math.ceil((sk.fadeDays||30)*0.34)?"var(--ember)":"var(--gold)";
-        leaves.push(`<circle cx="${cx}" cy="${cy}" r="${rr.toFixed(1)}" fill="none" stroke="${col}" stroke-width="2.5" stroke-dasharray="${dash} ${circ.toFixed(1)}" stroke-dashoffset="${offset}" opacity=".8" pointer-events="none"/>`);
-      }
-      if(node.group){
-        const subs=skSubsOf(node);
-        const lblAnchor = Math.cos(a)<-0.2?"end":(Math.cos(a)>0.2?"start":"middle");
-        leaves.push(`<text x="${(tx+Math.cos(a)*10).toFixed(0)}" y="${(ty+Math.sin(a)*10+3).toFixed(0)}" text-anchor="${lblAnchor}" font-size="11.5" font-weight="600" fill="var(--ink-dim)" style="text-shadow:0 1px 3px #000,0 0 2px #000">${esc(node.name)}</text>`);
-        const sc=subs.length;
-        subs.forEach((leaf,k)=>{
-          // fan the cluster wider and add a second ring so foliage looks full
-          const la = a + (sc<=1?0:((k/(sc-1))-0.5)*1.15);
-          const lr = 18 + (k%3)*13;
-          const lx = tx + Math.cos(la)*lr;
-          const ly = ty + Math.sin(la)*lr;
-          // tiny twig to each leaf
-          parts.push(`<line x1="${tx.toFixed(1)}" y1="${ty.toFixed(1)}" x2="${lx.toFixed(1)}" y2="${ly.toFixed(1)}" stroke="${barkLite}" stroke-width="1.1" opacity=".5"/>`);
-          const eff=skEffectiveLevel(leaf), peak=leaf.peakLevel||0, max=leaf.levels.length;
-          const rad = 4 + Math.min(5,(peak/max)*5);
-          leaves.push(`<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="${rad.toFixed(1)}" fill="${skLeafColor(eff,max,leaf)}" stroke="rgba(0,0,0,.4)" stroke-width=".7" data-skid="${esc(leaf.id)}" style="cursor:pointer"><title>${esc(leaf.name)} — ${eff>0?'Lv '+eff:'unproven'}${peak>eff?' · peak '+peak:''}</title></circle>`);
-          pushFadeRing(lx.toFixed(1), ly.toFixed(1), rad, leaf);
-        });
-      } else {
-        const eff=skEffectiveLevel(node), peak=node.peakLevel||0, max=node.levels.length;
-        const rad = 4.5 + Math.min(5.2,(peak/max)*5.2);
-        const lblAnchor = Math.cos(a)<-0.2?"end":(Math.cos(a)>0.2?"start":"middle");
-        leaves.push(`<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="${rad.toFixed(1)}" fill="${skLeafColor(eff,max,node)}" stroke="rgba(0,0,0,.4)" stroke-width=".7" data-skid="${esc(node.id)}" style="cursor:pointer"><title>${esc(node.name)} — ${eff>0?'Lv '+eff:'unproven'}${peak>eff?' · peak '+peak:''}</title></circle>`);
-        pushFadeRing(tx.toFixed(1), ty.toFixed(1), rad, node);
-        leaves.push(`<text x="${(tx+Math.cos(a)*11).toFixed(0)}" y="${(ty+Math.sin(a)*11+3).toFixed(0)}" text-anchor="${lblAnchor}" font-size="10.5" fill="var(--ink-faint)" style="text-shadow:0 1px 3px #000,0 0 2px #000">${esc(node.name)}</text>`);
-      }
-    });
-
     // --- the realm itself: a luminous world-disc with a per-world radial gradient
     const gid=`realm_${cat}`;
     palDefs+=`<radialGradient id="${gid}" cx="38%" cy="34%" r="72%">
       <stop offset="0%" stop-color="${pal.core}"/>
       <stop offset="100%" stop-color="${pal.edge}"/>
     </radialGradient>`;
-    const haloR = realmR + 18 + catLvl*3.6;
-    glows.push(`<circle cx="${slot.rx.toFixed(1)}" cy="${slot.ry.toFixed(1)}" r="${haloR.toFixed(1)}" fill="url(#realmGlow)" opacity="${(0.16+catLvl*0.045).toFixed(2)}"/>`);
-    leaves.push(`<circle cx="${slot.rx.toFixed(1)}" cy="${slot.ry.toFixed(1)}" r="${realmR.toFixed(1)}" fill="url(#${gid})" stroke="var(--gold)" stroke-width="2"/>`);
-    leaves.push(`<circle cx="${slot.rx.toFixed(1)}" cy="${slot.ry.toFixed(1)}" r="${(realmR-5).toFixed(1)}" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="1"/>`);
+    const haloR = realmR + 16 + progress*44;
+    glows.push(`<circle cx="${slot.rx.toFixed(1)}" cy="${slot.ry.toFixed(1)}" r="${haloR.toFixed(1)}" fill="url(#realmGlow)" opacity="${(0.12+progress*0.6).toFixed(2)}"/>`);
+    leaves.push(`<circle cx="${slot.rx.toFixed(1)}" cy="${slot.ry.toFixed(1)}" r="${realmR.toFixed(1)}" fill="url(#${gid})" stroke="var(--gold)" stroke-width="2" data-skcat="${esc(cat)}" style="cursor:pointer"/>`);
+    // an unlit world reads as dim/muted; full progress reads as fully luminous
+    leaves.push(`<circle cx="${slot.rx.toFixed(1)}" cy="${slot.ry.toFixed(1)}" r="${realmR.toFixed(1)}" fill="#0a0d05" opacity="${(0.6*(1-progress)).toFixed(2)}" pointer-events="none"/>`);
+    leaves.push(`<circle cx="${slot.rx.toFixed(1)}" cy="${slot.ry.toFixed(1)}" r="${(realmR-5).toFixed(1)}" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="1" pointer-events="none"/>`);
     // specular glint
-    leaves.push(`<ellipse cx="${(slot.rx-realmR*0.28).toFixed(1)}" cy="${(slot.ry-realmR*0.34).toFixed(1)}" rx="${(realmR*0.34).toFixed(1)}" ry="${(realmR*0.2).toFixed(1)}" fill="rgba(255,255,255,.18)"/>`);
+    leaves.push(`<ellipse cx="${(slot.rx-realmR*0.28).toFixed(1)}" cy="${(slot.ry-realmR*0.34).toFixed(1)}" rx="${(realmR*0.34).toFixed(1)}" ry="${(realmR*0.2).toFixed(1)}" fill="rgba(255,255,255,.18)" pointer-events="none"/>`);
     // --- Mastery insignia: a ring of studs around the realm rim that lights up and
-    // brightens as more of this world's pyramid-tree content is mastered. A world
-    // can hold more than one Mythic tree, so this reads across all of them together
-    // (catPyramidCompletion sums every pyramid-tagged card in the category).
+    // brightens as more of this world's pyramid-tree content is fully mastered — a
+    // separate, stricter signal from the ambient glow above (which credits any
+    // partial progress). A world can hold more than one Mythic tree, so this reads
+    // across all of them together (catPyramidCompletion sums every pyramid-tagged
+    // card in the category).
     const completion = typeof catPyramidCompletion==="function" ? catPyramidCompletion(cat) : 0;
     const studCol = completion<0.34 ? "#b8772e" : completion<0.67 ? "#d4af37" : "#ffe58a";
     const studN=8, studR=realmR+9;
@@ -263,14 +201,14 @@ function renderSkillTree(){
       const sx = slot.rx + Math.cos(sa)*studR, sy = slot.ry + Math.sin(sa)*studR;
       const op = lit ? (0.55+completion*0.45) : 0.14;
       const rad = lit ? 3.2 : 2;
-      leaves.push(`<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="${rad}" fill="${lit?studCol:'#2a2f1c'}" opacity="${op.toFixed(2)}"${lit?` style="filter:drop-shadow(0 0 3px ${studCol})"`:''}/>`);
+      leaves.push(`<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="${rad}" fill="${lit?studCol:'#2a2f1c'}" opacity="${op.toFixed(2)}" pointer-events="none"${lit?` style="filter:drop-shadow(0 0 3px ${studCol})"`:''}/>`);
     }
     // sigil + name + level
-    leaves.push(`<text x="${slot.rx.toFixed(0)}" y="${(slot.ry+realmR*0.16).toFixed(0)}" text-anchor="middle" font-size="${Math.min(34,realmR*0.78).toFixed(0)}">${SK_PATH_ICON[cat]||""}</text>`);
+    leaves.push(`<text x="${slot.rx.toFixed(0)}" y="${(slot.ry+realmR*0.16).toFixed(0)}" text-anchor="middle" font-size="${Math.min(34,realmR*0.78).toFixed(0)}" pointer-events="none">${SK_PATH_ICON[cat]||""}</text>`);
     const nm=esc(SK_CAT[cat]||cat);
-    leaves.push(`<text x="${slot.rx.toFixed(0)}" y="${(slot.ry+realmR+20).toFixed(0)}" text-anchor="middle" font-size="16" font-weight="700" fill="var(--gold-bright)" style="text-shadow:0 1px 4px #000,0 0 3px #000">${nm}</text>`);
-    leaves.push(`<text x="${slot.rx.toFixed(0)}" y="${(slot.ry+realmR+37).toFixed(0)}" text-anchor="middle" font-size="12" fill="var(--ink-dim)" style="text-shadow:0 1px 3px #000">World Lv ${fmtLvl(catLvl)}</text>`);
-    if(completion>0) leaves.push(`<text x="${slot.rx.toFixed(0)}" y="${(slot.ry+realmR+52).toFixed(0)}" text-anchor="middle" font-size="10" fill="${studCol}" style="text-shadow:0 1px 3px #000">${Math.round(completion*100)}% pyramid mastered</text>`);
+    leaves.push(`<text x="${slot.rx.toFixed(0)}" y="${(slot.ry+realmR+20).toFixed(0)}" text-anchor="middle" font-size="16" font-weight="700" fill="var(--gold-bright)" style="text-shadow:0 1px 4px #000,0 0 3px #000" pointer-events="none">${nm}</text>`);
+    leaves.push(`<text x="${slot.rx.toFixed(0)}" y="${(slot.ry+realmR+37).toFixed(0)}" text-anchor="middle" font-size="12" fill="var(--ink-dim)" style="text-shadow:0 1px 3px #000" pointer-events="none">World Lv ${fmtLvl(catLvl)} · ${Math.round(progress*100)}% along</text>`);
+    if(completion>0) leaves.push(`<text x="${slot.rx.toFixed(0)}" y="${(slot.ry+realmR+52).toFixed(0)}" text-anchor="middle" font-size="10" fill="${studCol}" style="text-shadow:0 1px 3px #000" pointer-events="none">${Math.round(completion*100)}% pyramid mastered</text>`);
   });
 
   const defs=`<defs>
@@ -290,11 +228,7 @@ function renderSkillTree(){
     <button type="button" id="skTreeZoomIn" title="Zoom in">+</button>
   </div>`;
   const legend=`<div class="sk-tree-legend">
-    <span><i class="sk-tree-dot" style="background:#3a4030"></i>unproven</span>
-    <span><i class="sk-tree-dot" style="background:#c8772e"></i>growing</span>
-    <span><i class="sk-tree-dot" style="background:#b8a06a"></i>established</span>
-    <span><i class="sk-tree-dot" style="background:#6f9e54"></i>mastered</span>
-    <span style="color:var(--ink-faint)">each glowing world is a Path · leaf size = all-time peak · drag to pan · pinch / buttons to zoom · tap a leaf for its skill</span>
+    <span style="color:var(--ink-faint)">each world is a Path, lit by how far you've progressed in it · the rim studs light up as its pyramid is mastered · drag to pan · pinch / buttons to zoom · tap a world to browse its skills</span>
   </div>`;
   host.innerHTML=`<div class="sk-tree-wrap">${svg}${controls}</div>${legend}`;
   // default view frames the whole world-tree (canopy through roots) on first open.
@@ -345,20 +279,17 @@ function _treeWireGestures(){
   },{passive:false});
   svg.addEventListener("touchend",up);
   svg.style.cursor="grab";
-  // tap a leaf → navigate to its skill card in the list view
+  // tap a world → navigate to that Path's deck in the list view
   svg.addEventListener("click",e=>{
     if(_moved) return;
-    const skId=e.target.dataset.skid; if(!skId) return;
+    const cat=e.target.dataset.skcat; if(!cat) return;
     const nb=document.querySelector('#sideNav button[data-tab="skills"]'); if(nb) nb.click();
     setTimeout(()=>{
-      const sk=(S.lifeSkills||[]).find(s=>s.id===skId);
-      if(sk){
-        const el=document.getElementById(`skcat-${sk.cat}`);
-        if(el){
-          const hdr=el.querySelector('.sk-deck-header'), body=el.querySelector('.sk-deck-body');
-          if(hdr&&!hdr.classList.contains('open')){ hdr.classList.add('open'); if(body) body.classList.add('open'); }
-          el.scrollIntoView({behavior:"smooth",block:"start"});
-        }
+      const el=document.getElementById(`skcat-${cat}`);
+      if(el){
+        const hdr=el.querySelector('.sk-deck-header'), body=el.querySelector('.sk-deck-body');
+        if(hdr&&!hdr.classList.contains('open')){ hdr.classList.add('open'); if(body) body.classList.add('open'); }
+        el.scrollIntoView({behavior:"smooth",block:"start"});
       }
     },150);
   });

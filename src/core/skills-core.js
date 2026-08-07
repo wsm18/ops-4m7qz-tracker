@@ -181,6 +181,22 @@ function skCombineSet(setKey){
   toast(`⚡ Synthesis complete — <b>${esc(synthSeed.name)}</b> is now active!`);
   return true;
 }
+// Every synthesis-target skill whose set is fully mastered but not yet combined —
+// the "ready to combine" list the Focus strip surfaces so a completed set doesn't
+// sit unnoticed behind a face-down card the user has to stumble onto.
+function skReadyToCombine(){
+  if(typeof SEED_SKILLS==="undefined") return [];
+  const seen=new Set(), ready=[];
+  SEED_SKILLS.forEach(seed=>{
+    if(!seed.synthesizedFrom||seen.has(seed.synthesizedFrom)) return;
+    seen.add(seed.synthesizedFrom);
+    if(!skSetCanCombine(seed.synthesizedFrom)) return;
+    const live=(S.lifeSkills||[]).find(s=>s.name===seed.name&&s.cat===seed.cat);
+    if(live&&(live.synthesisUnlocked||live.currentLevel>0)) return; // already combined/started
+    ready.push(seed);
+  });
+  return ready;
+}
 // Pure structural walk of a category's pyramid tree(s), straight from SEED_SKILLS —
 // no live-state dependency, so it's safe to memoize (SEED_SKILLS never changes at
 // runtime). A category can hold more than one Mythic tree (e.g. a legacy tree plus
@@ -223,6 +239,18 @@ function catPyramidCompletion(cat){
     return live&&live.levels&&live.currentLevel>=live.levels.length;
   }).length;
   return maxedCount/pyramidSeeds.length;
+}
+// Fraction (0-1) of how far along a whole Path is — sum of every leaf's effective
+// level over the sum of every leaf's max level. Unlike catPyramidCompletion (which
+// only credits a skill once fully mastered), this moves with any partial progress,
+// so it's what the tree view uses to light up a world: a Path with a few skills at
+// L2 reads as dimly lit, not unlit.
+function catProgressFraction(cat){
+  const leaves=(S.lifeSkills||[]).filter(s=>s.cat===cat&&!s.group&&s.levels&&s.levels.length);
+  if(!leaves.length) return 0;
+  let sumEff=0, sumMax=0;
+  leaves.forEach(s=>{ sumEff+=skEffectiveLevel(s); sumMax+=s.levels.length; });
+  return sumMax>0 ? sumEff/sumMax : 0;
 }
 // ── Synergy combos — complementary pairs that unlock ⚡ indicator at L4+ ───
 const SYNERGY_PAIRS=[

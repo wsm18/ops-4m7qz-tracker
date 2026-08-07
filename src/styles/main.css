@@ -2390,6 +2390,27 @@
 .sk-gm-stage{font-weight:700}
 .sk-gm-legend{font-size:11px;color:var(--ink-faint);margin-top:6px;padding:0 2px}
 
+/* ── v172: Skills-tab Focus strip — combined "what to work on next" ── */
+.sk-focus-strip:empty{margin:0}
+.sk-focus-strip-inner{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.sk-focus-col{flex:1 1 200px;min-width:180px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.sk-focus-col-hdr{font-size:11px;font-weight:700;color:var(--ink-dim);letter-spacing:.04em;text-transform:uppercase;margin-bottom:5px}
+.sk-focus-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--line);font-size:12px}
+.sk-focus-row:last-child{border-bottom:none}
+.sk-focus-name{color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sk-focus-stat{color:var(--ink-faint);font-size:11px;white-space:nowrap;flex:none}
+.sk-focus-combine{font-size:11px;font-weight:700;background:var(--panel-2);border:1px solid var(--gold);border-radius:6px;padding:3px 8px;color:var(--gold);cursor:pointer;white-space:nowrap;font-family:inherit;flex:none}
+.sk-focus-combine:active{opacity:.8}
+
+/* ── v172: Pyramid explainer (Skills tab) ── */
+.sk-pyramid-explainer{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:2px 12px;margin:10px 0}
+.sk-pyramid-explainer summary{cursor:pointer;list-style:none;padding:9px 0;font-size:12.5px;font-weight:700;color:var(--ink-dim)}
+.sk-pyramid-explainer summary::-webkit-details-marker{display:none}
+.sk-pyramid-explainer-body{padding:0 0 12px;font-size:12.5px;color:var(--ink-dim);line-height:1.55}
+.sk-pyramid-explainer-body p{margin:0 0 8px}
+.sk-pyramid-explainer-body p:last-child{margin-bottom:0}
+.sk-pyramid-explainer-body b{color:var(--ink)}
+
 /* ── v123: Skill notes search (Records tab) ── */
 .sk-note-entry{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:6px 0}
 .sk-note-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}

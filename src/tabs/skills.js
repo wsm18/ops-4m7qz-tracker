@@ -536,6 +536,7 @@ function renderSkillsTab(){
       </div>`;
     } else { sbEl.innerHTML=""; }
   }
+  renderFocusStrip();
   // skill list — category → top-level skill (group shows subs) → leaf
   if(!S.lifeSkills.length){ listEl.innerHTML=`<div class="aw-empty"><span class="big">🧠</span>No skills yet. Add one above to start tracking levels.</div>`; return; }
 
@@ -1123,6 +1124,34 @@ function updateAllSkillTargets(){
   });
   if(n>0){ save(); renderSkillsTab(); toast(`↑ ${n} skill target${n!==1?"s":""} updated to ${stage}`); }
   else toast(`All targets already at ${stage} level`);
+}
+// Compact, always-visible "what to work on next" strip — combines the most
+// actionable bits of the Weekly Queue (fading soon), Assessment (behind your
+// career-stage target), and the pyramid's ready-to-combine sets into one small
+// block, instead of requiring the user to know which hidden toggle to open.
+function renderFocusStrip(){
+  const el=document.getElementById("skFocusStrip"); if(!el) return;
+  const started=(S.lifeSkills||[]).filter(s=>!s.group&&s.currentLevel>0&&!s.auto&&s.levels&&s.levels.length);
+  const decaying=started.map(s=>({s,days:skDaysLeft(s),state:skFadeState(s)}))
+    .filter(x=>x.state!=='current'||(x.days!==null&&x.days<=7))
+    .sort((a,b)=>(a.days!==null?a.days:-999)-(b.days!==null?b.days:-999))
+    .slice(0,4);
+  const behind=(S.lifeSkills||[]).filter(s=>!s.group&&s.levels&&s.levels.length&&s.targetLevel!=null)
+    .map(s=>({s,gap:s.targetLevel-skEffectiveLevel(s)}))
+    .filter(x=>x.gap>0)
+    .sort((a,b)=>b.gap-a.gap)
+    .slice(0,4);
+  const ready=(typeof skReadyToCombine==="function"?skReadyToCombine():[]).slice(0,4);
+  if(!decaying.length&&!behind.length&&!ready.length){ el.innerHTML=""; return; }
+  const col=(title,icon,items,rowFn)=>items.length?`<div class="sk-focus-col">
+    <div class="sk-focus-col-hdr">${icon} ${title}</div>
+    ${items.map(rowFn).join("")}
+  </div>`:'';
+  el.innerHTML=`<div class="sk-focus-strip-inner">
+    ${col("Decaying soon","🍂",decaying,({s,days})=>`<div class="sk-focus-row"><span class="sk-focus-name">${esc(s.name)}</span><span class="sk-focus-stat">${days===null||days<=0?'overdue':days+'d left'}</span></div>`)}
+    ${col("Behind target","🎯",behind,({s,gap})=>`<div class="sk-focus-row"><span class="sk-focus-name">${esc(s.name)}</span><span class="sk-focus-stat">−${gap} to L${s.targetLevel}</span></div>`)}
+    ${col("Ready to combine","⚡",ready,seed=>`<div class="sk-focus-row"><span class="sk-focus-name">${esc(seed.name)}</span><button class="sk-focus-combine" data-skcombine="${esc(seed.synthesizedFrom)}">Combine</button></div>`)}
+  </div>`;
 }
 let _skWeeklyVisible=false;
 function renderWeeklyQueue(){
