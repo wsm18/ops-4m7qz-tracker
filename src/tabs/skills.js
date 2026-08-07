@@ -727,39 +727,12 @@ function skProgressBlock(sk, eff){
     </div>`;
   };
 
-  const groupCard=(sk,suit,rankMap)=>{
-    const subs=skSubsOf(sk);
-    const rolled=skRolledLevel(sk);
-    const s=suit||{sym:"★",col:"#555",light:"#ddd"};
-    const miniCard=sub=>{
-      const eff=skEffectiveLevel(sub); const max=(sub.levels||[]).length||10;
-      const pct=Math.min(100,Math.round(eff/max*100));
-      const col=skLeafColor(eff,max,sub);
-      const tier=skTier(sub,eff); const tierLabel=tier&&eff>0?tier.label:(eff>0?"L"+eff:"—");
-      const state=skFadeState(sub);
-      const r=rankMap&&rankMap[sub.id]||"";
-      return `<div class="sk-mini-card${state!=='current'?' sk-mini-atrisk':''}${eff===0?' sk-mini-unstarted':''}" style="--deck-col:${s.col};--deck-light:${s.light}">
-        <div class="spc-corner tl" style="color:${s.col}"><div class="spc-rank">${r}</div><div class="spc-suit">${s.sym}</div></div>
-        <div class="sk-mini-emb">${skEmblemSvg(sub,eff,max)||''}</div>
-        <div class="sk-mini-name">${esc(sub.name)}</div>
-        <div class="sk-mini-tier">${esc(tierLabel)}</div>
-        <div class="sk-mini-bar"><div class="sk-mini-fill" style="width:${pct}%;background:${col}"></div></div>
-        <div class="sk-mini-lvl">L${eff}/${max}</div>
-        ${sub.auto?'':`<button class="sk-mini-prac" data-skpractice="${sub.id}" title="practiced">✓</button>`}
-        <div class="spc-corner br" style="color:${s.col}"><div class="spc-rank">${r}</div><div class="spc-suit">${s.sym}</div></div>
-      </div>`;
-    };
-    return `<div class="sk-group">
-      <div class="sk-group-top">
-        <span class="sk-group-suit">${s.sym}</span>
-        <div class="sk-group-name">${esc(sk.name)} <span class="sk-group-sub">${subs.length} skill${subs.length!==1?'s':''}</span></div>
-        <span class="sk-level-badge group">Lv ${fmtLvl(rolled)}</span>
-        <button class="sk-card-edit" data-skedit="${sk.id}">✎</button>
-        <button class="sk-card-del" data-skdel="${sk.id}">✕</button>
-      </div>
-      <div class="sk-subs sk-mini-grid">${subs.map(miniCard).join("")}</div>
-    </div>`;
-  };
+  // Note: the old "Core Skills" group-rollup rendering (groupCard) was removed —
+  // every one of its ~158 member skills also has a real slot inside the Pyramid
+  // tree below (confirmed by walking every Mythic tree's setKey chain), so it was
+  // rendering the exact same skills twice. skRolledLevel()/skSubsOf() are still
+  // used elsewhere (e.g. catRolledLevel for the path-level "Lv X" badges) — only
+  // the duplicate card rendering here is gone, not the underlying group data model.
 
   // ============ PYRAMID TREE BROWSER — Mythic → Legendary → Rare → Uncommon → Common ============
   // Replaces the old "started vs unstarted, chunked by 13" browsing scheme for
@@ -906,12 +879,14 @@ function skProgressBlock(sk, eff){
     const allStartedBadge=pathStartedCount===totalLeaves&&totalLeaves>0?`<span class="sk-path-badge discovered">All Collected</span>`:'';
     const allMaxedBadge=pathMaxedCount===totalLeaves&&totalLeaves>0?`<span class="sk-path-badge mastered">★ All Mastered</span>`:'';
     const pathBadges=allMaxedBadge||allStartedBadge;
-    // Split tops three ways: groups (Core Skills, own section), pyramid-tagged skills
-    // (the vast majority once a path is seeded — routed to the new nested tree
-    // browser below), and custom/non-pyramid top-level skills (whatever's left —
-    // typically small, user-added skills with no setKey — kept on the old flat
-    // main/side/subdeck rendering, which remains a fine fit at that scale).
-    const groupTops=tops.filter(sk=>sk.group);
+    // Split tops two ways: pyramid-tagged skills (the vast majority once a path is
+    // seeded — routed to the nested tree browser below) and custom/non-pyramid
+    // top-level skills (whatever's left — typically small, user-added skills with
+    // no setKey — kept on the old flat main/side/subdeck rendering, which remains a
+    // fine fit at that scale). Note: skPyramidTrees() below walks SEED_SKILLS
+    // directly, independent of `tops` — it already reached every group-member skill
+    // via setKey regardless of this split; removing their group rollup card (see the
+    // note above groupCard's old location) didn't change what the tree covers.
     const isPyramidSk=sk=>{
       if(sk.group) return false;
       const seed=typeof skSeedOf==="function"?skSeedOf(sk.name,sk.cat):null;
@@ -919,7 +894,6 @@ function skProgressBlock(sk, eff){
     };
     const pyramidTops=tops.filter(isPyramidSk);
     const customTops=tops.filter(sk=>!sk.group&&!isPyramidSk(sk));
-    const coreSkillsHtml=groupTops.length?`<div class="sk-core-section"><div class="sk-pyr-section-label">Core skills</div>${groupTops.map(sk=>groupCard(sk,suit,rankMap)).join("")}</div>`:'';
     const pyramidSectionHtml=renderPyramidSection(cat,pyramidTops,suit,rankMap);
     const mainTops=customTops.filter(sk=>sk.currentLevel>0);
     const sideTops=customTops.filter(sk=>sk.currentLevel===0);
@@ -929,9 +903,9 @@ function skProgressBlock(sk, eff){
     for(let i=0;i<mainTops.length;i+=_SUBDECK) chunks.push(mainTops.slice(i,i+_SUBDECK));
     const bodyContent=mainTops.length===0?'':(chunks.length>1
       ? chunks.map((chunk,ci)=>{
-          const chCards=chunk.map(sk=>sk.group?groupCard(sk,suit,rankMap):leafCard(sk,false,suit,rankMap[sk.id])).join("");
+          const chCards=chunk.map(sk=>leafCard(sk,false,suit,rankMap[sk.id])).join("");
           const num=_roman[ci]||String(ci+1);
-          const sdCount=chunk.reduce((a,sk)=>a+(sk.group?skSubsOf(sk).length:1),0);
+          const sdCount=chunk.length;
           return `<div class="sk-subdeck" style="--deck-col:${suit.col};--deck-light:${suit.light}">
             <div class="sk-subdeck-hdr" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
               <div class="sdb-corner tl"><div class="sdb-rank">${num}</div><div class="sdb-suit">${suit.sym}</div></div>
@@ -941,7 +915,7 @@ function skProgressBlock(sk, eff){
             <div class="sk-subdeck-body">${chCards}</div>
           </div>`;
         }).join("")
-      : mainTops.map(sk=>sk.group?groupCard(sk,suit,rankMap):leafCard(sk,false,suit,rankMap[sk.id])).join(""));
+      : mainTops.map(sk=>leafCard(sk,false,suit,rankMap[sk.id])).join(""));
     const multiTag=chunks.length>1?` · <span class="sdb-subdeck-tag">${chunks.length} decks</span>`:"";
     // Side Deck — face-down cards for unstarted skills
     let sideDeckHtml='';
@@ -992,7 +966,6 @@ function skProgressBlock(sk, eff){
         <button class="sc-toggle" data-sctoggle="${cat}">⛓ Chain</button>
       </div>
       <div class="sk-deck-body${isOpen?' open':''}">
-        ${coreSkillsHtml}
         ${pyramidSectionHtml}
         ${bodyContent}
         ${sideDeckHtml}

@@ -605,7 +605,6 @@
   .sk-side-tier-body{display:flex;flex-wrap:wrap;gap:8px;padding:.4rem .5rem .6rem}
   /* Pyramid tree browser — Mythic -> Legendary -> Rare -> Uncommon -> Common */
   .sk-pyr-section-label{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint);margin:10px 4px 6px}
-  .sk-core-section{margin-bottom:6px}
   .sk-pyramid-section{margin-top:4px}
   .sk-pyr-tier{border-radius:.4rem;margin-bottom:6px}
   .sk-pyr-mythic{border:1px solid rgba(255,215,0,.25);background:rgba(255,215,0,.04)}
