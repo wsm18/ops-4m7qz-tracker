@@ -270,7 +270,13 @@ async function unlinkCloudFile(){
 }
 function setCloudStatus(msg,warn){
   const hint=document.getElementById("cloudHint"), foot=document.getElementById("footStatus");
-  if(foot){ foot.textContent = fileHandle ? "OPERATIONS · synced to your linked cloud file" : "OPERATIONS · all data lives only on this device"; foot.className = fileHandle?"linked":""; }
+  if(foot){
+    const synced=[];
+    if(fileHandle) synced.push("your linked cloud file");
+    if(typeof _tocPresent!=="undefined"&&_tocPresent) synced.push("TOC");
+    foot.textContent = synced.length ? "OPERATIONS · synced to "+synced.join(" & ") : "OPERATIONS · all data lives only on this device";
+    foot.className = synced.length?"linked":"";
+  }
   if(hint){ hint.textContent = msg||""; hint.className = "cloud-hint"+(warn?" warn":""); }
 }
 // on launch: try to restore a previously linked handle and read latest from it
@@ -290,6 +296,59 @@ async function cloudInit(){
 }
 const _cloudBtn=document.getElementById("cloudBtn");
 if(_cloudBtn) _cloudBtn.onclick=()=>{ if(fileHandle){ if(confirm("Unlink this cloud file on this device? Your data stays; it just stops auto-saving to the file.")) unlinkCloudFile(); } else linkCloudFile(); };
-cloudInit();
+
+/* ================= TOC DATA BRIDGE =================
+   On a machine that also runs TOC (a personal offline project-launcher app —
+   see its own repo), TOC serves this app from its own loopback origin, which
+   has its own separate localStorage from wherever else this app is opened
+   (its hosted URL, an installed PWA icon, etc). TOC can optionally persist
+   this app's save data to a file inside THIS repo's own personal/ folder
+   (personal/toc-save.json — gitignored, never committed), which — because
+   this repo already lives in a synced folder — carries progress across every
+   device that has both TOC and this repo, independent of any browser's
+   storage. Entirely opt-in from TOC's side (data_bridge: true in its
+   registry) and entirely best-effort from this side: a quick loopback health
+   check decides whether TOC is even running; if it isn't, this whole section
+   is a no-op. Still just localhost — no different in spirit than the cloud
+   file sync above, just a second, TOC-provided sync target. */
+const TOC_BASE="http://127.0.0.1:8799", TOC_PROJECT="operations";
+let _tocPresent=false, _tocDirty=false, _tocT=null;
+function tocWriteDebounced(){
+  if(!_tocPresent) return;
+  _tocDirty=true; clearTimeout(_tocT);
+  _tocT=setTimeout(tocFlush, 800);
+}
+async function tocFlush(){
+  if(!_tocPresent||!_tocDirty) return;
+  try{
+    const r=await fetch(`${TOC_BASE}/api/projects/${TOC_PROJECT}/data`,{
+      method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(S)
+    });
+    if(r.ok) _tocDirty=false;
+  }catch(e){ /* TOC likely closed mid-session — next save retries */ }
+}
+// on launch: if TOC is running and already opted this project in, adopt its
+// save (if any) — runs after cloudInit() so TOC, the most persistent source,
+// has the final say when both a cloud file and TOC are present.
+async function tocInit(){
+  try{
+    const health=await fetch(`${TOC_BASE}/api/health`,{signal:AbortSignal.timeout(800)});
+    if(!health.ok) return;
+    const hbody=await health.json();
+    if(hbody.app!=="TOC") return;
+  }catch(e){ return; } // no TOC on this machine/port — silently do nothing
+  _tocPresent=true;
+  try{
+    const r=await fetch(`${TOC_BASE}/api/projects/${TOC_PROJECT}/data`,{signal:AbortSignal.timeout(800)});
+    if(r.ok){
+      const body=await r.json();
+      if(body.ok&&body.data&&typeof body.data==="object"){
+        localStorage.setItem(KEY,JSON.stringify(body.data)); S=load(); seedSkillsIfEmpty(); render();
+      }
+    }
+  }catch(e){ /* TOC's running but this project isn't opted in / a transient hiccup — keep syncing writes */ }
+  setCloudStatus(null);
+}
+cloudInit().then(tocInit);
 
 /* ================= SKILLS (levels, decay, promotion quests) ================= */

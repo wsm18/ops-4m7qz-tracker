@@ -5,10 +5,10 @@ Paste this into a new Claude Code session to resume work.
 You are continuing work on **Operations**, a gamified ROTC life-tracker PWA built for an Army ROTC cadet (Wyatt, MS2, Cyber branch goal). **Read all of these before touching any code:**
 
 1. `CLAUDE.md` — the binding rulebook (hard rules, workflow, file layout)
-2. `planning/FINISHED-FEATURES.md` — design language, color palette, completed features, project identity (see the v172 entry for what just shipped, and v150–v167 for the pyramid Commons-layer workstream history)
-3. `planning/IDEAS-gui-revamp.md` — **the active workstream**, read this in full before starting
+2. `planning/FINISHED-FEATURES.md` — design language, color palette, completed features, project identity (see the v173 entry for what just shipped, v172 for the skills-tab GUI fixes, and v150–v167 for the pyramid Commons-layer workstream history)
+3. `planning/IDEAS-gui-revamp.md` — **the active in-app workstream**, read this in full before starting GUI work
 
-**Current version: v172.** The service worker is at `operations-v172` in `sw.js`. `SKILL_LADDER_VER` is **117** (unchanged since v155). Total skills: **12524**.
+**Current version: v173.** The service worker is at `operations-v173` in `sw.js`. `SKILL_LADDER_VER` is **117** (unchanged since v155). Total skills: **12524**.
 
 ---
 
@@ -27,6 +27,21 @@ Wyatt requested a whole-app GUI revamp mid-session during v167: visual/theme ref
 - `scripts/regress.js --shot`'s tree-screenshot selector had a pre-existing bug (matched the sidebar's "🌳The Tree" nav button instead of the actual view toggle) — fixed to click `#skViewTree` directly. Unrelated to the tree.js rewrite; found while verifying it.
 
 **Still queued, still NOT scoped into a build plan:** visual/theme refresh, layout/navigation restructuring, mobile/responsive overhaul (items 1–3 in `IDEAS-gui-revamp.md`). Wyatt confirmed these get their own dedicated session. When picked up, follow the same audit-first approach the skills-tab pass used (per `CLAUDE.md`'s "ask before large architectural shifts" rule and the project's standing feature-intake method):
+
+---
+
+## v173 — TOC data bridge (cross-project, unrelated to the GUI revamp)
+
+Wyatt asked, in a later session, for **TOC** — a separate personal project at `C:\Users\wyatt\Files\Projects\TOC\` (an offline desktop app that runs/serves/views his other local projects) — to give Operations more durable save-data persistence than the plain web version or installed Chrome PWA, on any machine that has both TOC and this repo. Full detail in the v173 entry of `FINISHED-FEATURES.md`. Short version:
+
+- **Root cause:** TOC serves Operations from its own loopback origin (`127.0.0.1:8081`), different from Operations' normal hosted URL's origin — `localStorage` doesn't carry over between them at all.
+- **TOC's side** (that repo's own `PHASE_7_NOTES.md`/`CLAUDE.md` have the full detail — **read those, not just this summary, before touching TOC's code again**): a new opt-in `data_bridge: true` registry field; `backend/projectdata.py` reads/writes `<project path>/personal/toc-save.json` **inside the project's own folder**, never TOC's own `config/`; new CORS-scoped `GET`/`POST /api/projects/{id}/data` routes on TOC's existing FastAPI backend (no `pywebview` bridge involved — TOC's whole frontend already talks to its backend over plain `fetch()`, so Operations does too, directly, cross-origin). Operations opted in. 243 tests passing there, ruff+mypy clean.
+- **Operations' side** (`src/core/app-setup.js`, new "TOC DATA BRIDGE" section beside the pre-existing cloud-file-sync): `tocInit()` best-effort-probes `http://127.0.0.1:8799/api/health`; if TOC's there, adopts its save the same way `cloudInit()` already adopts a linked cloud file, running **after** `cloudInit()` so TOC wins if both differ. `tocWriteDebounced()` hooks into `state.js`'s `save()` alongside the existing `cloudWriteDebounced()` — both fire independently on every save (Wyatt wanted redundant locations, not either/or). Footer text (`setCloudStatus()`) names every active sync target.
+- **A real cross-origin CORS wrinkle was found and fixed on TOC's side** (its `/api/health` route needed a wildcard CORS header so the *probe itself* doesn't log a console error for the common case of TOC not running) — verified live against a real, already-running TOC instance on this machine (not just a mock), using a throwaway Playwright script.
+
+**Known follow-up, not yet done:** there's a TOC instance that was already running on this machine before this session started (unrelated `pythonw.exe`, started that morning) — it's still serving pre-fix code (Python doesn't hot-reload). It was deliberately left running rather than force-restarted (it's Wyatt's own active window). **Restart TOC once, then do a real end-to-end check**: open Operations through TOC, make a change, confirm `personal/toc-save.json` appears in this repo, and confirm it syncs via OneDrive to another machine that has both TOC and this repo. That live confirmation has not happened yet — everything so far is verified by test suite + a `file://`-context Playwright probe, not a real TOC-hosted Operations tab.
+
+---
 
 1. Read what's actually built and how responsive/themed it already is (`src/styles/main.css` has ~12 `@media` queries as of v172 — check current count, it may have grown) before assuming what needs to change.
 2. Identify concrete pain points, not just "make it nicer" — ask Wyatt what specifically bothers him about the current visuals/nav/mobile experience if it's not already clear.

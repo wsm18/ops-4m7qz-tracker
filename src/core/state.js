@@ -130,7 +130,7 @@ function save(){
     // losing data on the next reload.
     if(typeof toast==="function") toast("⚠️ Couldn't save — device storage is full. This change may be lost on reload.");
   }
-  try{ if(typeof window!=="undefined") window.S=S; }catch(_){} cloudWriteDebounced();
+  try{ if(typeof window!=="undefined") window.S=S; }catch(_){} cloudWriteDebounced(); tocWriteDebounced();
 }
 // skill level from xp: rising cost curve
 function skillLevel(xp){let lvl=1,need=80,acc=0;while(xp>=acc+need){acc+=need;lvl++;need+=40;}return{lvl,into:xp-acc,need};}
