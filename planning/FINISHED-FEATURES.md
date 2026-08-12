@@ -1399,3 +1399,17 @@ First phase of `planning/IDEAS-tests-fm-workouts.md`'s confirmed 8-phase build o
 SW bumped to `operations-v175`. `SKILL_LADDER_VER` unchanged at **117** (no ladder/tier/guidance text touched). `npm run build` → OK, `npm run check` → SYNTAX OK, `npm run regress` → `PAGEERRORS 0`, `total:12524`, `badCount:0`. `npm run package` → produced `dist/operations.zip`. A visual screenshot check was skipped (not part of the required definition of done) since the system was still under load after the regress pass succeeded — worth a manual look next time the app's open.
 
 **Next:** Phase X-AAR (After-Action-Review journal, idea C) is next in the confirmed build order — a new structured reflection entry type in `records.js`, small-medium, zero dependencies. The deliberate Upcoming/existing-indicator overlap noted above is an open decision, not a blocker.
+
+### v176 — Declutter: resolve the Upcoming/existing-indicator overlap from v175
+
+**Files changed:** `src/tabs/today.js`, `src/styles/main.css`, `sw.js`, `planning/FINISHED-FEATURES.md`, `planning/NEXT-SESSION-PROMPT.md`, `planning/SESSION-TIMES.md`.
+
+Wyatt asked to resolve the duplication v175 deliberately left open. Removed the pieces the new Upcoming card fully superseded: the milestone progress-bar section (`milestoneHtml`), the quest-due-within-7-days Field Notes row, and the AFT-test-date Field Notes row — all forward-looking-only and now strictly covered by Upcoming. Removed the now-dead `.milestone-bar-wrap`/`.milestone-bar`/`.milestone-bar-fill`/`.milestone-bar-label`/`.milestone-dawn`/`.ms-pill` CSS (confirmed dead via a repo-wide grep before deleting — the separate `.milestone-date`/`.milestone-label`/`.milestone-when`/`.milestone-del` rules for the actual milestone-management list elsewhere were left alone, different UI).
+
+The qualification-expiry and counseling-follow-up alerts weren't fully redundant — each covered both upcoming *and already-overdue* items, and Upcoming deliberately excludes overdue (that's Warrior's Focus / the overdue-oaths count's job). Trimmed both to overdue-only rather than deleting them outright: `qualAlertHtml` now shows only expired qualifications, `cnAlertHtml` only past-due follow-ups, headers reworded accordingly ("Counseling Follow-Up Overdue"). Net result: Upcoming owns everything forward-looking across all 6 sources; the two trimmed alerts plus the pre-existing overdue-oaths count own everything already past due; no date now appears in two places.
+
+Verified with a functional Playwright smoke test seeding one future + one past item in each of quals and counseling: confirmed the milestone bar is gone, the overdue alert fires only for the past item, and the future item is correctly absent from the overdue alert (present in Upcoming instead).
+
+SW bumped to `operations-v176`. `SKILL_LADDER_VER` unchanged at **117**. `npm run build` → OK, `npm run check` → SYNTAX OK, `npm run regress` → `PAGEERRORS 0`, `total:12524`, `badCount:0`. `npm run package` → produced `dist/operations.zip`.
+
+**Next:** Phase X-AAR (After-Action-Review journal, idea C) — no more open decisions blocking it.

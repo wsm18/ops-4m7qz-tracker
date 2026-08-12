@@ -317,32 +317,6 @@ function renderToday(){
     }
   }
 
-  // ── Upcoming milestones
-  const today0=localYMD();
-  const upcomingMs=(S.milestones||[])
-    .filter(m=>m.date>=today0)
-    .sort((a,b)=>a.date<b.date?-1:1)
-    .slice(0,3);
-  let milestoneHtml="";
-  if(upcomingMs.length){
-    const nearest=upcomingMs[0];
-    const daysTo=Math.ceil((new Date(nearest.date+"T12:00:00")-Date.now())/864e5);
-    const urgentColor=daysTo<=7?"var(--ember)":"var(--jade)";
-    const pastMs=(S.milestones||[]).filter(m=>m.date<today0).sort((a,b)=>b.date<a.date?-1:1)[0];
-    const originDate=pastMs?new Date(pastMs.date+"T12:00:00"):new Date(Date.now()-30*864e5);
-    const totalSpan=new Date(nearest.date+"T12:00:00")-originDate;
-    const elapsed=Date.now()-originDate;
-    const pct=Math.max(0,Math.min(100,Math.round(100*elapsed/totalSpan)));
-    const restPills=upcomingMs.slice(1).map(m=>{
-      const d=Math.ceil((new Date(m.date+"T12:00:00")-Date.now())/864e5);
-      return `<span class="ms-pill"><b>${d===0?"today":`in ${d}d`}</b> · ${esc(m.label)}</span>`;
-    }).join("");
-    milestoneHtml=`<div class="milestone-bar-wrap">
-      <div class="milestone-bar-label">📍 <b>${esc(nearest.label)}</b> — ${daysTo===0?"today":`${daysTo}d away`}</div>
-      <div class="milestone-bar"><div class="milestone-bar-fill" style="width:${pct}%;background:${urgentColor}"></div></div>
-    </div>${restPills?`<div class="milestone-dawn">${restPills}</div>`:""}`;
-  }
-
   // ── Orders counts (used by both the inline card and streak protection) — kind:"order"
   // only, since habit-kind items never set .done (their "done today" signal is
   // lastDone===today instead) and shouldn't count toward the orders-remaining tally.
@@ -432,20 +406,10 @@ function renderToday(){
     const lastDon=(S.donations||[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
     if(lastDon){const nxt=new Date(lastDon.date);nxt.setDate(nxt.getDate()+56);const d=Math.ceil((nxt-Date.now())/864e5);if(d<=7)notes.push(`<div class="fn-row"><span class="fn-dot">🩸</span><span>Blood donation: ${d<=0?"eligible now":`eligible in ${d} day${d!==1?"s":""}`}</span></div>`);}
   }
-  if(S.aftTestDate){const _aftD=Math.ceil((new Date(S.aftTestDate+"T12:00:00")-Date.now())/864e5);if(_aftD>=0&&_aftD<=60)notes.push(`<div class="fn-row"><span class="fn-dot">⏳</span><span>AFT in ${_aftD===0?"today":_aftD+" day"+(_aftD!==1?"s":"")} · <span style="color:${_aftD<=14?"var(--ember)":"var(--ink-dim)"}">stay on plan</span></span><button class="td-go-sm" data-gototab="aft">→</button></div>`);}
+  // Overdue oaths — deliberately NOT duplicated in the Upcoming card (forward-looking
+  // only, by design) or Warrior's Focus (surfaces only the single most urgent one).
   const overdueCount=(S.quests||[]).filter(q=>!q.done&&q.due&&q.due<localYMD()).length;
   if(overdueCount>1) notes.push(`<div class="fn-row"><span class="fn-dot">⚠️</span><span>${overdueCount} overdue oaths</span><button class="td-go-sm" data-gototab="quests">→</button></div>`);
-  // F4: quest due within 7 days
-  const dueSoon7=(S.quests||[]).filter(q=>{
-    if(q.done||!q.due) return false;
-    const d=Math.ceil((new Date(q.due+"T12:00:00")-Date.now())/864e5);
-    return d>=0&&d<=7;
-  });
-  if(dueSoon7.length){
-    const names=dueSoon7.slice(0,2).map(q=>esc(q.title||"Quest")).join(" · ");
-    const more=dueSoon7.length>2?` +${dueSoon7.length-2} more`:"";
-    notes.push(`<div class="fn-row"><span class="fn-dot">🚩</span><span>${dueSoon7.length} oath${dueSoon7.length!==1?"s":""} due within 7 days: ${names}${more}</span><button class="td-go-sm" data-gototab="quests">→</button></div>`);
-  }
   // fading-soon digest: show all skills within 20% of their fade window, not just the worst one
   const fadingSoon=(S.lifeSkills||[]).filter(s=>!s.group&&s.currentLevel>0)
     .map(s=>({s,days:typeof skDaysLeft==="function"?skDaysLeft(s):null}))
@@ -560,44 +524,36 @@ function renderToday(){
     }
   }
 
-  // ── Counseling follow-up alert — any follow-up date within 7 days or past due
+  // ── Counseling follow-up alert — OVERDUE only; upcoming ones now live in the
+  // Upcoming card above (forward-looking, today included). This alert exists
+  // specifically for the case Upcoming deliberately excludes: already past due.
   let cnAlertHtml="";
   {
-    const today2=localYMD();
-    const upcoming=(S.counseling||[]).filter(c=>{
+    const overdueFU=(S.counseling||[]).filter(c=>{
       if(!c.followUp||!c.followUp.match(/^\d{4}-\d{2}-\d{2}$/)) return false;
-      const diff=Math.ceil((new Date(c.followUp+"T12:00:00")-Date.now())/864e5);
-      return diff<=7;
+      return c.followUp<localYMD();
     }).sort((a,b)=>a.followUp<b.followUp?-1:1);
-    if(upcoming.length){
-      const rows=upcoming.map(c=>{
-        const diff=Math.ceil((new Date(c.followUp+"T12:00:00")-Date.now())/864e5);
-        const when=diff<0?`${Math.abs(diff)}d overdue`:diff===0?"today":`in ${diff}d`;
-        return `<div class="cn-alert-row"><span class="cn-alert-date">${c.followUp} (${when})</span> — ${esc((c.summary||"").slice(0,60))}</div>`;
+    if(overdueFU.length){
+      const rows=overdueFU.map(c=>{
+        const diff=Math.abs(Math.ceil((new Date(c.followUp+"T12:00:00")-Date.now())/864e5));
+        return `<div class="cn-alert-row"><span class="cn-alert-date">${c.followUp} (${diff}d overdue)</span> — ${esc((c.summary||"").slice(0,60))}</div>`;
       }).join("");
-      cnAlertHtml=`<div class="cn-alert"><div class="td-h fn-h">⚠️ Counseling Follow-Up Due</div>${rows}<button class="td-go-sm" data-gototab="records">Records →</button></div>`;
+      cnAlertHtml=`<div class="cn-alert"><div class="td-h fn-h">⚠️ Counseling Follow-Up Overdue</div>${rows}<button class="td-go-sm" data-gototab="records">Records →</button></div>`;
     }
   }
 
-  // ── Qualification expiry alerts — expired or expiring within 60 days
+  // ── Qualification expiry alert — EXPIRED only; upcoming expiries now live in
+  // the Upcoming card above, same reasoning as the counseling alert.
   let qualAlertHtml="";
   {
     const today2=localYMD();
     const pastExp=(S.qualifications||[]).filter(q=>q.expires&&q.expires<=today2);
-    const soonExp=(S.qualifications||[]).filter(q=>q.expires&&q.expires>today2&&dayDiff(today2,q.expires)<=60);
-    if(pastExp.length||soonExp.length){
-      const rows=[
-        ...pastExp.map(q=>{
-          const cat=typeof QUAL_CATALOG!=="undefined"&&QUAL_CATALOG[q.key]?QUAL_CATALOG[q.key]:null;
-          const name=q.key==="custom"?(q.label||q.key):cat?cat.fullName:q.key;
-          return `<div class="qual-alert-row overdue">⚠️ <b>${esc(name)}</b> expired ${q.expires}</div>`;
-        }),
-        ...soonExp.map(q=>{
-          const cat=typeof QUAL_CATALOG!=="undefined"&&QUAL_CATALOG[q.key]?QUAL_CATALOG[q.key]:null;
-          const name=q.key==="custom"?(q.label||q.key):cat?cat.fullName:q.key;
-          return `<div class="qual-alert-row">🔔 <b>${esc(name)}</b> expires ${q.expires} (${dayDiff(today2,q.expires)}d)</div>`;
-        })
-      ].join("");
+    if(pastExp.length){
+      const rows=pastExp.map(q=>{
+        const cat=typeof QUAL_CATALOG!=="undefined"&&QUAL_CATALOG[q.key]?QUAL_CATALOG[q.key]:null;
+        const name=q.key==="custom"?(q.label||q.key):cat?cat.fullName:q.key;
+        return `<div class="qual-alert-row overdue">⚠️ <b>${esc(name)}</b> expired ${q.expires}</div>`;
+      }).join("");
       qualAlertHtml=`<div class="td-card fn-card qual-alert">${rows}<button class="td-go-sm" data-gototab="awards">Wall →</button></div>`;
     }
   }
@@ -686,7 +642,7 @@ function renderToday(){
   // ── Quick PT Log
   const quickLogHtml=typeof renderQuickLog==="function"?renderQuickLog():'';
   // ── Assemble — creed always first, then guided flow
-  const flow=[startHtml, todaysHandHtml, sessHtml, weekCardHtml, ordersHtml, recoveryHtml, discHtml, bossHtml, streakHtml, commissionHtml, milestoneHtml, pathSummaryHtml, focusHtml, adaptHtml, upcomingHtml, neglectHtml, pathPips, notesHtml, academicHtml, omlHtml, cnAlertHtml, qualAlertHtml, fmHtml, quickLogHtml, briefBtnHtml, installHtml, notifPromptHtml].filter(Boolean).join("");
+  const flow=[startHtml, todaysHandHtml, sessHtml, weekCardHtml, ordersHtml, recoveryHtml, discHtml, bossHtml, streakHtml, commissionHtml, pathSummaryHtml, focusHtml, adaptHtml, upcomingHtml, neglectHtml, pathPips, notesHtml, academicHtml, omlHtml, cnAlertHtml, qualAlertHtml, fmHtml, quickLogHtml, briefBtnHtml, installHtml, notifPromptHtml].filter(Boolean).join("");
 
   el.innerHTML=`<div class="td-creed">🌲 <span>${creed}</span></div>`+(
     flow

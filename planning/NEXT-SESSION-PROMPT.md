@@ -6,10 +6,10 @@ You are continuing work on **Operations**, a gamified ROTC life-tracker PWA buil
 
 1. `CLAUDE.md` — the binding rulebook (hard rules, workflow, file layout)
 2. `planning/FINISHED-FEATURES.md` — design language, color palette, completed features, project identity. **Read v168–v174 in full before touching the GUI revamp again** — that whole span is one continuous, easy-to-lose-track-of workstream (see "GUI revamp" section below for why this note exists).
-3. `planning/IDEAS-tests-fm-workouts.md` — **the active workstream as of v175**, fully designed, confirmed 8-phase build order at the bottom. Read the "Decisions needed"/"Recommended build order" sections before picking the next phase.
+3. `planning/IDEAS-tests-fm-workouts.md` — **the active workstream as of v176**, fully designed, confirmed 8-phase build order at the bottom. Read the "Decisions needed"/"Recommended build order" sections before picking the next phase.
 4. `planning/IDEAS-gui-revamp.md` — the GUI revamp is not the active workstream right now (see below) but isn't fully closed out either.
 
-**Current version: v175.** The service worker is at `operations-v175` in `sw.js`. `SKILL_LADDER_VER` is **117** (unchanged since v155). Total skills: **12524**.
+**Current version: v176.** The service worker is at `operations-v176` in `sw.js`. `SKILL_LADDER_VER` is **117** (unchanged since v155). Total skills: **12524**.
 
 ---
 
@@ -47,12 +47,11 @@ Wyatt asked, in a later session, for **TOC** — a separate personal project at 
 
 ---
 
-## FM/test-features workstream — active as of v175, 1 of 8 phases done
+## FM/test-features workstream — active as of v176, 1 of 8 phases done
 
-`planning/IDEAS-tests-fm-workouts.md` is fully designed (every idea confirmed, no open questions) with a confirmed build order at the bottom: **X-Timeline → X-AAR → FM-1 (#2+2b) → FM-2 (#3) → X-Insight (A) → T (#1) → FM-3 (#5) → X-SmartFocus (B)**. It was originally gated behind the pyramid Commons workstream, which finished long ago (v167) — so as of v175 this is simply the next thing to build, no re-confirmation needed unless you're changing something the doc already locked in.
+`planning/IDEAS-tests-fm-workouts.md` is fully designed (every idea confirmed, no open questions) with a confirmed build order at the bottom: **X-Timeline → X-AAR → FM-1 (#2+2b) → FM-2 (#3) → X-Insight (A) → T (#1) → FM-3 (#5) → X-SmartFocus (B)**. It was originally gated behind the pyramid Commons workstream, which finished long ago (v167) — so this is simply the next thing to build, no re-confirmation needed unless you're changing something the doc already locked in.
 
-- **Phase X-Timeline (idea D): DONE — v175.** A new `renderUpcomingTimeline()` in `src/tabs/today.js` merges quest due dates, boss target dates, the AFT test date, milestones, and qualification expiries into one sorted "Upcoming" card on the Dawn tab. Read-only aggregation, no new data model, matching the phase's own small-medium scope.
-- **Known open item from X-Timeline, not yet decided:** several of these dates were already individually surfaced elsewhere on the Dawn tab before this phase (milestone progress bar, qual/counseling expiry alerts, a quest-due-soon Field Notes row, an AFT-test-date row) — those were deliberately left in place rather than removed/consolidated, since the phase's scope was additive aggregation, not a refactor of already-shipped UI. Ask Wyatt whether he wants a follow-up decluttering pass, or is fine with the modest duplication.
+- **Phase X-Timeline (idea D): DONE — v175, decluttered in v176.** A new `renderUpcomingTimeline()` in `src/tabs/today.js` merges quest due dates, boss target dates, the AFT test date, milestones, and qualification expiries into one sorted "Upcoming" card on the Dawn tab. v175 shipped this as pure addition, leaving some pre-existing scattered indicators (milestone bar, qual/counseling alerts, a quest-due-soon note, an AFT-date note) showing the same dates twice; v176 resolved that — removed everything fully superseded by Upcoming, and trimmed the qualification/counseling alerts to overdue-only (Upcoming is forward-looking only by design, so those alerts now own exactly the complementary "already past due" case, no overlap either way). **No open items remain from this phase.**
 - **Next phase: X-AAR** (After-Action-Review journal, idea C) — new structured reflection entry type in `records.js` alongside the existing free-text counseling log, small-medium, zero dependencies. See that phase's entry in `FINISHED-FEATURES.md`'s build-order section (under "Recommended build order and phase plan" in `IDEAS-tests-fm-workouts.md`) for the full scope.
 - Remaining phases after that: FM-1, FM-2, X-Insight, T, FM-3, X-SmartFocus — see `IDEAS-tests-fm-workouts.md` for full scope/dependencies on each. **FM-3 (card-game workouts) is explicitly not build-greenlit even though its design is complete — Wyatt asked to hold it in planning; re-confirm before starting that one specifically, whenever its turn comes up.**
 
