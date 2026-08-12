@@ -9,9 +9,13 @@ const WEATHER={
   dark:{label:"Dark / unsafe", icon:"🌙", bad:true},
 };
 function weatherBad(){ const w=WEATHER[(S&&S.weather)||"clear"]; return !!(w&&w.bad); }
-function sessionEx(skey){
+// forceGym, if passed (true/false), overrides S.hasGym — used for TODAY's
+// actual prescribed session, which should reflect today's resolved gym
+// access (gymAccessForDate), not the general reference-library toggle every
+// other sessionEx() call site still uses.
+function sessionEx(skey, forceGym){
   const s=SESSIONS[skey]; if(!s) return [];
-  const useGym=!!(S&&S.hasGym);
+  const useGym = forceGym!=null ? !!forceGym : !!(S&&S.hasGym);
   let list=(useGym? s.gym : s.bw) || s.bw || s.ex || [];
   // Weather swap only applies to the no-equipment (outdoor) plan — gym work is already indoors.
   if(!useGym && weatherBad()){
@@ -31,15 +35,116 @@ const SESSION_AREAS = {
 
 // ===== Weekly training schedule (the coached rotation) =====
 // JS getDay(): 0=Sun … 6=Sat. null = rest day.
-const WEEK_PLAN = {
-  0:{ session:null, intensity:"rest", label:"Active recovery", note:"20–40 min easy walk + the Session 5 stretch block. Rest is when you actually adapt — take it." },
-  1:{ session:"s1", intensity:"hard", label:"Strength A — Lower + Push" },
-  2:{ session:"s2", intensity:"moderate", label:"Run (keep it easy/tempo, not all-out)" },
-  3:{ session:"s3", intensity:"hard", label:"Strength B — Upper + Core" },
-  4:{ session:"s5", intensity:"easy", label:"Mobility + Balance (recovery)" },
-  5:{ session:"s4", intensity:"hard", label:"AFT Circuit — your weak events" },
-  6:{ session:"s2", intensity:"hard", label:"Run (intervals OR long easy)" },
+//
+// FM-1: the schedule is no longer a fixed day->session map. Which session TYPE
+// lands on which day is now a function of that week's gym-access pattern —
+// equipment-preferred sessions (heavy lower/push, upper/core, the AFT circuit)
+// go on declared gym days; equipment-free sessions (runs, mobility) go on the
+// rest. Sunday stays a fixed rest day, same as before; only Mon-Sat rotate.
+// See assignWeekSessions()/gymAccessForDate() below.
+const REST_DAY_META = { session:null, intensity:"rest", label:"Active recovery", note:"20–40 min easy walk + the Session 5 stretch block. Rest is when you actually adapt — take it." };
+// Per-session label/intensity — travels with the session type wherever it lands.
+// s2 (Run) is special-cased in resolveDayPlan(): the week's EARLIER run slot
+// reads as the moderate "quality" run, the LATER slot as the hard/long one —
+// preserving the original Tue-quality/Sat-hard distinction without pinning it
+// to a fixed weekday, since which day gets which run now varies with gym access.
+const SESSION_META = {
+  s1:{ intensity:"hard",     label:"Strength A — Lower + Push" },
+  s3:{ intensity:"hard",     label:"Strength B — Upper + Core" },
+  s4:{ intensity:"hard",     label:"AFT Circuit — your weak events" },
+  s5:{ intensity:"easy",     label:"Mobility + Balance (recovery)" },
 };
+const SESSION_META_S2 = {
+  first:  { intensity:"moderate", label:"Run (keep it easy/tempo, not all-out)" },
+  second: { intensity:"hard",     label:"Run (intervals OR long easy)" },
+};
+// Equipment-preferred sessions go on gym days first; the rest fill non-gym days.
+// Order matters: earliest gym day gets s1, next gets s3, next gets s4 (mirrors
+// the original week's Strength-A -> Strength-B -> AFT-circuit progression).
+const GYM_PREFERRED = ["s1","s3","s4"];
+const NO_GYM_PREFERRED = ["s2","s2","s5"];
+
+// Monday (local midnight) of the week containing dateObj.
+function weekMonday(dateObj){
+  const d=new Date(dateObj); const dow=(d.getDay()+6)%7;
+  d.setDate(d.getDate()-dow); d.setHours(0,0,0,0);
+  return d;
+}
+// Resolved gym-access boolean for a specific calendar date, cascading:
+// 1. a same-day live override (set via the "actually I do/don't have gym
+//    today" toggle) — always wins when present, for TODAY specifically.
+// 2. this week's confirmed/adjusted pattern, IF gymAccess.weekOf still matches
+//    that date's Monday (once the user moves on to a new week without
+//    touching it, weekOf stops matching and older weeks correctly fall back
+//    to the default below — a deliberate simplification instead of keeping a
+//    full frozen per-date history, see FINISHED-FEATURES.md's FM-1 entry).
+// 3. the saved recurring default pattern.
+function gymAccessForDate(dateObj){
+  const ymd=localYMD(dateObj);
+  const live=(S.gymAccessLive||{})[ymd];
+  if(live!=null) return !!live;
+  const ga=S.gymAccess||{};
+  const mon=localYMD(weekMonday(dateObj));
+  if(ga.weekOf===mon && ga.week && ga.week[dateObj.getDay()]!=null) return !!ga.week[dateObj.getDay()];
+  return !!((ga.default||{})[dateObj.getDay()]);
+}
+// Set/clear today's live gym-access override (the "same-day ad-hoc change" layer).
+function setGymAccessToday(val){
+  if(!S.gymAccessLive) S.gymAccessLive={};
+  S.gymAccessLive[localYMD()]=!!val;
+}
+// The pattern to show in the per-week confirm-or-adjust UI: this week's already-
+// confirmed pattern if one exists for the current week, else a copy of the
+// default (the starting point the user adjusts from).
+function weekGymPatternForEditing(){
+  const ga=S.gymAccess||{}; const mon=localYMD(weekMonday(new Date()));
+  if(ga.weekOf===mon && ga.week) return Object.assign({}, ga.week);
+  return Object.assign({}, ga.default||{});
+}
+function weekGymPatternIsConfirmed(){
+  return (S.gymAccess||{}).weekOf===localYMD(weekMonday(new Date()));
+}
+function confirmWeekGymPattern(pattern){
+  if(!S.gymAccess) S.gymAccess={default:{1:true,3:true,5:true},weekOf:null,week:{}};
+  S.gymAccess.weekOf=localYMD(weekMonday(new Date()));
+  S.gymAccess.week=Object.assign({}, pattern);
+}
+function saveDefaultGymPattern(pattern){
+  if(!S.gymAccess) S.gymAccess={default:{1:true,3:true,5:true},weekOf:null,week:{}};
+  S.gymAccess.default=Object.assign({}, pattern);
+}
+// Assign session types to Mon-Sat for the week containing mondayDate, based on
+// that week's per-day resolved gym access. Deterministic given the same
+// gym-access pattern (no randomness), so it doesn't flicker across renders.
+function assignWeekSessions(mondayDate){
+  const days=[1,2,3,4,5,6];
+  const gymDays=days.filter(d=>{ const dt=new Date(mondayDate); dt.setDate(mondayDate.getDate()+(d-1)); return gymAccessForDate(dt); });
+  const nonGymDays=days.filter(d=>!gymDays.includes(d));
+  const poolA=GYM_PREFERRED.slice(), poolB=NO_GYM_PREFERRED.slice();
+  const assign={};
+  gymDays.forEach(d=>{ if(!assign[d] && poolA.length) assign[d]=poolA.shift(); });
+  nonGymDays.forEach(d=>{ if(!assign[d] && poolB.length) assign[d]=poolB.shift(); });
+  // leftovers: not enough gym days for all equipment-preferred sessions, or vice versa
+  nonGymDays.forEach(d=>{ if(!assign[d] && poolA.length) assign[d]=poolA.shift(); });
+  gymDays.forEach(d=>{ if(!assign[d] && poolB.length) assign[d]=poolB.shift(); });
+  days.forEach(d=>{ if(!assign[d]) assign[d]=null; });
+  return assign;
+}
+// Which of this week's two s2 (Run) slots a given day is — "first" (earlier,
+// the quality/moderate run) or "second" (later, the hard/long one) — or null
+// if that day isn't a run day. Falls back to "first" if only one run landed
+// this week (an edge case: e.g. 7/7 gym days leaves only 1 non-gym-preferred
+// slot filled before the pool runs out... in practice always 2 with 6 active
+// days, but stay defensive).
+function runSlotFor(dateObj){
+  const mon=weekMonday(dateObj);
+  const assign=assignWeekSessions(mon);
+  const runDays=Object.keys(assign).map(Number).filter(d=>assign[d]==="s2").sort((a,b)=>a-b);
+  const day=dateObj.getDay();
+  const idx=runDays.indexOf(day);
+  if(idx<0) return null;
+  return (idx===runDays.length-1 && runDays.length>1) ? "second" : "first";
+}
 // Short how-to for each exercise that appears in a session (matched by a keyword in the name).
 // Keeps the coached card self-explanatory without opening the glossary.
 const EX_HOWTO=[
@@ -125,23 +230,65 @@ function exHowto(name){
   const hit=EX_HOWTO.find(([k])=> n.includes(k));
   return hit? hit[1] : "";
 }
-function planForDay(d){ return WEEK_PLAN[ (d instanceof Date ? d.getDay() : d) ]; }
-// For "pick one" sessions (the run), choose which variant to do today, with a sensible rotation.
-// Tuesday = the easier/quality midweek run; Saturday = the harder/longer weekend run.
-// Every 3rd week, the Saturday slot becomes a timed 2-mile test so progress gets measured.
-function pickRunIndex(dateObj){
+// Resolve a full day-plan object {session, intensity, label, note?} for a
+// given Date. Sunday is a fixed rest day; Mon-Sat's session type comes from
+// that week's gym-access-driven assignment (assignWeekSessions), with s2's
+// label/intensity further split by which of the week's two run slots this
+// day landed (see runSlotFor).
+function planForDay(dateObj){
   const day=dateObj.getDay();
+  if(day===0) return REST_DAY_META;
+  const assign=assignWeekSessions(weekMonday(dateObj));
+  const skey=assign[day];
+  if(!skey) return REST_DAY_META;
+  if(skey==="s2"){
+    const slot=runSlotFor(dateObj)||"first";
+    return Object.assign({session:"s2"}, SESSION_META_S2[slot]);
+  }
+  return Object.assign({session:skey}, SESSION_META[skey]);
+}
+// For "pick one" sessions (the run), choose which variant to do today, with a
+// sensible rotation. The week's earlier run slot = the easier/quality
+// midweek-style run; the later slot = the harder/longer one — see runSlotFor
+// for how "earlier/later" is now determined (gym-access can move which actual
+// weekday each run lands on, so this no longer hardcodes Tue/Sat).
+// Every 3rd week, the later slot becomes a timed 2-mile test so progress gets measured.
+function pickRunIndex(dateObj){
+  const slot=runSlotFor(dateObj)||"first";
   // Continuous week count since a fixed epoch (a Monday) so the cadence never resets
   // at the New Year. Using local midnight avoids DST drift.
   const EPOCH=Date.UTC(2024,0,1); // Mon Jan 1 2024, an arbitrary stable anchor
   const dayUTC=Date.UTC(dateObj.getFullYear(),dateObj.getMonth(),dateObj.getDate());
   const week=Math.floor((dayUTC-EPOCH)/(7*864e5));
-  if(day===6){ // Saturday = harder
+  if(slot==="second"){ // harder/longer slot
     if(week%3===2) return 3;   // timed 2-mile test every 3rd week (continuous cadence)
     return 2;                  // long easy run
   }
-  // Tuesday (or any other run slot) = the quality midweek session, alternating intervals/tempo
+  // earlier/quality slot = alternating intervals/tempo
   return (week%2===0) ? 0 : 1; // intervals on even weeks, tempo on odd
+}
+// Adaptive pick for what an AFT-circuit (s4) day should actually be: a full
+// guided mock AFT, single-event practice on the weakest event, or the normal
+// bodyweight/gym circuit — per the doc's "let the coach decide adaptively,
+// no fixed cadence" resolution. Reuses signals the app already computes
+// (recoveryReadiness, AFT history, the declared test date) rather than adding
+// new tracking.
+function pickAftMode(){
+  const lastAft=(S.aft||[])[S.aft.length-1];
+  const daysSinceTest=lastAft?Math.abs(dayDiff(lastAft.date,localYMD())):999;
+  const testDate=S.aftTestDate;
+  const daysToTest=testDate?dayDiff(localYMD(),testDate):null;
+  const rec=typeof recoveryReadiness==="function"?recoveryReadiness():null;
+  const notRecovered=rec&&rec.level==="easy"; // two-or-more negative recovery flags
+  if(notRecovered) return "circuit"; // lower-demand default when markers say ease off
+  // close to a real test -> rehearse full conditions
+  if(daysToTest!=null && daysToTest>=0 && daysToTest<=14) return "mock";
+  // haven't tested in a long time -> a full mock re-baselines
+  if(daysSinceTest>=45) return "mock";
+  // otherwise: sharpen the weakest single event
+  if(lastAft) return "practice";
+  // no AFT history at all yet -> a full mock establishes the baseline
+  return "mock";
 }
 // Set/rep prescription per intensity — how to actually run today's exercises, in order.
 function prescriptionFor(intensity, ex){
@@ -179,7 +326,7 @@ function todaysPlan(){
   return {
     now, dayPlan,
     sessionKey: dayPlan.session,
-    exercises: dayPlan.session ? sessionEx(dayPlan.session) : [],
+    exercises: dayPlan.session ? sessionEx(dayPlan.session, gymAccessForDate(now)) : [],
     todayLogged: !!tLogged, todayLog: tLogged,
     yesterday: {
       plan: yPlan,

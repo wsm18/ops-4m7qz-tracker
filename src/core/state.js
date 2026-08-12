@@ -74,6 +74,10 @@ function load(){
     merged.lifts=Object.assign({deadliftLb:null,squatLb:null,benchLb:null,liftDate:null}, r.lifts||{});
     merged.aftStandard=r.aftStandard||"general";
     merged.aftEventTargets=Object.assign({hrp:null,sdc:null,run:null,dl:null,plank:null}, r.aftEventTargets||{});
+    merged.gymAccess=Object.assign({default:{1:true,3:true,5:true},weekOf:null,week:{}}, r.gymAccess||{});
+    merged.gymAccess.default=Object.assign({1:true,3:true,5:true}, merged.gymAccess.default||{});
+    merged.gymAccess.week=merged.gymAccess.week||{};
+    merged.gymAccessLive=r.gymAccessLive||{};
     merged.donations=r.donations||[];
     merged.weightLog=r.weightLog||[];
     merged.vitals=r.vitals||[];
@@ -281,6 +285,7 @@ function render(){
   if(typeof renderSkillBalance==="function") renderSkillBalance();
   if(typeof renderRecoveryAdvisory==="function") renderRecoveryAdvisory();
   if(typeof renderSessionLists==="function") renderSessionLists();
+  if(typeof renderGymAccessUI==="function") renderGymAccessUI();
   if(typeof renderCoachToday==="function") renderCoachToday();
   if(typeof renderSkillsTab==="function") renderSkillsTab();
   if(typeof renderAdaptiveTargets==="function") renderAdaptiveTargets();

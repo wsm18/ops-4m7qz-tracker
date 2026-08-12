@@ -73,6 +73,13 @@ const DEFAULT = {
   aftGoal:null,           // target total AFT score (e.g. 500); shown as a gap line on the score display
   hasGym:false,           // equipment mode: false = no-equipment (bodyweight) plans, true = gym versions
   weather:"clear",        // manual weather: clear|rain|snow|heat|cold|wind|air|dark — bad conditions swap outdoor work indoors
+  // Gym-access-aware weekly planning (FM-1). Three layers, checked in this order
+  // by gymAccessForDate() in training.js: gymAccessLive (today-only override) ->
+  // gymAccess.week (this week's confirmed/adjusted pattern, only valid while
+  // gymAccess.weekOf matches the current week's Monday) -> gymAccess.default
+  // (the saved recurring pattern). Keyed by JS getDay() (0=Sun..6=Sat).
+  gymAccess:{ default:{1:true,3:true,5:true}, weekOf:null, week:{} },
+  gymAccessLive:{},       // {"YYYY-MM-DD": true|false} same-day ad-hoc overrides
   donations:[],           // blood donations: [{id, date, type}]
   weightLog:[],           // weight history for trend: [{date, lb}]
   vitals:[],              // health readings: [{id, date, pulse, bpSys, bpDia, hemoglobin, note}]

@@ -104,7 +104,29 @@ function dawnSessionHtml(){
   const sess=SESSIONS[p.sessionKey];
   const intensity=p.dayPlan.intensity;
   const intLabel={hard:"🔴 Hard",moderate:"🟠 Moderate",easy:"🟢 Easy"}[intensity]||"";
-  const modeTag=S.hasGym?"🏋️ Gym":(weatherBad()?`${WEATHER[(S.weather)||"clear"].icon} Indoor`:"🤸 Bodyweight");
+  const todayGym=typeof gymAccessForDate==="function"?gymAccessForDate(p.now):S.hasGym;
+  const modeTag=todayGym?"🏋️ Gym":(weatherBad()?`${WEATHER[(S.weather)||"clear"].icon} Indoor`:"🤸 Bodyweight");
+  // AFT-circuit days: an adaptive coach call (full mock / single-event practice /
+  // the normal circuit) instead of always just showing the circuit — see FM-1.
+  if(p.sessionKey==="s4"&&typeof pickAftMode==="function"){
+    const mode=pickAftMode();
+    if(mode==="mock"){
+      return `<div class="dawn-sess">
+        <div class="ds-top"><span class="ds-name">${esc(dayName)} · AFT Circuit</span><span class="ds-badges">${intLabel} <span class="ds-mode">${modeTag}</span></span></div>
+        <div class="ds-note">Today's call: a full guided mock AFT — all 5 events, timed, feeding straight into your real AFT history.</div>
+        <div class="ds-actions"><button class="td-go ds-log-btn" data-mockaft="mock">🏁 Start guided mock AFT →</button></div>
+      </div>`;
+    }
+    if(mode==="practice"){
+      const weakest=typeof fmFocusLine==="function"?fmFocusLine():null;
+      return `<div class="dawn-sess">
+        <div class="ds-top"><span class="ds-name">${esc(dayName)} · AFT Circuit</span><span class="ds-badges">${intLabel} <span class="ds-mode">${modeTag}</span></span></div>
+        <div class="ds-note">Today's call: single-event practice, not a full mock. ${weakest?esc(weakest):""}</div>
+        <div class="ds-actions"><button class="td-go ds-log-btn" data-mockaft="practice">🎯 Start single-event practice →</button><button class="td-go ds-plan-btn" data-gototab="plan">Full plan →</button></div>
+      </div>`;
+    }
+    // "circuit" mode falls through to the normal exercise-list rendering below.
+  }
   const exList=p.exercises.slice(0,sess.pickOne?4:7).map(e=>`<div class="ds-ex">${esc(e.n)}${e._swapped?' <span class="ds-swap">· indoor</span>':''}</div>`).join("");
   const more=p.exercises.length>(sess.pickOne?4:7)?`<div class="ds-ex ds-more">+${p.exercises.length-(sess.pickOne?4:7)} more</div>`:"";
   const action=p.todayLogged
@@ -224,8 +246,22 @@ function renderCoachToday(){
     const sess=SESSIONS[p.sessionKey];
     const intensity=p.dayPlan.intensity;
     const intLabel={hard:"🔴 Hard day",moderate:"🟠 Moderate",easy:"🟢 Easy / recovery",rest:"💤 Rest"}[intensity]||"";
-    const modeTag = S.hasGym ? "🏋️ Gym version" : (weatherBad()? `${WEATHER[(S.weather)||"clear"].icon} indoor (weather)` : "🤸 No-equipment");
-    if(sess.pickOne){
+    const todayGym=typeof gymAccessForDate==="function"?gymAccessForDate(p.now):S.hasGym;
+    const modeTag = todayGym ? "🏋️ Gym version" : (weatherBad()? `${WEATHER[(S.weather)||"clear"].icon} indoor (weather)` : "🤸 No-equipment");
+    const aftMode=(p.sessionKey==="s4"&&typeof pickAftMode==="function")?pickAftMode():null;
+    if(aftMode==="mock"||aftMode==="practice"){
+      // Adaptive coach call for the AFT-circuit slot (FM-1/§2b) — a full guided
+      // mock or single-event practice instead of the normal fixed circuit.
+      const weakest=typeof fmFocusLine==="function"?fmFocusLine():null;
+      tHtml=`<div class="coach-body">
+        <div class="coach-day-h">${esc(dayName)} · AFT Circuit <span class="coach-int">${intLabel}</span></div>
+        <p class="coach-intro">${aftMode==="mock"
+          ? "Today's call: a full guided mock AFT — all 5 events, timed, feeding straight into your real AFT history."
+          : "Today's call: single-event practice, not a full mock." + (weakest?" "+esc(weakest):"")}</p>
+        <button class="btn-add" data-mockaft="${aftMode}">${aftMode==="mock"?"🏁 Start guided mock AFT":"🎯 Start single-event practice"} →</button>
+        <p class="coach-tip">The coach picks between a full mock, single-event practice, and the normal circuit based on how close your test date is, how long since your last AFT, and your recent recovery markers — not a fixed schedule.</p>
+      </div>`;
+    } else if(sess.pickOne){
       // ONE exercise per session (e.g. the run): pick today's variant, explain it fully.
       const idx=pickRunIndex(p.now);
       const e=p.exercises[idx] || p.exercises[0];
@@ -266,6 +302,51 @@ function renderCoachToday(){
     const nav=document.querySelector('#sideNav button[data-tab="log"]'); if(nav) nav.click();
     setTimeout(()=>{ const sel=document.getElementById("lgSession"); if(sel){ sel.value=lb.dataset.sess; if(sel.onchange) sel.onchange(); } }, 60);
   };
+}
+
+// ===== Gym-access-aware weekly planning (FM-1) =====
+// In-progress edits to this week's day-toggle pattern, before "Confirm"/"Save
+// as default" is clicked — module-scope draft, not persisted to S until acted
+// on, matching the module-scope draft pattern used elsewhere in this codebase
+// (e.g. skills.js's level-input draft). Resets to the confirmed/default
+// pattern on a fresh page load.
+let _gymEditDraft=null;
+function renderGymAccessUI(){
+  const el=document.getElementById("gymAccessArea"); if(!el) return;
+  if(!_gymEditDraft) _gymEditDraft=typeof weekGymPatternForEditing==="function"?weekGymPatternForEditing():{};
+  const confirmed=typeof weekGymPatternIsConfirmed==="function"&&weekGymPatternIsConfirmed();
+  const dayNames=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const dayToggles=[1,2,3,4,5,6].map(d=>`<button class="gym-day-tgl${_gymEditDraft[d]?' on':''}" data-gymday="${d}">${dayNames[d]}</button>`).join("");
+
+  const mon=weekMonday(new Date());
+  const assign=assignWeekSessions(mon);
+  const sessLabel={s1:"Str A",s2:"Run",s3:"Str B",s4:"AFT",s5:"Mobility"};
+  const previewCells=[1,2,3,4,5,6].map(d=>{
+    const skey=assign[d];
+    const dt=new Date(mon); dt.setDate(mon.getDate()+(d-1));
+    const isGym=gymAccessForDate(dt);
+    return `<div class="gym-preview-cell${isGym?' gym':''}"><span class="gym-preview-day">${dayNames[d]}</span><span class="gym-preview-sess">${skey?(sessLabel[skey]||skey):'Rest'}</span></div>`;
+  }).join("");
+
+  const todayLive=(S.gymAccessLive||{})[localYMD()];
+  const todayGym=gymAccessForDate(new Date());
+
+  el.innerHTML=`<div class="gym-access-card">
+    <div class="td-h fn-h">Gym Access ${confirmed?'This Week':'— not yet confirmed for this week'}</div>
+    <div class="plan-intro" style="margin-bottom:8px">Toggle which days (Mon–Sat) you'll have gym access. The coach puts equipment-heavy sessions (lifting, the AFT circuit) on those days and runs/mobility on the rest — Sunday stays a fixed rest day.</div>
+    <div class="gym-day-toggles">${dayToggles}</div>
+    <div class="gym-access-actions">
+      <button class="hb-starter-btn" id="gymConfirmWeekBtn">${confirmed?'Update this week':'Confirm this week'}</button>
+      <button class="hb-starter-btn" id="gymSaveDefaultBtn" style="background:transparent;border:1px solid var(--line)">Save as my usual pattern</button>
+    </div>
+    <div class="gym-week-preview">${previewCells}</div>
+    <div class="gym-today-live">
+      <span class="gym-today-lbl">Today specifically:</span>
+      <button class="gym-live-btn${todayGym?' on':''}" data-gymlive="1">🏋️ Have gym</button>
+      <button class="gym-live-btn${!todayGym?' on':''}" data-gymlive="0">🤸 No gym</button>
+      ${todayLive!=null?`<button class="gym-live-clear" data-gymlive="clear">↺ use the week's plan</button>`:''}
+    </div>
+  </div>`;
 }
 
 // Fill each session writeup's exercise list based on the equipment mode (S.hasGym).

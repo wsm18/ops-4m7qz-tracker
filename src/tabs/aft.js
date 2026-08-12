@@ -298,6 +298,151 @@ const EVENT_FOCUS_SHORT={
   plank:"keep up daily max-hold planks",
   run:"add a weekly run",
 };
+/* ---------------- Guided mock AFT walkthrough (FM-1 / idea #2b) ----------------
+   Walks the 5 scored events in order with a simple start/stop stopwatch,
+   feeding the same score_*()/S.aft pipeline aftSave() already uses. "mock"
+   mode runs all 5 and saves a real S.aft entry, same as manually typing scores
+   in. "practice" mode runs one event (the current weakest) and shows the
+   score as immediate feedback WITHOUT saving an S.aft entry — a single-event
+   result isn't an honest "AFT total" (the other 4 events would read as 0),
+   and this app doesn't fake metrics. */
+const MOCK_AFT_EVENTS=[
+  {k:"dl",    label:"3-Rep-Max Deadlift",     unit:"lbs",  valueType:"number", useTimer:false, instructions:"Warm up, then work up to a weight you can deadlift for exactly 3 reps with good form. No timer needed for this one — just enter the weight."},
+  {k:"hrp",   label:"Hand-Release Push-ups",  unit:"reps", valueType:"number", useTimer:true,  timerHint:"2:00 max effort", instructions:"Start the timer, do max hand-release push-ups for 2 minutes, stop the timer at 2:00, then enter your rep count."},
+  {k:"sdc",   label:"Sprint-Drag-Carry",      unit:"time", valueType:"time",   useTimer:true,  timerHint:"stopwatch", instructions:"Start the timer at your first sprint, stop it the instant you cross the finish line. The stopped time fills in below — you can still edit it."},
+  {k:"plank", label:"Plank (max hold)",       unit:"time", valueType:"time",   useTimer:true,  timerHint:"stopwatch", instructions:"Hold a forearm plank with correct form. Start the timer, stop it the moment your form breaks."},
+  {k:"run",   label:"2-Mile Run",             unit:"time", valueType:"time",   useTimer:true,  timerHint:"stopwatch", instructions:"Start the timer at your first step, stop it at the finish line."},
+];
+let _mockAft=null;
+function _fmtTimer(s){ const m=Math.floor(s/60), r=s%60; return `${m}:${String(r).padStart(2,"0")}`; }
+function _weakestAftEventKey(){
+  const last=(S.aft||[])[S.aft.length-1]; if(!last) return "dl";
+  const evts=["dl","hrp","sdc","plank","run"].filter(k=>last.scores[k]!=null);
+  if(!evts.length) return "dl";
+  return evts.reduce((m,k)=>last.scores[k]<last.scores[m]?k:m, evts[0]);
+}
+function openMockAft(mode){
+  const events = mode==="practice" ? [_weakestAftEventKey()] : MOCK_AFT_EVENTS.map(e=>e.k);
+  _mockAft={ mode, events, stepIdx:0, results:{}, timerInterval:null, elapsed:0 };
+  const modal=document.getElementById("mockAftModal"); if(modal) modal.style.display="flex";
+  renderMockAftStep();
+}
+function closeMockAft(){
+  if(_mockAft&&_mockAft.timerInterval) clearInterval(_mockAft.timerInterval);
+  _mockAft=null;
+  const modal=document.getElementById("mockAftModal"); if(modal) modal.style.display="none";
+}
+function mockAftStartTimer(){
+  if(!_mockAft||_mockAft.timerInterval) return;
+  const startedAt=Date.now()-_mockAft.elapsed*1000;
+  _mockAft.timerInterval=setInterval(()=>{
+    _mockAft.elapsed=Math.floor((Date.now()-startedAt)/1000);
+    const disp=document.getElementById("mockAftTimerDisp"); if(disp) disp.textContent=_fmtTimer(_mockAft.elapsed);
+  },250);
+  renderMockAftStep();
+}
+function mockAftStopTimer(){
+  if(!_mockAft||!_mockAft.timerInterval) return;
+  clearInterval(_mockAft.timerInterval); _mockAft.timerInterval=null;
+  renderMockAftStep();
+}
+function mockAftResetTimer(){
+  if(!_mockAft) return;
+  if(_mockAft.timerInterval){ clearInterval(_mockAft.timerInterval); _mockAft.timerInterval=null; }
+  _mockAft.elapsed=0;
+  renderMockAftStep();
+}
+function _mockAftCurrentEvent(){
+  if(!_mockAft) return null;
+  return MOCK_AFT_EVENTS.find(e=>e.k===_mockAft.events[_mockAft.stepIdx]);
+}
+function _mockAftCaptureInput(){
+  const ev=_mockAftCurrentEvent(); if(!ev) return;
+  const inp=document.getElementById("mockAftValueInput"); if(!inp) return;
+  const raw = ev.valueType==="time" ? parseTime(inp.value) : (parseInt(inp.value)||null);
+  _mockAft.results[ev.k]=raw;
+}
+function mockAftNext(){
+  if(!_mockAft) return;
+  _mockAftCaptureInput();
+  if(_mockAft.stepIdx>=_mockAft.events.length-1){ finishMockAft(); return; }
+  _mockAft.stepIdx++;
+  if(_mockAft.timerInterval){ clearInterval(_mockAft.timerInterval); _mockAft.timerInterval=null; }
+  _mockAft.elapsed=0;
+  renderMockAftStep();
+}
+function mockAftSkip(){
+  if(!_mockAft) return;
+  if(_mockAft.stepIdx>=_mockAft.events.length-1){ finishMockAft(); return; }
+  _mockAft.stepIdx++;
+  if(_mockAft.timerInterval){ clearInterval(_mockAft.timerInterval); _mockAft.timerInterval=null; }
+  _mockAft.elapsed=0;
+  renderMockAftStep();
+}
+function finishMockAft(){
+  if(!_mockAft) return;
+  _mockAftCaptureInput();
+  const mode=_mockAft.mode, r=_mockAft.results;
+  if(mode==="practice"){
+    const k=_mockAft.events[0];
+    const scoreFn={dl:score_dl,hrp:score_hrp,sdc:score_sdc,plank:score_plank,run:score_run}[k];
+    const raw=r[k];
+    closeMockAft();
+    if(raw==null){ toast("No result entered"); return; }
+    const score=scoreFn(raw);
+    const label=(MOCK_AFT_EVENTS.find(e=>e.k===k)||{}).label||k;
+    toast(`<span class="t-xp">${esc(label)}: ${score} pts</span> · practice only, not saved to your AFT history`);
+    return;
+  }
+  const scores={dl:score_dl(r.dl),hrp:score_hrp(r.hrp),sdc:score_sdc(r.sdc),plank:score_plank(r.plank),run:score_run(r.run)};
+  const hasAny=Object.values(scores).some(v=>v!=null);
+  closeMockAft();
+  if(!hasAny){ toast("No events recorded"); return; }
+  const total=Object.values(scores).reduce((s,v)=>s+(v||0),0);
+  const entry={date:new Date().toLocaleDateString(), raw:{dl:r.dl,hrp:r.hrp,sdc:r.sdc,plank:r.plank,run:r.run}, scores, total, source:"mock"};
+  S.aft.push(entry);
+  if(!S.pathXP) S.pathXP={};
+  S.pathXP.physical=(S.pathXP.physical||0)+30;
+  save(); render();
+  toast(`<span class="t-xp">Mock AFT logged: ${total} pts</span> · plan re-tuned`);
+}
+function renderMockAftStep(){
+  const el=document.getElementById("mockAftBody"); if(!el||!_mockAft) return;
+  const ev=_mockAftCurrentEvent(); if(!ev) return;
+  const stepNum=_mockAft.stepIdx+1, total=_mockAft.events.length;
+  const running=!!_mockAft.timerInterval;
+  const timerHtml = ev.useTimer ? `<div class="mockaft-timer">
+      <div class="mockaft-timer-disp" id="mockAftTimerDisp">${_fmtTimer(_mockAft.elapsed)}</div>
+      <div class="mockaft-timer-hint">${esc(ev.timerHint||"")}</div>
+      <div class="mockaft-timer-btns">
+        ${running?`<button class="btn-add" id="mockAftStopBtn">⏸ Stop</button>`:`<button class="btn-add" id="mockAftStartBtn">▶ Start</button>`}
+        <button class="hb-starter-btn" id="mockAftResetBtn" style="background:transparent">↺ Reset</button>
+      </div>
+    </div>` : "";
+  const inputLabel = ev.valueType==="time" ? `Time (m:ss)` : `${ev.unit[0].toUpperCase()+ev.unit.slice(1)}`;
+  const prevVal=_mockAft.results[ev.k];
+  const inputVal = prevVal!=null ? (ev.valueType==="time"?_fmtTimer(prevVal):prevVal) : (ev.useTimer&&ev.valueType==="time"&&_mockAft.elapsed>0?_fmtTimer(_mockAft.elapsed):"");
+  el.innerHTML=`
+    <div class="mockaft-progress">Event ${stepNum} of ${total}</div>
+    <div class="mockaft-event-name">${esc(ev.label)}</div>
+    <div class="mockaft-instructions">${esc(ev.instructions)}</div>
+    ${timerHtml}
+    <label class="mockaft-input-row">${esc(inputLabel)}
+      <input id="mockAftValueInput" type="${ev.valueType==="time"?"text":"number"}" placeholder="${ev.valueType==="time"?"m:ss":ev.unit}" value="${inputVal}">
+    </label>
+    <div class="mockaft-actions">
+      <button class="hb-starter-btn" id="mockAftSkipBtn" style="background:transparent">Skip this event</button>
+      <button class="btn-add" id="mockAftNextBtn">${stepNum>=total?"Finish":"Next event →"}</button>
+    </div>`;
+  const startBtn=document.getElementById("mockAftStartBtn"); if(startBtn) startBtn.onclick=mockAftStartTimer;
+  const stopBtn=document.getElementById("mockAftStopBtn"); if(stopBtn) stopBtn.onclick=()=>{ mockAftStopTimer(); const inp=document.getElementById("mockAftValueInput"); if(inp&&ev.valueType==="time") inp.value=_fmtTimer(_mockAft.elapsed); };
+  const resetBtn=document.getElementById("mockAftResetBtn"); if(resetBtn) resetBtn.onclick=mockAftResetTimer;
+  const skipBtn=document.getElementById("mockAftSkipBtn"); if(skipBtn) skipBtn.onclick=mockAftSkip;
+  const nextBtn=document.getElementById("mockAftNextBtn"); if(nextBtn) nextBtn.onclick=mockAftNext;
+}
+
+const _mockAftCloseBtn=document.getElementById("mockAftClose"); if(_mockAftCloseBtn) _mockAftCloseBtn.onclick=closeMockAft;
+
 document.getElementById("aftSave").onclick=()=>{
   const dl=parseInt(document.getElementById("aDl").value)||null;
   const hrp=parseInt(document.getElementById("aHrp").value)||null;

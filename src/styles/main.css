@@ -2470,3 +2470,38 @@
 .path-summary-icon{width:1.4rem;text-align:center}
 .path-summary-name{flex:1;color:var(--ink-dim)}
 .path-summary-stat{color:var(--jade);font-size:.75rem}
+
+/* ── FM-1: Gym-access weekly planning + guided mock AFT ── */
+.gym-access-card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px}
+.gym-day-toggles{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.gym-day-tgl{flex:1;min-width:38px;background:#0e0f09;border:1px solid var(--line);color:var(--ink-dim);padding:8px 4px;border-radius:7px;font-family:inherit;font-size:12px;cursor:pointer}
+.gym-day-tgl.on{background:var(--jade);border-color:var(--jade);color:#0e1108;font-weight:700}
+.gym-day-tgl:hover{border-color:var(--jade)}
+.gym-access-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.gym-week-preview{display:flex;gap:5px;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--line)}
+.gym-preview-cell{flex:1;min-width:44px;text-align:center;background:#0e0f09;border:1px solid var(--line);border-radius:7px;padding:6px 3px}
+.gym-preview-cell.gym{border-color:#3c5230;background:rgba(111,158,84,.08)}
+.gym-preview-day{display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint)}
+.gym-preview-sess{display:block;font-size:11.5px;color:var(--ink-dim);margin-top:2px;font-weight:600}
+.gym-today-live{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--line)}
+.gym-today-lbl{font-size:12px;color:var(--ink-faint)}
+.gym-live-btn{background:#0e0f09;border:1px solid var(--line);color:var(--ink-dim);padding:6px 10px;border-radius:16px;font-family:inherit;font-size:12px;cursor:pointer}
+.gym-live-btn.on{background:var(--gold);border-color:var(--gold);color:#1a1208;font-weight:700}
+.gym-live-clear{background:none;border:none;color:var(--ink-faint);font-size:11.5px;cursor:pointer;text-decoration:underline}
+
+#mockAftModal{position:fixed;inset:0;background:rgba(10,11,7,.94);z-index:70;display:none;flex-direction:column;padding:env(safe-area-inset-top) 0 0}
+#mockAftModal .qm-body{display:flex;flex-direction:column;gap:14px}
+.mockaft-progress{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
+.mockaft-event-name{font-size:19px;font-weight:600;line-height:1.3}
+.mockaft-instructions{font-size:13.5px;color:var(--ink-dim);line-height:1.5;background:var(--panel-2);border-left:3px solid var(--gold);padding:12px 14px;border-radius:8px}
+.mockaft-timer{text-align:center;padding:14px 0}
+.mockaft-timer-disp{font-family:ui-monospace,monospace;font-size:42px;font-weight:700;color:var(--gold);letter-spacing:.03em}
+.mockaft-timer-hint{font-size:12px;color:var(--ink-faint);margin-top:2px}
+.mockaft-timer-btns{display:flex;gap:8px;justify-content:center;margin-top:12px}
+.mockaft-timer-btns .btn-add{width:auto;padding:9px 20px}
+.mockaft-input-row{display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:var(--ink-faint)}
+.mockaft-input-row input{background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:11px 12px;border-radius:8px;font-family:inherit;font-size:16px}
+.mockaft-input-row input:focus{outline:none;border-color:var(--gold)}
+.mockaft-actions{display:flex;gap:8px;margin-top:4px}
+.mockaft-actions .btn-add{flex:2}
+.mockaft-actions #mockAftSkipBtn{flex:1;width:auto;margin:0}
