@@ -82,6 +82,36 @@
   </div><!-- /content-col -->
   </div><!-- /main-row -->
 
+  <!-- Mobile-only bottom bar (≤560px) — the 4 most-used tabs, plus a Menu button
+       opening the drawer below for everything else. Buttons share class="tabs" with
+       #sideNav so the existing nav.tabs click-delegation picks them up for free. -->
+  <nav class="tabs mobile-bar" id="mobileBar">
+    <button data-tab="today"><span class="ic">🌅</span><span class="lbl">Dawn</span></button>
+    <button data-tab="dailies"><span class="ic">📋</span><span class="lbl">Tasks</span></button>
+    <button data-tab="quests"><span class="ic">🎯</span><span class="lbl">Oaths</span><span class="nav-badge"></span></button>
+    <button data-tab="skills"><span class="ic">🌳</span><span class="lbl">Tree</span></button>
+    <button type="button" class="mobile-menu-btn" id="mobileMenuBtn"><span class="ic">☰</span><span class="lbl">Menu</span></button>
+  </nav>
+  <div class="mobile-drawer" id="mobileDrawer">
+    <div class="mobile-drawer-backdrop" id="mobileDrawerBackdrop"></div>
+    <nav class="tabs mobile-drawer-panel">
+      <button data-tab="plan"><span class="ic">📕</span><span class="lbl">FM Plan</span></button>
+      <button data-tab="aft"><span class="ic">💪</span><span class="lbl">AFT</span></button>
+      <button data-tab="log"><span class="ic">🏋️</span><span class="lbl">Log</span></button>
+      <button data-tab="profile"><span class="ic">🪪</span><span class="lbl">Profile</span></button>
+      <button data-tab="quizzes"><span class="ic">📚</span><span class="lbl">Quiz</span></button>
+      <button data-tab="test"><span class="ic">🧪</span><span class="lbl">Test</span></button>
+      <button data-tab="garden"><span class="ic">🌿</span><span class="lbl">The Grove</span></button>
+      <button data-tab="bosses"><span class="ic">⚔️</span><span class="lbl">Trials</span></button>
+      <button data-tab="board"><span class="ic">📈</span><span class="lbl">Muster</span></button>
+      <button data-tab="shop"><span class="ic">🍺</span><span class="lbl">Mead Hall</span></button>
+      <button data-tab="trophies"><span class="ic">🏺</span><span class="lbl">Carved Rings</span></button>
+      <button data-tab="awards"><span class="ic">🏆</span><span class="lbl">The Wall</span></button>
+      <button data-tab="records"><span class="ic">📖</span><span class="lbl">Saga</span></button>
+      <button data-tab="weight"><span class="ic">⚖️</span><span class="lbl">Weight</span></button>
+    </nav>
+  </div>
+
   <div class="foot">
     <span id="footStatus">OPERATIONS · carved on this device alone — no cloud, no witness but you</span><br>
     <a id="cloudBtn">link cloud file</a> &nbsp;·&nbsp; <a id="exportBtn">export backup</a> &nbsp;·&nbsp; <a id="importBtn">import backup</a> &nbsp;·&nbsp; <a id="resyncBtn">resync skill trees</a> &nbsp;·&nbsp; <a id="resetBtn">reset everything</a>

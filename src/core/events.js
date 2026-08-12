@@ -19,11 +19,15 @@ function applyNavMore(){
 document.querySelectorAll("nav.tabs button[data-tab]").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.remove("on"));
   document.querySelectorAll(".view").forEach(x=>x.classList.remove("on"));
-  b.classList.add("on");
+  // the mobile bottom bar + drawer duplicate a handful of tab buttons (same data-tab,
+  // separate DOM nodes) so they share this click-delegation for free — keep every
+  // copy of the clicked tab in sync, not just the one instance that was tapped.
+  document.querySelectorAll(`nav.tabs button[data-tab="${b.dataset.tab}"]`).forEach(x=>x.classList.add("on"));
   document.getElementById("view-"+b.dataset.tab).classList.add("on");
   const jb=document.getElementById("skJumpbar"); if(jb) jb.classList.toggle("show", b.dataset.tab==="skills");
   // if a secondary tab was clicked, ensure More section is open so it shows as active
   if(b.closest("#navMore") && !S.navExpanded){ S.navExpanded=true; save(); applyNavMore(); }
+  closeMobileDrawer();
   window.scrollTo(0,0);
 });
 // side-rail label toggle (desktop)
@@ -34,6 +38,15 @@ if(_navToggle) _navToggle.onclick=()=>{ S.navLabels=!S.navLabels; save(); applyN
 const _navMoreBtn=document.getElementById("navMoreBtn");
 if(_navMoreBtn) _navMoreBtn.onclick=()=>{ S.navExpanded=!S.navExpanded; save(); applyNavMore(); };
 applyNavMode();
+
+// Mobile bottom-bar drawer (≤560px) — ephemeral UI state, not persisted; a fresh
+// launch always starts with it closed, same as any other modal in the app.
+function closeMobileDrawer(){ document.getElementById("mobileDrawer")?.classList.remove("open"); }
+function toggleMobileDrawer(){ document.getElementById("mobileDrawer")?.classList.toggle("open"); }
+const _mobileMenuBtn=document.getElementById("mobileMenuBtn");
+if(_mobileMenuBtn) _mobileMenuBtn.onclick=toggleMobileDrawer;
+const _mobileDrawerBackdrop=document.getElementById("mobileDrawerBackdrop");
+if(_mobileDrawerBackdrop) _mobileDrawerBackdrop.onclick=closeMobileDrawer;
 applyNavMore();
 
 document.getElementById("qAdd").onclick=()=>{
