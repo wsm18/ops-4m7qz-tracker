@@ -95,6 +95,46 @@ function dawnBossHtml(){
   </div>`;
 }
 
+// Unified cross-tab "what's coming up" — merges every forward-looking date
+// already tracked independently across tabs (quest due dates, boss target
+// dates, the AFT test date, milestones, qualification expiries, counseling
+// follow-ups) into one chronologically-sorted view. Read-only aggregation —
+// none of these dates are stored here; each source tab remains the owner of
+// its own date field. Deliberately excludes already-overdue items (those get
+// their own top-billing treatment via Warrior's Focus / the overdue-oaths
+// count) — this is forward-looking only, "what's coming," not "what's late."
+function renderUpcomingTimeline(){
+  const today=localYMD();
+  const items=[];
+  (S.quests||[]).forEach(q=>{ if(!q.done&&q.due) items.push({date:q.due, icon:"🎯", label:q.name, tab:"quests"}); });
+  (S.bosses||[]).forEach(b=>{ if(!b.completedAt&&b.hp>0&&b.targetDate) items.push({date:b.targetDate, icon:"⚔️", label:b.name, tab:"bosses"}); });
+  if(S.aftTestDate) items.push({date:S.aftTestDate, icon:"💪", label:"AFT test", tab:"aft"});
+  (S.milestones||[]).forEach(m=>{ if(m.date) items.push({date:m.date, icon:"📍", label:m.label, tab:null}); });
+  (S.qualifications||[]).forEach(q=>{
+    if(!q.expires) return;
+    const cat=typeof QUAL_CATALOG!=="undefined"&&QUAL_CATALOG[q.key]?QUAL_CATALOG[q.key]:null;
+    const name=q.key==="custom"?(q.label||q.key):(cat?cat.fullName:q.key);
+    items.push({date:q.expires, icon:"🎖️", label:`${name} expires`, tab:"awards"});
+  });
+  (S.counseling||[]).forEach(c=>{
+    if(c.followUp&&/^\d{4}-\d{2}-\d{2}$/.test(c.followUp)) items.push({date:c.followUp, icon:"📋", label:`Follow-up: ${(c.summary||"").slice(0,40)}`, tab:"records"});
+  });
+
+  const upcoming=items.filter(x=>x.date>=today).sort((a,b)=>a.date<b.date?-1:(a.date>b.date?1:0));
+  if(!upcoming.length) return "";
+  const show=upcoming.slice(0,8);
+  const extra=upcoming.length-show.length;
+  const rows=show.map(x=>{
+    const days=Math.ceil((new Date(x.date+"T12:00:00")-Date.now())/864e5);
+    const dayStr=days<=0?"today":days===1?"tomorrow":`in ${days}d`;
+    const urgentColor=days<=3?"var(--ember)":days<=7?"var(--gold)":"var(--ink-dim)";
+    const goBtn=x.tab?`<button class="td-go-sm" data-gototab="${x.tab}">→</button>`:"";
+    return `<div class="tl-row"><span class="tl-icon">${x.icon}</span><span class="tl-label">${esc(x.label)}</span><span class="tl-when" style="color:${urgentColor}">${dayStr}</span>${goBtn}</div>`;
+  }).join("");
+  const moreLine=extra>0?`<div class="fn-row"><span class="fn-dot">+${extra} more upcoming</span></div>`:"";
+  return `<div class="td-card fn-card"><div class="td-h fn-h">Upcoming</div>${rows}${moreLine}</div>`;
+}
+
 function copyDailyBrief(){
   const name=S.name||"Cadet";
   const rank=S.rank||"MS2 Cadet";
@@ -334,6 +374,9 @@ function renderToday(){
   // ── Adaptive training note (missed sessions last 7 days)
   const adaptNote=typeof getAdaptiveNote==="function"?getAdaptiveNote():null;
   const adaptHtml=adaptNote?`<div class="adapt-note">⚠️ ${esc(adaptNote)}</div>`:"";
+
+  // ── Upcoming — unified cross-tab "what's coming up" timeline
+  const upcomingHtml=renderUpcomingTimeline();
 
   // ── Neglected path (only the worst one, only if genuinely behind)
   const neglected=getNeglectedPath();
@@ -643,7 +686,7 @@ function renderToday(){
   // ── Quick PT Log
   const quickLogHtml=typeof renderQuickLog==="function"?renderQuickLog():'';
   // ── Assemble — creed always first, then guided flow
-  const flow=[startHtml, todaysHandHtml, sessHtml, weekCardHtml, ordersHtml, recoveryHtml, discHtml, bossHtml, streakHtml, commissionHtml, milestoneHtml, pathSummaryHtml, focusHtml, adaptHtml, neglectHtml, pathPips, notesHtml, academicHtml, omlHtml, cnAlertHtml, qualAlertHtml, fmHtml, quickLogHtml, briefBtnHtml, installHtml, notifPromptHtml].filter(Boolean).join("");
+  const flow=[startHtml, todaysHandHtml, sessHtml, weekCardHtml, ordersHtml, recoveryHtml, discHtml, bossHtml, streakHtml, commissionHtml, milestoneHtml, pathSummaryHtml, focusHtml, adaptHtml, upcomingHtml, neglectHtml, pathPips, notesHtml, academicHtml, omlHtml, cnAlertHtml, qualAlertHtml, fmHtml, quickLogHtml, briefBtnHtml, installHtml, notifPromptHtml].filter(Boolean).join("");
 
   el.innerHTML=`<div class="td-creed">🌲 <span>${creed}</span></div>`+(
     flow
