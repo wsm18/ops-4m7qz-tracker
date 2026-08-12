@@ -41,6 +41,22 @@
       </div>
     </details>
 
+    <div class="sec-h" style="margin-top:20px"><h2>After-Action Review</h2><span class="hint">what was planned vs. what happened</span></div>
+    <div class="plan-intro">A real AAR, not another free-text note: what was supposed to happen, what actually happened, why, and what to sustain or improve. Worth writing after a bad test, a broken streak, or a rough week — the app will nudge you on the Dawn tab when one of those happens and it's been a few days since your last one.</div>
+    <div id="aarArea"></div>
+    <details class="habit-add-wrap"><summary>+ Write an AAR</summary>
+      <div class="adder" style="margin-top:10px">
+        <input id="aarDate" type="date">
+        <input id="aarTitle" placeholder="Title — e.g. AFT test, FTX, this week" maxlength="60" style="margin-top:7px">
+        <textarea id="aarPlanned" placeholder="What was supposed to happen" rows="2" maxlength="400" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
+        <textarea id="aarActual" placeholder="What actually happened" rows="2" maxlength="400" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
+        <textarea id="aarWhy" placeholder="Why the difference" rows="2" maxlength="400" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
+        <textarea id="aarSustain" placeholder="Sustain — what to keep doing" rows="2" maxlength="300" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
+        <textarea id="aarImprove" placeholder="Improve — what to change" rows="2" maxlength="300" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
+        <button class="btn-add" id="aarAdd" style="margin-top:9px">Save AAR</button>
+      </div>
+    </details>
+
     <div class="sec-h" style="margin-top:20px"><h2>Packing &amp; Gear Checklists</h2><span class="hint">reusable templates</span></div>
     <div id="checklistArea"></div>
     <details class="habit-add-wrap"><summary>+ New checklist</summary>
@@ -60,6 +76,7 @@
       <button class="hb-starter-btn" data-export="awards">Awards</button>
       <button class="hb-starter-btn" data-export="volunteer">Volunteer hours</button>
       <button class="hb-starter-btn" data-export="counseling">Counseling log</button>
+      <button class="hb-starter-btn" data-export="aar">AAR log</button>
     </div>
 
     <div class="sec-h" style="margin-top:20px"><h2>Export / Import a Section</h2><span class="hint">just one part</span></div>

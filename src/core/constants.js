@@ -85,6 +85,7 @@ const DEFAULT = {
   palaces:[],             // memory palaces: [{id, name, loci:[{place, item}]}]
   studyPlans:[],          // [{id, title, testDate, topics:[], created, done:[]}]
   counseling:[],          // DA 4856-style: [{id, date, type, people, summary, plan, followUp}]
+  aarLog:[],              // After-Action Reviews: [{id, date, title, planned, actual, why, sustain, improve, trigger}]
   checklists:[],          // packing/gear: [{id, name, items:[{text,done}], template}]
   dayLog:[],              // [{date:"YYYY-MM-DD", trained, wins, notes}]
   _seeded:false,     // whether starter skills have been seeded

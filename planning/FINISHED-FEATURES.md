@@ -1413,3 +1413,17 @@ Verified with a functional Playwright smoke test seeding one future + one past i
 SW bumped to `operations-v176`. `SKILL_LADDER_VER` unchanged at **117**. `npm run build` → OK, `npm run check` → SYNTAX OK, `npm run regress` → `PAGEERRORS 0`, `total:12524`, `badCount:0`. `npm run package` → produced `dist/operations.zip`.
 
 **Next:** Phase X-AAR (After-Action-Review journal, idea C) — no more open decisions blocking it.
+
+### v177 — Phase X-AAR: After-Action Review journal
+
+**Files changed:** `src/core/constants.js`, `src/core/state.js`, `src/tabs/records.js`, `src/tabs/records.html`, `src/tabs/today.js`, `src/tabs/awards.js`, `src/core/app-setup.js`, `src/styles/main.css`, `sw.js`.
+
+Second phase of the confirmed FM/test-features build order (idea C). New `S.aarLog` array, distinct from the existing free-text counseling log per the doc's explicit requirement — a real AAR structure (planned / actual / why / sustain / improve), not another notes field. Modeled the implementation directly on the counseling log's existing pattern (`renderCounsel`/`_cnAdd`/`data-cndel` in `awards.js`'s delegated click handler/`SECTIONS` JSON export config/CSV export) rather than inventing a new one, since that pattern was already right for this shape of data.
+
+**Contextually promptable, per the doc's "ideally" qualifier:** a new `aarNudgeHtml()` on the Dawn tab fires after the two triggers the doc names — a broken streak (reusing the same `S.streak===0 && S.streakBrokenDate` condition the existing recovery-mode card already checks) or a below-standard AFT score (reusing the pass/fail threshold already computed elsewhere in `today.js`). Suppressed once an AAR has been logged in the last 3 days, so it prompts without nagging after the user's actually written one.
+
+Verified through the real UI, not just internal function calls: a Playwright test opened the Records tab (had to expand the desktop "More" section first — `records` is a secondary nav tab, hidden by default), filled and submitted the actual `#aarAdd` form, confirmed the entry landed in `S.aarLog` and rendered correctly, then confirmed the Dawn nudge appears when a break is simulated and correctly suppresses once a recent AAR exists.
+
+SW bumped to `operations-v177`. `SKILL_LADDER_VER` unchanged at **117**. `npm run build` → OK, `npm run check` → SYNTAX OK, `npm run regress` → `PAGEERRORS 0`, `total:12524`, `badCount:0`. `npm run package` → produced `dist/operations.zip`.
+
+**Next:** Phase FM-1 (gym-schedule-aware planning + guided mock-AFT flow, ideas #2/#2b) — medium-large, the design has no remaining open questions per the doc, zero dependencies.

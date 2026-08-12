@@ -135,6 +135,25 @@ function renderUpcomingTimeline(){
   return `<div class="td-card fn-card"><div class="td-h fn-h">Upcoming</div>${rows}${moreLine}</div>`;
 }
 
+// Contextual AAR prompt — nudges toward the After-Action Review journal
+// (records.js) after the two triggers the doc calls out: a broken streak or
+// a below-standard AFT. Suppressed if an AAR was already logged in the last
+// 3 days, so this doesn't nag once the user's actually reflected.
+function aarNudgeHtml(){
+  const recentAAR=(S.aarLog||[]).some(a=>a.date&&dayDiff(a.date,localYMD())<=3);
+  if(recentAAR) return "";
+  const streakBroke=S.streak===0&&S.streakBrokenDate&&dayDiff(S.streakBrokenDate,localYMD())<=3;
+  const lastAft=(S.aft||[])[S.aft.length-1];
+  let badAft=false;
+  if(lastAft&&lastAft.date&&dayDiff(lastAft.date,localYMD())<=3){
+    const c=typeof aftCtx==="function"?aftCtx():{standard:"general"};
+    badAft=lastAft.total<(c.standard==="combat"?350:300);
+  }
+  if(!streakBroke&&!badAft) return "";
+  const reason=streakBroke?"Your streak just broke":"Your last AFT came in below standard";
+  return `<div class="aar-nudge">📝 ${reason} — worth an After-Action Review: what was planned, what happened, why, what to sustain or improve.<button class="td-go-sm" data-gototab="records">Write one →</button></div>`;
+}
+
 function copyDailyBrief(){
   const name=S.name||"Cadet";
   const rank=S.rank||"MS2 Cadet";
@@ -641,8 +660,10 @@ function renderToday(){
   const todaysHandHtml=typeof renderTodaysHand==="function"?renderTodaysHand():'';
   // ── Quick PT Log
   const quickLogHtml=typeof renderQuickLog==="function"?renderQuickLog():'';
+  // ── Contextual AAR prompt (broken streak / below-standard AFT)
+  const aarNudgeHtmlVal=aarNudgeHtml();
   // ── Assemble — creed always first, then guided flow
-  const flow=[startHtml, todaysHandHtml, sessHtml, weekCardHtml, ordersHtml, recoveryHtml, discHtml, bossHtml, streakHtml, commissionHtml, pathSummaryHtml, focusHtml, adaptHtml, upcomingHtml, neglectHtml, pathPips, notesHtml, academicHtml, omlHtml, cnAlertHtml, qualAlertHtml, fmHtml, quickLogHtml, briefBtnHtml, installHtml, notifPromptHtml].filter(Boolean).join("");
+  const flow=[startHtml, todaysHandHtml, sessHtml, weekCardHtml, ordersHtml, recoveryHtml, aarNudgeHtmlVal, discHtml, bossHtml, streakHtml, commissionHtml, pathSummaryHtml, focusHtml, adaptHtml, upcomingHtml, neglectHtml, pathPips, notesHtml, academicHtml, omlHtml, cnAlertHtml, qualAlertHtml, fmHtml, quickLogHtml, briefBtnHtml, installHtml, notifPromptHtml].filter(Boolean).join("");
 
   el.innerHTML=`<div class="td-creed">🌲 <span>${creed}</span></div>`+(
     flow

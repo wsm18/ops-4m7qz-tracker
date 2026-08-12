@@ -81,6 +81,25 @@ function renderCounsel(){
     ${c.plan?`<div class="cn-plan"><b>Plan:</b> ${esc(c.plan)}</div>`:''}
   </div>`).join("");
 }
+// ===== After-Action Review journal =====
+// Distinct from the counseling log above — a real AAR (what was supposed to
+// happen / what actually happened / why / sustain vs. improve), not free-text
+// notes. See today.js's aarNudgeHtml() for the contextual prompt (broken
+// streak / below-standard AFT) that points here.
+function renderAAR(){
+  const el=document.getElementById("aarArea"); if(!el) return;
+  const items=(S.aarLog||[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(!items.length){ el.innerHTML=`<div style="font-size:12.5px;color:var(--ink-faint)">No AARs yet. After a test, a broken streak, or a rough week, write one — what was planned, what actually happened, why, and what to sustain or improve.</div>`; return; }
+  el.innerHTML=items.map(a=>`<div class="cn-card">
+    <div class="cn-top"><span class="cn-type">${esc(a.title||"AAR")}</span><span class="cn-date">${new Date(a.date).toLocaleDateString()}</span><button class="hb-del" data-aardel="${a.id}">✕</button></div>
+    ${a.planned?`<div class="aar-field"><b>Planned:</b> ${esc(a.planned)}</div>`:''}
+    ${a.actual?`<div class="aar-field"><b>Actual:</b> ${esc(a.actual)}</div>`:''}
+    ${a.why?`<div class="aar-field"><b>Why:</b> ${esc(a.why)}</div>`:''}
+    ${a.sustain?`<div class="aar-field sustain"><b>Sustain:</b> ${esc(a.sustain)}</div>`:''}
+    ${a.improve?`<div class="aar-field improve"><b>Improve:</b> ${esc(a.improve)}</div>`:''}
+  </div>`).join("");
+}
+
 // ===== Checklists =====
 const CHECKLIST_TEMPLATES={
   ruck:["Rucksack + frame","Water (full)","Boots broken in","Socks (extra pairs)","Reflective belt","Weather layers","Snacks/fuel","ID + meds","Foot care / moleskin","Headlamp"],
@@ -111,6 +130,7 @@ function exportData(kind){
   else if(kind==="awards"){ const rows=[["Title","Org","Year"]]; (S.awards||[]).forEach(a=>rows.push([a.title||a.name,a.org||"",a.year||""])); downloadCSV("awards.csv",rows); }
   else if(kind==="volunteer"){ const rows=[["Date","Activity","Hours"]]; (S.volunteer||[]).forEach(v=>rows.push([v.date||"",v.name||v.activity||"",v.hours||""])); downloadCSV("volunteer-hours.csv",rows); }
   else if(kind==="counseling"){ const rows=[["Date","Type","People","Summary","Plan"]]; (S.counseling||[]).forEach(c=>rows.push([new Date(c.date).toLocaleDateString(),c.type,c.people,c.summary,c.plan])); downloadCSV("counseling-log.csv",rows); }
+  else if(kind==="aar"){ const rows=[["Date","Title","Planned","Actual","Why","Sustain","Improve"]]; (S.aarLog||[]).forEach(a=>rows.push([new Date(a.date).toLocaleDateString(),a.title,a.planned,a.actual,a.why,a.sustain,a.improve])); downloadCSV("aar-log.csv",rows); }
   toast("📄 CSV exported");
 }
 
@@ -126,6 +146,7 @@ const SECTIONS={
   memory:      {label:"Memory (SRS decks + palaces)", keys:["srsDecks","palaces"]},
   study:       {label:"Study plans", keys:["studyPlans"]},
   counseling:  {label:"Counseling log", keys:["counseling"]},
+  aar:         {label:"After-Action Reviews", keys:["aarLog"]},
   checklists:  {label:"Packing / gear checklists", keys:["checklists"]},
   quizzes:     {label:"Quiz progress", keys:["quizzes"]},
   missions:    {label:"Missions, daily orders & objectives", keys:["quests","dailies","bosses"]},

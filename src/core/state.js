@@ -113,6 +113,7 @@ function load(){
     merged.palaces=r.palaces||[];
     merged.studyPlans=r.studyPlans||[];
     merged.counseling=r.counseling||[];
+    merged.aarLog=r.aarLog||[];
     merged.checklists=r.checklists||[];
     merged.gpaHistory=r.gpaHistory||[];
     merged.milestones=r.milestones||[];
@@ -271,6 +272,7 @@ function render(){
   if(typeof renderSkillNotes==="function") renderSkillNotes();
   if(typeof renderHistory==="function") renderHistory();
   if(typeof renderCounsel==="function") renderCounsel();
+  if(typeof renderAAR==="function") renderAAR();
   if(typeof renderChecklists==="function") renderChecklists();
   if(typeof renderSectionPicker==="function") renderSectionPicker();
   if(typeof renderPT==="function") renderPT();

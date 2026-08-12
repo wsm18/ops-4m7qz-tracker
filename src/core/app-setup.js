@@ -25,6 +25,23 @@ if(_cnAdd) _cnAdd.onclick=()=>{
   ["cnPeople","cnSummary","cnPlan","cnDate"].forEach(x=>document.getElementById(x).value="");
   save(); render(); toast("📝 Entry saved");
 };
+const _aarAdd=document.getElementById("aarAdd");
+if(_aarAdd) _aarAdd.onclick=()=>{
+  const date=document.getElementById("aarDate").value||localYMD();
+  const entry={id:id(),date,
+    title:document.getElementById("aarTitle").value.trim(),
+    planned:document.getElementById("aarPlanned").value.trim(),
+    actual:document.getElementById("aarActual").value.trim(),
+    why:document.getElementById("aarWhy").value.trim(),
+    sustain:document.getElementById("aarSustain").value.trim(),
+    improve:document.getElementById("aarImprove").value.trim(),
+    trigger:null};
+  if(!entry.planned&&!entry.actual){ toast("Fill in at least planned and actual"); return; }
+  if(!S.aarLog) S.aarLog=[];
+  S.aarLog.push(entry);
+  ["aarTitle","aarPlanned","aarActual","aarWhy","aarSustain","aarImprove","aarDate"].forEach(x=>document.getElementById(x).value="");
+  save(); render(); toast("📝 AAR saved");
+};
 const _clAdd=document.getElementById("clAdd");
 if(_clAdd) _clAdd.onclick=()=>{
   const n=document.getElementById("clName").value.trim(); if(!n){toast("Name the checklist");return;}
