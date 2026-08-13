@@ -442,17 +442,6 @@ function pickAftMode(){
   return "mock";
 }
 // Most recent logged weight for a named weighted exercise, straight from real
-// workout history (S.workouts) — never fabricated. Returns null if it's never
-// been logged with a weight before.
-function lastLoggedWeight(exName){
-  const workouts=(S.workouts||[]).slice().sort((a,b)=>new Date(b.ts||b.date)-new Date(a.ts||a.date));
-  for(const w of workouts){
-    const ex=(w.exercises||[]).find(e=>e.name===exName && e.w);
-    const withWeight=(ex&&ex.sets||[]).slice().reverse().find(s=>s.weight);
-    if(withWeight) return {weight:withWeight.weight, date:w.date};
-  }
-  return null;
-}
 // Set/rep/weight prescription per intensity — how to actually run today's exercises, in order.
 function prescriptionFor(intensity, ex){
   // returns a short "what to do" string for an exercise given the day's intensity
@@ -471,15 +460,16 @@ function prescriptionFor(intensity, ex){
     else if(t==="time") base="hold as prescribed, relaxed";
     else if(t==="dist") base="easy pace only";
   }
-  // Weight suggestion — only for weighted (equipment) exercises, sourced from
-  // your own logged history, not guessed. A real adaptive version (learning
-  // from logged difficulty/completion, not just "repeat last time") is a
-  // planned future phase — see planning/IDEAS-tests-fm-workouts.md.
-  if(t==="reps" && ex.w){
-    const last=lastLoggedWeight(ex.n);
-    base += last
-      ? ` · last logged: ${last.weight} (${last.date}) — repeat it, or add a little if every rep felt easy`
-      : " · no logged weight yet — start conservative and find a load where the last 1–2 reps are genuinely hard";
+  // Adaptive target (FM-Adapt) — computeTarget() (log.js) reads this exercise's
+  // real logged trend: raw performance (reps/weight/time), stall detection,
+  // monthly-baseline blending, and — new — your own per-exercise difficulty
+  // rating and "had to cut it short" flag from the log form. One shared engine
+  // instead of a separate simpler guess here; falls back to a plain "no
+  // history" note for a never-logged weighted exercise, never invents a number.
+  if(typeof computeTarget==="function"){
+    const tgt=computeTarget(ex.n);
+    if(tgt) base += ` · next: ${tgt.target}${tgt.note?` (${tgt.note})`:""}`;
+    else if(t==="reps" && ex.w) base += " · no logged weight yet — start conservative and find a load where the last 1–2 reps are genuinely hard";
   }
   return base;
 }

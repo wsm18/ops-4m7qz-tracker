@@ -35,6 +35,14 @@
           <option value="10">10 — max</option>
         </select></label>
       </div>
+      <div class="lg-readiness-row">
+        <span class="lg-label">How do you feel today? <span class="lg-label-sub">(logged for your record — the per-exercise rating below is what actually adjusts next time's suggestion)</span></span>
+        <div class="lg-readiness-btns" id="lgReadinessBtns">
+          <button type="button" class="lg-ready-btn" data-readiness="rough">😓 Rough</button>
+          <button type="button" class="lg-ready-btn" data-readiness="normal">😐 Normal</button>
+          <button type="button" class="lg-ready-btn" data-readiness="strong">💪 Strong</button>
+        </div>
+      </div>
       <div id="lgExercises" style="margin-top:12px"></div>
       <textarea id="lgNote" class="lg-note" placeholder="Optional note — conditions, felt strong, modified…" rows="2" maxlength="120"></textarea>
       <button class="btn-add" id="lgSave" style="margin-top:12px">Save Workout</button>

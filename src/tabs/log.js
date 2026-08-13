@@ -10,8 +10,13 @@ function initLogTab(){
 }
 function buildLogForm(skey){
   const s=SESSIONS[skey];
-  LG={session:skey, exercises:sessionEx(skey).map(e=>({name:e.n,type:e.t,w:!!e.w,custom:!!e.custom,sets:[blankSet(e.t)]}))};
+  LG={session:skey, readiness:null, exercises:sessionEx(skey).map(e=>({name:e.n,type:e.t,w:!!e.w,custom:!!e.custom,sets:[blankSet(e.t)],difficulty:null,reduced:false}))};
   renderLogForm();
+  renderReadinessBtns();
+}
+function renderReadinessBtns(){
+  const el=document.getElementById("lgReadinessBtns"); if(!el||!LG) return;
+  el.querySelectorAll("[data-readiness]").forEach(b=>b.classList.toggle("on", b.dataset.readiness===LG.readiness));
 }
 function blankSet(type){
   if(type==="reps") return {reps:"",weight:""};
@@ -32,6 +37,13 @@ function renderLogForm(){
         ${ex.sets.length>1?`<button class="rmset" data-rm="${xi}.${si}">✕</button>`:''}
       </div>`).join("")}
       <button class="lg-addset" data-addset="${xi}">+ add set</button>
+      <div class="lg-diff-row">
+        <span class="lg-diff-lbl">How did it feel?</span>
+        <button type="button" class="lg-diff-btn${ex.difficulty==='easy'?' on':''}" data-diff="${xi}.easy">😌 Easy</button>
+        <button type="button" class="lg-diff-btn${ex.difficulty==='right'?' on':''}" data-diff="${xi}.right">👍 Right</button>
+        <button type="button" class="lg-diff-btn${ex.difficulty==='hard'?' on':''}" data-diff="${xi}.hard">😤 Hard</button>
+        <label class="lg-reduced-lbl"><input type="checkbox" data-reduced="${xi}" ${ex.reduced?'checked':''}> had to cut it short</label>
+      </div>
     </div>`;
   }).join("");
 }
@@ -56,6 +68,10 @@ document.addEventListener("input",e=>{
   const cn=e.target.dataset.cn;
   if(cn!=null){LG.exercises[cn].name=e.target.value;}
 });
+document.addEventListener("change",e=>{
+  const red=e.target.dataset.reduced;
+  if(red!=null && LG){ LG.exercises[red].reduced=e.target.checked; }
+});
 document.addEventListener("click",e=>{
   const add=e.target.dataset.addset;
   if(add!=null){const ex=LG.exercises[add];ex.sets.push(blankSet(ex.type));renderLogForm();return;}
@@ -63,6 +79,10 @@ document.addEventListener("click",e=>{
   if(rm!=null){const[xi,si]=rm.split(".");LG.exercises[xi].sets.splice(si,1);renderLogForm();return;}
   const dw=e.target.dataset.delw;
   if(dw!=null){if(confirm("Delete this workout?")){S.workouts=S.workouts.filter(w=>w.id!==dw);save();renderLog();}return;}
+  const diff=e.target.dataset.diff;
+  if(diff!=null && LG){ const[xi,val]=diff.split("."); const ex=LG.exercises[xi]; ex.difficulty=(ex.difficulty===val)?null:val; renderLogForm(); return; }
+  const readiness=e.target.dataset.readiness;
+  if(readiness!=null && LG){ LG.readiness=(LG.readiness===readiness)?null:readiness; renderReadinessBtns(); return; }
 });
 function setHasData(ex,st){
   if(ex.type==="reps") return st.reps!=="";
@@ -77,14 +97,15 @@ document.getElementById("lgSave").onclick=()=>{
   // keep only exercises with at least one filled set
   const exercises=LG.exercises.map(ex=>({
     name:ex.name, type:ex.type, w:ex.w,
-    sets:ex.sets.filter(st=>setHasData(ex,st))
+    sets:ex.sets.filter(st=>setHasData(ex,st)),
+    difficulty:ex.difficulty||null, reduced:!!ex.reduced,
   })).filter(ex=>ex.sets.length>0 && ex.name && ex.name!=="Custom exercise");
   if(!exercises.length){toast("Log at least one set first");return;}
   const note=document.getElementById("lgNote").value.trim()||null;
   // Snapshot adaptive targets BEFORE adding the new workout so we can diff
   const _exNames=exercises.map(e=>e.name);
   const _tBefore={}; _exNames.forEach(n=>{ _tBefore[n]=computeTarget(n); });
-  S.workouts.push({id:id(), date:new Date().toLocaleDateString(), ts:Date.now(), session:LG.session, duration:dur, rpe, exercises, note});
+  S.workouts.push({id:id(), date:new Date().toLocaleDateString(), ts:Date.now(), session:LG.session, duration:dur, rpe, readiness:LG.readiness||null, exercises, note});
   if(!S.pathXP) S.pathXP={};
   S.pathXP.physical=(S.pathXP.physical||0)+25; S.gold+=8; S.totalDone++;
   save();
@@ -253,7 +274,7 @@ function exerciseSeries(name){
   (S.workouts||[]).slice().sort((a,b)=>a.ts-b.ts).forEach(w=>{
     (w.exercises||[]).filter(e=>e.name===name && e.sets && e.sets.length).forEach(ex=>{
       const best=ex.sets.reduce((m,st)=>setVolume(ex,st)>setVolume(ex,m)?st:m,ex.sets[0]);
-      out.push({ts:w.ts,ex,best,vol:setVolume(ex,best)});
+      out.push({ts:w.ts,ex,best,vol:setVolume(ex,best),difficulty:ex.difficulty||null,reduced:!!ex.reduced,sessionRpe:w.rpe||null});
     });
   });
   return out;
@@ -328,6 +349,25 @@ function computeTarget(name){
       baselineNote=" (anchored to this month's baseline)";
     }
   }
+  // ---- DIFFICULTY / REDUCED SIGNAL (FM-Adapt) ----
+  // A plain rule applied to what you actually told us last time, not a fitted
+  // model — stays honest with a single data point since it's not claiming to
+  // have "learned" a pattern, just repeating your own most recent rating back.
+  // Only the two clearest signals move anything: rated hard or had to cut a
+  // set short forces a hold (safety/injury-reduction first); rated easy nudges
+  // a flat/first trend up a notch. Silent when nothing was rated — this never
+  // invents a signal you didn't give it.
+  let diffNote="";
+  const hardSignal = last.reduced || last.difficulty==="hard" || (last.sessionRpe!=null && last.sessionRpe>=9);
+  const easySignal = !hardSignal && (last.difficulty==="easy" || (last.sessionRpe!=null && last.sessionRpe<=6));
+  if(hardSignal && trend!=="down"){
+    stalled=true; trend="down";
+    diffNote = last.reduced ? " (you had to cut it short last time — hold here)" : " (rated hard last time — hold here)";
+  } else if(easySignal && (trend==="flat"||trend==="first")){
+    trend="up";
+    diffNote = " (rated easy last time — pushing a bit more)";
+  }
+  baselineNote = baselineNote + diffNote;
   // build target string
   if(ex.type==="reps"){
     const r=parseFloat(last.best.reps)||0; const w=parseFloat(last.best.weight)||0;

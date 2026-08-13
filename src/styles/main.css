@@ -2550,3 +2550,15 @@
 .sess-phase-h.cool{color:var(--violet)}
 .sess-phase-h.work{color:var(--gold)}
 .ds-warmcool{font-size:11px;color:var(--ink-faint);margin-top:4px}
+
+/* ── FM-Adapt: readiness check-in + per-exercise difficulty rating ── */
+.lg-readiness-row{margin:10px 0}
+.lg-label-sub{font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-faint);display:block;margin-top:2px;font-size:11px}
+.lg-readiness-btns{display:flex;gap:6px;margin-top:6px}
+.lg-ready-btn{flex:1;background:#0e0f09;border:1px solid var(--line);color:var(--ink-dim);padding:8px 4px;border-radius:8px;font-family:inherit;font-size:12.5px;cursor:pointer}
+.lg-ready-btn.on{border-color:var(--gold);color:var(--gold);background:rgba(184,160,106,.1)}
+.lg-diff-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px;padding-top:8px;border-top:1px solid var(--line)}
+.lg-diff-lbl{font-size:11px;color:var(--ink-faint);flex:none;width:100%}
+.lg-diff-btn{background:#0e0f09;border:1px solid var(--line);color:var(--ink-dim);padding:5px 10px;border-radius:14px;font-family:inherit;font-size:12px;cursor:pointer}
+.lg-diff-btn.on{border-color:var(--jade);color:var(--jade);background:rgba(111,158,84,.1)}
+.lg-reduced-lbl{font-size:11.5px;color:var(--ink-faint);display:flex;align-items:center;gap:5px;margin-left:auto;cursor:pointer}
