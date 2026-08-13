@@ -78,6 +78,16 @@ function load(){
     merged.gymAccess.default=Object.assign({1:true,3:true,5:true}, merged.gymAccess.default||{});
     merged.gymAccess.week=merged.gymAccess.week||{};
     merged.gymAccessLive=r.gymAccessLive||{};
+    // Equipment inventory (FM-2) — old saves get the two real default profiles;
+    // an old save that already has profiles keeps them (never overwritten), and
+    // any custom profile the user already added/edited survives untouched.
+    merged.equipProfiles=Object.assign({
+      "ROTC/Campus Gym":{tags:["barbell","dumbbells","kettlebell","machines","pullupbar","dipbars","bands","treadmill","rower","bike","pool","climbwall","aftkit","waterjugs","stretcher","ruck","sandbag","tires","agility","battlerope"]},
+      "Dorm":{tags:[]},
+    }, r.equipProfiles||{});
+    merged.activeEquipProfile = (r.activeEquipProfile && merged.equipProfiles[r.activeEquipProfile]) ? r.activeEquipProfile : Object.keys(merged.equipProfiles)[0];
+    merged.exChoice=r.exChoice||{};
+    merged.optionalSessions=r.optionalSessions||[];
     merged.donations=r.donations||[];
     merged.weightLog=r.weightLog||[];
     merged.vitals=r.vitals||[];
@@ -286,6 +296,7 @@ function render(){
   if(typeof renderRecoveryAdvisory==="function") renderRecoveryAdvisory();
   if(typeof renderSessionLists==="function") renderSessionLists();
   if(typeof renderGymAccessUI==="function") renderGymAccessUI();
+  if(typeof renderEquipProfileUI==="function") renderEquipProfileUI();
   if(typeof renderCoachToday==="function") renderCoachToday();
   if(typeof renderSkillsTab==="function") renderSkillsTab();
   if(typeof renderAdaptiveTargets==="function") renderAdaptiveTargets();

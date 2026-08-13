@@ -9,19 +9,68 @@ const WEATHER={
   dark:{label:"Dark / unsafe", icon:"🌙", bad:true},
 };
 function weatherBad(){ const w=WEATHER[(S&&S.weather)||"clear"]; return !!(w&&w.bad); }
-// forceGym, if passed (true/false), overrides S.hasGym — used for TODAY's
-// actual prescribed session, which should reflect today's resolved gym
-// access (gymAccessForDate), not the general reference-library toggle every
-// other sessionEx() call site still uses.
-function sessionEx(skey, forceGym){
+
+// ── Equipment-aware exercise selection (FM-2) ────────────────────────────
+const EQUIP_ALL_TAGS = Object.keys(typeof EQUIP_TAGS!=="undefined"?EQUIP_TAGS:{});
+function activeEquipTags(){
+  const p=(S.equipProfiles||{})[S.activeEquipProfile];
+  return (p&&p.tags) || [];
+}
+function eqSubset(eq, tags){ return !eq || !eq.length || eq.every(t=>tags.includes(t)); }
+// All candidate variants for one slot of a session: the bw entry (always
+// eq:[]), the gym entry, and any extra pool members from `alt[slotIdx]` —
+// deduped by name so an identical bw/gym pair (e.g. a shared stretch) only
+// shows once.
+function sessionSlotPool(skey, slotIdx){
   const s=SESSIONS[skey]; if(!s) return [];
-  const useGym = forceGym!=null ? !!forceGym : !!(S&&S.hasGym);
-  let list=(useGym? s.gym : s.bw) || s.bw || s.ex || [];
-  // Weather swap only applies to the no-equipment (outdoor) plan — gym work is already indoors.
-  if(!useGym && weatherBad()){
-    list=list.map(e=> (e.out && e.indoor) ? Object.assign({}, e.indoor, {_swapped:true, _from:e.n}) : e);
-  }
-  return list;
+  const cands=[s.bw&&s.bw[slotIdx], s.gym&&s.gym[slotIdx], ...((s.alt&&s.alt[slotIdx])||[])].filter(Boolean);
+  const seen=new Set(), out=[];
+  cands.forEach(c=>{ if(!seen.has(c.n)){ seen.add(c.n); out.push(Object.assign({eq:[]}, c)); } });
+  return out;
+}
+// Stable per-day suggestion index into an eligible pool — same mechanism as
+// the app's other daily deterministic shuffles (see hashStr/seededShuffle in
+// today.js): varies day to day so it doesn't feel stale, but never flickers
+// mid-day across renders.
+function suggestedPoolIndex(skey, slotIdx, poolLen, dateObj){
+  if(poolLen<=1) return 0;
+  const key=localYMD(dateObj)+"|"+skey+"|"+slotIdx;
+  return hashStr(key)%poolLen;
+}
+// Resolve one session's exercises against an equipment-tag set, honoring any
+// per-day manual override (S.exChoice) and applying the weather indoor-swap
+// to whichever variant actually gets chosen. Returns exercises annotated with
+// _pool (all equipment-eligible alternates) and _slotIdx (for the override
+// UI) so a disagreeing suggestion can be swapped without losing the rest.
+function sessionExForProfile(skey, tags, dateObj){
+  const s=SESSIONS[skey]; if(!s) return [];
+  const base=s.bw||s.gym||[];
+  const dateKey=localYMD(dateObj||new Date());
+  return base.map((_,i)=>{
+    const pool=sessionSlotPool(skey,i).filter(e=>eqSubset(e.eq,tags));
+    if(!pool.length) return null;
+    const overrideKey=dateKey+"|"+skey+"|"+i;
+    const overrideIdx=(S.exChoice||{})[overrideKey];
+    const idx=(overrideIdx!=null && overrideIdx<pool.length) ? overrideIdx : suggestedPoolIndex(skey,i,pool.length,dateObj);
+    let e=pool[idx];
+    if(e.out && e.indoor && weatherBad()) e=Object.assign({}, e.indoor, {_swapped:true, _from:e.n});
+    return Object.assign({}, e, {_pool:pool, _slotIdx:i, _suggestedIdx:idx});
+  }).filter(Boolean);
+}
+// Backward-compatible flat accessor (no pool/override metadata) for call
+// sites that just want a display list. forceGym (true/false), if passed,
+// synthesizes a rich-vs-empty tag set — used by FM-1's per-day resolved gym
+// access; omit it to use the real active equipment profile (S.activeEquipProfile).
+function sessionEx(skey, forceGym){
+  const tags = forceGym==null ? activeEquipTags() : (forceGym ? EQUIP_ALL_TAGS : []);
+  return sessionExForProfile(skey, tags, new Date());
+}
+// Set/clear today's manual exercise-slot override (the "suggestion, but let
+// me choose if I disagree" layer). idx indexes into that slot's eligible pool
+// as last rendered — callers pass it straight from a pool member's position.
+function setExerciseChoice(skey, slotIdx, idx){
+  if(!S.exChoice) S.exChoice={};
+  S.exChoice[localYMD()+"|"+skey+"|"+slotIdx]=idx;
 }
 // Body areas / systems each FM session loads — used for PT recovery-aware adjustment.
 const SESSION_AREAS = {
@@ -30,8 +79,18 @@ const SESSION_AREAS = {
   s3:["pull","push","core"],    // Upper + Core
   s4:["legs","push","core","cardio"], // AFT circuit (full)
   s5:["mobility","balance"],    // Mobility + Balance (recovery-oriented, low fatigue)
+  swim:["cardio"],              // Swim (optional)
+  climb:["pull","core","legs"], // Rock Climbing (optional)
   other:[],
 };
+// Optional session types the coach may suggest (never auto-schedules) on a
+// day whose active equipment profile carries the matching tag, once opted in.
+function optionalSessionSuggestions(tags){
+  return Object.keys(SESSIONS).filter(k=>{
+    const s=SESSIONS[k];
+    return s.optional && (S.optionalSessions||[]).includes(k) && eqSubset(s.eq,tags);
+  });
+}
 
 // ===== Weekly training schedule (the coached rotation) =====
 // JS getDay(): 0=Sun … 6=Sat. null = rest day.
@@ -173,7 +232,8 @@ const EX_HOWTO=[
   // --- gym cardio ---
   ["treadmill interval","Run hard/easy bursts on a treadmill; add incline to build power and spare your joints."],
   ["treadmill tempo","Hold a comfortably-hard pace on the treadmill for 15–25 min."],
-  ["rower or bike interval","Hard/easy bursts on a rowing machine or stationary bike — cardio that spares your legs for lifting days."],
+  ["rower interval","Hard/easy bursts on a rowing machine — cardio that spares your legs for lifting days."],
+  ["stationary bike","Hard/easy bursts on a stationary bike — cardio that spares your legs for lifting days."],
   // --- indoor weather swaps ---
   ["indoor intervals","8 rounds of 30 seconds hard / 60 seconds easy (rest or march in place). Rotate through 4 moves so each gets hit exactly twice: round 1 burpees, 2 high-knees, 3 mountain-climbers, 4 squat jumps, then repeat the cycle for rounds 5–8. That keeps every move balanced. A burpee = squat down, kick your feet back to a push-up, do the push-up, jump your feet in, jump up."],
   ["indoor tempo","Keep moving continuously for 20 minutes at a steady, comfortably-hard effort — never fully stopping. Cycle through the 4 moves 5 minutes each (jumping jacks, shadow boxing, step-ups, jog in place) so every move gets equal time. The rotation just keeps any one move from wearing you out — the goal is continuous effort."],
@@ -193,12 +253,20 @@ const EX_HOWTO=[
   // --- upper / core (gym) ---
   ["pull-up","Hang from a bar (palms away), arms straight, and pull until your chin clears the bar, then lower all the way. Use a band or the lat-pulldown machine if you can't do one yet."],
   ["lat pulldown","Seated at the machine, pull the bar down to your upper chest, squeezing your shoulder blades, then return under control."],
-  ["cable / barbell row","Pull a cable handle or barbell toward your stomach, squeezing the shoulder blades, then return under control. Horizontal pulling for the mid-back."],
+  ["seated cable row","Pull a cable handle toward your stomach, squeezing the shoulder blades, then return under control. Horizontal pulling for the mid-back."],
+  ["barbell row","Hinge over a barbell with a flat back and pull it toward your stomach, squeezing the shoulder blades, then lower under control. The barbell-loaded version of the cable row."],
   ["incline db press","Press dumbbells from your shoulders to straight arms on an inclined bench — upper chest and shoulders."],
   ["face pull","Pull a rope to your face with your elbows high — strengthens the rear shoulders and posture muscles."],
   ["hanging knee raise","Hang from a bar and raise your knees toward your chest, then lower under control. Core."],
   ["back extension","Hinge over a back-extension bench or machine and raise your torso to a straight line, then lower. Loaded lower back."],
   ["farmer's carry","Hold a heavy dumbbell or kettlebell in each hand and walk a set distance, standing tall and braced. Grip, core, and carry strength."],
+  // --- ROTC-trailer carries/drags (confirmed equipment: full AFT kit, water jugs, weighted stretcher) ---
+  ["water jug carry","Hold a filled water jug in each hand (or one held at your chest with both hands) and walk a set distance, standing tall and braced. Grip, core, and carry strength — same movement as the farmer's carry, trailer-equipment version."],
+  ["stretcher carry","With a partner, grip the stretcher's handles at each end (add weight — sandbags, plates, or more water jugs — across it) and carry it a set distance, staying tall and in step with each other. Grip, core, and shoulders — mirrors a real casualty-carry load."],
+  ["stretcher drag","Grip the stretcher's near handles, hinge at the hips with a flat back, and drag it a set distance, driving through your legs. Mimics the SDC drag using real trailer equipment."],
+  ["loaded ruck carry","Load the rucksack to a manageable, honest weight, put it on with both straps snug, and walk/carry it a set distance standing tall. Build the load up gradually — this is a loaded carry, not a max-effort lift."],
+  ["sandbag carry","Hold a sandbag against your chest (or one in each hand if using smaller bags) and walk a set distance, standing tall and braced. The shifting weight adds a real core-stability demand a fixed dumbbell doesn't."],
+  ["tire flip","Squat down, grip the tire's near edge, and drive through your legs and hips to flip it forward, then reset and repeat. Full-body power — legs, back, and grip."],
   // --- AFT circuit ---
   ["shuttle sprint","Sprint to a line ~25m away, touch it, sprint back, and repeat. Mimics the change-of-direction of the Sprint-Drag-Carry without a sled."],
   ["bear crawl","On hands and feet with knees just off the floor, crawl forward keeping your back flat. Replaces the SDC drag — taxes legs, shoulders, and core."],
@@ -224,6 +292,14 @@ const EX_HOWTO=[
   ["warm-up","5 minutes of easy movement to raise your temperature — jog in place, jumping jacks, or a brisk walk. Don't stretch cold muscles."],
   ["band shoulder","Hold a band wider than shoulder-width and, keeping your arms straight, take it from in front of you up and over your head to behind you, then back. Opens the shoulders."],
   ["foam-roll","Slowly roll the target muscle over a foam roller, pausing on tight spots, to loosen the tissue before stretching."],
+  // --- Swim (optional session) ---
+  ["easy continuous swim","Swim continuously at a conversational, sustainable pace for the time — any stroke, mixing strokes is fine. Builds the aerobic base without pounding your joints."],
+  ["swim intervals","Swim a hard 50m, then rest ~30s at the wall, and repeat for the set count. Builds swim-specific speed and lung capacity."],
+  ["kickboard","Hold a kickboard out front and kick continuous laps, then switch to a pull-buoy between your legs and pull with your arms only. Isolates legs, then arms, to build technique in each separately."],
+  // --- Rock Climbing (optional session) ---
+  ["bouldering","Climb short, unroped problems on the bouldering wall at a moderate grade you can mostly complete, resting between attempts. Builds pulling strength, grip, and body awareness."],
+  ["top-rope climbing","Climb roped routes on the wall with a belay partner or auto-belay, resting between routes. Sustained pulling and grip endurance over a longer route than bouldering."],
+  ["traverse","Move sideways across the wall low to the ground without climbing up, staying on for the full time. Builds grip and pulling endurance without the fall risk of height."],
 ];
 function exHowto(name){
   const n=String(name||"").toLowerCase();
@@ -290,24 +366,47 @@ function pickAftMode(){
   // no AFT history at all yet -> a full mock establishes the baseline
   return "mock";
 }
-// Set/rep prescription per intensity — how to actually run today's exercises, in order.
+// Most recent logged weight for a named weighted exercise, straight from real
+// workout history (S.workouts) — never fabricated. Returns null if it's never
+// been logged with a weight before.
+function lastLoggedWeight(exName){
+  const workouts=(S.workouts||[]).slice().sort((a,b)=>new Date(b.ts||b.date)-new Date(a.ts||a.date));
+  for(const w of workouts){
+    const ex=(w.exercises||[]).find(e=>e.name===exName && e.w);
+    const withWeight=(ex&&ex.sets||[]).slice().reverse().find(s=>s.weight);
+    if(withWeight) return {weight:withWeight.weight, date:w.date};
+  }
+  return null;
+}
+// Set/rep/weight prescription per intensity — how to actually run today's exercises, in order.
 function prescriptionFor(intensity, ex){
   // returns a short "what to do" string for an exercise given the day's intensity
   const t=ex.type||ex.t;
+  let base="as prescribed";
   if(intensity==="hard"){
-    if(t==="reps") return "3–4 sets, leave 1–2 reps in the tank";
-    if(t==="time") return "3 sets, push the hold/effort";
-    if(t==="dist") return "main effort — see the session note for distance/pace";
+    if(t==="reps") base="3–4 sets, leave 1–2 reps in the tank";
+    else if(t==="time") base="3 sets, push the hold/effort";
+    else if(t==="dist") base="main effort — see the session note for distance/pace";
   } else if(intensity==="moderate"){
-    if(t==="reps") return "2–3 sets, controlled";
-    if(t==="time") return "2–3 sets, steady";
-    if(t==="dist") return "easy–tempo pace, conversational";
+    if(t==="reps") base="2–3 sets, controlled";
+    else if(t==="time") base="2–3 sets, steady";
+    else if(t==="dist") base="easy–tempo pace, conversational";
   } else { // easy / recovery / rest
-    if(t==="reps") return "1–2 easy sets, focus on form";
-    if(t==="time") return "hold as prescribed, relaxed";
-    if(t==="dist") return "easy pace only";
+    if(t==="reps") base="1–2 easy sets, focus on form";
+    else if(t==="time") base="hold as prescribed, relaxed";
+    else if(t==="dist") base="easy pace only";
   }
-  return "as prescribed";
+  // Weight suggestion — only for weighted (equipment) exercises, sourced from
+  // your own logged history, not guessed. A real adaptive version (learning
+  // from logged difficulty/completion, not just "repeat last time") is a
+  // planned future phase — see planning/IDEAS-tests-fm-workouts.md.
+  if(t==="reps" && ex.w){
+    const last=lastLoggedWeight(ex.n);
+    base += last
+      ? ` · last logged: ${last.weight} (${last.date}) — repeat it, or add a little if every rep felt easy`
+      : " · no logged weight yet — start conservative and find a load where the last 1–2 reps are genuinely hard";
+  }
+  return base;
 }
 // Did the user log a workout on a given Date (local day)?
 function workoutOnDay(dateObj){
@@ -326,7 +425,7 @@ function todaysPlan(){
   return {
     now, dayPlan,
     sessionKey: dayPlan.session,
-    exercises: dayPlan.session ? sessionEx(dayPlan.session, gymAccessForDate(now)) : [],
+    exercises: dayPlan.session ? sessionExForProfile(dayPlan.session, gymAccessForDate(now)?activeEquipTags():[], now) : [],
     todayLogged: !!tLogged, todayLog: tLogged,
     yesterday: {
       plan: yPlan,

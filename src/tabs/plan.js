@@ -104,8 +104,8 @@ function dawnSessionHtml(){
   const sess=SESSIONS[p.sessionKey];
   const intensity=p.dayPlan.intensity;
   const intLabel={hard:"🔴 Hard",moderate:"🟠 Moderate",easy:"🟢 Easy"}[intensity]||"";
-  const todayGym=typeof gymAccessForDate==="function"?gymAccessForDate(p.now):S.hasGym;
-  const modeTag=todayGym?"🏋️ Gym":(weatherBad()?`${WEATHER[(S.weather)||"clear"].icon} Indoor`:"🤸 Bodyweight");
+  const todayGym=typeof gymAccessForDate==="function"?gymAccessForDate(p.now):false;
+  const modeTag=todayGym?`🏋️ ${esc(S.activeEquipProfile||"Gym")}`:(weatherBad()?`${WEATHER[(S.weather)||"clear"].icon} Indoor`:"🤸 Bodyweight");
   // AFT-circuit days: an adaptive coach call (full mock / single-event practice /
   // the normal circuit) instead of always just showing the circuit — see FM-1.
   if(p.sessionKey==="s4"&&typeof pickAftMode==="function"){
@@ -217,6 +217,32 @@ function renderRecoveryAdvisory(){
   el.innerHTML=`<div class="forge-recovery-card"><h3>♻️ Recovery-aware (from your PT log)</h3>${lines}</div>`;
 }
 
+// "skey|slotIdx" of the currently open swap panel on the coach card, or null —
+// module-scope UI state, same pattern as _gymEditDraft/_equipEditProfile above.
+let _exSwapOpen=null;
+function toggleExSwap(key){ _exSwapOpen=(_exSwapOpen===key)?null:key; if(typeof renderCoachToday==="function") renderCoachToday(); }
+// The suggestion-plus-override affordance for one exercise: a "🔀 swap" toggle
+// (only shown when the slot has more than one equipment-eligible variant) and,
+// when open, the full eligible pool as pickable buttons — the suggested one
+// starred. This is the "give a suggestion, but let me choose if I disagree" UI.
+function exSwapHtml(sessKey, e){
+  if(!e._pool || e._pool.length<2) return "";
+  const swapKey=sessKey+"|"+e._slotIdx;
+  const open=_exSwapOpen===swapKey;
+  const btn=`<button class="ex-swap-btn" data-exswap="${swapKey}">🔀 ${open?'hide':'swap'}</button>`;
+  const panel=open?`<div class="ex-alt-panel">${e._pool.map((alt,ai)=>`<button class="ex-alt-btn${ai===e._suggestedIdx?' suggested':''}${alt.n===e.n?' current':''}" data-expick="${sessKey}|${e._slotIdx}|${ai}">${ai===e._suggestedIdx?'⭐ ':''}${esc(alt.n)}</button>`).join("")}</div>`:"";
+  return btn+panel;
+}
+// Optional-session suggestion (FM-2): shown when the user has opted in and
+// today's active equipment profile actually unlocks it (pool/climbwall tag) —
+// the coach never auto-schedules these, just surfaces them as a real option.
+function optionalSessionSuggestionHtml(){
+  const tags=typeof activeEquipTags==="function"?activeEquipTags():[];
+  const opts=typeof optionalSessionSuggestions==="function"?optionalSessionSuggestions(tags):[];
+  if(!opts.length) return "";
+  const chips=opts.map(k=>`<button class="opt-sess-chip" data-gototab="log" data-logsess="${k}">${SESSIONS[k].name.replace(" (optional)","")}</button>`).join("");
+  return `<div class="coach-opt-suggest">🌊 Feel like a change today? Your active profile unlocks: ${chips}</div>`;
+}
 // The coached "today" block: yesterday's read + today's session, fully explained, in order.
 function renderCoachToday(){
   const el=document.getElementById("coachToday"); if(!el) return;
@@ -246,8 +272,8 @@ function renderCoachToday(){
     const sess=SESSIONS[p.sessionKey];
     const intensity=p.dayPlan.intensity;
     const intLabel={hard:"🔴 Hard day",moderate:"🟠 Moderate",easy:"🟢 Easy / recovery",rest:"💤 Rest"}[intensity]||"";
-    const todayGym=typeof gymAccessForDate==="function"?gymAccessForDate(p.now):S.hasGym;
-    const modeTag = todayGym ? "🏋️ Gym version" : (weatherBad()? `${WEATHER[(S.weather)||"clear"].icon} indoor (weather)` : "🤸 No-equipment");
+    const todayGym=typeof gymAccessForDate==="function"?gymAccessForDate(p.now):false;
+    const modeTag = todayGym ? `🏋️ ${esc(S.activeEquipProfile||"Gym")} version` : (weatherBad()? `${WEATHER[(S.weather)||"clear"].icon} indoor (weather)` : "🤸 No-equipment");
     const aftMode=(p.sessionKey==="s4"&&typeof pickAftMode==="function")?pickAftMode():null;
     if(aftMode==="mock"||aftMode==="practice"){
       // Adaptive coach call for the AFT-circuit slot (FM-1/§2b) — a full guided
@@ -272,7 +298,7 @@ function renderCoachToday(){
         <div class="coach-day-h">${esc(dayName)} · ${esc(sess.name.split(" · ")[0])} <span class="coach-int">${intLabel}</span></div>
         <p class="coach-intro">${esc(p.dayPlan.label)}. <span class="coach-mode">${modeTag}</span> — this is a <b>pick-one</b> session: you do <b>one</b> run today, not all of them. Today's pick:</p>
         <ol class="coach-list" style="list-style:none;padding-left:0"><li>
-          <div class="coach-ex-n"><b>👉 ${esc(e.n)}</b>${e._swapped?' <span class="sess-swap">· indoors for weather</span>':''}</div>
+          <div class="coach-ex-n"><b>👉 ${esc(e.n)}</b>${e._swapped?' <span class="sess-swap">· indoors for weather</span>':''}${exSwapHtml(p.sessionKey,e)}</div>
           ${desc?`<div class="coach-ex-how">${esc(desc)}</div>`:''}
           <div class="coach-ex-rx">${esc(rx)}</div>
         </li></ol>
@@ -284,7 +310,7 @@ function renderCoachToday(){
       const items=p.exercises.map((e,i)=>{
         const rx=prescriptionFor(intensity, e);
         const desc=exHowto(e.n);
-        return `<li><div class="coach-ex-n"><b>${esc(e.n)}</b>${e.w?' <span class="sess-eq">· equipment</span>':''}${e._swapped?' <span class="sess-swap">· indoors for weather</span>':''}</div>${desc?`<div class="coach-ex-how">${esc(desc)}</div>`:''}<div class="coach-ex-rx">${esc(rx)}</div></li>`;
+        return `<li><div class="coach-ex-n"><b>${esc(e.n)}</b>${e.w?' <span class="sess-eq">· equipment</span>':''}${e._swapped?' <span class="sess-swap">· indoors for weather</span>':''}${exSwapHtml(p.sessionKey,e)}</div>${desc?`<div class="coach-ex-how">${esc(desc)}</div>`:''}<div class="coach-ex-rx">${esc(rx)}</div></li>`;
       }).join("");
       tHtml=`<div class="coach-body">
         <div class="coach-day-h">${esc(dayName)} · ${esc(sess.name.split(" · ")[0])} <span class="coach-int">${intLabel}</span></div>
@@ -295,7 +321,7 @@ function renderCoachToday(){
       </div>`;
     }
   }
-  el.innerHTML=`<div class="coach-card"><div class="coach-h">📋 Today's orders</div>${yHtml}${tHtml}</div>`;
+  el.innerHTML=`<div class="coach-card"><div class="coach-h">📋 Today's orders</div>${yHtml}${tHtml}${optionalSessionSuggestionHtml()}</div>`;
   const lb=document.getElementById("coachLogBtn");
   if(lb) lb.onclick=()=>{
     // jump to Log tab, preload today's session
@@ -349,15 +375,43 @@ function renderGymAccessUI(){
   </div>`;
 }
 
-// Fill each session writeup's exercise list based on the equipment mode (S.hasGym).
+// ===== Equipment profiles + optional sessions (FM-2) =====
+// Which profile is currently being tag-edited in the UI — module-scope draft,
+// same pattern as _gymEditDraft above. Defaults to the active profile.
+let _equipEditProfile=null;
+function renderEquipProfileUI(){
+  const el=document.getElementById("equipProfileArea"); if(!el) return;
+  const profiles=S.equipProfiles||{};
+  const names=Object.keys(profiles);
+  if(!_equipEditProfile || !profiles[_equipEditProfile]) _equipEditProfile=S.activeEquipProfile||names[0];
+  const active=S.activeEquipProfile;
+  const profileBtns=names.map(n=>`<button class="equip-profile-btn${n===active?' on':''}${n===_equipEditProfile?' editing':''}" data-equipedit="${esc(n)}">${n===active?'✓ ':''}${esc(n)}</button>`).join("");
+  const editing=profiles[_equipEditProfile]||{tags:[]};
+  const tagBtns=Object.keys(EQUIP_TAGS).map(k=>{
+    const t=EQUIP_TAGS[k];
+    const on=(editing.tags||[]).includes(k);
+    return `<button class="equip-tag-tgl${on?' on':''}" data-equiptag="${k}">${esc(t.label)}${t.unverified?' <span class="equip-unverified" title="Common ROTC PT gear by general knowledge — not verified against your trailer. Edit if this is wrong.">?</span>':''}</button>`;
+  }).join("");
+  const canDelete=names.length>1;
+  const editingTags=editing.tags||[];
+  const optToggles=Object.keys(SESSIONS).filter(k=>SESSIONS[k].optional).map(k=>{
+    const s=SESSIONS[k];
+    const unlocked=eqSubset(s.eq,editingTags);
+    const on=(S.optionalSessions||[]).includes(k);
+    return `<button class="equip-opt-tgl${on?' on':''}${unlocked?'':' locked'}" data-equipopt="${k}" ${unlocked?'':'disabled title="Needs the '+esc((EQUIP_TAGS[s.eq[0]]||{}).label||s.eq[0])+' tag on this profile"'}>${on?'✓ ':''}${esc(s.name)}</button>`;
+  }).join("");
+  el.innerHTML=`<div class="equip-profile-card">
+    <div class="td-h fn-h">Equipment Profiles</div>
+    <div class="plan-intro" style="margin-bottom:8px">The <b>active</b> profile decides which exercise variant gets suggested per slot on gym days. Tags marked <span class="equip-unverified">?</span> are common ROTC PT-trailer gear by general knowledge only — no public battalion inventory exists to check against, so correct them to match what your trailer actually has.</div>
+    <div class="equip-profile-list">${profileBtns}<button class="equip-profile-btn equip-profile-add" data-equipnew="1">+ New profile</button></div>
+    <div class="equip-edit-label">Editing: <b>${esc(_equipEditProfile)}</b>${_equipEditProfile!==active?` <button class="equip-edit-switch" data-equipactive="${esc(_equipEditProfile)}">make active</button>`:''}${canDelete?` <button class="equip-profile-del" data-equipdel="${esc(_equipEditProfile)}">delete</button>`:''} <button class="equip-profile-rename" data-equiprename="${esc(_equipEditProfile)}">rename</button></div>
+    <div class="equip-tag-toggles">${tagBtns}</div>
+    ${optToggles?`<div class="equip-opt-h">Optional sessions (coach suggests these on a day this profile's tags unlock them, once opted in):</div><div class="equip-opt-toggles">${optToggles}</div>`:''}
+  </div>`;
+}
+
+// Fill each session writeup's exercise list based on the active equipment profile (FM-2).
 function renderSessionLists(){
-  // update the toggle button + subtitle
-  const sub=document.getElementById("gymModeSub");
-  const btn=document.getElementById("gymToggleBtn");
-  const tgl=document.getElementById("gymToggle");
-  if(sub) sub.textContent = S.hasGym ? "Gym — equipment versions of each session" : "No-equipment — bodyweight only (floor + wall)";
-  if(btn) btn.textContent = S.hasGym ? "Switch to No-equipment" : "Switch to Gym";
-  if(tgl) tgl.className = "gym-toggle"+(S.hasGym?" on":"");
   // weather picker
   const wp=document.getElementById("weatherBtns");
   const wsub=document.getElementById("weatherSub");
@@ -366,27 +420,28 @@ function renderSessionLists(){
     wp.innerHTML=Object.keys(WEATHER).map(k=>`<button class="weather-b${k===cur?' on':''}" data-weather="${k}">${WEATHER[k].icon} ${esc(WEATHER[k].label)}</button>`).join("");
   }
   if(wsub){
-    if(S.hasGym) wsub.textContent="Gym mode — weather doesn't matter (you're indoors)";
-    else wsub.textContent = weatherBad() ? `${WEATHER[cur].icon} ${WEATHER[cur].label} — outdoor work swapped to indoor` : "Clear — outdoor runs as planned";
+    wsub.textContent = weatherBad() ? `${WEATHER[cur].icon} ${WEATHER[cur].label} — outdoor work swapped to indoor on days that need it` : "Clear — outdoor runs as planned";
   }
+  const tags=activeEquipTags();
+  const rich=tags.length>0;
   // fill each session's exercise container and inject beginner prescriptions
   document.querySelectorAll(".sess-ex").forEach(div=>{
     const skey=div.getAttribute("data-sess");
-    const list=sessionEx(skey);
-    const swapped = !S.hasGym && weatherBad() && list.some(e=>e._swapped);
+    const list=sessionExForProfile(skey, tags, new Date());
+    const swapped = list.some(e=>e._swapped);
     const pickOne = SESSIONS[skey] && SESSIONS[skey].pickOne;
     const pickNote = pickOne ? `<div class="pickone-note">Pick <b>one</b> per run day — the plan rotates these for you.</div>` : "";
-    div.innerHTML = `<div class="sess-ex-tag">${S.hasGym?"🏋️ Gym version":(swapped?`${WEATHER[(S.weather)||"clear"].icon} No-equipment · indoor (weather)`:"🤸 No-equipment version")}</div>${pickNote}<ul class="gl">${list.map(e=>`<li>${esc(e.n)}${e.w?' <span class="sess-eq">· equipment</span>':''}${e._swapped?` <span class="sess-swap">· indoors for weather</span>`:''}</li>`).join("")}</ul>`;
+    div.innerHTML = `<div class="sess-ex-tag">${esc(S.activeEquipProfile||"")}${swapped?` · ${WEATHER[(S.weather)||"clear"].icon} indoor (weather)`:""}</div>${pickNote}<ul class="gl">${list.map(e=>`<li>${esc(e.n)}${e.w?' <span class="sess-eq">· equipment</span>':''}${e._swapped?` <span class="sess-swap">· indoors for weather</span>`:''}${(e._pool&&e._pool.length>1)?` <span class="sess-alt">· ${e._pool.length-1} alt${e._pool.length>2?'s':''}</span>`:''}</li>`).join("")}</ul>`;
     // remove any previous rx-card for this session, then inject fresh
     const prevRx=div.nextElementSibling;
     if(prevRx&&prevRx.classList.contains('rx-card')) prevRx.remove();
     const rx=BEGINNER_RX[skey];
     if(rx){
-      const exList=S.hasGym?rx.gym:rx.bw;
-      const rows=exList.map(e=>`<tr><td>${esc(e.name)}</td><td>${esc(String(e.sets))}</td><td>${esc(String(e.reps))}</td>${(S.hasGym&&e.weight)?`<td>${esc(e.weight)}</td>`:'<td></td>'}<td>${esc(e.rest||'')}</td></tr>`).join('');
+      const exList=rich?rx.gym:rx.bw;
+      const rows=exList.map(e=>`<tr><td>${esc(e.name)}</td><td>${esc(String(e.sets))}</td><td>${esc(String(e.reps))}</td>${(rich&&e.weight)?`<td>${esc(e.weight)}</td>`:'<td></td>'}<td>${esc(e.rest||'')}</td></tr>`).join('');
       div.insertAdjacentHTML('afterend',
         `<div class="rx-card"><p class="rx-note">New to this? Start here. Add reps when all sets feel easy — not before.</p>
-        <table class="rx-table"><thead><tr><th>Exercise</th><th>Sets</th><th>Reps</th>${S.hasGym?'<th>Start weight</th>':'<th></th>'}<th>Rest</th></tr></thead>
+        <table class="rx-table"><thead><tr><th>Exercise</th><th>Sets</th><th>Reps</th>${rich?'<th>Start weight</th>':'<th></th>'}<th>Rest</th></tr></thead>
         <tbody>${rows}</tbody></table>
         <p class="rx-effort">Stop each set when you could still do 2 clean reps. That margin is what makes this sustainable for months.</p></div>`
       );

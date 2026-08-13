@@ -9,16 +9,7 @@
       Built to max your <b>AFT</b> (Deadlift · Hand-Release Push-up · Sprint-Drag-Carry · Plank · 2-Mile Run) and rebuild strength + endurance after your break. Runs <b>on top of ROTC PT</b>: on weeks you have PT, count it as one session and do the rest. Aim for <b>4 hard sessions/week</b> (never two hard days back-to-back) plus the <b>Mobility + Balance day</b> on an easy/rest day — it adds recovery, not fatigue.
     </div>
 
-    <div class="gym-toggle" id="gymToggle">
-      <div class="gym-toggle-row">
-        <div>
-          <div class="gym-toggle-label">Equipment mode</div>
-          <div class="gym-toggle-sub" id="gymModeSub">No-equipment — bodyweight only (floor + wall)</div>
-        </div>
-        <button id="gymToggleBtn" class="gym-btn">Switch to Gym</button>
-      </div>
-      <div class="gym-toggle-note">Every session has <b>two versions that hit the same muscles</b>: a <b>No-equipment</b> version (truly just your body, floor, and a wall — plus a grip trainer if you have one) and a <b>Gym</b> version (different movements using equipment). Flip this when you have gym access; it changes <i>how</i> you train, not <i>what</i> muscles, so it never affects your recovery schedule. Default is No-equipment — the whole week works with zero gear. Suggested rotation: <b>mostly no-equipment, use the gym version when you're actually at one.</b></div>
-    </div>
+    <div id="equipProfileArea"></div>
 
     <div class="gym-toggle" id="weatherPick">
       <div class="gym-toggle-row">
@@ -28,8 +19,9 @@
         </div>
       </div>
       <div class="weather-btns" id="weatherBtns"></div>
-      <div class="gym-toggle-note">Set the conditions and the <b>No-equipment plan swaps outdoor work for indoor alternatives</b> — runs become in-place cardio circuits, outdoor sprints become hallway/burpee intervals. Same muscles and effort, just inside. In <b>Gym</b> mode this does nothing (you're already indoors). Tap <b>Clear</b> when it's fine to head back outside.</div>
+      <div class="gym-toggle-note">Set the conditions and outdoor work (runs, sprints) on days with no gym access swaps to indoor alternatives — same muscles and effort, just inside. Tap <b>Clear</b> when it's fine to head back outside.</div>
     </div>
+    <div class="phase" style="background:rgba(184,160,106,.06);border-color:var(--line)">🔀 <b>Every slot in every session is a small pool of tagged variants</b>, not one fixed exercise — the coach suggests whichever your <b>active equipment profile</b> (above) unlocks, and a "swap" button on any exercise in Today's Orders lets you pick a different eligible one if you'd rather. That's also where day-to-day variety comes from, and where ROTC-trailer gear (water jugs, weighted stretcher) shows up as real alternates on the carry/drag slots. Opt into <b>Swim</b> or <b>Rock Climbing</b> in the Equipment Profiles card above and the coach will suggest them on days your profile has a pool or climbing-wall tag.</div>
     <div class="phase" style="background:rgba(127,174,107,.08);border-color:#3c5230">🌱 <b style="color:var(--jade)">Lean &amp; bodyweight focus.</b> This plan builds relative strength and lean muscle — the kind that helps your run and push-up scores, not bulk that slows them. The trick: get stronger by making bodyweight moves <i>harder</i> (tougher leverage, slower tempo, more reps, less rest), not by adding mass. External load stays minimal and only where the AFT demands it (deadlift + carries).</div>
 
     <div id="gymAccessArea"></div>

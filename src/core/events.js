@@ -320,10 +320,8 @@ function showLevelUp(path,lvl){
 }
 document.getElementById("luClose").onclick=()=>document.getElementById("levelup").classList.remove("show");
 
-/* ---------------- Equipment mode toggle ---------------- */
+/* ---------------- Weather toggle ---------------- */
 {
-  const gb=document.getElementById("gymToggleBtn");
-  if(gb) gb.onclick=()=>{ S.hasGym=!S.hasGym; save(); render(); toast(S.hasGym?"🏋️ Gym mode — equipment versions shown":"🤸 No-equipment mode — bodyweight only"); };
   const wb=document.getElementById("weatherBtns");
   if(wb) wb.onclick=(e)=>{ const b=e.target.closest("[data-weather]"); if(!b) return; S.weather=b.getAttribute("data-weather"); save(); render(); const w=WEATHER[S.weather]; toast(weatherBad()?`${w.icon} ${w.label} — outdoor work moved indoors`:"☀️ Clear — outdoor work restored"); };
 }

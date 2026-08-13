@@ -2505,3 +2505,33 @@
 .mockaft-actions{display:flex;gap:8px;margin-top:4px}
 .mockaft-actions .btn-add{flex:2}
 .mockaft-actions #mockAftSkipBtn{flex:1;width:auto;margin:0}
+
+/* ── FM-2: Equipment profiles, exercise pools, optional sessions ── */
+.equip-profile-card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px}
+.equip-profile-list{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.equip-profile-btn{background:#0e0f09;border:1px solid var(--line);color:var(--ink-dim);padding:7px 12px;border-radius:16px;font-family:inherit;font-size:12.5px;cursor:pointer}
+.equip-profile-btn.on{border-color:var(--jade);color:var(--jade);background:rgba(111,158,84,.1)}
+.equip-profile-btn.editing{box-shadow:0 0 0 1.5px var(--gold) inset}
+.equip-profile-btn.equip-profile-add{border-style:dashed;color:var(--ink-faint)}
+.equip-edit-label{font-size:12px;color:var(--ink-faint);margin:6px 0 10px}
+.equip-edit-switch,.equip-profile-del,.equip-profile-rename{background:none;border:none;color:var(--gold);font-size:11.5px;cursor:pointer;text-decoration:underline;margin-left:6px;padding:0}
+.equip-profile-del{color:var(--blood)}
+.equip-tag-toggles{display:flex;gap:6px;flex-wrap:wrap}
+.equip-tag-tgl{background:#0e0f09;border:1px solid var(--line);color:var(--ink-dim);padding:6px 10px;border-radius:14px;font-family:inherit;font-size:11.5px;cursor:pointer}
+.equip-tag-tgl.on{background:var(--gold);border-color:var(--gold);color:#1a1208;font-weight:600}
+.equip-unverified{color:var(--ember);font-weight:700;border:1px solid var(--ember);border-radius:50%;width:13px;height:13px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;vertical-align:middle;cursor:help}
+.equip-opt-h{font-size:12px;color:var(--ink-faint);margin:12px 0 6px;border-top:1px solid var(--line);padding-top:10px}
+.equip-opt-toggles{display:flex;gap:6px;flex-wrap:wrap}
+.equip-opt-tgl{background:#0e0f09;border:1px solid var(--line);color:var(--ink-dim);padding:6px 10px;border-radius:14px;font-family:inherit;font-size:12px;cursor:pointer}
+.equip-opt-tgl.on{border-color:var(--jade);color:var(--jade);background:rgba(111,158,84,.1)}
+.equip-opt-tgl.locked{opacity:.4;cursor:not-allowed}
+
+.ex-swap-btn{background:none;border:none;color:var(--gold);font-size:11px;cursor:pointer;margin-left:8px;padding:0;vertical-align:middle}
+.ex-alt-panel{display:flex;gap:5px;flex-wrap:wrap;margin:6px 0 2px}
+.ex-alt-btn{background:#0e0f09;border:1px solid var(--line);color:var(--ink-dim);padding:4px 9px;border-radius:12px;font-family:inherit;font-size:11px;cursor:pointer}
+.ex-alt-btn.suggested{border-color:var(--gold);color:var(--gold)}
+.ex-alt-btn.current{background:var(--jade);border-color:var(--jade);color:#0e1108;font-weight:600}
+.sess-alt{color:var(--ink-faint);font-size:11px}
+
+.coach-opt-suggest{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-dim);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.opt-sess-chip{background:rgba(127,174,214,.1);border:1px solid var(--violet);color:var(--violet);padding:5px 11px;border-radius:14px;font-family:inherit;font-size:12px;cursor:pointer}

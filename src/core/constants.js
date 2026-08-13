@@ -71,7 +71,7 @@ const DEFAULT = {
   aftEventTargets:{hrp:null,sdc:null,run:null,dl:null,plank:null},
   aftStandard:"general",  // "general" (sex+age normed, 300 min) or "combat" (sex-neutral, 350 min)
   aftGoal:null,           // target total AFT score (e.g. 500); shown as a gap line on the score display
-  hasGym:false,           // equipment mode: false = no-equipment (bodyweight) plans, true = gym versions
+  hasGym:false,           // legacy (pre-FM-2) equipment toggle — superseded by equipProfiles/activeEquipProfile below; kept only so old saves still validate
   weather:"clear",        // manual weather: clear|rain|snow|heat|cold|wind|air|dark — bad conditions swap outdoor work indoors
   // Gym-access-aware weekly planning (FM-1). Three layers, checked in this order
   // by gymAccessForDate() in training.js: gymAccessLive (today-only override) ->
@@ -80,6 +80,17 @@ const DEFAULT = {
   // (the saved recurring pattern). Keyed by JS getDay() (0=Sun..6=Sat).
   gymAccess:{ default:{1:true,3:true,5:true}, weekOf:null, week:{} },
   gymAccessLive:{},       // {"YYYY-MM-DD": true|false} same-day ad-hoc overrides
+  // Equipment inventory (FM-2). Named, editable profiles built from EQUIP_TAGS
+  // (constants.js) replace the old flat hasGym boolean for exercise SELECTION
+  // (which specific exercise fills a slot); gymAccess above still separately
+  // decides which session TYPE lands on which day (FM-1) — the two compose.
+  equipProfiles:{
+    "ROTC/Campus Gym":{tags:["barbell","dumbbells","kettlebell","machines","pullupbar","dipbars","bands","treadmill","rower","bike","pool","climbwall","aftkit","waterjugs","stretcher","ruck","sandbag","tires","agility","battlerope"]},
+    "Dorm":{tags:[]},
+  },
+  activeEquipProfile:"ROTC/Campus Gym",
+  exChoice:{},   // per-day manual exercise-slot overrides: {"YYYY-MM-DD|skey|slotIdx": variantIndex} — suggestion still shown, this just wins when set
+  optionalSessions:[], // opted-in optional session types beyond the core 5, e.g. ["swim","climb"] — coach may suggest, never auto-schedules without opt-in
   donations:[],           // blood donations: [{id, date, type}]
   weightLog:[],           // weight history for trend: [{date, lb}]
   vitals:[],              // health readings: [{id, date, pulse, bpSys, bpDia, hemoglobin, note}]
@@ -146,104 +157,164 @@ const VALUES = {
   quest:{easy:{xp:15,g:5},med:{xp:35,g:12},hard:{xp:70,g:28}},
   daily:{easy:{xp:10,g:4},med:{xp:20,g:8},hard:{xp:40,g:16}},
 };
+// ── Equipment taxonomy (FM-2) ────────────────────────────────────────────
+// A deliberately coarse tag set (machines is one umbrella tag, not per-machine)
+// so a profile is a short, honest checklist, not an unmaintainable catalog.
+// Sourced two ways, both real, neither invented:
+//  - Campus gym tags (barbell..climbwall): confirmed via research against
+//    Wake Forest's Wellbeing Center (Reynolds Gym + Sutton Center) — a real
+//    weight room, cardio floor, pool+whirlpool, and a climbing/bouldering wall.
+//  - ROTC trailer tags (aftkit/waterjugs/stretcher): confirmed directly by
+//    Wyatt ("everything needed to run a full and proper AFT, water jugs and
+//    stretchers that can have weights put on them").
+// unverified:true tags are common ROTC PT-trailer gear by general knowledge
+// only (no public battalion inventory exists to check against) — included as
+// editable placeholders, flagged honestly rather than presented as confirmed.
+const EQUIP_TAGS = {
+  barbell:   {label:"Barbell + plates"},
+  dumbbells: {label:"Dumbbells"},
+  kettlebell:{label:"Kettlebell"},
+  machines:  {label:"Machines (cable / leg press / etc.)"},
+  pullupbar: {label:"Pull-up bar"},
+  dipbars:   {label:"Dip bars / parallettes"},
+  bands:     {label:"Resistance bands"},
+  treadmill: {label:"Treadmill"},
+  rower:     {label:"Rowing machine"},
+  bike:      {label:"Stationary bike"},
+  pool:      {label:"Pool"},
+  climbwall: {label:"Climbing / bouldering wall"},
+  aftkit:    {label:"Full AFT event kit (sled, plates, SDC lane gear)"},
+  waterjugs: {label:"Water jugs"},
+  stretcher: {label:"Weighted stretcher / litter"},
+  ruck:      {label:"Rucksack", unverified:true},
+  sandbag:   {label:"Sandbag", unverified:true},
+  tires:     {label:"Tires", unverified:true},
+  agility:   {label:"Agility ladder / cones", unverified:true},
+  battlerope:{label:"Battle ropes", unverified:true},
+};
 // Exercise library — type drives which inputs show: "reps"=sets×reps(±weight), "time"=duration, "dist"=distance+time
-// Each session has TWO variants that train the SAME muscle groups:
-//  bw  = no-equipment (floor + wall/doorway only)
-//  gym = equipment version (different movements, used when you have gym access)
-// A global toggle (S.hasGym) decides which one the log form and plan show.
+// Each session slot is a POOL of one-or-more tagged variants (eq:[EQUIP_TAGS
+// keys]) that all train the same muscle group in that slot — bodyweight
+// entries carry eq:[] (always available). Selection (see sessionExForProfile()
+// in training.js) filters each slot's pool to variants the active equipment
+// profile can support, then suggests one (stable per day) while surfacing the
+// rest so a disagreeing suggestion can be swapped for another eligible one —
+// the same mechanism doubles as equipment-fallback and as day-to-day variety.
 const SESSIONS = {
   s1:{name:"Session 1 · Lower + Push", areas:["legs","push","core"],
     bw:[
       {n:"5-min easy cardio warm-up (don't stretch cold)", t:"time"},
-      {n:"Reverse lunge (no support)", t:"reps"},
-      {n:"Single-leg glute bridge", t:"reps"},
-      {n:"Hand-release push-ups", t:"reps"},
-      {n:"Pike push-ups", t:"reps"},
-      {n:"Shrimp squat / split squat (floor)", t:"reps"},
-      {n:"Hollow-body hold", t:"time"},
-      {n:"Single-leg hip hinge (airplane)", t:"reps"},
+      {n:"Reverse lunge (no support)", t:"reps", m:["quads","glutes"]},
+      {n:"Single-leg glute bridge", t:"reps", m:["glutes","hamstrings"]},
+      {n:"Hand-release push-ups", t:"reps", m:["chest","triceps"]},
+      {n:"Pike push-ups", t:"reps", m:["shoulders","triceps"]},
+      {n:"Shrimp squat / split squat (floor)", t:"reps", m:["quads","glutes"]},
+      {n:"Hollow-body hold", t:"time", m:["core"]},
+      {n:"Single-leg hip hinge (airplane)", t:"reps", m:["hamstrings","glutes"]},
       {n:"Quad stretch (hold 30s ×2/side)", t:"time"},
       {n:"Standing hamstring stretch (hold 30s ×2/side)", t:"time"},
       {n:"Doorway chest/shoulder stretch (hold 30s ×2)", t:"time"},
     ],
     gym:[
       {n:"5-min easy cardio warm-up (don't stretch cold)", t:"time"},
-      {n:"Bulgarian split squat (bench)", t:"reps", w:true},
-      {n:"Single-leg RDL (dumbbells)", t:"reps", w:true},
-      {n:"Barbell / DB bench press", t:"reps", w:true},
-      {n:"Overhead press (barbell/DB)", t:"reps", w:true},
-      {n:"Leg press or goblet squat", t:"reps", w:true},
-      {n:"Cable / machine crunch", t:"reps", w:true},
-      {n:"Trap-bar / barbell deadlift", t:"reps", w:true},
+      {n:"Bulgarian split squat (bench)", t:"reps", w:true, eq:["dumbbells"], m:["quads","glutes"]},
+      {n:"Single-leg RDL (dumbbells)", t:"reps", w:true, eq:["dumbbells"], m:["hamstrings","glutes"]},
+      {n:"Barbell / DB bench press", t:"reps", w:true, eq:["barbell"], m:["chest","triceps"]},
+      {n:"Overhead press (barbell/DB)", t:"reps", w:true, eq:["barbell"], m:["shoulders","triceps"]},
+      {n:"Leg press or goblet squat", t:"reps", w:true, eq:["machines"], m:["quads","glutes"]},
+      {n:"Cable / machine crunch", t:"reps", w:true, eq:["machines"], m:["core"]},
+      {n:"Trap-bar / barbell deadlift", t:"reps", w:true, eq:["barbell"], m:["hamstrings","glutes","back"]},
       {n:"Quad stretch (hold 30s ×2/side)", t:"time"},
       {n:"Standing hamstring stretch (hold 30s ×2/side)", t:"time"},
       {n:"Doorway chest/shoulder stretch (hold 30s ×2)", t:"time"},
-    ]},
+    ],
+    alt:{5:[{n:"Kettlebell goblet squat", t:"reps", w:true, eq:["kettlebell"], m:["quads","glutes"]}]}},
   s2:{name:"Session 2 · Run", areas:["cardio","legs"], pickOne:true,
     bw:[
-      {n:"Intervals (sprint reps, any open ground)", t:"dist", out:true, indoor:{n:"Indoor intervals — 30s hard / 60s easy ×8, rotating burpees → high-knees → mountain-climbers → squat jumps", t:"time"}},
-      {n:"Tempo run", t:"dist", out:true, indoor:{n:"Indoor tempo — 20 min continuous, cycling jumping jacks → shadow boxing → step-ups → jog-in-place", t:"time"}},
-      {n:"Long easy run", t:"dist", out:true, indoor:{n:"Indoor steady cardio — 40 min easy, cycling march/jog-in-place → step-ups → jacks → shadow boxing (10 min each)", t:"time"}},
-      {n:"Timed 2-mile", t:"dist", out:true, indoor:{n:"Indoor cardio test — 20 min, max jog-in-place / burpee reps (log the count as your benchmark)", t:"reps"}},
+      {n:"Intervals (sprint reps, any open ground)", t:"dist", out:true, m:["cardio","legs"], indoor:{n:"Indoor intervals — 30s hard / 60s easy ×8, rotating burpees → high-knees → mountain-climbers → squat jumps", t:"time"}},
+      {n:"Tempo run", t:"dist", out:true, m:["cardio"], indoor:{n:"Indoor tempo — 20 min continuous, cycling jumping jacks → shadow boxing → step-ups → jog-in-place", t:"time"}},
+      {n:"Long easy run", t:"dist", out:true, m:["cardio"], indoor:{n:"Indoor steady cardio — 40 min easy, cycling march/jog-in-place → step-ups → jacks → shadow boxing (10 min each)", t:"time"}},
+      {n:"Timed 2-mile", t:"dist", out:true, m:["cardio"], indoor:{n:"Indoor cardio test — 20 min, max jog-in-place / burpee reps (log the count as your benchmark)", t:"reps"}},
     ],
     gym:[
-      {n:"Treadmill intervals (incline)", t:"dist", w:true},
-      {n:"Treadmill tempo run", t:"dist", w:true},
-      {n:"Rower or bike intervals", t:"time", w:true},
-      {n:"Timed 2-mile (treadmill)", t:"dist", w:true},
-    ]},
+      {n:"Treadmill intervals (incline)", t:"dist", w:true, eq:["treadmill"], m:["cardio","legs"]},
+      {n:"Treadmill tempo run", t:"dist", w:true, eq:["treadmill"], m:["cardio"]},
+      {n:"Rower intervals", t:"time", w:true, eq:["rower"], m:["cardio","back"]},
+      {n:"Timed 2-mile (treadmill)", t:"dist", w:true, eq:["treadmill"], m:["cardio"]},
+    ],
+    alt:{2:[{n:"Stationary bike intervals", t:"time", w:true, eq:["bike"], m:["cardio","legs"]}]}},
   s3:{name:"Session 3 · Upper + Core", areas:["pull","push","core"],
     bw:[
       {n:"5-min easy cardio warm-up (don't stretch cold)", t:"time"},
-      {n:"Doorway/towel rows (isometric pull)", t:"reps"},
-      {n:"Towel pull-aparts / prone Y-T-W raises (pull)", t:"reps"},
-      {n:"Decline push-ups (feet on floor ledge/step)", t:"reps"},
-      {n:"Plank", t:"time"},
-      {n:"Side plank", t:"time"},
-      {n:"Superman / back extension", t:"reps"},
-      {n:"Grip squeeze (grip trainer / towel)", t:"time"},
+      {n:"Doorway/towel rows (isometric pull)", t:"reps", m:["back","biceps"]},
+      {n:"Towel pull-aparts / prone Y-T-W raises (pull)", t:"reps", m:["upper back","rear delts"]},
+      {n:"Decline push-ups (feet on floor ledge/step)", t:"reps", m:["chest","shoulders"]},
+      {n:"Plank", t:"time", m:["core"]},
+      {n:"Side plank", t:"time", m:["obliques"]},
+      {n:"Superman / back extension", t:"reps", m:["lower back"]},
+      {n:"Grip squeeze (grip trainer / towel)", t:"time", m:["grip"]},
       {n:"Doorway chest/shoulder stretch (hold 30s ×2)", t:"time"},
       {n:"Thoracic rotations + cat-cow (slow reps)", t:"reps"},
       {n:"Figure-4 glute stretch (hold 30s ×2/side)", t:"time"},
     ],
     gym:[
       {n:"5-min easy cardio warm-up (don't stretch cold)", t:"time"},
-      {n:"Pull-ups / lat pulldown", t:"reps", w:true},
-      {n:"Seated cable / barbell row", t:"reps", w:true},
-      {n:"Incline DB press", t:"reps", w:true},
-      {n:"Cable face pulls", t:"reps", w:true},
-      {n:"Hanging knee raises", t:"reps"},
-      {n:"Back extension (machine/bench)", t:"reps", w:true},
-      {n:"Farmer's carry (dumbbells)", t:"dist", w:true},
+      {n:"Pull-ups", t:"reps", w:true, eq:["pullupbar"], m:["back","biceps"]},
+      {n:"Seated cable row", t:"reps", w:true, eq:["machines"], m:["back","biceps"]},
+      {n:"Incline DB press", t:"reps", w:true, eq:["dumbbells"], m:["chest","shoulders"]},
+      {n:"Cable face pulls", t:"reps", w:true, eq:["machines"], m:["rear delts","upper back"]},
+      {n:"Hanging knee raises", t:"reps", eq:["pullupbar"], m:["core"]},
+      {n:"Back extension (machine/bench)", t:"reps", w:true, eq:["machines"], m:["lower back"]},
+      {n:"Farmer's carry (dumbbells)", t:"dist", w:true, eq:["dumbbells"], m:["grip","core"]},
       {n:"Doorway chest/shoulder stretch (hold 30s ×2)", t:"time"},
       {n:"Thoracic rotations + cat-cow (slow reps)", t:"reps"},
       {n:"Figure-4 glute stretch (hold 30s ×2/side)", t:"time"},
-    ]},
+    ],
+    alt:{
+      1:[{n:"Lat pulldown (machine)", t:"reps", w:true, eq:["machines"], m:["back","biceps"]}],
+      2:[{n:"Barbell row", t:"reps", w:true, eq:["barbell"], m:["back","biceps"]}],
+      7:[
+        {n:"Water jug carry", t:"dist", w:true, eq:["waterjugs"], m:["grip","core"]},
+        {n:"Weighted stretcher carry (2-person)", t:"dist", w:true, eq:["stretcher"], m:["grip","core","shoulders"]},
+        {n:"Loaded ruck carry", t:"dist", w:true, eq:["ruck"], m:["grip","core"]},
+      ],
+    }},
   s4:{name:"Session 4 · AFT Circuit", areas:["legs","push","core","cardio"],
     bw:[
       {n:"5-min easy cardio warm-up (don't stretch cold)", t:"time"},
-      {n:"Shuttle sprints (SDC substitute)", t:"time", out:true, indoor:{n:"In-place shuttle — 5-yard touch-downs and lateral steps in a hallway (or burpee-to-sprint-step), 6 trips", t:"time"}},
-      {n:"Bear crawl (drag substitute)", t:"time"},
-      {n:"Hand-release push-ups", t:"reps"},
-      {n:"Squat jumps", t:"reps"},
-      {n:"Plank", t:"time"},
-      {n:"200m run", t:"time", out:true, indoor:{n:"45s hard cardio burst — pick one: mountain climbers, jog-in-place, or jacks", t:"time"}},
+      {n:"Shuttle sprints (SDC substitute)", t:"time", out:true, m:["cardio","legs"], indoor:{n:"In-place shuttle — 5-yard touch-downs and lateral steps in a hallway (or burpee-to-sprint-step), 6 trips", t:"time"}},
+      {n:"Bear crawl (drag substitute)", t:"time", m:["shoulders","core"]},
+      {n:"Hand-release push-ups", t:"reps", m:["chest","triceps"]},
+      {n:"Squat jumps", t:"reps", m:["quads","glutes"]},
+      {n:"Plank", t:"time", m:["core"]},
+      {n:"200m run", t:"time", out:true, m:["cardio"], indoor:{n:"45s hard cardio burst — pick one: mountain climbers, jog-in-place, or jacks", t:"time"}},
       {n:"Standing hamstring stretch (hold 30s ×2/side)", t:"time"},
       {n:"Calf stretch, straight + bent knee (hold 30s/side)", t:"time"},
       {n:"Doorway chest/shoulder stretch (hold 30s ×2)", t:"time"},
     ],
     gym:[
       {n:"5-min easy cardio warm-up (don't stretch cold)", t:"time"},
-      {n:"Sled push/pull or SDC sim", t:"time", w:true},
-      {n:"Loaded carry (kettlebells)", t:"dist", w:true},
-      {n:"Hand-release push-ups", t:"reps"},
-      {n:"Box jumps", t:"reps", w:true},
-      {n:"Plank", t:"time"},
-      {n:"Rower 200m sprint", t:"time", w:true},
+      {n:"Sled push/pull (SDC sim)", t:"time", w:true, eq:["aftkit"], m:["legs","cardio"]},
+      {n:"Loaded carry (kettlebells)", t:"dist", w:true, eq:["kettlebell"], m:["grip","core"]},
+      {n:"Hand-release push-ups", t:"reps", m:["chest","triceps"]},
+      {n:"Box jumps", t:"reps", m:["quads","glutes"]},
+      {n:"Plank", t:"time", m:["core"]},
+      {n:"Rower 200m sprint", t:"time", w:true, eq:["rower"], m:["cardio","back"]},
       {n:"Standing hamstring stretch (hold 30s ×2/side)", t:"time"},
       {n:"Calf stretch, straight + bent knee (hold 30s/side)", t:"time"},
       {n:"Doorway chest/shoulder stretch (hold 30s ×2)", t:"time"},
-    ]},
+    ],
+    alt:{
+      1:[
+        {n:"Weighted stretcher drag (SDC sim)", t:"time", w:true, eq:["stretcher"], m:["legs","cardio"]},
+        {n:"Tire flips", t:"time", w:true, eq:["tires"], m:["legs","cardio"]},
+      ],
+      2:[
+        {n:"Water jug carry", t:"dist", w:true, eq:["waterjugs"], m:["grip","core"]},
+        {n:"Sandbag carry", t:"dist", w:true, eq:["sandbag"], m:["grip","core"]},
+      ],
+      6:[{n:"Stationary bike 500m sprint", t:"time", w:true, eq:["bike"], m:["cardio"]}],
+    }},
   s5:{name:"Session 5 · Mobility + Balance", areas:["mobility","balance"],
     bw:[
       // --- Flexibility block (held static stretches, after a light warm-up) ---
@@ -257,12 +328,12 @@ const SESSIONS = {
       {n:"Doorway chest/shoulder stretch (hold 30s ×2)", t:"time"},
       {n:"Thoracic rotations + cat-cow (slow reps)", t:"reps"},
       // --- Balance block (progressive, near a wall to catch yourself) ---
-      {n:"Single-leg stand, eyes OPEN (hold 30–45s/leg)", t:"time"},
-      {n:"Single-leg stand, eyes CLOSED (hold 15–30s/leg)", t:"time"},
-      {n:"Single-leg stand on cushion/pillow (hold 20–30s/leg)", t:"time"},
-      {n:"Single-leg hinge reach (balance, reps/leg)", t:"reps"},
-      {n:"Tandem (heel-to-toe) walk, 10–20 steps", t:"reps"},
-      {n:"Y-balance reach: stand on one leg, reach foot front/side/back", t:"reps"},
+      {n:"Single-leg stand, eyes OPEN (hold 30–45s/leg)", t:"time", m:["balance"]},
+      {n:"Single-leg stand, eyes CLOSED (hold 15–30s/leg)", t:"time", m:["balance"]},
+      {n:"Single-leg stand on cushion/pillow (hold 20–30s/leg)", t:"time", m:["balance"]},
+      {n:"Single-leg hinge reach (balance, reps/leg)", t:"reps", m:["balance","hamstrings"]},
+      {n:"Tandem (heel-to-toe) walk, 10–20 steps", t:"reps", m:["balance"]},
+      {n:"Y-balance reach: stand on one leg, reach foot front/side/back", t:"reps", m:["balance"]},
     ],
     gym:[
       // mobility/balance is the same either way; gym just adds a couple of tools
@@ -273,18 +344,35 @@ const SESSIONS = {
       {n:"Figure-4 glute stretch (hold 30s ×2/side)", t:"time"},
       {n:"Quad stretch (hold 30s ×2/side)", t:"time"},
       {n:"Calf stretch on a step (straight + bent knee)", t:"time"},
-      {n:"Band shoulder dislocates / chest opener", t:"reps", w:true},
+      {n:"Band shoulder dislocates / chest opener", t:"reps", w:true, eq:["bands"]},
       {n:"Foam-roll back + thoracic rotations", t:"reps"},
-      {n:"Single-leg stand, eyes OPEN (hold 30–45s/leg)", t:"time"},
-      {n:"Single-leg stand, eyes CLOSED (hold 15–30s/leg)", t:"time"},
-      {n:"Single-leg stand on a balance pad/BOSU", t:"time", w:true},
-      {n:"Single-leg RDL reach (light DB)", t:"reps", w:true},
-      {n:"Tandem (heel-to-toe) walk, 10–20 steps", t:"reps"},
-      {n:"Y-balance reach: stand on one leg, reach foot front/side/back", t:"reps"},
+      {n:"Single-leg stand, eyes OPEN (hold 30–45s/leg)", t:"time", m:["balance"]},
+      {n:"Single-leg stand, eyes CLOSED (hold 15–30s/leg)", t:"time", m:["balance"]},
+      {n:"Single-leg stand on a balance pad/BOSU", t:"time", w:true, eq:["machines"], m:["balance"]},
+      {n:"Single-leg RDL reach (light DB)", t:"reps", w:true, eq:["dumbbells"], m:["balance","hamstrings"]},
+      {n:"Tandem (heel-to-toe) walk, 10–20 steps", t:"reps", m:["balance"]},
+      {n:"Y-balance reach: stand on one leg, reach foot front/side/back", t:"reps", m:["balance"]},
     ]},
   other:{name:"Other / Custom", areas:[],
     bw:[{n:"Custom exercise", t:"reps", w:true, custom:true}],
     gym:[{n:"Custom exercise", t:"reps", w:true, custom:true}]},
+  // Optional session types (FM-2): the weekly scheduler never auto-assigns
+  // these — they only appear as a coach suggestion on a day whose active
+  // equipment profile carries the matching tag, and only once opted in via
+  // S.optionalSessions. Single-tier pool (no bw/gym split — access is binary:
+  // you either have the pool/wall that day, or the session isn't offered).
+  swim:{name:"Swim (optional)", areas:["cardio"], optional:true, eq:["pool"],
+    bw:[
+      {n:"Easy continuous swim, 20–30 min", t:"time", m:["cardio","full-body"]},
+      {n:"Swim intervals — 50m hard / 30s rest ×8–10", t:"time", m:["cardio","full-body"]},
+      {n:"Kickboard + pull-buoy technique set, 20 min", t:"time", m:["legs","back"]},
+    ]},
+  climb:{name:"Rock Climbing (optional)", areas:["pull","core","legs"], optional:true, eq:["climbwall"],
+    bw:[
+      {n:"Bouldering — top-out problems, moderate grade, 45–60 min", t:"time", m:["back","forearms","core"]},
+      {n:"Top-rope climbing, 45–60 min", t:"time", m:["back","forearms","legs"]},
+      {n:"Traverse laps for grip/pull endurance, 30–40 min", t:"time", m:["forearms","back"]},
+    ]},
 };
 // resolve a session's exercise list for the current equipment mode
 // Weather conditions. "outdoorBad" = conditions where you'd skip outdoor work.
