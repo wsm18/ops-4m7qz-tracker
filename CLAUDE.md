@@ -165,6 +165,7 @@ The user's saves are often many versions old. `mergeNewSeedSkills()` (in `src/co
 - Don't reformat or churn unrelated code. Small, surgical diffs.
 - Never commit `dist/`, `node_modules/`, or scratch `_*` files (they're git-ignored).
 - `index.html` is assembled output — commit it after building so users can install directly from the repo.
+- **Any subjective self-rating input (effort, difficulty, intensity, readiness, mood, or similar) uses a 1-10 scale** — never a coarse 3-way bucket or emoji tap. Standing rule from v182-v184. Doesn't apply to objective categorical choices (award/task-difficulty-tier pickers, etc.) or inputs that feed a specific algorithm expecting discrete grades (e.g. SRS/Anki-style spaced-repetition grading) — those stay as designed.
 
 When in doubt about scope or a design decision, ask the user — he iterates deliberately and cares about getting names and progressions right.
 

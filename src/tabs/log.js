@@ -1,4 +1,5 @@
 let LG=null; // current draft {session, exercises:[{name,type,w,sets:[...]}]}
+let _ptIntensity=6; // PT session "how hard" — 1-10, separate one-shot form from LG
 function initLogTab(){
   const sel=document.getElementById("lgSession");
   if(!sel) return;
@@ -7,17 +8,24 @@ function initLogTab(){
     sel.onchange=()=>buildLogForm(sel.value);
   }
   if(!LG) buildLogForm(sel.value);
+  renderPtIntensityBtns();
 }
 function buildLogForm(skey){
   const s=SESSIONS[skey];
-  LG={session:skey, readiness:null, exercises:sessionEx(skey).map(e=>({name:e.n,type:e.t,w:!!e.w,custom:!!e.custom,sets:[blankSet(e.t)],effort:null,reduced:false}))};
+  LG={session:skey, readiness:null, rpe:null, exercises:sessionEx(skey).map(e=>({name:e.n,type:e.t,w:!!e.w,custom:!!e.custom,sets:[blankSet(e.t)],effort:null,reduced:false}))};
   renderLogForm();
   renderReadinessBtns();
+  renderRpeBtns();
 }
-function renderReadinessBtns(){
-  const el=document.getElementById("lgReadinessBtns"); if(!el||!LG) return;
-  el.querySelectorAll("[data-readiness]").forEach(b=>b.classList.toggle("on", +b.dataset.readiness===LG.readiness));
+// Shared renderer for any 1-10 rating button group: matches buttons by their
+// data-attribute value against a current value, toggling the "on" class.
+function renderRatingBtns(containerId, attr, value){
+  const el=document.getElementById(containerId); if(!el) return;
+  el.querySelectorAll(`[data-${attr}]`).forEach(b=>b.classList.toggle("on", +b.dataset[attr]===value));
 }
+function renderReadinessBtns(){ if(LG) renderRatingBtns("lgReadinessBtns","readiness",LG.readiness); }
+function renderRpeBtns(){ if(LG) renderRatingBtns("lgRpeBtns","rpe",LG.rpe); }
+function renderPtIntensityBtns(){ renderRatingBtns("ptIntensityBtns","ptintensity",_ptIntensity); }
 function blankSet(type){
   if(type==="reps") return {reps:"",weight:""};
   if(type==="time") return {time:""};
@@ -81,6 +89,10 @@ document.addEventListener("click",e=>{
   if(eff!=null && LG){ const[xi,val]=eff.split("."); const ex=LG.exercises[xi]; const n=+val; ex.effort=(ex.effort===n)?null:n; renderLogForm(); return; }
   const readiness=e.target.dataset.readiness;
   if(readiness!=null && LG){ const n=+readiness; LG.readiness=(LG.readiness===n)?null:n; renderReadinessBtns(); return; }
+  const rpe=e.target.dataset.rpe;
+  if(rpe!=null && LG){ const n=+rpe; LG.rpe=(LG.rpe===n)?null:n; renderRpeBtns(); return; }
+  const ptI=e.target.dataset.ptintensity;
+  if(ptI!=null){ _ptIntensity=+ptI; renderPtIntensityBtns(); return; }
 });
 function setHasData(ex,st){
   if(ex.type==="reps") return st.reps!=="";
@@ -91,7 +103,7 @@ function setHasData(ex,st){
 document.getElementById("lgSave").onclick=()=>{
   if(!LG) return;
   const dur=parseInt(document.getElementById("lgDur").value)||null;
-  const rpe=parseInt(document.getElementById("lgRpe").value)||null;
+  const rpe=LG.rpe||null;
   // keep only exercises with at least one filled set
   const exercises=LG.exercises.map(ex=>({
     name:ex.name, type:ex.type, w:ex.w,
@@ -108,7 +120,6 @@ document.getElementById("lgSave").onclick=()=>{
   S.pathXP.physical=(S.pathXP.physical||0)+25; S.gold+=8; S.totalDone++;
   save();
   document.getElementById("lgDur").value="";
-  document.getElementById("lgRpe").value="";
   document.getElementById("lgNote").value="";
   buildLogForm(document.getElementById("lgSession").value);
   render();
@@ -149,7 +160,8 @@ function renderPT(){
   const list=S.ptLog.filter(p=>p.ts>=days7).sort((a,b)=>b.ts-a.ts);
   recent.innerHTML=list.length?`<div class="sec-h" style="margin-top:16px"><h2>PT this week</h2></div>`+list.map(p=>{
     const what = p.text ? esc(p.text) : (p.areas||[]).map(k=>(PT_AREAS.find(x=>x.k===k)||{}).label||k).map(s=>s.split(' ')[0]).join(', ');
-    return `<div class="pt-recent-row"><span>${p.date} · <span class="areas">${what}</span> · ${p.intensity}</span><button class="del" data-dpt="${p.id}">✕</button></div>`;
+    const intensityLabel = typeof p.intensity==="number" ? `${p.intensity}/10` : p.intensity;
+    return `<div class="pt-recent-row"><span>${p.date} · <span class="areas">${what}</span> · ${esc(String(intensityLabel))}</span><button class="del" data-dpt="${p.id}">✕</button></div>`;
   }).join(""):"";
 }
 // live-parse the text box, update detected areas + preview, re-render chips
@@ -165,15 +177,24 @@ function ptOnText(){
   } else { det.innerHTML=""; }
   renderPT();
 }
+// Intensity weight for the recovery-load decay math below. Handles both the
+// current 1-10 scale (mapped onto the same 0-3 range the old light/moderate/
+// hard weights used, so the fatigued/sore thresholds in plan.js's
+// renderRecoveryAdvisory — calibrated against that range — stay meaningful)
+// and legacy string values from before this was a numeric scale.
+function ptIntensityWeight(p){
+  if(typeof p.intensity==="number") return (p.intensity/10)*3;
+  return {light:1,moderate:2,hard:3}[p.intensity] || 2;
+}
 // recovery load per area over the last N days, intensity-weighted & decaying
 function recoveryLoad(){
-  const now=Date.now(), W={light:1,moderate:2,hard:3};
+  const now=Date.now();
   const load={legs:0,push:0,pull:0,core:0,cardio:0};
   S.ptLog.forEach(p=>{
     const ageDays=(now-p.ts)/864e5;
     if(ageDays>4) return;
     const decay=Math.max(0,1-ageDays/4);
-    (p.areas||[]).forEach(k=>{ if(load[k]!=null) load[k]+=(W[p.intensity]||2)*decay; });
+    (p.areas||[]).forEach(k=>{ if(load[k]!=null) load[k]+=ptIntensityWeight(p)*decay; });
   });
   return load;
 }
@@ -181,7 +202,7 @@ function savePT(){
   const eff=ptEffectiveAreas();
   const text=document.getElementById("ptText").value.trim();
   if(eff.size===0){toast("Type what PT did, or tap at least one area");return;}
-  const intensity=document.getElementById("ptIntensity").value;
+  const intensity=_ptIntensity;
   S.ptLog.push({id:id(),ts:Date.now(),date:new Date().toLocaleDateString(),areas:[...eff],intensity,text:text||null});
   _ptSel=new Set(); _ptTextAreas=new Set();
   document.getElementById("ptText").value="";

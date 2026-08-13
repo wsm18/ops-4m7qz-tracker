@@ -1530,3 +1530,20 @@ Direct follow-up to v182: Wyatt asked to make the pre-session readiness check-in
 SW bumped to `operations-v183`. `SKILL_LADDER_VER` unchanged at **117**. `npm run build` → OK, `npm run check` → SYNTAX OK, `npm run regress` → `PAGEERRORS 0`, `total:12524`, `badCount:0`. `npm run package` → produced `dist/operations.zip`.
 
 **Next:** X-Insight or T — same as noted above, unchanged by this quick interrupt.
+
+### v184 — Standing rule applied: every subjective self-rating scale is 1-10
+
+**Files changed:** `src/tabs/log.js`, `src/tabs/log.html`, `sw.js`.
+
+Wyatt generalized v182/v183 into a standing instruction: *"for any effort level or self rating thing or anything else similar to this please have it use a 1-10 scale."* Rather than guess at scope, dispatched an Explore agent to audit every rating-shaped input (`<select>` dropdowns and emoji-tap button groups) across all of `src/`. Found exactly two more genuine matches, and confirmed everything else deliberately stays as-is:
+
+- **Converted:** `#ptIntensity` (Log tab's cadre-PT "how hard," was Light/Moderate/Hard) and `#lgRpe` (workout session RPE, was a `<select>` oddly capped to values 6-10 only — missing 1 through 5 entirely, so not even honestly "1-10" before). Both now use the same 10-numbered-button pattern as the effort/readiness scales from v182/v183.
+- **Confirmed out of scope, with reasoning (not touched):** task-difficulty pickers (`#qaDiff`/`#qDiff`/`#dtDiff`) set fixed XP/reward tiers when *creating* a task — an objective reward-tier choice, not a self-rating of state; award/membership/qualification category pickers are objective classification; the ILR language-proficiency field is already a standardized fine-grained government scale, not an ad hoc 1-3; and SRS/flashcard grading (Again/Hard/Good/Easy) feeds a real SM-2 spaced-repetition algorithm where the four discrete grades map to specific ease/interval-adjustment formulas — forcing that to 1-10 would break the scheduling math, not just relabel it.
+
+**A real calculation dependency caught before shipping:** `recoveryLoad()` (feeds `plan.js`'s PT-fatigue-aware session-easing) used `{light:1,moderate:2,hard:3}` as a decay weight per logged PT session. Converting the input to a raw 1-10 number without adjusting this would have silently thrown off `renderRecoveryAdvisory()`'s fatigued/sore thresholds, which are calibrated against that old 0-3 magnitude — so the new `ptIntensityWeight()` scales `(intensity/10)*3` to land in the same effective range, with a fallback for any legacy string-valued `S.ptLog` entries already on disk from before this change.
+
+Verified via direct function calls (`recoveryLoad()`'s output confirmed at the expected ~2.7 weight for a rated-9 session, matching a pre-v184 "hard"-rated session's ~3 weight) and real UI interaction (PT intensity default-highlight and click-to-set; RPE's full 10-button render, click, and a saved-workout round-trip confirming the numeric value persists).
+
+SW bumped to `operations-v184`. `SKILL_LADDER_VER` unchanged at **117**. `npm run build` → OK, `npm run check` → SYNTAX OK, `npm run regress` → `PAGEERRORS 0`, `total:12524`, `badCount:0`. `npm run package` → produced `dist/operations.zip`.
+
+**Next:** X-Insight or T — unchanged by this interrupt. The "every self-rating is 1-10" rule is now a standing convention for any future rating input added to the app.

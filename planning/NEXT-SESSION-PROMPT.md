@@ -9,7 +9,7 @@ You are continuing work on **Operations**, a gamified ROTC life-tracker PWA buil
 3. `planning/IDEAS-tests-fm-workouts.md` — **the active workstream as of v181**, confirmed build order at the bottom. Read the "Decisions needed"/"Recommended build order" sections before picking the next phase.
 4. `planning/IDEAS-gui-revamp.md` — the GUI revamp is not the active workstream right now (see below) but isn't fully closed out either.
 
-**Current version: v183.** The service worker is at `operations-v183` in `sw.js`. `SKILL_LADDER_VER` is **117** (unchanged since v155). Total skills: **12524**. (v182/v183 were quick interrupts — FM-Adapt's per-exercise effort rating and the pre-session readiness check-in both changed from 3-way taps to real 1-10 scales; see their `FINISHED-FEATURES.md` entries.)
+**Current version: v184.** The service worker is at `operations-v184` in `sw.js`. `SKILL_LADDER_VER` is **117** (unchanged since v155). Total skills: **12524**. (v182-v184 were quick interrupts, not FM-doc phases — every subjective self-rating input in the app (effort, readiness, PT intensity, session RPE) now uses a 1-10 scale; this is now a **standing convention in `CLAUDE.md`** for any future rating input. See the v182/v183/v184 entries in `FINISHED-FEATURES.md`.)
 
 **v180 was an unplanned, mid-workstream correctness fix** (real dynamic warm-up / static cool-down stretches, muscle-matched per session, sourced from a new `STRETCH_LIBRARY` — see its `FINISHED-FEATURES.md` entry) — not part of the FM-doc build order.
 
