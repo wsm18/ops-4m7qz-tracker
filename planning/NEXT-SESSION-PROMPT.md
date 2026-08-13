@@ -6,10 +6,12 @@ You are continuing work on **Operations**, a gamified ROTC life-tracker PWA buil
 
 1. `CLAUDE.md` — the binding rulebook (hard rules, workflow, file layout)
 2. `planning/FINISHED-FEATURES.md` — design language, color palette, completed features, project identity. **Read v168–v174 in full before touching the GUI revamp again** — that whole span is one continuous, easy-to-lose-track-of workstream (see "GUI revamp" section below for why this note exists).
-3. `planning/IDEAS-tests-fm-workouts.md` — **the active workstream as of v179**, fully designed except the newly-added FM-Adapt phase (see below), confirmed build order at the bottom. Read the "Decisions needed"/"Recommended build order" sections before picking the next phase.
+3. `planning/IDEAS-tests-fm-workouts.md` — **the active workstream as of v180**, fully designed except the newly-added FM-Adapt phase (see below), confirmed build order at the bottom. Read the "Decisions needed"/"Recommended build order" sections before picking the next phase.
 4. `planning/IDEAS-gui-revamp.md` — the GUI revamp is not the active workstream right now (see below) but isn't fully closed out either.
 
-**Current version: v179.** The service worker is at `operations-v179` in `sw.js`. `SKILL_LADDER_VER` is **117** (unchanged since v155). Total skills: **12524**.
+**Current version: v180.** The service worker is at `operations-v180` in `sw.js`. `SKILL_LADDER_VER` is **117** (unchanged since v155). Total skills: **12524**.
+
+**v180 was an unplanned, mid-workstream correctness fix** (real dynamic warm-up / static cool-down stretches, muscle-matched per session, sourced from a new `STRETCH_LIBRARY` — see its `FINISHED-FEATURES.md` entry) — not part of the FM-doc build order. It doesn't change what's next; FM-Adapt/X-Insight are still the next phases whenever asked for.
 
 ---
 
@@ -118,6 +120,7 @@ npm run package               # produces dist/operations.zip
 - `skReadyToCombine()` → **new in v172**, in `skills-core.js` — every synthesis-target seed whose set is fully mastered but not yet combined; backs the Focus strip's "Ready to combine" column.
 - `PATH_META` — path metadata (name, icon, color, world, lore), in `constants.js`.
 - `SK_PATH_ICON` — path → emoji map, in `tree.js`.
+- `STRETCH_LIBRARY`/`AREA_MUSCLES` — **new in v180**, in `constants.js` — the tagged dynamic-warmup/static-cooldown pool every session's warm-up/cool-down (and Session 5's flexibility block) is composed from; see `warmupStretchesFor()`/`cooldownStretchesFor()`/`sessionExForProfile()` in `training.js`.
 - All CSS in `src/styles/main.css` — no per-tab CSS files.
 - Regression covers 18 tabs (see `scripts/regress.js`).
 - No network calls, no CDN fonts, no telemetry — ever.

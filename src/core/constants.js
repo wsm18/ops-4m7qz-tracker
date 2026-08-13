@@ -192,6 +192,61 @@ const EQUIP_TAGS = {
   agility:   {label:"Agility ladder / cones", unverified:true},
   battlerope:{label:"Battle ropes", unverified:true},
 };
+// ── Stretch library (true warm-up vs. cool-down, not a relabeled duplicate) ──
+// Real exercise-science distinction the app already states elsewhere ("never
+// static-stretch cold muscles"): a warm-up should be a brief temperature-raise
+// plus DYNAMIC, moving mobilization of the muscles about to be worked — never
+// held static stretches, which measurably reduce power output when done cold
+// and don't actually prepare a muscle to contract hard. A cool-down is where
+// held STATIC stretches belong — muscles are warm, and holding them there is
+// what actually helps recovery/soreness/range of motion. Every session's
+// warm-up and cool-down are composed from this one tagged library (see
+// warmupStretchesFor()/cooldownStretchesFor() in training.js), matched to
+// that session's `areas`, instead of hand-duplicating the same few stretches
+// into every session's own list — the same entries also back Session 5's
+// flexibility block, so "cool-down stretch" and "flexibility work" are
+// literally the same tagged pool, not two maintained separately.
+const AREA_MUSCLES = {
+  legs:["quads","hamstrings","glutes","calves","hips"],
+  push:["chest","shoulders","triceps"],
+  pull:["back","lats","biceps","rear delts"],
+  core:["core","obliques","lower back"],
+  cardio:["hips","calves","hamstrings"],
+  mobility:["hips","shoulders","core","lower back","quads","hamstrings"],
+  balance:["hips","calves"],
+};
+const STRETCH_LIBRARY=[
+  // --- dynamic (warm-up — moving, never held) ---
+  {n:"Leg swings, front-to-back (10/leg)", kind:"dynamic", t:"reps", m:["hamstrings","quads","hips"]},
+  {n:"Leg swings, side-to-side (10/leg)", kind:"dynamic", t:"reps", m:["hips","glutes"]},
+  {n:"Walking lunges with a torso twist (8/leg)", kind:"dynamic", t:"reps", m:["quads","glutes","core"]},
+  {n:"Bodyweight squats, slow and controlled (10)", kind:"dynamic", t:"reps", m:["quads","glutes"]},
+  {n:"Arm circles, small to large (10 each direction)", kind:"dynamic", t:"reps", m:["shoulders"]},
+  {n:"Arm swings across the chest (10)", kind:"dynamic", t:"reps", m:["chest","back","rear delts"]},
+  {n:"Cat-cow flow (8 reps)", kind:"dynamic", t:"reps", m:["core","lower back"]},
+  {n:"Standing torso twists (10/side)", kind:"dynamic", t:"reps", m:["core","obliques"]},
+  {n:"High knees in place (20s)", kind:"dynamic", t:"time", m:["hips","hamstrings"]},
+  {n:"Butt kicks in place (20s)", kind:"dynamic", t:"time", m:["hamstrings"]},
+  {n:"Inchworm to push-up (5 reps)", kind:"dynamic", t:"reps", m:["hamstrings","shoulders","core"]},
+  {n:"Hip circles, standing (8/direction/side)", kind:"dynamic", t:"reps", m:["hips","glutes"]},
+  {n:"Ankle circles + calf raises (10 each)", kind:"dynamic", t:"reps", m:["calves"]},
+  {n:"World's-greatest-stretch (each side)", kind:"dynamic", t:"reps", m:["hips","hamstrings","core","shoulders"]},
+  {n:"Band shoulder dislocates / chest opener", kind:"dynamic", t:"reps", eq:["bands"], m:["shoulders","chest"]},
+  {n:"Foam-roll the muscles you're about to work", kind:"dynamic", t:"reps", m:["lower back","quads","hamstrings","glutes","calves"]},
+  // --- static (cool-down / flexibility — held, muscles warm) ---
+  {n:"Standing quad stretch (hold 30s ×2/side)", kind:"static", t:"time", m:["quads"]},
+  {n:"Standing hamstring stretch (hold 30s ×2/side)", kind:"static", t:"time", m:["hamstrings"]},
+  {n:"Kneeling hip-flexor stretch (hold 30s ×2/side)", kind:"static", t:"time", m:["hips"]},
+  {n:"Figure-4 glute stretch (hold 30s ×2/side)", kind:"static", t:"time", m:["glutes"]},
+  {n:"Calf stretch, straight + bent knee (hold 30s/side)", kind:"static", t:"time", m:["calves"]},
+  {n:"Doorway chest/shoulder stretch (hold 30s ×2)", kind:"static", t:"time", m:["chest","shoulders"]},
+  {n:"Cross-body shoulder stretch (hold 30s ×2/side)", kind:"static", t:"time", m:["shoulders","rear delts"]},
+  {n:"Overhead lat stretch, reach and lean to the side (hold 30s ×2/side)", kind:"static", t:"time", m:["back","lats"]},
+  {n:"Overhead triceps stretch (hold 30s ×2/side)", kind:"static", t:"time", m:["triceps"]},
+  {n:"Child's pose (hold 45s)", kind:"static", t:"time", m:["lower back","hips"]},
+  {n:"Seated spinal twist (hold 30s ×2/side)", kind:"static", t:"time", m:["core","obliques","lower back"]},
+  {n:"Wrist/forearm stretch (hold 20s ×2/side)", kind:"static", t:"time", m:["grip","forearms"]},
+];
 // Exercise library — type drives which inputs show: "reps"=sets×reps(±weight), "time"=duration, "dist"=distance+time
 // Each session slot is a POOL of one-or-more tagged variants (eq:[EQUIP_TAGS
 // keys]) that all train the same muscle group in that slot — bodyweight
@@ -200,10 +255,12 @@ const EQUIP_TAGS = {
 // profile can support, then suggests one (stable per day) while surfacing the
 // rest so a disagreeing suggestion can be swapped for another eligible one —
 // the same mechanism doubles as equipment-fallback and as day-to-day variety.
+// Warm-up/cool-down stretches are NOT listed per session below — they're
+// composed fresh from STRETCH_LIBRARY, matched to `areas`, by
+// warmupStretchesFor()/cooldownStretchesFor() in training.js.
 const SESSIONS = {
   s1:{name:"Session 1 · Lower + Push", areas:["legs","push","core"],
     bw:[
-      {n:"5-min easy cardio warm-up (don't stretch cold)", t:"time"},
       {n:"Reverse lunge (no support)", t:"reps", m:["quads","glutes"]},
       {n:"Single-leg glute bridge", t:"reps", m:["glutes","hamstrings"]},
       {n:"Hand-release push-ups", t:"reps", m:["chest","triceps"]},
@@ -211,12 +268,8 @@ const SESSIONS = {
       {n:"Shrimp squat / split squat (floor)", t:"reps", m:["quads","glutes"]},
       {n:"Hollow-body hold", t:"time", m:["core"]},
       {n:"Single-leg hip hinge (airplane)", t:"reps", m:["hamstrings","glutes"]},
-      {n:"Quad stretch (hold 30s ×2/side)", t:"time"},
-      {n:"Standing hamstring stretch (hold 30s ×2/side)", t:"time"},
-      {n:"Doorway chest/shoulder stretch (hold 30s ×2)", t:"time"},
     ],
     gym:[
-      {n:"5-min easy cardio warm-up (don't stretch cold)", t:"time"},
       {n:"Bulgarian split squat (bench)", t:"reps", w:true, eq:["dumbbells"], m:["quads","glutes"]},
       {n:"Single-leg RDL (dumbbells)", t:"reps", w:true, eq:["dumbbells"], m:["hamstrings","glutes"]},
       {n:"Barbell / DB bench press", t:"reps", w:true, eq:["barbell"], m:["chest","triceps"]},
@@ -224,11 +277,8 @@ const SESSIONS = {
       {n:"Leg press or goblet squat", t:"reps", w:true, eq:["machines"], m:["quads","glutes"]},
       {n:"Cable / machine crunch", t:"reps", w:true, eq:["machines"], m:["core"]},
       {n:"Trap-bar / barbell deadlift", t:"reps", w:true, eq:["barbell"], m:["hamstrings","glutes","back"]},
-      {n:"Quad stretch (hold 30s ×2/side)", t:"time"},
-      {n:"Standing hamstring stretch (hold 30s ×2/side)", t:"time"},
-      {n:"Doorway chest/shoulder stretch (hold 30s ×2)", t:"time"},
     ],
-    alt:{5:[{n:"Kettlebell goblet squat", t:"reps", w:true, eq:["kettlebell"], m:["quads","glutes"]}]}},
+    alt:{4:[{n:"Kettlebell goblet squat", t:"reps", w:true, eq:["kettlebell"], m:["quads","glutes"]}]}},
   s2:{name:"Session 2 · Run", areas:["cardio","legs"], pickOne:true,
     bw:[
       {n:"Intervals (sprint reps, any open ground)", t:"dist", out:true, m:["cardio","legs"], indoor:{n:"Indoor intervals — 30s hard / 60s easy ×8, rotating burpees → high-knees → mountain-climbers → squat jumps", t:"time"}},
@@ -245,7 +295,6 @@ const SESSIONS = {
     alt:{2:[{n:"Stationary bike intervals", t:"time", w:true, eq:["bike"], m:["cardio","legs"]}]}},
   s3:{name:"Session 3 · Upper + Core", areas:["pull","push","core"],
     bw:[
-      {n:"5-min easy cardio warm-up (don't stretch cold)", t:"time"},
       {n:"Doorway/towel rows (isometric pull)", t:"reps", m:["back","biceps"]},
       {n:"Towel pull-aparts / prone Y-T-W raises (pull)", t:"reps", m:["upper back","rear delts"]},
       {n:"Decline push-ups (feet on floor ledge/step)", t:"reps", m:["chest","shoulders"]},
@@ -253,12 +302,8 @@ const SESSIONS = {
       {n:"Side plank", t:"time", m:["obliques"]},
       {n:"Superman / back extension", t:"reps", m:["lower back"]},
       {n:"Grip squeeze (grip trainer / towel)", t:"time", m:["grip"]},
-      {n:"Doorway chest/shoulder stretch (hold 30s ×2)", t:"time"},
-      {n:"Thoracic rotations + cat-cow (slow reps)", t:"reps"},
-      {n:"Figure-4 glute stretch (hold 30s ×2/side)", t:"time"},
     ],
     gym:[
-      {n:"5-min easy cardio warm-up (don't stretch cold)", t:"time"},
       {n:"Pull-ups", t:"reps", w:true, eq:["pullupbar"], m:["back","biceps"]},
       {n:"Seated cable row", t:"reps", w:true, eq:["machines"], m:["back","biceps"]},
       {n:"Incline DB press", t:"reps", w:true, eq:["dumbbells"], m:["chest","shoulders"]},
@@ -266,14 +311,11 @@ const SESSIONS = {
       {n:"Hanging knee raises", t:"reps", eq:["pullupbar"], m:["core"]},
       {n:"Back extension (machine/bench)", t:"reps", w:true, eq:["machines"], m:["lower back"]},
       {n:"Farmer's carry (dumbbells)", t:"dist", w:true, eq:["dumbbells"], m:["grip","core"]},
-      {n:"Doorway chest/shoulder stretch (hold 30s ×2)", t:"time"},
-      {n:"Thoracic rotations + cat-cow (slow reps)", t:"reps"},
-      {n:"Figure-4 glute stretch (hold 30s ×2/side)", t:"time"},
     ],
     alt:{
-      1:[{n:"Lat pulldown (machine)", t:"reps", w:true, eq:["machines"], m:["back","biceps"]}],
-      2:[{n:"Barbell row", t:"reps", w:true, eq:["barbell"], m:["back","biceps"]}],
-      7:[
+      0:[{n:"Lat pulldown (machine)", t:"reps", w:true, eq:["machines"], m:["back","biceps"]}],
+      1:[{n:"Barbell row", t:"reps", w:true, eq:["barbell"], m:["back","biceps"]}],
+      6:[
         {n:"Water jug carry", t:"dist", w:true, eq:["waterjugs"], m:["grip","core"]},
         {n:"Weighted stretcher carry (2-person)", t:"dist", w:true, eq:["stretcher"], m:["grip","core","shoulders"]},
         {n:"Loaded ruck carry", t:"dist", w:true, eq:["ruck"], m:["grip","core"]},
@@ -281,52 +323,39 @@ const SESSIONS = {
     }},
   s4:{name:"Session 4 · AFT Circuit", areas:["legs","push","core","cardio"],
     bw:[
-      {n:"5-min easy cardio warm-up (don't stretch cold)", t:"time"},
       {n:"Shuttle sprints (SDC substitute)", t:"time", out:true, m:["cardio","legs"], indoor:{n:"In-place shuttle — 5-yard touch-downs and lateral steps in a hallway (or burpee-to-sprint-step), 6 trips", t:"time"}},
       {n:"Bear crawl (drag substitute)", t:"time", m:["shoulders","core"]},
       {n:"Hand-release push-ups", t:"reps", m:["chest","triceps"]},
       {n:"Squat jumps", t:"reps", m:["quads","glutes"]},
       {n:"Plank", t:"time", m:["core"]},
       {n:"200m run", t:"time", out:true, m:["cardio"], indoor:{n:"45s hard cardio burst — pick one: mountain climbers, jog-in-place, or jacks", t:"time"}},
-      {n:"Standing hamstring stretch (hold 30s ×2/side)", t:"time"},
-      {n:"Calf stretch, straight + bent knee (hold 30s/side)", t:"time"},
-      {n:"Doorway chest/shoulder stretch (hold 30s ×2)", t:"time"},
     ],
     gym:[
-      {n:"5-min easy cardio warm-up (don't stretch cold)", t:"time"},
       {n:"Sled push/pull (SDC sim)", t:"time", w:true, eq:["aftkit"], m:["legs","cardio"]},
       {n:"Loaded carry (kettlebells)", t:"dist", w:true, eq:["kettlebell"], m:["grip","core"]},
       {n:"Hand-release push-ups", t:"reps", m:["chest","triceps"]},
       {n:"Box jumps", t:"reps", m:["quads","glutes"]},
       {n:"Plank", t:"time", m:["core"]},
       {n:"Rower 200m sprint", t:"time", w:true, eq:["rower"], m:["cardio","back"]},
-      {n:"Standing hamstring stretch (hold 30s ×2/side)", t:"time"},
-      {n:"Calf stretch, straight + bent knee (hold 30s/side)", t:"time"},
-      {n:"Doorway chest/shoulder stretch (hold 30s ×2)", t:"time"},
     ],
     alt:{
-      1:[
+      0:[
         {n:"Weighted stretcher drag (SDC sim)", t:"time", w:true, eq:["stretcher"], m:["legs","cardio"]},
         {n:"Tire flips", t:"time", w:true, eq:["tires"], m:["legs","cardio"]},
       ],
-      2:[
+      1:[
         {n:"Water jug carry", t:"dist", w:true, eq:["waterjugs"], m:["grip","core"]},
         {n:"Sandbag carry", t:"dist", w:true, eq:["sandbag"], m:["grip","core"]},
       ],
-      6:[{n:"Stationary bike 500m sprint", t:"time", w:true, eq:["bike"], m:["cardio"]}],
+      5:[{n:"Stationary bike 500m sprint", t:"time", w:true, eq:["bike"], m:["cardio"]}],
     }},
-  s5:{name:"Session 5 · Mobility + Balance", areas:["mobility","balance"],
+  // Flexibility block is intentionally NOT listed here — flexFromLibrary tells
+  // sessionExForProfile() to compose it fresh from the full STRETCH_LIBRARY
+  // (every static entry the active equipment profile supports), so this
+  // session's flexibility work and every other session's cool-down stretches
+  // are always the exact same pool, never two hand-maintained copies.
+  s5:{name:"Session 5 · Mobility + Balance", areas:["mobility","balance"], flexFromLibrary:true,
     bw:[
-      // --- Flexibility block (held static stretches, after a light warm-up) ---
-      {n:"5-min easy cardio warm-up (don't stretch cold)", t:"time"},
-      {n:"World's-greatest-stretch (each side)", t:"reps"},
-      {n:"Standing hamstring stretch (hold 30s ×2/side)", t:"time"},
-      {n:"Kneeling hip-flexor stretch (hold 30s ×2/side)", t:"time"},
-      {n:"Figure-4 glute stretch (hold 30s ×2/side)", t:"time"},
-      {n:"Quad stretch (hold 30s ×2/side)", t:"time"},
-      {n:"Calf stretch, straight + bent knee (hold 30s/side)", t:"time"},
-      {n:"Doorway chest/shoulder stretch (hold 30s ×2)", t:"time"},
-      {n:"Thoracic rotations + cat-cow (slow reps)", t:"reps"},
       // --- Balance block (progressive, near a wall to catch yourself) ---
       {n:"Single-leg stand, eyes OPEN (hold 30–45s/leg)", t:"time", m:["balance"]},
       {n:"Single-leg stand, eyes CLOSED (hold 15–30s/leg)", t:"time", m:["balance"]},
@@ -337,15 +366,6 @@ const SESSIONS = {
     ],
     gym:[
       // mobility/balance is the same either way; gym just adds a couple of tools
-      {n:"5-min easy cardio warm-up (don't stretch cold)", t:"time"},
-      {n:"World's-greatest-stretch (each side)", t:"reps"},
-      {n:"Standing hamstring stretch (hold 30s ×2/side)", t:"time"},
-      {n:"Kneeling hip-flexor stretch (hold 30s ×2/side)", t:"time"},
-      {n:"Figure-4 glute stretch (hold 30s ×2/side)", t:"time"},
-      {n:"Quad stretch (hold 30s ×2/side)", t:"time"},
-      {n:"Calf stretch on a step (straight + bent knee)", t:"time"},
-      {n:"Band shoulder dislocates / chest opener", t:"reps", w:true, eq:["bands"]},
-      {n:"Foam-roll back + thoracic rotations", t:"reps"},
       {n:"Single-leg stand, eyes OPEN (hold 30–45s/leg)", t:"time", m:["balance"]},
       {n:"Single-leg stand, eyes CLOSED (hold 15–30s/leg)", t:"time", m:["balance"]},
       {n:"Single-leg stand on a balance pad/BOSU", t:"time", w:true, eq:["machines"], m:["balance"]},

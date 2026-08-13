@@ -2535,3 +2535,18 @@
 
 .coach-opt-suggest{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-dim);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .opt-sess-chip{background:rgba(127,174,214,.1);border:1px solid var(--violet);color:var(--violet);padding:5px 11px;border-radius:14px;font-family:inherit;font-size:12px;cursor:pointer}
+
+/* ── Warm-up / working set / cool-down grouping (true dynamic-before, static-after stretches) ── */
+.coach-phase-h{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin:12px 0 6px;padding-top:10px;border-top:1px solid var(--line)}
+.coach-phase-h:first-of-type{border-top:none;padding-top:0;margin-top:6px}
+.coach-phase-h.warm{color:var(--ember)}
+.coach-phase-h.cool{color:var(--violet)}
+.coach-phase-h.work{color:var(--gold)}
+.coach-list-sm .coach-ex-n{font-size:13px}
+.coach-list-sm .coach-ex-how{font-size:12px}
+.sess-phase-h{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin:8px 0 3px}
+.sess-phase-h:first-of-type{margin-top:0}
+.sess-phase-h.warm{color:var(--ember)}
+.sess-phase-h.cool{color:var(--violet)}
+.sess-phase-h.work{color:var(--gold)}
+.ds-warmcool{font-size:11px;color:var(--ink-faint);margin-top:4px}

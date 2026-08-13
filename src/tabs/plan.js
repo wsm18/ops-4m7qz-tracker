@@ -127,8 +127,12 @@ function dawnSessionHtml(){
     }
     // "circuit" mode falls through to the normal exercise-list rendering below.
   }
-  const exList=p.exercises.slice(0,sess.pickOne?4:7).map(e=>`<div class="ds-ex">${esc(e.n)}${e._swapped?' <span class="ds-swap">· indoor</span>':''}</div>`).join("");
-  const more=p.exercises.length>(sess.pickOne?4:7)?`<div class="ds-ex ds-more">+${p.exercises.length-(sess.pickOne?4:7)} more</div>`:"";
+  const workOnly=p.exercises.filter(e=>!e._phase||e._phase==="work"||e._phase==="balance");
+  const warmupCount=p.exercises.filter(e=>e._phase==="warmup").length;
+  const cooldownCount=p.exercises.filter(e=>e._phase==="cooldown"||e._phase==="flex").length;
+  const exList=workOnly.slice(0,sess.pickOne?4:7).map(e=>`<div class="ds-ex">${esc(e.n)}${e._swapped?' <span class="ds-swap">· indoor</span>':''}</div>`).join("");
+  const more=workOnly.length>(sess.pickOne?4:7)?`<div class="ds-ex ds-more">+${workOnly.length-(sess.pickOne?4:7)} more</div>`:"";
+  const warmCoolNote=(warmupCount||cooldownCount)?`<div class="ds-warmcool">${warmupCount?`🔥 ${warmupCount}-move warm-up`:''}${warmupCount&&cooldownCount?' + ':''}${cooldownCount?`🧊 ${cooldownCount}-stretch cool-down`:''} included</div>`:"";
   const action=p.todayLogged
     ? `<div class="ds-done">✓ Logged — well done.</div>`
     : `<button class="td-go ds-log-btn" data-gototab="log" data-logsess="${p.sessionKey}">Log this session →</button>`;
@@ -138,6 +142,7 @@ function dawnSessionHtml(){
       <span class="ds-badges">${intLabel} <span class="ds-mode">${modeTag}</span></span>
     </div>
     <div class="ds-exlist">${exList}${more}</div>
+    ${warmCoolNote}
     <div class="ds-actions">${action}<button class="td-go ds-plan-btn" data-gototab="plan">Full plan →</button></div>
   </div>`;
 }
@@ -233,6 +238,20 @@ function exSwapHtml(sessKey, e){
   const panel=open?`<div class="ex-alt-panel">${e._pool.map((alt,ai)=>`<button class="ex-alt-btn${ai===e._suggestedIdx?' suggested':''}${alt.n===e.n?' current':''}" data-expick="${sessKey}|${e._slotIdx}|${ai}">${ai===e._suggestedIdx?'⭐ ':''}${esc(alt.n)}</button>`).join("")}</div>`:"";
   return btn+panel;
 }
+// One exercise <li>, shared by the warm-up/cool-down blocks and the main
+// working-set list so they render identically.
+function exLiHtml(e, intensity, sessKey){
+  const rx=prescriptionFor(intensity, e);
+  const desc=exHowto(e.n);
+  return `<li><div class="coach-ex-n"><b>${esc(e.n)}</b>${e.w?' <span class="sess-eq">· equipment</span>':''}${e._swapped?' <span class="sess-swap">· indoors for weather</span>':''}${exSwapHtml(sessKey,e)}</div>${desc?`<div class="coach-ex-how">${esc(desc)}</div>`:''}<div class="coach-ex-rx">${esc(rx)}</div></li>`;
+}
+// A labeled Warm-up/Cool-down/Flexibility group — real dynamic-before,
+// static-after stretches composed from STRETCH_LIBRARY (see training.js),
+// not the working set. Renders nothing if this session has none (e.g. `other`).
+function warmCoolBlockHtml(items, sessKey, intensity, label, cls){
+  if(!items || !items.length) return "";
+  return `<div class="coach-phase-h ${cls}">${esc(label)}</div><ol class="coach-list coach-list-sm">${items.map(e=>exLiHtml(e,intensity,sessKey)).join("")}</ol>`;
+}
 // Optional-session suggestion (FM-2): shown when the user has opted in and
 // today's active equipment profile actually unlocks it (pool/climbwall tag) —
 // the coach never auto-schedules these, just surfaces them as a real option.
@@ -290,34 +309,46 @@ function renderCoachToday(){
     } else if(sess.pickOne){
       // ONE exercise per session (e.g. the run): pick today's variant, explain it fully.
       const idx=pickRunIndex(p.now);
-      const e=p.exercises[idx] || p.exercises[0];
+      const workEx=p.exercises.filter(x=>x._phase==="work");
+      const e=workEx.find(x=>x._slotIdx===idx) || workEx[0] || p.exercises[0];
       const desc=exHowto(e.n);
       const rx=prescriptionFor(intensity, e);
-      const otherNames=p.exercises.filter((_,i)=>i!==idx).map(x=>x.n.replace(/\s*\(.*$/,"").trim());
+      const otherNames=workEx.filter(x=>x._slotIdx!==idx).map(x=>x.n.replace(/\s*\(.*$/,"").trim());
+      const warmHtml=warmCoolBlockHtml(p.exercises.filter(x=>x._phase==="warmup"), p.sessionKey, intensity, "🔥 Warm-up (dynamic — keep moving)", "warm");
+      const coolHtml=warmCoolBlockHtml(p.exercises.filter(x=>x._phase==="cooldown"), p.sessionKey, intensity, "🧊 Cool-down (hold each stretch)", "cool");
       tHtml=`<div class="coach-body">
         <div class="coach-day-h">${esc(dayName)} · ${esc(sess.name.split(" · ")[0])} <span class="coach-int">${intLabel}</span></div>
         <p class="coach-intro">${esc(p.dayPlan.label)}. <span class="coach-mode">${modeTag}</span> — this is a <b>pick-one</b> session: you do <b>one</b> run today, not all of them. Today's pick:</p>
+        ${warmHtml}
+        <div class="coach-phase-h work">🏃 Today's run</div>
         <ol class="coach-list" style="list-style:none;padding-left:0"><li>
           <div class="coach-ex-n"><b>👉 ${esc(e.n)}</b>${e._swapped?' <span class="sess-swap">· indoors for weather</span>':''}${exSwapHtml(p.sessionKey,e)}</div>
           ${desc?`<div class="coach-ex-how">${esc(desc)}</div>`:''}
           <div class="coach-ex-rx">${esc(rx)}</div>
         </li></ol>
         <p class="coach-tip">Why this one: the plan rotates your runs so you train different systems — a faster quality run midweek (intervals/tempo) and a longer or test run on the weekend. You don't need to choose; it rotates for you. Want a different one today? Any of these also counts: ${esc(otherNames.join(", "))}.</p>
+        ${coolHtml}
         ${p.todayLogged?`<div class="coach-done">✓ Logged today — nice work.</div>`:`<button class="btn-add" id="coachLogBtn" data-sess="${p.sessionKey}">Log this run →</button>`}
       </div>`;
     } else {
-      // ALL exercises, in order (strength / circuit days).
-      const items=p.exercises.map((e,i)=>{
-        const rx=prescriptionFor(intensity, e);
-        const desc=exHowto(e.n);
-        return `<li><div class="coach-ex-n"><b>${esc(e.n)}</b>${e.w?' <span class="sess-eq">· equipment</span>':''}${e._swapped?' <span class="sess-swap">· indoors for weather</span>':''}${exSwapHtml(p.sessionKey,e)}</div>${desc?`<div class="coach-ex-how">${esc(desc)}</div>`:''}<div class="coach-ex-rx">${esc(rx)}</div></li>`;
-      }).join("");
+      // ALL exercises, in order (strength / circuit days) — or, for Session 5,
+      // warm-up + the full flexibility sweep + the balance block (flexFromLibrary).
+      const isFlexSession=!!sess.flexFromLibrary;
+      const warmItems=p.exercises.filter(x=>x._phase==="warmup");
+      const workItems=p.exercises.filter(x=>x._phase==="work"||x._phase==="flex"||x._phase==="balance"||!x._phase);
+      const coolItems=p.exercises.filter(x=>x._phase==="cooldown");
+      const items=workItems.map((e,i)=>exLiHtml(e,intensity,p.sessionKey)).join("");
+      const warmHtml=warmCoolBlockHtml(warmItems, p.sessionKey, intensity, "🔥 Warm-up (dynamic — keep moving)", "warm");
+      const coolHtml=warmCoolBlockHtml(coolItems, p.sessionKey, intensity, "🧊 Cool-down (hold each stretch)", "cool");
       tHtml=`<div class="coach-body">
         <div class="coach-day-h">${esc(dayName)} · ${esc(sess.name.split(" · ")[0])} <span class="coach-int">${intLabel}</span></div>
-        <p class="coach-intro">${esc(p.dayPlan.label)}. <span class="coach-mode">${modeTag}</span> — do <b>all of these, in order</b>${intensity==="hard"?", resting 60–90s between sets":""}. ${intensity==="hard"?"Warm up 5 min first; leave 1–2 reps in the tank.":intensity==="moderate"?"Keep the effort conversational.":"Move easy — this is for recovery."}</p>
+        <p class="coach-intro">${esc(p.dayPlan.label)}. <span class="coach-mode">${modeTag}</span>${isFlexSession?' — a real, dedicated flexibility sweep plus balance work, not a throwaway day.':` — do all of these, in order${intensity==="hard"?", resting 60–90s between sets":""}. ${intensity==="hard"?"Leave 1–2 reps in the tank.":intensity==="moderate"?"Keep the effort conversational.":"Move easy — this is for recovery."}`}</p>
+        ${warmHtml}
+        <div class="coach-phase-h work">${isFlexSession?"🤸 Flexibility + balance":"💪 Today's session"}</div>
         <ol class="coach-list">${items}</ol>
+        ${coolHtml}
         ${p.todayLogged?`<div class="coach-done">✓ Logged today — nice work.</div>`:`<button class="btn-add" id="coachLogBtn" data-sess="${p.sessionKey}">Log this session →</button>`}
-        <p class="coach-tip">Tap any exercise's name in the session list below for the full how-to, warm-up, and stretches.</p>
+        <p class="coach-tip">Tap any exercise's name in the session list below for the full how-to.</p>
       </div>`;
     }
   }
@@ -431,7 +462,12 @@ function renderSessionLists(){
     const swapped = list.some(e=>e._swapped);
     const pickOne = SESSIONS[skey] && SESSIONS[skey].pickOne;
     const pickNote = pickOne ? `<div class="pickone-note">Pick <b>one</b> per run day — the plan rotates these for you.</div>` : "";
-    div.innerHTML = `<div class="sess-ex-tag">${esc(S.activeEquipProfile||"")}${swapped?` · ${WEATHER[(S.weather)||"clear"].icon} indoor (weather)`:""}</div>${pickNote}<ul class="gl">${list.map(e=>`<li>${esc(e.n)}${e.w?' <span class="sess-eq">· equipment</span>':''}${e._swapped?` <span class="sess-swap">· indoors for weather</span>`:''}${(e._pool&&e._pool.length>1)?` <span class="sess-alt">· ${e._pool.length-1} alt${e._pool.length>2?'s':''}</span>`:''}</li>`).join("")}</ul>`;
+    const exLi=e=>`<li>${esc(e.n)}${e.w?' <span class="sess-eq">· equipment</span>':''}${e._swapped?` <span class="sess-swap">· indoors for weather</span>`:''}${(e._pool&&e._pool.length>1)?` <span class="sess-alt">· ${e._pool.length-1} alt${e._pool.length>2?'s':''}</span>`:''}</li>`;
+    const warmItems=list.filter(e=>e._phase==="warmup");
+    const workItems=list.filter(e=>e._phase==="work"||e._phase==="flex"||e._phase==="balance"||!e._phase);
+    const coolItems=list.filter(e=>e._phase==="cooldown");
+    const group=(items,label,cls)=>items.length?`<div class="sess-phase-h ${cls}">${label}</div><ul class="gl">${items.map(exLi).join("")}</ul>`:"";
+    div.innerHTML = `<div class="sess-ex-tag">${esc(S.activeEquipProfile||"")}${swapped?` · ${WEATHER[(S.weather)||"clear"].icon} indoor (weather)`:""}</div>${pickNote}${group(warmItems,"🔥 Warm-up (dynamic)","warm")}${group(workItems,SESSIONS[skey]&&SESSIONS[skey].flexFromLibrary?"🤸 Flexibility + balance":"💪 Session","work")}${group(coolItems,"🧊 Cool-down (static)","cool")}`;
     // remove any previous rx-card for this session, then inject fresh
     const prevRx=div.nextElementSibling;
     if(prevRx&&prevRx.classList.contains('rx-card')) prevRx.remove();

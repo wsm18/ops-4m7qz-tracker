@@ -37,25 +37,79 @@ function suggestedPoolIndex(skey, slotIdx, poolLen, dateObj){
   const key=localYMD(dateObj)+"|"+skey+"|"+slotIdx;
   return hashStr(key)%poolLen;
 }
+// ── True warm-up / cool-down composition (not a relabeled duplicate) ────
+// See the STRETCH_LIBRARY comment in constants.js for the exercise-science
+// reasoning: dynamic movement before, held static stretches after.
+function areaMuscles(areas){
+  const set=new Set();
+  (areas||[]).forEach(a=>(typeof AREA_MUSCLES!=="undefined"&&AREA_MUSCLES[a]||[]).forEach(m=>set.add(m)));
+  return [...set];
+}
+// Rank STRETCH_LIBRARY entries of one kind by how many of this session's
+// muscle groups they hit (best fit first), filtered to what the active
+// equipment profile actually supports, then take a stable-per-day rotation
+// among the top matches so it's not the literal same N stretches forever.
+function pickStretches(kind, muscles, tags, count, seedKey, dateObj){
+  if(typeof STRETCH_LIBRARY==="undefined") return [];
+  const eligible=STRETCH_LIBRARY.filter(s=>s.kind===kind && eqSubset(s.eq,tags) && (s.m||[]).some(m=>muscles.includes(m)));
+  if(!eligible.length) return [];
+  const ranked=eligible.slice().sort((a,b)=>
+    (b.m||[]).filter(m=>muscles.includes(m)).length - (a.m||[]).filter(m=>muscles.includes(m)).length
+  );
+  if(ranked.length<=count) return ranked;
+  const pool=ranked.slice(0, Math.min(ranked.length, count*2));
+  const seed=hashStr(localYMD(dateObj||new Date())+"|"+seedKey);
+  return seededShuffle(pool, seed).slice(0, count);
+}
+function warmupStretchesFor(skey, tags, dateObj, count){
+  const s=SESSIONS[skey]; if(!s||!s.areas||!s.areas.length) return [];
+  const muscles=areaMuscles(s.areas);
+  const raise={n:"5-min easy cardio warm-up to raise your temperature (don't hold stretches cold yet)", t:"time", _phase:"warmup"};
+  const dyn=pickStretches("dynamic", muscles, tags, count||3, skey+"|warmup", dateObj).map(e=>Object.assign({},e,{_phase:"warmup"}));
+  return [raise, ...dyn];
+}
+function cooldownStretchesFor(skey, tags, dateObj, count){
+  const s=SESSIONS[skey]; if(!s||!s.areas||!s.areas.length) return [];
+  const muscles=areaMuscles(s.areas);
+  return pickStretches("static", muscles, tags, count||3, skey+"|cooldown", dateObj).map(e=>Object.assign({},e,{_phase:"cooldown"}));
+}
 // Resolve one session's exercises against an equipment-tag set, honoring any
 // per-day manual override (S.exChoice) and applying the weather indoor-swap
 // to whichever variant actually gets chosen. Returns exercises annotated with
 // _pool (all equipment-eligible alternates) and _slotIdx (for the override
 // UI) so a disagreeing suggestion can be swapped without losing the rest.
+// A real dynamic warm-up and static cool-down (see STRETCH_LIBRARY) are
+// composed on, matched to the session's muscle groups — except for
+// `other` (custom, nothing to match) and flexFromLibrary sessions (Session 5:
+// its whole body IS the stretch library, not a wrapper around one).
 function sessionExForProfile(skey, tags, dateObj){
   const s=SESSIONS[skey]; if(!s) return [];
-  const base=s.bw||s.gym||[];
-  const dateKey=localYMD(dateObj||new Date());
-  return base.map((_,i)=>{
+  const dt=dateObj||new Date();
+  const dateKey=localYMD(dt);
+  const resolveSlot=(i)=>{
     const pool=sessionSlotPool(skey,i).filter(e=>eqSubset(e.eq,tags));
     if(!pool.length) return null;
     const overrideKey=dateKey+"|"+skey+"|"+i;
     const overrideIdx=(S.exChoice||{})[overrideKey];
-    const idx=(overrideIdx!=null && overrideIdx<pool.length) ? overrideIdx : suggestedPoolIndex(skey,i,pool.length,dateObj);
+    const idx=(overrideIdx!=null && overrideIdx<pool.length) ? overrideIdx : suggestedPoolIndex(skey,i,pool.length,dt);
     let e=pool[idx];
     if(e.out && e.indoor && weatherBad()) e=Object.assign({}, e.indoor, {_swapped:true, _from:e.n});
     return Object.assign({}, e, {_pool:pool, _slotIdx:i, _suggestedIdx:idx});
-  }).filter(Boolean);
+  };
+  const base=s.bw||s.gym||[];
+  if(skey==="other"){
+    return base.map((_,i)=>resolveSlot(i)).filter(Boolean);
+  }
+  if(s.flexFromLibrary){
+    const warmup=warmupStretchesFor(skey, tags, dt, 2);
+    const flex=(typeof STRETCH_LIBRARY!=="undefined"?STRETCH_LIBRARY:[]).filter(e=>e.kind==="static" && eqSubset(e.eq,tags)).map(e=>Object.assign({},e,{_phase:"flex"}));
+    const balance=base.map((_,i)=>resolveSlot(i)).filter(Boolean).map(e=>Object.assign({},e,{_phase:"balance"}));
+    return [...warmup, ...flex, ...balance];
+  }
+  const working=base.map((_,i)=>resolveSlot(i)).filter(Boolean).map(e=>Object.assign({},e,{_phase:"work"}));
+  const warmup=warmupStretchesFor(skey, tags, dt);
+  const cooldown=cooldownStretchesFor(skey, tags, dt);
+  return [...warmup, ...working, ...cooldown];
 }
 // Backward-compatible flat accessor (no pool/override metadata) for call
 // sites that just want a display list. forceGym (true/false), if passed,
@@ -292,6 +346,27 @@ const EX_HOWTO=[
   ["warm-up","5 minutes of easy movement to raise your temperature — jog in place, jumping jacks, or a brisk walk. Don't stretch cold muscles."],
   ["band shoulder","Hold a band wider than shoulder-width and, keeping your arms straight, take it from in front of you up and over your head to behind you, then back. Opens the shoulders."],
   ["foam-roll","Slowly roll the target muscle over a foam roller, pausing on tight spots, to loosen the tissue before stretching."],
+  // --- dynamic warm-up moves (moving, done cold — never held) ---
+  ["leg swings, front","Hold a wall for balance and swing one leg forward and back in a controlled arc, keeping your knee mostly straight. Do the set, then switch legs."],
+  ["leg swings, side","Hold a wall for balance and swing one leg out to the side and back across your body in a controlled arc. Do the set, then switch legs."],
+  ["walking lunges","Step forward into a lunge, both knees near 90°, then as you stand rotate your torso toward your front leg. Alternate legs as you walk forward."],
+  ["bodyweight squats","Feet shoulder-width, squat down under control until your thighs are near parallel, then stand. Slow and controlled — this is a mobility opener, not a max-effort set."],
+  ["arm circles","Arms out to your sides, make small circles that gradually grow larger, then reverse direction. Warms up the shoulder joint through its full range."],
+  ["arm swings","Swing both arms across your chest and back out wide, like a big self-hug and release, picking up a little more range each rep."],
+  ["cat-cow flow","On hands and knees, alternate between arching your back up and looking down (cat) and letting it sag while lifting your head (cow), flowing smoothly between the two."],
+  ["torso twists","Standing, feet shoulder-width, rotate your upper body side to side with a little momentum, letting your arms swing loosely. Keep your hips mostly facing forward."],
+  ["high knees","Jog in place, driving your knees up toward your chest each step, arms pumping."],
+  ["butt kicks","Jog in place, kicking your heels back up toward your glutes each step."],
+  ["inchworm","From standing, hinge over and walk your hands out to a push-up position, do one push-up, then walk your feet back up to your hands and stand. Warms hamstrings, shoulders, and core together."],
+  ["hip circles","Hands on your hips, make slow, large circles with your hips like a hula-hoop, then reverse direction. Switch which leg bears more weight to bias each side."],
+  ["ankle circles","Lift one foot slightly off the floor and circle it at the ankle, both directions, then switch feet. Follow with a few slow calf raises to finish warming the lower leg."],
+  // --- static cool-down stretches (held, muscles warm) ---
+  ["cross-body shoulder","Bring one arm straight across your chest, use the other forearm to gently pull it closer, and hold. Switch arms."],
+  ["lat stretch","Reach one arm overhead, grab that wrist with your other hand, and lean your torso to the opposite side until you feel a stretch down your side/lat. Hold, switch."],
+  ["triceps stretch","Reach one arm overhead and bend the elbow so your hand drops behind your head; use the other hand to gently press the elbow further. Hold, switch."],
+  ["child's pose","Kneel and sit back toward your heels, reaching your arms forward on the floor and letting your chest sink toward the ground. Breathe and relax into it."],
+  ["spinal twist","Sitting with legs extended (or one crossed over the other), rotate your torso toward one side, using your arm against your leg for leverage. Hold, switch sides."],
+  ["wrist/forearm","Extend one arm out, palm up, and gently pull the fingers back with the other hand until you feel a stretch through the forearm; repeat palm-down. Switch arms."],
   // --- Swim (optional session) ---
   ["easy continuous swim","Swim continuously at a conversational, sustainable pace for the time — any stroke, mixing strokes is fine. Builds the aerobic base without pounding your joints."],
   ["swim intervals","Swim a hard 50m, then rest ~30s at the wall, and repeat for the set count. Builds swim-specific speed and lung capacity."],
