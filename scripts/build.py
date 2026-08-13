@@ -65,6 +65,7 @@ JS_FILES = [
     # Tab implementations (in original file order)
     'tabs/quizzes.js',         # renderQuizzes, quiz state machine, parseTime
     'core/aft-scoring.js',     # AFT_TABLES, aftLookup, clampScore, score_* helpers
+    'core/insights.js',        # computeInsights — cross-domain pattern surfacing (X-Insight)
     'tabs/aft.js',             # renderAft, renderAftStandardBar, EVENT_FOCUS
     'tabs/log.js',             # workout log, PT system, fmtSec, AREA_LABEL, baseline
     'tabs/plan.js',            # renderSkillBalance, renderCoachToday, renderBaseline

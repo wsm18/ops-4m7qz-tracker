@@ -26,9 +26,20 @@ function trendLine(vals, w, h, color, lowerBetter){
   const pts=nums.map((v,i)=>`${(i*step).toFixed(1)},${(h-((v-min)/rng)*h).toFixed(1)}`).join(" ");
   return `<svg width="100%" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2"/></svg>`;
 }
+// Cross-domain pattern block (X-Insight) — see computeInsights() in insights.js
+// for the honesty rules (silent unless there's real support on both sides of
+// a comparison, plain bucketed averages rather than a fake-precision r value).
+function renderInsightsBlock(){
+  const insights=typeof computeInsights==="function"?computeInsights():[];
+  if(!insights.length){
+    return `<div class="hist-block hist-block-wide"><div class="hist-h">🔍 Insights</div><div class="hist-meta">Not enough logged history yet to surface a real pattern — keep logging AFT tests, workouts, and daily orders and this fills in over time.</div></div>`;
+  }
+  return `<div class="hist-block hist-block-wide"><div class="hist-h">🔍 Insights <span class="hist-insight-sub">from your own logged data — not predictions</span></div>${insights.map(i=>`<div class="recovery-line">${i.line}<div class="insight-detail">${i.detail}</div></div>`).join("")}</div>`;
+}
 function renderHistory(){
   const el=document.getElementById("historyArea"); if(!el) return;
   const blocks=[];
+  blocks.push(renderInsightsBlock());
   // AFT total over time
   if((S.aft||[]).length){
     const totals=S.aft.map(a=>a.total);
