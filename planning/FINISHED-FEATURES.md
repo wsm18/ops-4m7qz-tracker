@@ -1510,3 +1510,13 @@ Verified via direct function calls covering the exact behaviors above (first-eve
 SW bumped to `operations-v181`. `SKILL_LADDER_VER` unchanged at **117** (no ladder/tier/guidance text touched). `npm run build` → OK, `npm run check` → SYNTAX OK, `npm run regress` → `PAGEERRORS 0`, `total:12524`, `badCount:0`. `npm run package` → produced `dist/operations.zip`.
 
 **Next:** back to the confirmed build order — **X-Insight** (needs its own design pass for the small-N-honesty problem, same as this phase turned out not to need once the existing engine was found) — or **T** (stealth-assessment games) if Wyatt wants to switch subsystems. Start only when explicitly asked.
+
+### v182 — Effort rating: 1-3 scale → real 1-10 RPE scale
+
+**Files changed:** `src/tabs/log.js`, `src/styles/main.css`, `sw.js`.
+
+Quick, direct fix: Wyatt asked to change FM-Adapt's per-exercise effort rating from the 3-way 😌/👍/😤 tap to a proper 1-10 scale, matching standard RPE (Rate of Perceived Exertion) convention rather than a coarse 3-bucket approximation. `ex.difficulty` (string enum `"easy"|"right"|"hard"`) became `ex.effort` (number 1-10) throughout `log.js` — the log form now renders 10 small numbered buttons per exercise instead of 3 emoji buttons. `computeTarget()`'s hard/easy detection moved from string equality to effort bands (≥8 = hard/hold, ≤3 = easy/push, 4-7 = neutral/no override — same 3-tier *logic*, just finer-grained input), with a graceful fallback to the existing session-level RPE wording for the rare case only that signal is present. Verified the same three logic cases from v181 (hard/easy/neutral) now driven by numeric thresholds, plus real UI clicks confirming all 10 buttons render per exercise and set the value correctly.
+
+SW bumped to `operations-v182`. `SKILL_LADDER_VER` unchanged at **117**. `npm run build` → OK, `npm run check` → SYNTAX OK, `npm run regress` → `PAGEERRORS 0`, `total:12524`, `badCount:0`. `npm run package` → produced `dist/operations.zip`.
+
+**Next:** X-Insight or T, same as noted above — this was a quick interrupt, not a phase change.

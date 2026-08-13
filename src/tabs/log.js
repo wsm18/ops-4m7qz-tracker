@@ -10,7 +10,7 @@ function initLogTab(){
 }
 function buildLogForm(skey){
   const s=SESSIONS[skey];
-  LG={session:skey, readiness:null, exercises:sessionEx(skey).map(e=>({name:e.n,type:e.t,w:!!e.w,custom:!!e.custom,sets:[blankSet(e.t)],difficulty:null,reduced:false}))};
+  LG={session:skey, readiness:null, exercises:sessionEx(skey).map(e=>({name:e.n,type:e.t,w:!!e.w,custom:!!e.custom,sets:[blankSet(e.t)],effort:null,reduced:false}))};
   renderLogForm();
   renderReadinessBtns();
 }
@@ -38,10 +38,8 @@ function renderLogForm(){
       </div>`).join("")}
       <button class="lg-addset" data-addset="${xi}">+ add set</button>
       <div class="lg-diff-row">
-        <span class="lg-diff-lbl">How did it feel?</span>
-        <button type="button" class="lg-diff-btn${ex.difficulty==='easy'?' on':''}" data-diff="${xi}.easy">😌 Easy</button>
-        <button type="button" class="lg-diff-btn${ex.difficulty==='right'?' on':''}" data-diff="${xi}.right">👍 Right</button>
-        <button type="button" class="lg-diff-btn${ex.difficulty==='hard'?' on':''}" data-diff="${xi}.hard">😤 Hard</button>
+        <span class="lg-diff-lbl">Effort (RPE) <span class="lg-diff-hint">1 = very easy · 10 = max effort</span></span>
+        <div class="lg-effort-scale">${Array.from({length:10},(_,i)=>i+1).map(n=>`<button type="button" class="lg-effort-btn${ex.effort===n?' on':''}" data-effort="${xi}.${n}">${n}</button>`).join("")}</div>
         <label class="lg-reduced-lbl"><input type="checkbox" data-reduced="${xi}" ${ex.reduced?'checked':''}> had to cut it short</label>
       </div>
     </div>`;
@@ -79,8 +77,8 @@ document.addEventListener("click",e=>{
   if(rm!=null){const[xi,si]=rm.split(".");LG.exercises[xi].sets.splice(si,1);renderLogForm();return;}
   const dw=e.target.dataset.delw;
   if(dw!=null){if(confirm("Delete this workout?")){S.workouts=S.workouts.filter(w=>w.id!==dw);save();renderLog();}return;}
-  const diff=e.target.dataset.diff;
-  if(diff!=null && LG){ const[xi,val]=diff.split("."); const ex=LG.exercises[xi]; ex.difficulty=(ex.difficulty===val)?null:val; renderLogForm(); return; }
+  const eff=e.target.dataset.effort;
+  if(eff!=null && LG){ const[xi,val]=eff.split("."); const ex=LG.exercises[xi]; const n=+val; ex.effort=(ex.effort===n)?null:n; renderLogForm(); return; }
   const readiness=e.target.dataset.readiness;
   if(readiness!=null && LG){ LG.readiness=(LG.readiness===readiness)?null:readiness; renderReadinessBtns(); return; }
 });
@@ -98,7 +96,7 @@ document.getElementById("lgSave").onclick=()=>{
   const exercises=LG.exercises.map(ex=>({
     name:ex.name, type:ex.type, w:ex.w,
     sets:ex.sets.filter(st=>setHasData(ex,st)),
-    difficulty:ex.difficulty||null, reduced:!!ex.reduced,
+    effort:ex.effort||null, reduced:!!ex.reduced,
   })).filter(ex=>ex.sets.length>0 && ex.name && ex.name!=="Custom exercise");
   if(!exercises.length){toast("Log at least one set first");return;}
   const note=document.getElementById("lgNote").value.trim()||null;
@@ -274,7 +272,7 @@ function exerciseSeries(name){
   (S.workouts||[]).slice().sort((a,b)=>a.ts-b.ts).forEach(w=>{
     (w.exercises||[]).filter(e=>e.name===name && e.sets && e.sets.length).forEach(ex=>{
       const best=ex.sets.reduce((m,st)=>setVolume(ex,st)>setVolume(ex,m)?st:m,ex.sets[0]);
-      out.push({ts:w.ts,ex,best,vol:setVolume(ex,best),difficulty:ex.difficulty||null,reduced:!!ex.reduced,sessionRpe:w.rpe||null});
+      out.push({ts:w.ts,ex,best,vol:setVolume(ex,best),effort:ex.effort||null,reduced:!!ex.reduced,sessionRpe:w.rpe||null});
     });
   });
   return out;
@@ -349,23 +347,26 @@ function computeTarget(name){
       baselineNote=" (anchored to this month's baseline)";
     }
   }
-  // ---- DIFFICULTY / REDUCED SIGNAL (FM-Adapt) ----
+  // ---- EFFORT / REDUCED SIGNAL (FM-Adapt) ----
   // A plain rule applied to what you actually told us last time, not a fitted
   // model — stays honest with a single data point since it's not claiming to
   // have "learned" a pattern, just repeating your own most recent rating back.
-  // Only the two clearest signals move anything: rated hard or had to cut a
-  // set short forces a hold (safety/injury-reduction first); rated easy nudges
-  // a flat/first trend up a notch. Silent when nothing was rated — this never
-  // invents a signal you didn't give it.
+  // Effort is a 1-10 RPE scale (1 = very easy, 10 = max effort); only the two
+  // clearest bands move anything: 8+ or had to cut a set short forces a hold
+  // (safety/injury-reduction first); 3 or under nudges a flat/first trend up
+  // a notch. Silent when nothing was rated — this never invents a signal you
+  // didn't give it.
   let diffNote="";
-  const hardSignal = last.reduced || last.difficulty==="hard" || (last.sessionRpe!=null && last.sessionRpe>=9);
-  const easySignal = !hardSignal && (last.difficulty==="easy" || (last.sessionRpe!=null && last.sessionRpe<=6));
+  const hardSignal = last.reduced || (last.effort!=null && last.effort>=8) || (last.sessionRpe!=null && last.sessionRpe>=9);
+  const easySignal = !hardSignal && ((last.effort!=null && last.effort<=3) || (last.sessionRpe!=null && last.sessionRpe<=6));
   if(hardSignal && trend!=="down"){
     stalled=true; trend="down";
-    diffNote = last.reduced ? " (you had to cut it short last time — hold here)" : " (rated hard last time — hold here)";
+    diffNote = last.reduced ? " (you had to cut it short last time — hold here)"
+      : last.effort!=null ? ` (rated ${last.effort}/10 effort last time — hold here)`
+      : ` (RPE ${last.sessionRpe} last session — hold here)`;
   } else if(easySignal && (trend==="flat"||trend==="first")){
     trend="up";
-    diffNote = " (rated easy last time — pushing a bit more)";
+    diffNote = last.effort!=null ? ` (rated ${last.effort}/10 effort last time — pushing a bit more)` : " (low RPE last session — pushing a bit more)";
   }
   baselineNote = baselineNote + diffNote;
   // build target string
