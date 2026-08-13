@@ -16,7 +16,7 @@ function buildLogForm(skey){
 }
 function renderReadinessBtns(){
   const el=document.getElementById("lgReadinessBtns"); if(!el||!LG) return;
-  el.querySelectorAll("[data-readiness]").forEach(b=>b.classList.toggle("on", b.dataset.readiness===LG.readiness));
+  el.querySelectorAll("[data-readiness]").forEach(b=>b.classList.toggle("on", +b.dataset.readiness===LG.readiness));
 }
 function blankSet(type){
   if(type==="reps") return {reps:"",weight:""};
@@ -80,7 +80,7 @@ document.addEventListener("click",e=>{
   const eff=e.target.dataset.effort;
   if(eff!=null && LG){ const[xi,val]=eff.split("."); const ex=LG.exercises[xi]; const n=+val; ex.effort=(ex.effort===n)?null:n; renderLogForm(); return; }
   const readiness=e.target.dataset.readiness;
-  if(readiness!=null && LG){ LG.readiness=(LG.readiness===readiness)?null:readiness; renderReadinessBtns(); return; }
+  if(readiness!=null && LG){ const n=+readiness; LG.readiness=(LG.readiness===n)?null:n; renderReadinessBtns(); return; }
 });
 function setHasData(ex,st){
   if(ex.type==="reps") return st.reps!=="";

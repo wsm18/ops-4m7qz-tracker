@@ -1520,3 +1520,13 @@ Quick, direct fix: Wyatt asked to change FM-Adapt's per-exercise effort rating f
 SW bumped to `operations-v182`. `SKILL_LADDER_VER` unchanged at **117**. `npm run build` → OK, `npm run check` → SYNTAX OK, `npm run regress` → `PAGEERRORS 0`, `total:12524`, `badCount:0`. `npm run package` → produced `dist/operations.zip`.
 
 **Next:** X-Insight or T, same as noted above — this was a quick interrupt, not a phase change.
+
+### v183 — Readiness check-in: 1-3 scale → 1-10, matching v182's effort scale
+
+**Files changed:** `src/tabs/log.js`, `src/tabs/log.html`, `src/styles/main.css`, `sw.js`.
+
+Direct follow-up to v182: Wyatt asked to make the pre-session readiness check-in 1-10 too, for consistency with the just-converted effort rating. `LG.readiness`/`S.workouts[].readiness` changed from a string enum (`"rough"|"normal"|"strong"`) to a number (1-10); the log form's readiness row now shows 10 numbered buttons instead of 3 emoji buttons, same visual pattern as the per-exercise effort scale. Readiness still isn't read by `computeTarget()` — that design decision from v181 stands: it's captured before the workout starts, so it can't honestly recalculate a target that's already been shown, and pretending otherwise would overclaim. Verified with real UI clicks (button count, click-to-set, click-to-toggle-off, and a full save round-trip persisting the numeric value correctly).
+
+SW bumped to `operations-v183`. `SKILL_LADDER_VER` unchanged at **117**. `npm run build` → OK, `npm run check` → SYNTAX OK, `npm run regress` → `PAGEERRORS 0`, `total:12524`, `badCount:0`. `npm run package` → produced `dist/operations.zip`.
+
+**Next:** X-Insight or T — same as noted above, unchanged by this quick interrupt.
