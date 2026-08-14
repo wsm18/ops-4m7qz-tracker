@@ -211,100 +211,169 @@ function startSentry(){
   sentryNext();
 }
 
-// ---- Digit span test ----
-let _dsState=null;
-function startDigitSpan(){
+// ---- Land Nav Relay: digit span, disguised as a route-memorization game (Phase T) ----
+// Same underlying measurement as before — an adaptive recall span, unchanged
+// TESTS[1].scoreToLevel and recordTest("digitspan", span) — only the skin
+// changed. Digits (0-9) become 10 numbered waypoint markers on a course map;
+// the flashed sequence (identical 650ms-on/250ms-gap timing) becomes a route
+// call-out, and typed recall becomes tapping the same waypoints back in
+// order to "relay the route." Waypoint numbers stay visible on the map at
+// all times (a real map would label its own waypoints) — that doesn't leak
+// the answer, since the thing that must be recalled is still the *order*
+// they light up in, exactly as before.
+let _lnState=null;
+const LN_WAYPOINTS=10;
+function startDigitSpan(){ startLandNav(); }
+function startLandNav(){
   const stage=document.getElementById("stage-digitspan"); if(!stage) return;
-  _dsState={len:4, seq:[], failed:false, best:0};
-  dsShow();
-  function dsShow(){
-    _dsState.seq=Array.from({length:_dsState.len},()=>Math.floor(Math.random()*10));
-    stage.className="test-stage ds"; stage.innerHTML=`<div class="ds-digit"></div>`;
-    const dEl=stage.querySelector(".ds-digit");
+  _lnState={len:4, seq:[], best:0, tapped:[]};
+  lnShow();
+  function lnMap(){
+    stage.className="test-stage ln";
+    stage.innerHTML=`<div class="ln-map" id="lnMap">${Array.from({length:LN_WAYPOINTS},(_,i)=>`<div class="ln-wp" data-lnwp="${i}"><span class="ln-wp-n">${i}</span></div>`).join("")}</div><div class="ln-note" id="lnNote"></div>`;
+    return stage.querySelectorAll("[data-lnwp]");
+  }
+  function lnShow(){
+    _lnState.seq=Array.from({length:_lnState.len},()=>Math.floor(Math.random()*10));
+    _lnState.tapped=[];
+    const wps=lnMap();
+    document.getElementById("lnNote").textContent="Route incoming — watch the waypoint call-out order.";
     let i=0;
     const show=()=>{
-      if(i<_dsState.seq.length){ dEl.textContent=_dsState.seq[i]; i++; setTimeout(()=>{dEl.textContent="";setTimeout(show,250);},650); }
-      else { dsAsk(); }
+      if(i<_lnState.seq.length){
+        const wp=wps[_lnState.seq[i]]; wp.classList.add("lit"); i++;
+        setTimeout(()=>{ wp.classList.remove("lit"); setTimeout(show,250); },650);
+      } else { lnAsk(wps); }
     };
     setTimeout(show, 400);
   }
-  function dsAsk(){
-    stage.innerHTML=`<div class="ds-ask">Type the ${_dsState.seq.length} digits in order:<br><input id="dsInput" inputmode="numeric" autocomplete="off" class="ds-input"><button class="btn-add" id="dsSubmit" style="margin-top:8px">Submit</button></div>`;
-    const inp=stage.querySelector("#dsInput"); inp.focus();
-    const submit=()=>{
-      const ans=inp.value.replace(/\D/g,"");
-      if(ans===_dsState.seq.join("")){
-        _dsState.best=_dsState.len; _dsState.len++;
-        stage.innerHTML=`<div class="ds-ok">✓ Correct — span ${_dsState.best}. Next: ${_dsState.len} digits. Tap to continue.</div>`;
-        stage.onclick=()=>{ stage.onclick=null; dsShow(); };
-      } else {
-        dsDone();
-      }
-    };
-    stage.querySelector("#dsSubmit").onclick=submit;
-    inp.onkeydown=e=>{ if(e.key==="Enter") submit(); };
+  function lnAsk(wps){
+    document.getElementById("lnNote").textContent=`Relay the route — tap the ${_lnState.seq.length} waypoints back in the order they lit.`;
+    // A waypoint marker isn't disabled after one tap — the same digit (and
+    // so the same waypoint) can legitimately appear more than once in a
+    // sequence, and a relay needs to be able to call it out again.
+    wps.forEach(wp=>{
+      wp.classList.add("pickable");
+      wp.onclick=()=>{
+        if(_lnState.tapped.length>=_lnState.seq.length) return;
+        _lnState.tapped.push(parseInt(wp.dataset.lnwp));
+        wp.classList.add("picked"); setTimeout(()=>wp.classList.remove("picked"),200);
+        if(_lnState.tapped.length>=_lnState.seq.length) lnCheck(wps);
+      };
+    });
   }
-  function dsDone(){
-    const span=_dsState.best;
-    if(span<4){ stage.className="test-stage ds result"; stage.innerHTML=`<div class="test-result"><div class="big">${span}</div><div>Give it another go — watch the digits, then chunk them.</div></div>`; _dsState=null; return; }
+  function lnCheck(wps){
+    wps.forEach(wp=>{ wp.onclick=null; wp.classList.remove("pickable"); });
+    if(_lnState.tapped.join(",")===_lnState.seq.join(",")){
+      _lnState.best=_lnState.len; _lnState.len++;
+      stage.innerHTML=`<div class="ln-ok">✓ Route relayed — ${_lnState.best} waypoints. Next: ${_lnState.len}. Tap to continue.</div>`;
+      // deferred a tick — the winning tap's click event is still bubbling up
+      // to this same `stage` element; attaching the handler synchronously
+      // lets that same event fire it immediately and skip the round.
+      setTimeout(()=>{ stage.onclick=()=>{ stage.onclick=null; lnShow(); }; },0);
+    } else {
+      lnDone();
+    }
+  }
+  function lnDone(){
+    const span=_lnState.best;
+    if(span<4){ stage.className="test-stage ln result"; stage.innerHTML=`<div class="test-result"><div class="big">${span}</div><div>Route lost early — stand it again. Watch the call-out, then chunk it.</div></div>`; _lnState=null; return; }
     const res=recordTest("digitspan", span);
     // see the comment in sentryDone() — render() wipes the stage, so write
     // results into a fresh post-render reference.
-    _dsState=null; render();
+    _lnState=null; render();
     const stageEl=document.getElementById("stage-digitspan"); if(!stageEl) return;
-    stageEl.className="test-stage ds result";
-    stageEl.innerHTML=`<div class="test-result"><div class="big">${span} digits</div><div>your forward span</div>${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}<div class="sugg">${testSuggestion("digitspan",span)}</div></div>`;
+    stageEl.className="test-stage ln result";
+    stageEl.innerHTML=`<div class="test-result"><div class="big">${span} waypoints</div><div>longest route relayed</div>${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}<div class="sugg">${testSuggestion("digitspan",span)}</div></div>`;
   }
 }
 
-// ---- Typing speed test ----
-const TYPING_TEXTS=[
-  "The mission depends on clear communication and steady hands under pressure.",
-  "Discipline is choosing what you want most over what you want right now.",
-  "A good plan executed now beats a perfect plan executed too late.",
-  "Train hard, stay humble, and take care of the soldiers on your left and right."
+// ---- Comms Relay: typing speed, disguised as a radio-traffic game (Phase T) ----
+// Same underlying measurement as before — keystroke-timed WPM × accuracy,
+// unchanged TESTS[2].scoreToLevel and recordTest("typing", wpm) — only the
+// skin changed. One long sentence becomes a stream of short "transmissions"
+// each on its own garble countdown; per-message elapsed time and per-char
+// accuracy aggregate into the same gross-WPM-times-accuracy formula the
+// original single-sentence test used. No live WPM number is shown mid-play
+// — only a "messages relayed" tally and a decoded/lost flash per line.
+const COMMS_MESSAGES=[
+  "Enemy contact, grid four two one seven",
+  "Requesting immediate resupply at checkpoint bravo",
+  "Convoy departing now, hold this position",
+  "Casualty evacuation needed, landing zone secure",
+  "Fire mission complete, shifting to next target",
+  "All clear, proceeding to phase line charlie",
+  "Command post relocating, stand by for update",
+  "Squad in position, awaiting your signal"
 ];
-let _tyState=null;
-function startTyping(){
+const COMMS_ROUNDS=5;
+let _crState=null;
+function startTyping(){ startCommsRelay(); }
+function startCommsRelay(){
   const stage=document.getElementById("stage-typing"); if(!stage) return;
-  const text=TYPING_TEXTS[Math.floor(Math.random()*TYPING_TEXTS.length)];
-  _tyState={text, started:null};
-  stage.className="test-stage ty";
-  stage.innerHTML=`<div class="ty-text">${esc(text)}</div><textarea id="tyInput" class="ty-input" rows="3" placeholder="Start typing — timer begins on first keystroke"></textarea><div class="ty-live" id="tyLive"></div>`;
-  const inp=stage.querySelector("#tyInput"); inp.focus();
-  inp.oninput=()=>{
-    if(!_tyState.started) _tyState.started=performance.now();
-    const typed=inp.value;
-    const live=document.getElementById("tyLive");
-    if(typed===text || (typed.length>=text.length)){
-      const secs=Math.max(0.5,(performance.now()-_tyState.started)/1000); // guard against instant paste
-      const words=text.split(/\s+/).length;
-      let correct=0; for(let i=0;i<text.length;i++){ if(typed[i]===text[i]) correct++; }
-      const acc=correct/text.length;
-      const grossWpm=(words/secs)*60;
-      const wpm=Math.max(0, Math.min(250, Math.round(grossWpm*acc))); // cap at a sane ceiling
-      const res=recordTest("typing", wpm);
-      // see the comment in sentryDone() — render() wipes the stage, so write
-      // results into a fresh post-render reference.
-      _tyState=null; render();
-      const stageEl=document.getElementById("stage-typing"); if(!stageEl) return;
-      stageEl.className="test-stage ty result";
-      stageEl.innerHTML=`<div class="test-result"><div class="big">${wpm} WPM</div><div>${Math.round(acc*100)}% accuracy over ${secs.toFixed(1)}s</div>${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}<div class="sugg">${testSuggestion("typing",wpm)}</div></div>`;
-    } else {
-      // live accuracy hint
-      let correct=0; for(let i=0;i<typed.length;i++){ if(typed[i]===text[i]) correct++; }
-      live.textContent=`${typed.length}/${text.length} chars`;
-    }
-  };
+  if(_crState && _crState.garbleTimer) clearTimeout(_crState.garbleTimer);
+  const queue=shuffleInPlace(COMMS_MESSAGES).slice(0,COMMS_ROUNDS);
+  _crState={queue, i:-1, results:[], garbleTimer:null, resolved:false};
+  crNext();
+  function crNext(){
+    _crState.i++;
+    if(_crState.i>=_crState.queue.length){ crDone(); return; }
+    const text=_crState.queue[_crState.i];
+    _crState.resolved=false;
+    const windowMs=Math.max(5000, text.length*180);
+    stage.className="test-stage cr";
+    stage.innerHTML=`<div class="cr-tally">Messages relayed: <b id="crTally">${_crState.results.length}</b>/${_crState.queue.length}</div>
+      <div class="cr-msg">${esc(text)}</div>
+      <textarea id="crInput" class="ty-input" rows="2" placeholder="Type the transmission before it garbles…"></textarea>
+      <div class="cr-note">Incoming transmission — type it exactly before the signal is lost.</div>`;
+    const inp=stage.querySelector("#crInput"); inp.focus();
+    const t0=performance.now();
+    _crState.garbleTimer=setTimeout(()=>crResolve(text,inp.value,t0,false), windowMs);
+    inp.oninput=()=>{ if(inp.value===text) crResolve(text,inp.value,t0,true); };
+  }
+  function crResolve(text,typed,t0,success){
+    if(_crState.resolved) return;
+    _crState.resolved=true; clearTimeout(_crState.garbleTimer);
+    const secs=Math.max(0.4,(performance.now()-t0)/1000);
+    const words=text.split(/\s+/).length;
+    let correct=0; for(let i=0;i<text.length;i++){ if(typed[i]===text[i]) correct++; }
+    _crState.results.push({words, secs, correct, total:text.length});
+    stage.innerHTML=`<div class="cr-flash ${success?'ok':'lost'}">${success?'✓ Message decoded':'✗ Signal lost'}</div>`;
+    setTimeout(crNext, 500);
+  }
+  function crDone(){
+    const r=_crState.results;
+    const totalWords=r.reduce((a,b)=>a+b.words,0);
+    const totalSecs=r.reduce((a,b)=>a+b.secs,0);
+    const totalCorrect=r.reduce((a,b)=>a+b.correct,0);
+    const totalChars=r.reduce((a,b)=>a+b.total,0);
+    const acc=totalChars?totalCorrect/totalChars:0;
+    const grossWpm=totalSecs>0?(totalWords/(totalSecs/60)):0;
+    const wpm=Math.max(0, Math.min(250, Math.round(grossWpm*acc)));
+    const res=recordTest("typing", wpm);
+    // see the comment in sentryDone() — render() wipes the stage, so write
+    // results into a fresh post-render reference.
+    _crState=null; render();
+    const stageEl=document.getElementById("stage-typing"); if(!stageEl) return;
+    stageEl.className="test-stage cr result";
+    stageEl.innerHTML=`<div class="test-result"><div class="big">${wpm} WPM</div><div>${Math.round(acc*100)}% accuracy across ${r.length} messages</div>${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}<div class="sugg">${testSuggestion("typing",wpm)}</div></div>`;
+  }
 }
 
-// ---- N-back working memory trainer ----
+// ---- Perimeter Watch: n-back, disguised as a patrol-rotation game (Phase T) ----
+// Same underlying measurement as before — identical trial generation,
+// unchanged TESTS[3].scoreToLevel and recordTest("nback", n) — only the skin
+// changed. The bare 3x3 grid becomes 9 watch-post markers, and the lit cell
+// each step becomes "which post the patrol is currently covering." The
+// MATCH button becomes "Report repeat" — tap it whenever the currently lit
+// post matches the one N steps back in the rotation, exactly the n-back task.
 let _nbState=null;
-function startNback(){
+function startNback(){ startPerimeterWatch(); }
+function startPerimeterWatch(){
   const stage=document.getElementById("stage-nback"); if(!stage) return;
-  stage.innerHTML=`<div class="nb-setup">Choose level:
+  stage.innerHTML=`<div class="pw-setup">Set the watch depth:
     <div class="nb-levels">${[1,2,3,4].map(n=>`<button class="hb-starter-btn" data-nbn="${n}">${n}-back</button>`).join("")}</div>
-    <div class="nb-hint" style="font-size:12px;color:var(--ink-faint);margin-top:6px">In N-back, tap MATCH when the current square is in the same spot as the one N steps back. Start at 1.</div></div>`;
+    <div class="nb-hint" style="font-size:12px;color:var(--ink-faint);margin-top:6px">Posts light up in rotation. Tap "Report repeat" when the currently lit post matches the one N steps back. Start at 1.</div></div>`;
   stage.querySelectorAll("[data-nbn]").forEach(btn=>btn.onclick=()=>nbRun(parseInt(btn.dataset.nbn)));
   function nbRun(n){
     const trials=20+n*2, seq=[];
@@ -314,10 +383,10 @@ function startNback(){
     }
     _nbState={n, seq, i:-1, hits:0, misses:0, fa:0, correctRej:0, responded:false, gen:(window._nbGen=(window._nbGen||0)+1)};
     const myGen=_nbState.gen;
-    stage.innerHTML=`<div class="nb-grid">${Array.from({length:9},(_,k)=>`<div class="nb-cell" data-cell="${k}"></div>`).join("")}</div>
-      <div class="nb-status" id="nbStatus">Watch…</div>
-      <button class="btn-add" id="nbMatch" disabled>MATCH (${n}-back)</button>`;
-    const cells=stage.querySelectorAll(".nb-cell");
+    stage.innerHTML=`<div class="pw-posts">${Array.from({length:9},(_,k)=>`<div class="pw-post" data-cell="${k}">🗼</div>`).join("")}</div>
+      <div class="nb-status" id="nbStatus">Watching the rotation…</div>
+      <button class="btn-add" id="nbMatch" disabled>🚨 Report repeat (${n}-back)</button>`;
+    const cells=stage.querySelectorAll(".pw-post");
     const matchBtn=stage.querySelector("#nbMatch");
     const status=stage.querySelector("#nbStatus");
     matchBtn.onclick=()=>{
@@ -339,7 +408,7 @@ function startNback(){
       matchBtn.classList.remove("good","bad");
       cells.forEach(c=>c.classList.remove("on"));
       cells[_nbState.seq[_nbState.i]].classList.add("on");
-      status.textContent=`${_nbState.i+1}/${_nbState.seq.length}`;
+      status.textContent=`Post ${_nbState.i+1} of ${_nbState.seq.length}`;
       setTimeout(()=>{ cells.forEach(c=>c.classList.remove("on")); }, 700);
       setTimeout(step, 2200);
     };
@@ -359,28 +428,36 @@ function startNback(){
       _nbState=null; render();
       const stageEl=document.getElementById("stage-nback"); if(!stageEl) return;
       stageEl.className="test-stage result";
-      stageEl.innerHTML=`<div class="test-result"><div class="big">${passed?nUsed+'-back ✓':'Keep practicing'}</div>
-        <div>${acc}% accuracy · caught ${hits}/${matches} matches · ${fa} false alarms</div>
+      stageEl.innerHTML=`<div class="test-result"><div class="big">${passed?nUsed+'-back watch ✓':'Keep practicing'}</div>
+        <div>${acc}% accuracy · caught ${hits}/${matches} repeats · ${fa} false reports</div>
         ${res&&res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}
         <div class="sugg">${testSuggestion("nback", passed?nUsed:0)}</div></div>`;
     }
   }
 }
 
-// ---- Go / No-Go attention test ----
+// ---- Fire Discipline: go/no-go, disguised as a target-discrimination drill (Phase T) ----
+// Same underlying measurement as before — identical 25-signal trial timing
+// and accuracy math, unchanged TESTS[4].scoreToLevel and recordTest("gonogo",
+// acc) — only the skin changed. The green-circle/red-square go/no-go pair
+// becomes hostile (▲, tap to engage) vs. friendly/non-combatant (●, hold
+// fire) — a real, legitimate ROTC target-discrimination concept (Wyatt
+// confirmed this framing directly — see planning/IDEAS-tests-fm-workouts.md
+// §1a), tasteful abstract silhouettes, no graphic content.
 let _ggState=null;
-function startGoNoGo(){
+function startGoNoGo(){ startFireDiscipline(); }
+function startFireDiscipline(){
   const stage=document.getElementById("stage-gonogo"); if(!stage) return;
   if(_ggState && _ggState.t2) clearTimeout(_ggState.t2);
   _ggState={i:0, max:25, correct:0, total:0, showing:false, isGo:false, t2:null};
-  stage.innerHTML=`<div class="gg-zone wait" id="ggZone">Get ready…</div><div class="gg-status" id="ggStatus">Tap GREEN ● circles. Do NOT tap red ■ squares.</div>`;
+  stage.innerHTML=`<div class="gg-zone fd-zone wait" id="ggZone">Get ready…</div><div class="gg-status" id="ggStatus">Engage hostile ▲ silhouettes. Hold fire on friendly ● silhouettes.</div>`;
   const zone=stage.querySelector("#ggZone");
   const status=stage.querySelector("#ggStatus");
   zone.onclick=()=>{
     if(!_ggState.showing) return;
     _ggState.showing=false; clearTimeout(_ggState.t2);
-    if(_ggState.isGo){ _ggState.correct++; zone.className="gg-zone hit"; }
-    else { zone.className="gg-zone miss"; }
+    if(_ggState.isGo){ _ggState.correct++; zone.className="gg-zone fd-zone hit"; }
+    else { zone.className="gg-zone fd-zone miss"; }
     _ggState.total++;
     setTimeout(next, 350);
   };
@@ -388,12 +465,12 @@ function startGoNoGo(){
     if(_ggState.i>=_ggState.max){ ggDone(); return; }
     _ggState.i++;
     _ggState.isGo=Math.random()<0.72;
-    zone.className="gg-zone wait"; zone.textContent="";
+    zone.className="gg-zone fd-zone wait"; zone.textContent="";
     setTimeout(()=>{
       _ggState.showing=true;
-      zone.className="gg-zone "+(_ggState.isGo?"go":"nogo");
-      zone.textContent=_ggState.isGo?"●":"■";
-      status.textContent=`${_ggState.i}/${_ggState.max}`;
+      zone.className="gg-zone fd-zone "+(_ggState.isGo?"hostile":"friendly");
+      zone.textContent=_ggState.isGo?"▲":"●";
+      status.textContent=`Silhouette ${_ggState.i} of ${_ggState.max}`;
       _ggState.t2=setTimeout(()=>{
         if(_ggState.showing){
           _ggState.showing=false;
@@ -414,15 +491,21 @@ function startGoNoGo(){
     _ggState=null; render();
     const stageEl=document.getElementById("stage-gonogo"); if(!stageEl) return;
     stageEl.className="test-stage result";
-    stageEl.innerHTML=`<div class="test-result"><div class="big">${acc}%</div><div>accuracy over ${maxUsed} signals</div>
+    stageEl.innerHTML=`<div class="test-result"><div class="big">${acc}%</div><div>target discrimination over ${maxUsed} silhouettes</div>
       ${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}
       <div class="sugg">${testSuggestion("gonogo", acc)}</div></div>`;
   }
 }
 
-// ---- Processing speed (symbol-digit matching) ----
+// ---- Cipher Desk: processing speed, disguised as a codebreaking game (Phase T) ----
+// Same underlying measurement as before — identical symbol→number matching-
+// pad mechanic and 60-second sprint timing, unchanged TESTS[5].scoreToLevel
+// and recordTest("procspeed", mpm) — only the skin changed. The fixed key
+// becomes a displayed "cipher key," and each correct match is a "decrypted"
+// symbol rather than a bare score tick.
 let _psState=null;
-function startProcSpeed(){
+function startProcSpeed(){ startCipherDesk(); }
+function startCipherDesk(){
   const stage=document.getElementById("stage-procspeed"); if(!stage) return;
   if(_psState && _psState.tick) clearInterval(_psState.tick);
   const symbols=["◆","●","■","▲","★","✦","♦","◐","✚"];
@@ -434,14 +517,16 @@ function startProcSpeed(){
     const sym=stage.querySelector("#psSymbol"); if(sym) sym.textContent=_psState.cur.s;
     stage.querySelectorAll(".ps-num").forEach(b=>b.classList.remove("good","bad"));
   }
-  stage.innerHTML=`<div class="ps-keyrow">${keyHtml}</div>
-    <div class="ps-prompt">What number is <span id="psSymbol" class="ps-symbol"></span>?</div>
+  stage.innerHTML=`<div class="cd-intro">Cipher key — decode each symbol to its number as fast as you can:</div>
+    <div class="ps-keyrow">${keyHtml}</div>
+    <div class="ps-prompt">Decode: <span id="psSymbol" class="ps-symbol"></span> = ?</div>
     <div class="ps-pad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button class="ps-num" data-psn="${n}">${n}</button>`).join("")}</div>
+    <div class="cd-tally">Decrypted: <b id="cdTally">0</b></div>
     <div class="ps-status" id="psStatus">60s</div>`;
   stage.querySelectorAll("[data-psn]").forEach(btn=>btn.onclick=()=>{
     if(Date.now()>=_psState.endsAt) return;
     _psState.attempts++;
-    if(parseInt(btn.dataset.psn)===_psState.cur.n){ _psState.correct++; btn.classList.add("good"); }
+    if(parseInt(btn.dataset.psn)===_psState.cur.n){ _psState.correct++; btn.classList.add("good"); const t=stage.querySelector("#cdTally"); if(t) t.textContent=_psState.correct; }
     else btn.classList.add("bad");
     setTimeout(nextItem, 110);
   });
@@ -459,36 +544,50 @@ function startProcSpeed(){
     _psState=null; render();
     const stageEl=document.getElementById("stage-procspeed"); if(!stageEl) return;
     stageEl.className="test-stage result";
-    stageEl.innerHTML=`<div class="test-result"><div class="big">${mpm}/min</div><div>${mpm} correct of ${attempts}</div>
+    stageEl.innerHTML=`<div class="test-result"><div class="big">${mpm}/min</div><div>${mpm} of ${attempts} messages decrypted</div>
       ${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}
       <div class="sugg">${testSuggestion("procspeed", mpm)}</div></div>`;
   }
 }
 
-// ---- Mental math sprint ----
+// ---- Fire Mission: mental math sprint, disguised as a call-for-fire drill (Phase T) ----
+// Same underlying measurement as before — identical arithmetic generation
+// and 60-second sprint timing, unchanged TESTS[6].scoreToLevel and
+// recordTest("mathsprint", cpm) — only the skin changed. "a + b =" becomes
+// an artillery/logistics correction ("adjust", "drop", "rounds needed"),
+// and each correct entry gets a brief "Target hit" flash before the next
+// mission loads, instead of a silent auto-advance.
 let _mmState=null;
-function startMathSprint(){
+function startMathSprint(){ startFireMission(); }
+function startFireMission(){
   const stage=document.getElementById("stage-mathsprint"); if(!stage) return;
   if(_mmState && _mmState.tick) clearInterval(_mmState.tick);
   _mmState={correct:0, attempts:0, endsAt:Date.now()+60000, ans:0, tick:null};
   function gen(){
     const op=["+","−","×"][Math.floor(Math.random()*3)];
-    let a,b,ans;
-    if(op==="+"){ a=2+Math.floor(Math.random()*98); b=2+Math.floor(Math.random()*98); ans=a+b; }
-    else if(op==="−"){ a=10+Math.floor(Math.random()*90); b=1+Math.floor(Math.random()*a); ans=a-b; }
-    else { a=2+Math.floor(Math.random()*11); b=2+Math.floor(Math.random()*11); ans=a*b; }
+    let a,b,ans,prompt;
+    if(op==="+"){ a=2+Math.floor(Math.random()*98); b=2+Math.floor(Math.random()*98); ans=a+b; prompt=`Adjust fire: ${a} mils, add ${b} =`; }
+    else if(op==="−"){ a=10+Math.floor(Math.random()*90); b=1+Math.floor(Math.random()*a); ans=a-b; prompt=`Adjust fire: ${a} mils, drop ${b} =`; }
+    else { a=2+Math.floor(Math.random()*11); b=2+Math.floor(Math.random()*11); ans=a*b; prompt=`Rounds needed: ${a} guns × ${b} rounds each =`; }
     _mmState.ans=ans;
-    const q=stage.querySelector("#mmQ"); if(q) q.textContent=`${a} ${op} ${b} =`;
-    const inp=stage.querySelector("#mmA"); if(inp){ inp.value=""; inp.focus(); }
+    const q=stage.querySelector("#mmQ"); if(q) q.textContent=prompt;
+    const inp=stage.querySelector("#mmA"); if(inp){ inp.value=""; inp.focus(); inp.classList.remove("fm-hit"); }
   }
   stage.innerHTML=`<div class="mm-q" id="mmQ"></div>
     <input id="mmA" inputmode="numeric" class="ds-input" autocomplete="off">
+    <div class="fm-flash" id="fmFlash"></div>
     <div class="ps-status" id="mmStatus">60s</div>`;
   const inp=stage.querySelector("#mmA");
+  const flash=stage.querySelector("#fmFlash");
   inp.oninput=()=>{
     if(Date.now()>=_mmState.endsAt) return;
     const v=inp.value.replace(/[^\d-]/g,"");
-    if(v!=="" && parseInt(v)===_mmState.ans){ _mmState.correct++; _mmState.attempts++; gen(); }
+    if(v!=="" && parseInt(v)===_mmState.ans){
+      _mmState.correct++; _mmState.attempts++;
+      inp.classList.add("fm-hit");
+      flash.textContent="🎯 Target hit";
+      setTimeout(()=>{ flash.textContent=""; gen(); }, 150);
+    }
   };
   gen();
   _mmState.tick=setInterval(()=>{
@@ -504,18 +603,39 @@ function startMathSprint(){
     _mmState=null; render();
     const stageEl=document.getElementById("stage-mathsprint"); if(!stageEl) return;
     stageEl.className="test-stage result";
-    stageEl.innerHTML=`<div class="test-result"><div class="big">${cpm}/min</div><div>correct answers in 60s</div>
+    stageEl.innerHTML=`<div class="test-result"><div class="big">${cpm}/min</div><div>fire missions completed in 60s</div>
       ${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}
       <div class="sugg">${testSuggestion("mathsprint", cpm)}</div></div>`;
   }
 }
 
-// ===== Reading speed test =====
+// ===== Intel Briefing: reading speed, disguised as an intercepted-report drill (Phase T) =====
+// Same underlying measurement as before — identical timed-passage mechanic
+// and the same WPM formula, unchanged READING_SCORE_MAP and the "reading"
+// test type — only the comprehension check changed, and it's a genuine
+// honesty upgrade, not just a skin: instead of self-reporting how well you
+// understood the passage, you're given 2-3 possible next actions and must
+// pick the one that's actually consistent with what the report said.
+// Whether you pick correctly *is* the comprehension measurement, an
+// objective decision-correctness signal replacing self-report (confirmed
+// direction in planning/IDEAS-tests-fm-workouts.md §1a).
 const READING_PASSAGES=[
-  {title:"FM 6-0 Excerpt",words:284,text:"Mission command is the exercise of authority and direction by the commander using mission orders to enable disciplined initiative within the commander's intent to empower agile and adaptive leaders in the conduct of unified land operations. Mission command rests on the principle that subordinate leaders must be able to act and make decisions rapidly and on their own initiative to exploit fleeting opportunities. The key to success in mission command is trust — trust developed through shared understanding and the exercise of disciplined initiative. Leaders at all levels must understand the commander's intent two levels up. This understanding allows them to act in the absence of orders and to adapt their actions to the changing situation. The commander creates a shared understanding by clearly expressing his intent, providing mission-type orders, and creating an environment that fosters initiative. Subordinate leaders are empowered to make decisions within the framework established by the commander. They must not wait for orders when the situation changes rapidly. Instead, they must act boldly and decisively to accomplish the mission. The Army's doctrine of mission command has its roots in the 19th-century Prussian military model of Auftragstaktik, which emphasized decentralized decision-making and trust in subordinate judgment. This model proved decisive in numerous campaigns and remains the foundation of Army leadership today."},
-  {title:"Army Writing Passage",words:296,text:"Clear writing is a military skill. Officers and NCOs who write clearly save time, reduce friction, and drive results. Poor writing wastes effort: a vague order requires clarification; an unclear report forces a follow-up; an ambiguous policy breeds inconsistent action. The Army's standard for writing is the BLUF — Bottom Line Up Front. State the purpose in the first sentence. Follow with supporting detail. Close with required actions, deadlines, and who is responsible. This structure mirrors how busy leaders consume information — they read the first sentence, decide if they need the rest, and act. Military writing strips filler: no passive voice when active is available, no jargon when plain English works, no long preamble before the point. Every word must earn its place. Good writers revise. A first draft is thinking on paper; the revision is the actual writing. Before sending, ask: Would someone who knows nothing about this understand what to do, by when, and why? If not, revise. The Army invests in writing skills for a reason: when words fail, missions fail. An incomplete OPORD, a poorly drafted counseling statement, or a vague message to higher can cascade into real consequences in the field. Writing is not a soft skill; it is a force multiplier. Treat it like a weapon and maintain it like one."},
-  {title:"Leadership Story",words:278,text:"The squad leader had twelve seconds to decide. His team was pinned on the left flank, the platoon sergeant unreachable, and the enemy crew-served weapon was repositioning. He had trained for exactly this — not because anyone had told him this scenario would happen, but because the Army trains leaders to think under pressure, not just to follow scripts. He checked his sectors, assessed his casualties — one walking wounded, the others still effective — and made the call. The squad would bound right, using the creek bed for cover, and suppress from a position of advantage while the weapons squad shifted fire. It was not the perfect plan. The creek bed was shallow and the right flank had unknown threats. But a good plan now beats a perfect plan too late. He signaled his team leaders and they moved. Within ninety seconds the crew-served weapon was silenced and the platoon was able to maneuver. After the action, his platoon leader asked how he had made the call so quickly. He did not have a clever answer. He had drilled the fundamentals — cover and concealment, bounding overwatch, fire and movement — until they were instinct. When the moment came, he did not think. He acted on what he knew. That is what training builds: not answers to specific questions, but the capacity to find answers to questions no one anticipated."},
-  {title:"Sleep & Recovery",words:271,text:"Sleep is not passive recovery. During sleep, the brain consolidates memories, clears metabolic waste, and restores the cognitive capacity degraded by a day of sustained attention and decision-making. For a soldier or officer operating in a demanding environment, sleep is as important as ammunition: you can fight for a while without it, but performance degrades fast, and the degradation compounds. Research on sleep deprivation shows that after 17 to 19 hours without sleep, cognitive performance drops to the equivalent of a blood alcohol level of 0.05 percent. After 24 hours, it reaches 0.10 percent — legally impaired in every U.S. state. What makes sleep deprivation particularly dangerous is that the impaired person rarely notices the impairment. Confidence stays high while judgment erodes. Leaders who operate on chronic sleep debt make worse decisions while believing they are sharp. The Army acknowledges this: Performance Triad doctrine lists sleep alongside nutrition and physical activity as the three pillars of physical and cognitive readiness. The prescription is seven to nine hours for most adults. The challenge is building the conditions and culture that make that possible — consistent sleep schedules, protected sleep windows before operations, and leaders who model recovery rather than treating sleeplessness as a badge of toughness. Sleep is a weapon system. Maintain it accordingly."},
+  {title:"FM 6-0 Excerpt",words:284,text:"Mission command is the exercise of authority and direction by the commander using mission orders to enable disciplined initiative within the commander's intent to empower agile and adaptive leaders in the conduct of unified land operations. Mission command rests on the principle that subordinate leaders must be able to act and make decisions rapidly and on their own initiative to exploit fleeting opportunities. The key to success in mission command is trust — trust developed through shared understanding and the exercise of disciplined initiative. Leaders at all levels must understand the commander's intent two levels up. This understanding allows them to act in the absence of orders and to adapt their actions to the changing situation. The commander creates a shared understanding by clearly expressing his intent, providing mission-type orders, and creating an environment that fosters initiative. Subordinate leaders are empowered to make decisions within the framework established by the commander. They must not wait for orders when the situation changes rapidly. Instead, they must act boldly and decisively to accomplish the mission. The Army's doctrine of mission command has its roots in the 19th-century Prussian military model of Auftragstaktik, which emphasized decentralized decision-making and trust in subordinate judgment. This model proved decisive in numerous campaigns and remains the foundation of Army leadership today.",
+   scenario:"Situation changes rapidly and you can't reach the commander. What do you do?",
+   actions:["Wait for updated orders from higher before adjusting the plan.","Act on the commander's intent and adjust to the new situation without waiting for orders.","Escalate the decision to the commander's commander for clarification."],
+   correct:1, why:"The report's whole point is that subordinate leaders act on intent and don't wait for orders when the situation changes."},
+  {title:"Army Writing Passage",words:296,text:"Clear writing is a military skill. Officers and NCOs who write clearly save time, reduce friction, and drive results. Poor writing wastes effort: a vague order requires clarification; an unclear report forces a follow-up; an ambiguous policy breeds inconsistent action. The Army's standard for writing is the BLUF — Bottom Line Up Front. State the purpose in the first sentence. Follow with supporting detail. Close with required actions, deadlines, and who is responsible. This structure mirrors how busy leaders consume information — they read the first sentence, decide if they need the rest, and act. Military writing strips filler: no passive voice when active is available, no jargon when plain English works, no long preamble before the point. Every word must earn its place. Good writers revise. A first draft is thinking on paper; the revision is the actual writing. Before sending, ask: Would someone who knows nothing about this understand what to do, by when, and why? If not, revise. The Army invests in writing skills for a reason: when words fail, missions fail. An incomplete OPORD, a poorly drafted counseling statement, or a vague message to higher can cascade into real consequences in the field. Writing is not a soft skill; it is a force multiplier. Treat it like a weapon and maintain it like one.",
+   scenario:"You're drafting a report for a busy commander. How do you structure it?",
+   actions:["Open with a long preamble giving full background before the main point.","State the purpose first, then supporting detail, then clear required actions.","List every possible consideration so nothing is left out, regardless of length."],
+   correct:1, why:"The report's whole point is BLUF — bottom line up front, then detail, then required actions."},
+  {title:"Leadership Story",words:278,text:"The squad leader had twelve seconds to decide. His team was pinned on the left flank, the platoon sergeant unreachable, and the enemy crew-served weapon was repositioning. He had trained for exactly this — not because anyone had told him this scenario would happen, but because the Army trains leaders to think under pressure, not just to follow scripts. He checked his sectors, assessed his casualties — one walking wounded, the others still effective — and made the call. The squad would bound right, using the creek bed for cover, and suppress from a position of advantage while the weapons squad shifted fire. It was not the perfect plan. The creek bed was shallow and the right flank had unknown threats. But a good plan now beats a perfect plan too late. He signaled his team leaders and they moved. Within ninety seconds the crew-served weapon was silenced and the platoon was able to maneuver. After the action, his platoon leader asked how he had made the call so quickly. He did not have a clever answer. He had drilled the fundamentals — cover and concealment, bounding overwatch, fire and movement — until they were instinct. When the moment came, he did not think. He acted on what he knew. That is what training builds: not answers to specific questions, but the capacity to find answers to questions no one anticipated.",
+   scenario:"You're the squad leader in this exact spot, with the platoon sergeant unreachable. What do you do?",
+   actions:["Hold position and wait until contact with the platoon sergeant is re-established.","Bound right using the creek bed for cover while shifting suppressive fire — an imperfect but timely plan.","Retreat immediately to avoid casualties until a perfect plan can be devised."],
+   correct:1, why:"The report's point is a good plan now beats a perfect plan too late — the squad leader acted, he didn't wait or retreat."},
+  {title:"Sleep & Recovery",words:271,text:"Sleep is not passive recovery. During sleep, the brain consolidates memories, clears metabolic waste, and restores the cognitive capacity degraded by a day of sustained attention and decision-making. For a soldier or officer operating in a demanding environment, sleep is as important as ammunition: you can fight for a while without it, but performance degrades fast, and the degradation compounds. Research on sleep deprivation shows that after 17 to 19 hours without sleep, cognitive performance drops to the equivalent of a blood alcohol level of 0.05 percent. After 24 hours, it reaches 0.10 percent — legally impaired in every U.S. state. What makes sleep deprivation particularly dangerous is that the impaired person rarely notices the impairment. Confidence stays high while judgment erodes. Leaders who operate on chronic sleep debt make worse decisions while believing they are sharp. The Army acknowledges this: Performance Triad doctrine lists sleep alongside nutrition and physical activity as the three pillars of physical and cognitive readiness. The prescription is seven to nine hours for most adults. The challenge is building the conditions and culture that make that possible — consistent sleep schedules, protected sleep windows before operations, and leaders who model recovery rather than treating sleeplessness as a badge of toughness. Sleep is a weapon system. Maintain it accordingly.",
+   scenario:"You're leading into an operation tomorrow and feel confident tonight despite a short night's sleep. What's the right call?",
+   actions:["Push through — feeling confident and sharp means you're still fit to lead.","Protect a consistent sleep window before the operation — impaired judgment isn't self-evident.","Rely on caffeine before the mission to replace the lost sleep hours."],
+   correct:1, why:"The report's key point is that confidence stays high while judgment erodes — you can't trust how sharp you feel."},
 ];
 const READING_SCORE_MAP=wpm=>wpm>=1000?10:wpm>=700?9:wpm>=500?8:wpm>=400?7:wpm>=300?6:wpm>=250?5:wpm>=200?4:wpm>=150?3:wpm>=100?2:wpm>=50?1:0;
 
@@ -535,14 +655,15 @@ function renderReadingTest(){
     <button class="btn-add test-start" data-rdstart="1">Start (pick a passage)</button>
   </div>`;
 }
-function startReading(){
+function startReading(){ startIntelBriefing(); }
+function startIntelBriefing(){
   const stage=document.getElementById("stage-reading"); if(!stage) return;
   const p=READING_PASSAGES[Math.floor(Math.random()*READING_PASSAGES.length)];
   _rdState={passage:p, t0:null, running:false};
   stage.className="test-stage rd";
-  stage.innerHTML=`<div class="rd-title">${esc(p.title)}</div>
+  stage.innerHTML=`<div class="rd-title">📡 Intercepted report — ${esc(p.title)}</div>
     <div class="rd-passage">${esc(p.text)}</div>
-    <div class="rd-instructions">Read the passage above at your natural pace. When you finish, tap <b>Done reading</b> — then answer the comprehension check honestly.</div>
+    <div class="rd-instructions">Read the report above at your natural pace. When you finish, tap <b>Done reading</b> — you'll then have to act on what it actually said.</div>
     <button class="btn-add" id="rdBegin">Begin reading (starts timer)</button>`;
   document.getElementById("rdBegin").onclick=()=>{
     _rdState.t0=performance.now(); _rdState.running=true;
@@ -556,22 +677,18 @@ function rdDone(){
   if(!_rdState||!_rdState.t0) return;
   const secs=(performance.now()-_rdState.t0)/1000;
   const wpm=Math.round(_rdState.passage.words/(secs/60));
+  const p=_rdState.passage;
   const stage=document.getElementById("stage-reading"); if(!stage) return;
   stage.innerHTML=`<div class="rd-comprehension">
-    <div class="rd-result-wpm">${wpm} WPM</div>
-    <div style="font-size:12.5px;color:var(--ink-dim);margin-bottom:10px">Comprehension check — be honest. Speed without understanding doesn't count.</div>
-    <div class="rd-comp-q">Did you understand the main point well enough to summarize it?</div>
-    <div class="rd-comp-btns">
-      <button class="hb-starter-btn" data-rdcomp="yes">Yes — I understood it</button>
-      <button class="hb-starter-btn" data-rdcomp="partial">Partially</button>
-      <button class="hb-starter-btn" data-rdcomp="no">No — I skimmed</button>
-    </div>
+    <div style="font-size:12.5px;color:var(--ink-dim);margin-bottom:10px">${esc(p.scenario)}</div>
+    <div class="rd-comp-btns">${p.actions.map((a,i)=>`<button class="hb-starter-btn" data-rdact="${i}">${esc(a)}</button>`).join("")}</div>
   </div>`;
-  stage.querySelectorAll("[data-rdcomp]").forEach(btn=>btn.onclick=()=>{
-    const comp=btn.dataset.rdcomp;
-    const adjWpm=comp==="yes"?wpm:comp==="partial"?Math.round(wpm*0.7):Math.round(wpm*0.4);
+  stage.querySelectorAll("[data-rdact]").forEach(btn=>btn.onclick=()=>{
+    const picked=parseInt(btn.dataset.rdact);
+    const correct=picked===p.correct;
+    const adjWpm=correct?wpm:Math.round(wpm*0.4);
     const lvl=READING_SCORE_MAP(adjWpm);
-    S.tests.push({id:id(),type:"reading",date:new Date().toISOString(),raw:adjWpm,score:lvl,rawWpm:wpm,comprehension:comp,linkedSkill:"Reading speed"});
+    S.tests.push({id:id(),type:"reading",date:new Date().toISOString(),raw:adjWpm,score:lvl,rawWpm:wpm,comprehension:correct?"yes":"no",linkedSkill:"Reading speed"});
     const sk=S.lifeSkills.find(s=>s.name==="Reading speed");
     let leveled=false;
     if(sk){
@@ -580,13 +697,14 @@ function rdDone(){
       else{sk.lastQuestTs=Date.now();}
     }
     save();
-    const sugg=adjWpm>=500?"Excellent pace with comprehension — that's proficient speed-reading territory. Maintain with regular varied reading.":adjWpm>=300?"Solid pace. Push further with regression-elimination (force yourself not to re-read) and chunking 2–3 words at a time.":adjWpm>=200?"Average reading speed. Try pacing with a finger or pointer to reduce fixation time, and minimize re-reading.":"Focus on comprehension first — speed follows. Read daily on varied material and don't skim to inflate the number.";
+    const sugg=(correct?(adjWpm>=500?"Excellent pace with real comprehension — that's proficient speed-reading territory. Maintain with regular varied reading.":adjWpm>=300?"Solid pace with real comprehension. Push further with regression-elimination (force yourself not to re-read) and chunking 2–3 words at a time.":"Correct call, average pace. Try pacing with a finger or pointer to reduce fixation time, and minimize re-reading.")
+      :"You picked the action the report doesn't actually support — that's what this check catches. Slow down slightly and read for the actual point, not just the words. Speed only counts when it holds up to a real decision.");
     // see the comment in sentryDone() — render() wipes the stage (and here,
     // renderReadingTest() also rebuilds #stage-reading the same way), so
     // write results into a fresh post-render reference.
     _rdState=null; render();
     const stageEl=document.getElementById("stage-reading"); if(!stageEl) return;
-    stageEl.innerHTML=`<div class="test-result"><div class="big">${adjWpm} WPM</div><div>${wpm} raw · ${comp==="yes"?"full":"partial"} comprehension applied</div>${leveled&&sk?`<div class="leveled">⬆️ Reading speed → Level ${sk.currentLevel}</div>`:''}<div class="sugg">${sugg}</div></div>`;
+    stageEl.innerHTML=`<div class="test-result"><div class="big">${adjWpm} WPM</div><div>${wpm} raw · ${correct?'✓ correct action picked':'✗ wrong action picked'}</div><div style="font-size:12px;color:var(--ink-faint);margin-top:4px">${esc(p.why)}</div>${leveled&&sk?`<div class="leveled">⬆️ Reading speed → Level ${sk.currentLevel}</div>`:''}<div class="sugg">${sugg}</div></div>`;
   });
 }
 

@@ -21,15 +21,35 @@ function renderQuizzes(){
   }).join("");
 }
 
-let QZ=null; // {key, idx, correct, order}
+// ---- Climb the Tree: knowledge quizzes, disguised as a Yggdrasil-climb game (Phase T) ----
+// Same underlying measurement as before — every question in the bank is
+// still asked, in the same shuffled order, and pass/fail still compares
+// against the same t.pass threshold — only the presentation and the scoring
+// signal changed. A small climber (🐿️, after Ratatoskr, the squirrel who
+// runs Yggdrasil's trunk in the source myth) advances one node per question
+// answered correctly. A wrong answer doesn't fail the run — it's a small
+// setback: the climber slips, the explanation still shows, and you retry
+// the SAME junction until you clear it, so everyone reaches the top. The
+// score that actually counts (and feeds the pass/fail + rewards below) is
+// the first-attempt accuracy — retries let you keep climbing, but they
+// don't inflate the honest measurement of what you knew on first read.
+let QZ=null; // {key, idx, firstCorrect, retried, order}
 function startQuiz(key){
   const t=window.QUIZ_BANK[key]; if(!t) return;
   // shuffle a copy of questions
   const order=t.questions.map((q,i)=>i).sort(()=>Math.random()-0.5);
-  QZ={key,idx:0,correct:0,order};
-  document.getElementById("qmTitle").textContent=t.icon+" "+t.name;
+  QZ={key,idx:0,firstCorrect:0,retried:false,order};
+  document.getElementById("qmTitle").textContent="🐿️ Climb the Tree — "+t.icon+" "+t.name;
   document.getElementById("quizModal").classList.add("show");
   showQuizQ();
+}
+function ctPathHtml(total,idx){
+  const nodes=Array.from({length:total},(_,i)=>{
+    const cls=i<idx?"done":i===idx?"cur":"todo";
+    const ic=i<idx?"🌿":i===idx?"🐿️":"🍃";
+    return `<span class="ct-node ${cls}" id="ctNode${i}">${ic}</span>`;
+  }).join("");
+  return `<div class="ct-path">${nodes}</div>`;
 }
 function showQuizQ(){
   const t=window.QUIZ_BANK[QZ.key];
@@ -38,7 +58,8 @@ function showQuizQ(){
   if(QZ.idx>=total){ return finishQuiz(); }
   const q=t.questions[QZ.order[QZ.idx]];
   const body=document.getElementById("qmBody");
-  body.innerHTML=`<div class="qm-qnum">Question ${QZ.idx+1} of ${total}</div>
+  body.innerHTML=`${ctPathHtml(total,QZ.idx)}
+    <div class="qm-qnum">${QZ.retried?"Same junction — try again":`Junction ${QZ.idx+1} of ${total}`}</div>
     <div class="qm-q">${esc(q.q)}</div>
     <div id="qmOpts">${q.a.map((opt,i)=>`<button class="qm-opt" data-opt="${i}">${esc(opt)}</button>`).join("")}</div>`;
   body.scrollTop=0;
@@ -48,23 +69,31 @@ function answerQuiz(choice){
   const q=t.questions[QZ.order[QZ.idx]];
   const opts=document.querySelectorAll("#qmOpts .qm-opt");
   opts.forEach((o,i)=>{o.disabled=true;if(i===q.c)o.classList.add("correct");if(i===choice&&choice!==q.c)o.classList.add("wrong");});
-  if(choice===q.c) QZ.correct++;
+  const correct=choice===q.c;
   const body=document.getElementById("qmBody");
   const exp=document.createElement("div");
   exp.className="qm-exp";
-  exp.innerHTML=(choice===q.c?"✅ Correct. ":"❌ Not quite. ")+esc(q.e);
+  exp.innerHTML=(correct?"✅ Correct — the path clears. ":"❌ Not quite — the branch holds. ")+esc(q.e);
   body.appendChild(exp);
   const nx=document.createElement("button");
   nx.className="qm-next";
-  nx.textContent=QZ.idx+1>=QZ.order.length?"See Results":"Next Question";
-  nx.onclick=()=>{QZ.idx++;showQuizQ();};
+  if(correct){
+    if(!QZ.retried) QZ.firstCorrect++;
+    nx.textContent=QZ.idx+1>=QZ.order.length?"Reach the top":"Climb on →";
+    nx.onclick=()=>{ QZ.idx++; QZ.retried=false; showQuizQ(); };
+  } else {
+    const node=document.getElementById("ctNode"+QZ.idx); if(node) node.classList.add("slip");
+    QZ.retried=true;
+    nx.textContent="Try this junction again";
+    nx.onclick=()=>{ showQuizQ(); };
+  }
   body.appendChild(nx);
   body.scrollTop=body.scrollHeight;
 }
 function finishQuiz(){
   const t=window.QUIZ_BANK[QZ.key];
   const total=QZ.order.length;
-  const pct=Math.round(QZ.correct/total*100);
+  const pct=Math.round(QZ.firstCorrect/total*100);
   const passed=pct>=Math.round(t.pass*100);
   const prev=S.quizzes[QZ.key]||{passed:false,bestPct:0,attempts:0};
   const firstPass=passed && !prev.passed;
@@ -87,9 +116,9 @@ function finishQuiz(){
   document.getElementById("qmProg").style.width="100%";
   body.innerHTML=`<div class="qm-result">
     <div class="big">${passed?"🎖️":"📚"}</div>
-    <h2>${passed?"Passed":"Keep Studying"}</h2>
+    <h2>${passed?"Reached the crown":"Keep climbing"}</h2>
     <div class="score" style="color:${passed?'var(--jade)':'var(--ember)'}">${pct}%</div>
-    <p style="color:var(--ink-dim)">${QZ.correct} of ${total} correct · need ${Math.round(t.pass*100)}%</p>
+    <p style="color:var(--ink-dim)">${QZ.firstCorrect} of ${total} junctions cleared on the first try · need ${Math.round(t.pass*100)}%</p>
     ${firstPass?`<p style="color:var(--gold);margin-top:12px">+20 merit pts · +50 Knowledge XP<br>Daily review order added to keep it sharp.</p>`:''}
     <button class="qm-next" style="margin-top:22px;max-width:300px" id="qmDone">Return</button>
   </div>`;
