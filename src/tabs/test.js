@@ -106,45 +106,109 @@ function renderTests(){
   }).join("");
 }
 
-// ---- Reaction time test ----
-let _rxState=null;
-function startReaction(){
+// ---- Sentry: reaction time, disguised as a night-watch game (Phase T / idea #1) ----
+// Same underlying measurement as before — reaction latency, scored through
+// the unchanged TESTS[0].scoreToLevel and recordTest("reaction", avg) — this
+// only replaces the presentation. A threat silhouette requires a fast tap
+// (that's the measured trial, exactly 5 per session); a decoy/wildlife
+// silhouette must be ignored — tapping one is a real, felt false alarm, not
+// a no-op, which doubles as impulse-control practice per the confirmed
+// design (planning/IDEAS-tests-fm-workouts.md §1a). No ms or timer is shown
+// during play, only game-native tallies and a slow tension ramp — the real
+// numbers (and a PR check) only appear once the watch ends, matching the
+// resolved "hide during play, honest after" rule for the whole stealth-
+// assessment workstream.
+let _sentryState=null;
+const SENTRY_SLOTS=5, SENTRY_THREATS=5, SENTRY_DECOYS=3;
+function shuffleInPlace(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function startReaction(){ startSentry(); }
+function startSentry(){
   const stage=document.getElementById("stage-reaction"); if(!stage) return;
-  if(_rxState && _rxState.timer) clearTimeout(_rxState.timer);  // cancel a previous run's pending timer
-  _rxState={trials:[], n:0, max:5, ready:false, t0:0, timer:null};
-  // main tap handler — handles both "tapped too early" and a valid green tap
-  function onTap(){
-    if(!_rxState) return;
-    if(!_rxState.ready){ // tapped before green
-      clearTimeout(_rxState.timer);
-      stage.className="test-stage rx early"; stage.textContent="Too early — wait for green. Tap to restart.";
-      stage.onclick=()=>{ startReaction(); };
-      return;
+  if(_sentryState){ clearTimeout(_sentryState.timer); clearTimeout(_sentryState.hideTimer); }
+  const rounds=shuffleInPlace([...Array(SENTRY_THREATS).fill(true), ...Array(SENTRY_DECOYS).fill(false)]);
+  _sentryState={rounds, i:-1, trials:[], falseAlarms:0, missed:0, showing:false, isThreat:false, activeSlot:null, t0:0, timer:null, hideTimer:null};
+  stage.className="test-stage";
+  stage.innerHTML=`<div class="sentry-scene" id="sentryScene">
+    <div class="sentry-tally">Threats spotted: <b id="sentrySpotted">0</b>/${SENTRY_THREATS} &nbsp;·&nbsp; False alarms: <b id="sentryAlarms">0</b></div>
+    <div class="sentry-treeline" id="sentryTreeline"></div>
+    <div class="sentry-note">Night watch — tap the instant a threat silhouette (▲) breaks the treeline. Hold on wildlife (●); a false alarm costs you.</div>
+  </div>`;
+  const scene=document.getElementById("sentryScene");
+  const treeline=document.getElementById("sentryTreeline");
+  const slots=[];
+  for(let i=0;i<SENTRY_SLOTS;i++){
+    const d=document.createElement("div"); d.className="sentry-slot"; treeline.appendChild(d);
+    d.onclick=()=>sentryTap(d);
+    slots.push(d);
+  }
+  function sentryTap(slot){
+    if(!_sentryState.showing || slot!==_sentryState.activeSlot) return;
+    _sentryState.showing=false; clearTimeout(_sentryState.hideTimer);
+    if(_sentryState.isThreat){
+      const ms=Math.round(performance.now()-_sentryState.t0);
+      _sentryState.trials.push(ms);
+      document.getElementById("sentrySpotted").textContent=_sentryState.trials.length;
+      slot.className="sentry-slot hit";
+    } else {
+      _sentryState.falseAlarms++;
+      document.getElementById("sentryAlarms").textContent=_sentryState.falseAlarms;
+      slot.className="sentry-slot alarm";
     }
-    const ms=Math.round(performance.now()-_rxState.t0);
-    _rxState.trials.push(ms); _rxState.n++;
-    _rxState.ready=false;
-    const left=_rxState.max-_rxState.n;
-    stage.className="test-stage rx"; stage.textContent=left>0?`${ms}ms — tap to continue (${left} to go)`:`${ms}ms — tap to finish`;
-    // next tap advances to the next round (or finishes), then restores the main handler
-    stage.onclick=()=>{ rxNext(); };
+    setTimeout(sentryNext, 500);
   }
-  function rxNext(){
-    if(_rxState.n>=_rxState.max){ rxDone(); return; }
-    stage.onclick=onTap;                 // restore the measuring handler for this round
-    const prog=`(${_rxState.n+1}/${_rxState.max})`;
-    stage.className="test-stage rx wait"; stage.textContent=`Wait for green… ${prog}`; _rxState.ready=false;
-    const delay=900+Math.random()*2200;
-    _rxState.timer=setTimeout(()=>{ if(!_rxState)return; stage.className="test-stage rx go"; stage.textContent=`TAP! ${prog}`; _rxState.ready=true; _rxState.t0=performance.now(); }, delay);
+  function sentryNext(){
+    _sentryState.i++;
+    if(_sentryState.i>=_sentryState.rounds.length){ sentryDone(); return; }
+    const isThreat=_sentryState.rounds[_sentryState.i];
+    _sentryState.isThreat=isThreat; _sentryState.showing=false;
+    slots.forEach(s=>{ s.className="sentry-slot"; s.textContent=""; });
+    const tenseFrac=_sentryState.i/_sentryState.rounds.length;
+    scene.className="sentry-scene"+(tenseFrac>0.5?" tense":"");
+    const delay=(900-tenseFrac*300)+Math.random()*(1800-tenseFrac*400);
+    _sentryState.timer=setTimeout(()=>{
+      const slot=slots[Math.floor(Math.random()*slots.length)];
+      _sentryState.activeSlot=slot; _sentryState.showing=true;
+      slot.className="sentry-slot "+(isThreat?"threat":"decoy");
+      slot.textContent=isThreat?"▲":"●";
+      _sentryState.t0=performance.now();
+      _sentryState.hideTimer=setTimeout(()=>{
+        if(!_sentryState.showing) return;
+        _sentryState.showing=false;
+        if(isThreat){ _sentryState.missed++; slot.className="sentry-slot missed"; }
+        setTimeout(sentryNext, 500);
+      }, isThreat?900:1100);
+    }, delay);
   }
-  function rxDone(){
-    const avg=Math.round(_rxState.trials.reduce((a,b)=>a+b,0)/_rxState.trials.length);
-    const res=recordTest("reaction", avg);
-    stage.className="test-stage rx result";
-    stage.innerHTML=`<div class="test-result"><div class="big">${avg}ms</div><div>average over ${_rxState.trials.length} (${_rxState.trials.join(", ")})</div>${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}<div class="sugg">${testSuggestion("reaction",avg)}</div></div>`;
-    stage.onclick=null; _rxState=null; render();
+  function sentryDone(){
+    const trials=_sentryState.trials;
+    const avg=trials.length?Math.round(trials.reduce((a,b)=>a+b,0)/trials.length):null;
+    const prev=bestTest("reaction");
+    const isPR=avg!=null && (!prev || avg<prev.raw);
+    const res=avg!=null?recordTest("reaction", avg):{leveled:false};
+    const missedNote=_sentryState.missed?`${_sentryState.missed} threat${_sentryState.missed!==1?'s':''} slipped past`:"";
+    const alarmNote=_sentryState.falseAlarms?`${_sentryState.falseAlarms} false alarm${_sentryState.falseAlarms!==1?'s':''}`:"clean watch, no false alarms";
+    if(res.leveled && typeof showLevelUp==="function") showLevelUp(res.sk.cat, res.sk.currentLevel);
+    // render() rebuilds the whole test list (so the card's Lv/Best badges pick
+    // up this result) — that also wipes #stage-reaction back to empty, so the
+    // results screen has to be written into a FRESH reference AFTER render(),
+    // not the pre-render `stage` var, or it's overwritten in the same tick
+    // before ever painting.
+    _sentryState=null; render();
+    const stageEl=document.getElementById("stage-reaction"); if(!stageEl) return;
+    stageEl.className="test-stage result";
+    stageEl.innerHTML = avg!=null ? `<div class="test-result">
+        <div class="big">${avg}ms</div>
+        <div>average over ${trials.length} threat${trials.length!==1?'s':''} spotted (${trials.join(", ")})${isPR?' · <span class="sentry-pr">🏆 new best</span>':''}</div>
+        <div>${[missedNote,alarmNote].filter(Boolean).join(' · ')}</div>
+        ${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}
+        <div class="sugg">${testSuggestion("reaction",avg)}</div>
+      </div>` : `<div class="test-result"><div class="big">No threats spotted</div><div>Every threat slipped past this watch — stand it again.</div></div>`;
   }
-  rxNext();   // start the first round (sets onTap and shows the first wait/green)
+  sentryNext();
 }
 
 // ---- Digit span test ----
@@ -184,9 +248,12 @@ function startDigitSpan(){
     const span=_dsState.best;
     if(span<4){ stage.className="test-stage ds result"; stage.innerHTML=`<div class="test-result"><div class="big">${span}</div><div>Give it another go — watch the digits, then chunk them.</div></div>`; _dsState=null; return; }
     const res=recordTest("digitspan", span);
-    stage.className="test-stage ds result";
-    stage.innerHTML=`<div class="test-result"><div class="big">${span} digits</div><div>your forward span</div>${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}<div class="sugg">${testSuggestion("digitspan",span)}</div></div>`;
+    // see the comment in sentryDone() — render() wipes the stage, so write
+    // results into a fresh post-render reference.
     _dsState=null; render();
+    const stageEl=document.getElementById("stage-digitspan"); if(!stageEl) return;
+    stageEl.className="test-stage ds result";
+    stageEl.innerHTML=`<div class="test-result"><div class="big">${span} digits</div><div>your forward span</div>${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}<div class="sugg">${testSuggestion("digitspan",span)}</div></div>`;
   }
 }
 
@@ -217,9 +284,12 @@ function startTyping(){
       const grossWpm=(words/secs)*60;
       const wpm=Math.max(0, Math.min(250, Math.round(grossWpm*acc))); // cap at a sane ceiling
       const res=recordTest("typing", wpm);
-      stage.className="test-stage ty result";
-      stage.innerHTML=`<div class="test-result"><div class="big">${wpm} WPM</div><div>${Math.round(acc*100)}% accuracy over ${secs.toFixed(1)}s</div>${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}<div class="sugg">${testSuggestion("typing",wpm)}</div></div>`;
+      // see the comment in sentryDone() — render() wipes the stage, so write
+      // results into a fresh post-render reference.
       _tyState=null; render();
+      const stageEl=document.getElementById("stage-typing"); if(!stageEl) return;
+      stageEl.className="test-stage ty result";
+      stageEl.innerHTML=`<div class="test-result"><div class="big">${wpm} WPM</div><div>${Math.round(acc*100)}% accuracy over ${secs.toFixed(1)}s</div>${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}<div class="sugg">${testSuggestion("typing",wpm)}</div></div>`;
     } else {
       // live accuracy hint
       let correct=0; for(let i=0;i<typed.length;i++){ if(typed[i]===text[i]) correct++; }
@@ -280,14 +350,19 @@ function startNback(){
       const total=_nbState.seq.length-_nbState.n;
       const acc=total>0?Math.round((correct/total)*100):0;
       const passed = acc>=80 && _nbState.hits>=Math.ceil(matches*0.6);
+      const nUsed=_nbState.n, hits=_nbState.hits, fa=_nbState.fa;
       let res=null;
-      if(passed) res=recordTest("nback", _nbState.n);
-      stage.className="test-stage result";
-      stage.innerHTML=`<div class="test-result"><div class="big">${passed?_nbState.n+'-back ✓':'Keep practicing'}</div>
-        <div>${acc}% accuracy · caught ${_nbState.hits}/${matches} matches · ${_nbState.fa} false alarms</div>
-        ${res&&res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}
-        <div class="sugg">${testSuggestion("nback", passed?_nbState.n:0)}</div></div>`;
+      if(passed) res=recordTest("nback", nUsed);
+      // see the comment in sentryDone() — render() wipes the stage, so write
+      // results into a fresh post-render reference (and snapshot every value
+      // read below into a local first, since _nbState is about to go away).
       _nbState=null; render();
+      const stageEl=document.getElementById("stage-nback"); if(!stageEl) return;
+      stageEl.className="test-stage result";
+      stageEl.innerHTML=`<div class="test-result"><div class="big">${passed?nUsed+'-back ✓':'Keep practicing'}</div>
+        <div>${acc}% accuracy · caught ${hits}/${matches} matches · ${fa} false alarms</div>
+        ${res&&res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}
+        <div class="sugg">${testSuggestion("nback", passed?nUsed:0)}</div></div>`;
     }
   }
 }
@@ -332,12 +407,16 @@ function startGoNoGo(){
   setTimeout(next, 700);
   function ggDone(){
     const acc=Math.round((_ggState.correct/_ggState.max)*100);
+    const maxUsed=_ggState.max;
     const res=recordTest("gonogo", acc);
-    stage.className="test-stage result";
-    stage.innerHTML=`<div class="test-result"><div class="big">${acc}%</div><div>accuracy over ${_ggState.max} signals</div>
+    // see the comment in sentryDone() — render() wipes the stage, so write
+    // results into a fresh post-render reference.
+    _ggState=null; render();
+    const stageEl=document.getElementById("stage-gonogo"); if(!stageEl) return;
+    stageEl.className="test-stage result";
+    stageEl.innerHTML=`<div class="test-result"><div class="big">${acc}%</div><div>accuracy over ${maxUsed} signals</div>
       ${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}
       <div class="sugg">${testSuggestion("gonogo", acc)}</div></div>`;
-    _ggState=null; render();
   }
 }
 
@@ -373,13 +452,16 @@ function startProcSpeed(){
     if(left<=0){ clearInterval(_psState.tick); psDone(); }
   }, 250);
   function psDone(){
-    const mpm=_psState.correct;
+    const mpm=_psState.correct, attempts=_psState.attempts;
     const res=recordTest("procspeed", mpm);
-    stage.className="test-stage result";
-    stage.innerHTML=`<div class="test-result"><div class="big">${mpm}/min</div><div>${_psState.correct} correct of ${_psState.attempts}</div>
+    // see the comment in sentryDone() — render() wipes the stage, so write
+    // results into a fresh post-render reference.
+    _psState=null; render();
+    const stageEl=document.getElementById("stage-procspeed"); if(!stageEl) return;
+    stageEl.className="test-stage result";
+    stageEl.innerHTML=`<div class="test-result"><div class="big">${mpm}/min</div><div>${mpm} correct of ${attempts}</div>
       ${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}
       <div class="sugg">${testSuggestion("procspeed", mpm)}</div></div>`;
-    _psState=null; render();
   }
 }
 
@@ -417,11 +499,14 @@ function startMathSprint(){
   function mmDone(){
     const cpm=_mmState.correct;
     const res=recordTest("mathsprint", cpm);
-    stage.className="test-stage result";
-    stage.innerHTML=`<div class="test-result"><div class="big">${cpm}/min</div><div>correct answers in 60s</div>
+    // see the comment in sentryDone() — render() wipes the stage, so write
+    // results into a fresh post-render reference.
+    _mmState=null; render();
+    const stageEl=document.getElementById("stage-mathsprint"); if(!stageEl) return;
+    stageEl.className="test-stage result";
+    stageEl.innerHTML=`<div class="test-result"><div class="big">${cpm}/min</div><div>correct answers in 60s</div>
       ${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}
       <div class="sugg">${testSuggestion("mathsprint", cpm)}</div></div>`;
-    _mmState=null; render();
   }
 }
 
@@ -496,8 +581,12 @@ function rdDone(){
     }
     save();
     const sugg=adjWpm>=500?"Excellent pace with comprehension — that's proficient speed-reading territory. Maintain with regular varied reading.":adjWpm>=300?"Solid pace. Push further with regression-elimination (force yourself not to re-read) and chunking 2–3 words at a time.":adjWpm>=200?"Average reading speed. Try pacing with a finger or pointer to reduce fixation time, and minimize re-reading.":"Focus on comprehension first — speed follows. Read daily on varied material and don't skim to inflate the number.";
-    stage.innerHTML=`<div class="test-result"><div class="big">${adjWpm} WPM</div><div>${wpm} raw · ${comp==="yes"?"full":"partial"} comprehension applied</div>${leveled&&sk?`<div class="leveled">⬆️ Reading speed → Level ${sk.currentLevel}</div>`:''}<div class="sugg">${sugg}</div></div>`;
+    // see the comment in sentryDone() — render() wipes the stage (and here,
+    // renderReadingTest() also rebuilds #stage-reading the same way), so
+    // write results into a fresh post-render reference.
     _rdState=null; render();
+    const stageEl=document.getElementById("stage-reading"); if(!stageEl) return;
+    stageEl.innerHTML=`<div class="test-result"><div class="big">${adjWpm} WPM</div><div>${wpm} raw · ${comp==="yes"?"full":"partial"} comprehension applied</div>${leveled&&sk?`<div class="leveled">⬆️ Reading speed → Level ${sk.currentLevel}</div>`:''}<div class="sugg">${sugg}</div></div>`;
   });
 }
 

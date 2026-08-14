@@ -1557,7 +1557,7 @@ const SEED_SKILLS=[
   {name:"Reaction speed", cat:"cognitive", setKey:"cog_r_speed", synthesizedFrom:"cog_u_reaction", parent:"Speed",fadeDays:30, auto:"test:reaction",
    tiers:[{label:"Average",upTo:5},{label:"Quick",upTo:7},{label:"Fast",upTo:9},{label:"Human-Limit",upTo:10}],
    why:"How fast your brain turns 'I see it' into 'I moved' matters for driving, shooting, sports, and safety. Measuring it shows real improvement and warns you when fatigue is slowing you down.",
-   whatYouDo:"In the Test tab: stare at the box, and the instant it changes, tap as fast as you can. Don't tap early. It averages several tries. Lower ms is better — ~250ms is normal, under 200ms is fast.",
+   whatYouDo:"In the Test tab: stand night watch in Sentry. Tap the instant a threat silhouette breaks the treeline; hold on wildlife — a false alarm costs you. Your reaction time on the 5 real threats is averaged; lower ms is better — ~250ms is normal, under 200ms is fast.",
    howTo:"Reaction is part trainable, part fixed. You improve it by anticipating less and responding cleaner, by being well-rested (it's very fatigue-sensitive), and by repeated practice on the exact task. There's a hard floor — signals physically take ~100ms to travel — so the top levels approach a biological limit, not a skill gap.",
    levels:["React under 400ms average","React under 350ms","React under 300ms","React under 270ms","React under 250ms (about average)","React under 230ms","React under 215ms (quick)","React under 200ms (fast)","React under 180ms average","React under ~150ms — near the human floor (~100ms signal latency)"],
    roadmap:["<400ms","<350ms","<300ms","<270ms","<250ms","<230ms","<215ms","<200ms","<180ms","~150ms (human floor)"],
