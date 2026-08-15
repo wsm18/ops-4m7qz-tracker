@@ -316,6 +316,62 @@ function skDaysLeft(sk){
   const next=(sk.lastQuestTs||Date.now())+(fd+grace)*864e5;
   return Math.ceil((next-Date.now())/864e5);
 }
+// ===== X-SmartFocus: whole-tree leverage recommender (idea B) =====
+// Surfaces the single highest-leverage already-started skill to re-engage
+// right now. Distinct from Today's Hand's random daily draw (today.js) and
+// from getWarriorsFocus()'s single "next action" decay check (today.js) —
+// this is a whole-tree SCORED ranking, not a random sample or a first-match
+// pick, weighted toward Cyber-branch commissioning relevance.
+//
+// Two deliberate, honest scoping choices, confirmed with Wyatt before
+// building:
+// - Path weight is a plain, visible multiplier (1.5x War/Craft/Knowledge/
+//   Command — tactical/technical/academic/leadership — vs. 1.0x for the
+//   other six Paths), not a hidden black-box score.
+// - "Opportunity" is peakLevel - effectiveLevel (a real, already-tracked
+//   number), not "how close to the next level." The app has no way to
+//   measure fractional progress toward an unearned level (levels are
+//   earned via real benchmarks, not a continuous XP bar), so inventing
+//   that number would be a faked metric. Practically, this means the gap
+//   is usually 0 until a skill has actually decayed (currentLevel only
+//   moves down for a couple of explicitly read-only auto-skills — see
+//   CLAUDE.md's weight:integrity note — decay itself is a computed, not
+//   stored, drop) — so the recommender only ever surfaces skills you've
+//   already started and either let slip or are about to. Fresh discovery
+//   is Today's Hand's job, not this one's.
+const SMARTFOCUS_PATH_WEIGHT={tactical:1.5, technical:1.5, academic:1.5, leadership:1.5};
+function smartFocusPathWeight(cat){ return SMARTFOCUS_PATH_WEIGHT[cat]||1.0; }
+function computeSmartFocus(){
+  const skills=(S.lifeSkills||[]).filter(s=>!s.group && s.currentLevel>0 && s.levels && s.levels.length);
+  let best=null, bestScore=0;
+  skills.forEach(sk=>{
+    const eff=skEffectiveLevel(sk);
+    const peak=Math.max(sk.peakLevel||0, sk.currentLevel||0);
+    const state=skFadeState(sk);
+    const daysLeft=skDaysLeft(sk);
+    let urgency=0;
+    if(state==="at-risk" && daysLeft!=null){
+      const fd=sk.fadeDays||30, grace=fd*0.2;
+      urgency = grace>0 ? Math.max(0, Math.min(1, (grace-Math.max(0,daysLeft))/grace)) : 0;
+    }
+    const opportunity=Math.max(0, peak-eff);
+    const raw=urgency+opportunity;
+    if(raw<=0) return;
+    const score=raw*smartFocusPathWeight(sk.cat);
+    if(score>bestScore){ bestScore=score; best={sk, eff, peak, urgency, opportunity, daysLeft}; }
+  });
+  if(!best) return null;
+  const pm=(typeof PATH_META!=="undefined"&&PATH_META[best.sk.cat])||{name:best.sk.cat, icon:"🌳", color:"var(--gold)"};
+  let why;
+  if(best.opportunity>0 && best.urgency>0){
+    why=`down to level ${best.eff} (peak ${best.peak}) and ${best.daysLeft} day${best.daysLeft!==1?'s':''} from slipping further`;
+  } else if(best.opportunity>0){
+    why=`down to level ${best.eff} — ${best.opportunity} below your peak of ${best.peak}. One practice tap reclaims it.`;
+  } else {
+    why=`${best.daysLeft} day${best.daysLeft!==1?'s':''} from decaying past its grace period`;
+  }
+  return {sk:best.sk, path:pm, why};
+}
 // generate the active quest for a skill: maintain current, reclaim decayed, or promote
 function skQuest(sk){
   const eff=skEffectiveLevel(sk);

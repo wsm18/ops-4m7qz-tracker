@@ -227,6 +227,22 @@ function seededShuffle(arr, seed){
   }
   return a;
 }
+// X-SmartFocus callout — the single highest-leverage skill to re-engage
+// right now, per computeSmartFocus() (skills-core.js). Supplements Today's
+// Hand's random draw rather than replacing it; silent when nothing in the
+// tree currently has real urgency or a real peak/effective gap to close.
+function smartFocusCalloutHtml(){
+  const rec=typeof computeSmartFocus==="function"?computeSmartFocus():null;
+  if(!rec) return "";
+  return `<div class="sf-callout" style="--sf-col:${rec.path.color||'var(--gold)'}">
+    <span class="sf-ic">🎯</span>
+    <div class="sf-body">
+      <div class="sf-lbl">Your real priority</div>
+      <div class="sf-skill">${esc(rec.sk.name)} <span class="sf-path">${rec.path.icon||''} ${esc(rec.path.name||'')}</span></div>
+      <div class="sf-why">${esc(rec.why)}</div>
+    </div>
+  </div>`;
+}
 // Today's Hand — 5 started skills drawn from deterministic daily shuffle
 function renderTodaysHand(){
   const started=(S.lifeSkills||[]).filter(s=>!s.group&&s.currentLevel>0&&s.levels&&s.levels.length);
@@ -251,7 +267,7 @@ function renderTodaysHand(){
       <button class="td-go-sm" data-skpractice="${esc(sk.id)}" title="Mark practiced">✓</button>
     </div>`;
   }).join('');
-  return `<div class="td-card fn-card"><div class="td-h fn-h">Today's Hand <span style="font-size:11px;color:var(--muted)">daily draw</span></div><div class="th-hand">${cardHtml}</div></div>`;
+  return `<div class="td-card fn-card"><div class="td-h fn-h">Today's Hand <span style="font-size:11px;color:var(--muted)">daily draw</span></div>${smartFocusCalloutHtml()}<div class="th-hand">${cardHtml}</div></div>`;
 }
 // Quick PT Log — lightweight workout entry without opening Log tab
 function renderQuickLog(){
