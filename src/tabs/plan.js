@@ -348,6 +348,7 @@ function renderCoachToday(){
         <ol class="coach-list">${items}</ol>
         ${coolHtml}
         ${p.todayLogged?`<div class="coach-done">✓ Logged today — nice work.</div>`:`<button class="btn-add" id="coachLogBtn" data-sess="${p.sessionKey}">Log this session →</button>`}
+        ${(!p.todayLogged && typeof cgAvailableToday==="function" && cgAvailableToday())?`<button class="hb-starter-btn" id="coachCardGameBtn" style="margin-top:8px">🎴 Play it as a card-game workout instead</button>`:''}
         <p class="coach-tip">Tap any exercise's name in the session list below for the full how-to.</p>
       </div>`;
     }
@@ -359,6 +360,8 @@ function renderCoachToday(){
     const nav=document.querySelector('#sideNav button[data-tab="log"]'); if(nav) nav.click();
     setTimeout(()=>{ const sel=document.getElementById("lgSession"); if(sel){ sel.value=lb.dataset.sess; if(sel.onchange) sel.onchange(); } }, 60);
   };
+  const cgb=document.getElementById("coachCardGameBtn");
+  if(cgb) cgb.onclick=()=>{ if(typeof cgOpen==="function") cgOpen(); };
 }
 
 // ===== Gym-access-aware weekly planning (FM-1) =====

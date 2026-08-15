@@ -63,6 +63,7 @@ const JS_FILES = [
   'tabs/aft.js',             // renderAft, renderAftStandardBar, EVENT_FOCUS
   'tabs/log.js',             // workout log, PT system, fmtSec, AREA_LABEL, baseline
   'tabs/plan.js',            // renderSkillBalance, renderCoachToday, renderBaseline
+  'tabs/cardgame.js',        // FM-3: card-game workout mode (cgOpen, draw/log loop)
   'tabs/board.js',           // renderBoard, add-task handler
   'tabs/weight.js',          // W_WEIGHTS, coin jars, renderWeight, importWeightLedger
   'tabs/awards.js',          // renderAwards, renderMemberships, renderEvents, renderVolunteer

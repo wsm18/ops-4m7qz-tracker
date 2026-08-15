@@ -277,6 +277,7 @@ function render(){
   if(typeof renderProfile==="function") renderProfile();
   if(typeof renderEmergencyAndBlood==="function") renderEmergencyAndBlood();
   if(typeof renderVitals==="function") renderVitals();
+  if(typeof renderFocusPicker==="function") renderFocusPicker();
   if(typeof renderTests==="function") renderTests();
   if(typeof renderReadingTest==="function") renderReadingTest();
   if(typeof renderSRS==="function") renderSRS();

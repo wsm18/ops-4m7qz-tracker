@@ -1,3 +1,45 @@
+// ===== Focus picker: "what do you want to train today?" (Phase T, idea #1's own §1 ask) =====
+// The last unbuilt piece of the stealth-assessment workstream — Wyatt's
+// original ask was to present a menu of what to train, not a flat list of
+// named tests. Now that every construct is a real game, this is a thin
+// front door onto the existing per-test cards: pick a tile, it scrolls to
+// and starts that game directly. The detailed list below still exists for
+// stats/history — this doesn't replace it, just stops it being the first
+// thing you see.
+const FOCUS_TILES=[
+  {key:"reflexes",testId:"reaction",icon:"🌲",label:"Reflexes",blurb:"Stand night watch — pure reaction speed."},
+  {key:"memory",testId:"digitspan",icon:"🗺️",label:"Memory",blurb:"Memorize and relay a route."},
+  {key:"typing",testId:"typing",icon:"📻",label:"Typing",blurb:"Type fast under a radio deadline."},
+  {key:"workingmem",testId:"nback",icon:"🗼",label:"Working memory",blurb:"Track a rotating patrol."},
+  {key:"impulse",testId:"gonogo",icon:"🎯",label:"Impulse control",blurb:"Target discrimination under pressure."},
+  {key:"procspeed",testId:"procspeed",icon:"🔐",label:"Processing speed",blurb:"Decode a stream of symbols fast."},
+  {key:"math",testId:"mathsprint",icon:"💥",label:"Math",blurb:"Quick fire-mission arithmetic."},
+  {key:"reading",testId:"reading",icon:"📡",label:"Reading",blurb:"Read fast, act on what it said."},
+  {key:"knowledge",quiz:true,icon:"🐿️",label:"Knowledge",blurb:"Climb Yggdrasil on real ROTC knowledge."},
+];
+function renderFocusPicker(){
+  const el=document.getElementById("focusPicker"); if(!el) return;
+  el.innerHTML=`<div class="fp-grid">${FOCUS_TILES.map(t=>`<button class="fp-tile" data-fp="${t.key}"><span class="fp-icon">${t.icon}</span><span class="fp-label">${esc(t.label)}</span><span class="fp-blurb">${esc(t.blurb)}</span></button>`).join("")}</div>`;
+  el.querySelectorAll("[data-fp]").forEach(btn=>{
+    const tile=FOCUS_TILES.find(t=>t.key===btn.dataset.fp);
+    btn.onclick=()=>focusPickerGo(tile);
+  });
+}
+function focusPickerGo(tile){
+  if(tile.quiz){
+    const navBtn=document.querySelector('#sideNav button[data-tab="quizzes"]');
+    if(navBtn) navBtn.click();
+    return;
+  }
+  const card=document.getElementById("test-"+tile.testId);
+  if(!card) return;
+  card.scrollIntoView({behavior:"smooth", block:"start"});
+  setTimeout(()=>{
+    const startBtn=card.querySelector("[data-teststart],[data-rdstart]");
+    if(startBtn) startBtn.click();
+  }, 350);
+}
+
 // ===== TEST tab: cognitive tests/trainers =====
 // Each test: id, name, the skill it feeds, and scoreToLevel(raw)->1..N.
 const TESTS=[
