@@ -39,6 +39,28 @@ const _navMoreBtn=document.getElementById("navMoreBtn");
 if(_navMoreBtn) _navMoreBtn.onclick=()=>{ S.navExpanded=!S.navExpanded; save(); applyNavMore(); };
 applyNavMode();
 
+// Collapsible per-category nav groups (GUI revamp Phase B) — tap a category
+// header to show/hide just that group's tabs. Defaults to expanded (matches
+// the always-visible behavior every group had before this existed); state
+// is DOM-only, not persisted to S — a low-stakes display convenience, not
+// user data worth a save-schema field.
+function initNavGroupToggles(container){
+  if(!container) return;
+  container.querySelectorAll(".nav-group-h").forEach(h=>{
+    h.onclick=()=>{
+      h.classList.toggle("collapsed");
+      const hidden=h.classList.contains("collapsed");
+      let el=h.nextElementSibling;
+      while(el && !el.classList.contains("nav-group-h")){
+        el.style.display=hidden?"none":"";
+        el=el.nextElementSibling;
+      }
+    };
+  });
+}
+initNavGroupToggles(document.getElementById("navMore"));
+initNavGroupToggles(document.querySelector(".mobile-drawer-panel"));
+
 // Mobile bottom-bar drawer (≤560px) — ephemeral UI state, not persisted; a fresh
 // launch always starts with it closed, same as any other modal in the app.
 function closeMobileDrawer(){ document.getElementById("mobileDrawer")?.classList.remove("open"); }
