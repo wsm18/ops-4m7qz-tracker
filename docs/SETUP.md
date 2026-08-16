@@ -27,7 +27,7 @@ If you skip this, you can still edit and preview the app manually (step 5), you 
 
 When you start a Claude Code session, tell it to read the docs first. A good opening prompt:
 
-> Read CLAUDE.md and OPERATIONS-HANDOFF.md, then confirm you understand the project, the current version, and the build/verify/package workflow before we start. Don't change anything yet.
+> Read CLAUDE.md and docs/OPERATIONS-HANDOFF.md, then confirm you understand the project, the current version, and the build/verify/package workflow before we start. Don't change anything yet.
 
 Claude Code automatically picks up **CLAUDE.md** as repo instructions, but asking it to confirm context first keeps it on the rails. The key rules it must follow are in CLAUDE.md (honesty, offline, preserve progress, auto-skills-never-self-reportable, bump versions, run the regression).
 
@@ -36,15 +36,15 @@ Claude Code automatically picks up **CLAUDE.md** as repo instructions, but askin
 ```bash
 # after Claude makes an edit to index.html:
 npm run check         # fast syntax check (no browser)
-npm run regress       # loads the app headless, clicks all 16 tabs, asserts no JS errors
+npm run regress       # loads the app headless, clicks all 18 tabs, asserts no JS errors
 npm run verify        # = check + regress
 
 # when changing the tree, capture a screenshot to eyeball it:
 npm run regress -- --shot     # writes dist/tree.png  (open it in VS Code)
 
 # before shipping a change:
-#   - bump SKILL_LADDER_VER in index.html  (only if a skill ladder/tier/guidance changed)
-#   - bump the cache string in sw.js:  operations-vNN -> vN+1   (always)
+#   - bump SKILL_LADDER_VER in src/core/migration.js  (only if a skill ladder/tier/guidance changed)
+#   - bump the cache string in sw.js:  operations-vNN -> vN+1   (only if something actually shipped)
 npm run package       # regenerates icons + builds dist/operations.zip and dist/operations-preview.html
 ```
 

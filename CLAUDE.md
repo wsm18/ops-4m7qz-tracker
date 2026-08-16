@@ -1,6 +1,6 @@
 # CLAUDE.md — Operating rules for AI assistants in this repo
 
-You are continuing work on **Operations**, a gamified ROTC + life-tracker PWA. Read this file first, then **`docs/OPERATIONS-HANDOFF.md`** for full architecture and history. This file is the short, binding rulebook.
+You are continuing work on **Operations**, a gamified ROTC + life-tracker PWA. Read this file first, then **`docs/OPERATIONS-HANDOFF.md`** for orientation (who the user is, how the big systems fit together) and **`planning/FINISHED-FEATURES.md`** for the full feature history. This file is the short, binding rulebook.
 
 ---
 
@@ -174,11 +174,10 @@ When in doubt about scope or a design decision, ask the user — he iterates del
 # Last updated: 2026-07-09 09:07
 
 ## File map
-- README.md: README.md describes Operations PWA: single-file ROTC life-tracker with 93 skills, Yggdrasil tree, offline-first, v88 caching, migrations, 10 Paths, 16 tabs.
+- README.md: README.md describes Operations PWA: single-file ROTC life-tracker with 12,524 skills across a 5-tier synthesis pyramid, Yggdrasil tree, offline-first, v192 caching, migrations, 10 Paths, 18 tabs.
 - docs/HOW TO INSTALL.txt: Installation guide for OPERATIONS ROTC tracker app; covers feature overview, setup via Netlify, quiz editing, and cross-device data synchronization methods.
-- docs/OPERATIONS-HANDOFF.md: Full project handoff documentation: covers purpose, file layout, build workflow, 16-tab structure, skill system with paths, ladders, and progression rules.
+- docs/OPERATIONS-HANDOFF.md: Fast-onboarding orientation doc: who the user is, the skill pyramid's structure, and pointers to the other reference docs for detail.
 - docs/SETUP.md: Setup guide for cloning Operations, installing Node/Python deps, configuring Claude Code, and the edit-verify-package-deploy workflow.
-- docs/operations-expansion-outline.md: Expansion spec for Operations PWA covering health vitals, cognitive skills, habits tracking, in-app testing, study plans, and practice routing system.
 - index.html: Generated PWA shell assembling CSS theme variables, hero header, navigation tabs, stat displays, and mobile-responsive Yggdrasil-themed interface structure.
 - manifest.json: Manifest for Operations PWA: configures display mode, theme colors, start URL, app metadata, and launcher icon assets.
 - package-lock.json: npm lockfile for operations-pwa v88.0.0, recording exact versions of playwright 1.61.1 and transitive dependencies.
@@ -197,7 +196,6 @@ When in doubt about scope or a design decision, ask the user — he iterates del
 - personal/volunteer.txt: Volunteer service records totaling 69.53 hours from 2022â€“2024 across Athletic Department, American Legion, and NHS, with organization breakdown and pending additions.
 - personal/wall-additions.json: JSON import file: corrections and new awards/memberships/honors/events/volunteer entries to merge into the Operations PWA user save file.
 - planning/FINISHED-FEATURES.md: Permanent Operations PWA reference: design system (Yggdrasil, 10-path color palette), architecture overview, and completed features history indexed by version.
-- planning/IDEAS-tests-fm-workouts.md: Planning document proposing stealth-assessment game concepts for cognitive tests; outlines game-mechanics roadmaps for reaction-time, memory, n-back, math, reading, quizzes with measurement requirements.
 - planning/IMPROVEMENTS-skills-expansion.md: Planning document listing new skill entries (T1â€“T8 tactical: M17, CBRN, grenades, law, battle drills, SALUTE, rappelling, MDMP); no code exports.
 - planning/NEXT-SESSION-PROMPT.md: Session-resume guide for Operations PWA v156; provides current state, required-reading checklist, git-workflow reminders, and lessons-learned from v148â€“v154 development phases.
 - planning/SESSION-TIMES.md: Session timing log tracking wall-clock work duration by phase; table records date, start/end, elapsed time, notes; no code exports.

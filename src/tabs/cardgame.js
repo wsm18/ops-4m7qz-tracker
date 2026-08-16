@@ -1,7 +1,8 @@
-// ===== FM-3: Card-game workouts (idea #5) =====
-// Full session-flow spec per planning/IDEAS-tests-fm-workouts.md §5, using
-// the confirmed §5a math — greenlit for a full build (not a one-slot
-// prototype) after being deliberately held in planning for several sessions.
+// ===== FM-3: Card-game workouts =====
+// Full design rationale and deviations from the original spec are documented
+// in the v188 entry of planning/FINISHED-FEATURES.md — read that before
+// touching this file. Greenlit for a full build (not a one-slot prototype)
+// after being deliberately held in planning for several sessions.
 //
 // Architecture (Wyatt's own framing): "the coach gives the material... the
 // game mode picks exercises to work those." This build takes that literally
@@ -11,27 +12,26 @@
 // slot's real prescribed volume. The card game is a presentation + pacing
 // layer on top of that existing, trusted material — not a parallel system.
 //
-// One real, documented deviation from §5a's literal spec: §5a assumed each
+// One real, documented deviation from the original spec: it assumed each
 // exercise slot has exactly 4 fixed "regression" variants at different
 // difficulty tiers. The real SESSIONS data (built in FM-2) isn't shaped
 // that way — a slot's eligible pool is 1-5 DIFFERENT real exercises for the
 // same muscle group (not a hard->easy ladder of one movement), and nothing
 // in the app tracks a real relative-difficulty ranking between them.
 // Inventing one would be a faked metric (a CLAUDE.md hard-rule violation),
-// so every variant in a pool gets an equal value multiplier here — §5a's
-// "conversion rate" math still runs, it just always evaluates to 1, which
-// is the honest choice given what the app actually knows. Suits still map
-// to different real exercises (bucketing a variable-length pool onto 4
-// suits, the same "bucket into N real options" idea §5a already used to
-// solve its own variable-suit-count problem), and reps still scale by rank
+// so every variant in a pool gets an equal value multiplier here — the
+// original "conversion rate" math still runs, it just always evaluates to 1,
+// which is the honest choice given what the app actually knows. Suits still
+// map to different real exercises (bucketing a variable-length pool onto 4
+// suits, the same "bucket into N real options" idea already used to solve
+// the original variable-suit-count problem), and reps still scale by rank
 // — the game feel is intact, just without a fabricated difficulty score.
 //
-// The progressive-overload guardrails (§5a point 5) are a hard clamp, not
-// an emergent property to hope for: every draw's reps land in an
-// [8%,12%]-of-threshold band by construction (interpolated by rank within
-// that band), so "roughly 8-13 draws per group" and "never wildly overshoot
-// the real prescription" hold for any threshold, not just the doc's own
-// 36-rep worked example. The adaptive difficulty-bias (too easy/too hard)
+// The progressive-overload guardrails are a hard clamp, not an emergent
+// property to hope for: every draw's reps land in an [8%,12%]-of-threshold
+// band by construction (interpolated by rank within that band), so "roughly
+// 8-13 draws per group" and "never wildly overshoot the real prescription"
+// hold for any threshold. The adaptive difficulty-bias (too easy/too hard)
 // nudges the rank draw INSIDE that band — it can never push a single draw
 // outside the safety bounds.
 

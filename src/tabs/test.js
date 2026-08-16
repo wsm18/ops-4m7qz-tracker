@@ -155,7 +155,7 @@ function renderTests(){
 // (that's the measured trial, exactly 5 per session); a decoy/wildlife
 // silhouette must be ignored — tapping one is a real, felt false alarm, not
 // a no-op, which doubles as impulse-control practice per the confirmed
-// design (planning/IDEAS-tests-fm-workouts.md §1a). No ms or timer is shown
+// design (see the v186 entry in planning/FINISHED-FEATURES.md). No ms or timer is shown
 // during play, only game-native tallies and a slow tension ramp — the real
 // numbers (and a PR check) only appear once the watch ends, matching the
 // resolved "hide during play, honest after" rule for the whole stealth-
@@ -484,8 +484,8 @@ function startPerimeterWatch(){
 // acc) — only the skin changed. The green-circle/red-square go/no-go pair
 // becomes hostile (▲, tap to engage) vs. friendly/non-combatant (●, hold
 // fire) — a real, legitimate ROTC target-discrimination concept (Wyatt
-// confirmed this framing directly — see planning/IDEAS-tests-fm-workouts.md
-// §1a), tasteful abstract silhouettes, no graphic content.
+// confirmed this framing directly — see the v186/v187 entries in
+// planning/FINISHED-FEATURES.md), tasteful abstract silhouettes, no graphic content.
 let _ggState=null;
 function startGoNoGo(){ startFireDiscipline(); }
 function startFireDiscipline(){
@@ -660,7 +660,7 @@ function startFireMission(){
 // pick the one that's actually consistent with what the report said.
 // Whether you pick correctly *is* the comprehension measurement, an
 // objective decision-correctness signal replacing self-report (confirmed
-// direction in planning/IDEAS-tests-fm-workouts.md §1a).
+// direction — see the v187 entry in planning/FINISHED-FEATURES.md).
 const READING_PASSAGES=[
   {title:"FM 6-0 Excerpt",words:284,text:"Mission command is the exercise of authority and direction by the commander using mission orders to enable disciplined initiative within the commander's intent to empower agile and adaptive leaders in the conduct of unified land operations. Mission command rests on the principle that subordinate leaders must be able to act and make decisions rapidly and on their own initiative to exploit fleeting opportunities. The key to success in mission command is trust — trust developed through shared understanding and the exercise of disciplined initiative. Leaders at all levels must understand the commander's intent two levels up. This understanding allows them to act in the absence of orders and to adapt their actions to the changing situation. The commander creates a shared understanding by clearly expressing his intent, providing mission-type orders, and creating an environment that fosters initiative. Subordinate leaders are empowered to make decisions within the framework established by the commander. They must not wait for orders when the situation changes rapidly. Instead, they must act boldly and decisively to accomplish the mission. The Army's doctrine of mission command has its roots in the 19th-century Prussian military model of Auftragstaktik, which emphasized decentralized decision-making and trust in subordinate judgment. This model proved decisive in numerous campaigns and remains the foundation of Army leadership today.",
    scenario:"Situation changes rapidly and you can't reach the commander. What do you do?",

@@ -5,7 +5,7 @@ A gamified ROTC + life-tracker **Progressive Web App** for a single user (Wyatt,
 - **Stack:** one big `index.html` (HTML + CSS + JS) + a `quizbank.js` + a service worker. No framework, no build step to *run* it, no external runtime dependencies.
 - **Data:** lives in the browser's `localStorage` per device, with an optional cloud-file (JSON) backup/sync.
 - **Install:** "Add to Home Screen" on a phone/tablet, or open `index.html` in any browser.
-- **Current version:** **v88** (see `sw.js` cache string). 16 tabs, 93 skills across 10 themed Paths.
+- **Current version:** **v192** (see `sw.js` cache string). 18 tabs, 12,524 skills across 10 themed Paths, structured as a five-tier synthesis pyramid (Common → Uncommon → Rare → Legendary → Mythic, 16 Mythic trees total).
 
 > The build tooling (Node + Playwright + Python) exists only for **testing and packaging**. The app itself ships as static files and runs with zero dependencies.
 
@@ -36,19 +36,20 @@ Then the loop is:
 
 ```bash
 npm run check               # fast: syntax-check the main script (no browser)
-npm run regress             # full: load app headless, click all 16 tabs, assert no errors
+npm run regress             # full: load app headless, click all 18 tabs, assert no errors
 npm run verify              # check + regress together
 npm run package             # build dist/operations.zip + dist/operations-preview.html
 ```
 
-See **SETUP.md** for the detailed Claude-Code-in-VS-Code workflow, and **CLAUDE.md** for the rules an AI assistant must follow when editing this repo.
+See **docs/SETUP.md** for the detailed Claude-Code-in-VS-Code workflow, and **CLAUDE.md** for the rules an AI assistant must follow when editing this repo.
 
 ---
 
 ## Repository layout
 
 ```
-index.html              The entire app (HTML + CSS + JS in one file, ~8,200 lines)
+index.html              The entire app (HTML + CSS + JS in one file, generated — never edit directly)
+src/                    Source files — edit these, then `python scripts/build.py`
 quizbank.js             The 16 ROTC quiz banks, loaded via <script src>
 sw.js                   Service worker; holds the cache version string ("operations-vNN")
 manifest.json           PWA manifest
@@ -57,14 +58,21 @@ icon-512.png
 HOW TO INSTALL.txt      End-user install instructions
 
 README.md               This file
-SETUP.md                Step-by-step dev setup for VS Code + Claude Code
 CLAUDE.md               Operating rules for AI assistants editing this repo (READ FIRST)
-OPERATIONS-HANDOFF.md   Full project context: architecture, systems, decisions, history
+EXPANSION.md            Open, unimplemented future-expansion proposal ("The Long Campaign")
+docs/
+  SETUP.md              Step-by-step dev setup for VS Code + Claude Code
+  OPERATIONS-HANDOFF.md Fast-onboarding orientation: who the user is, how the big systems fit together
+planning/
+  FINISHED-FEATURES.md  The permanent reference: design language, architecture, every shipped feature by version
+  NEXT-SESSION-PROMPT.md Current session-resume state — what's open, what's closed
+  SESSION-TIMES.md      Wall-clock session-time log
+  IMPROVEMENTS-skills-expansion.md  Deferred future skill-content proposal
 
 package.json            npm scripts (check / regress / preview / package / icons / verify)
 scripts/
   check_syntax.js       Syntax-check index.html's main script (no execution)
-  regress.js            Headless Playwright regression across all 16 tabs (+ --shot)
+  regress.js            Headless Playwright regression across all 18 tabs (+ --shot)
   build_preview.py      Inline quizbank.js into a single operations-preview.html
   package.js            Bump cache, regen icons, zip the app, build the preview
   make_icons.py         Regenerate the chevron app icons (PIL)
@@ -77,7 +85,7 @@ dist/                   Build outputs (git-ignored): operations.zip, operations-
 
 ## What the app does (one-paragraph tour)
 
-Open it and the **Today** tab aggregates what to do now: habit quests, skills needing attention, the training advisory, vitals/donation reminders, and AFT pass status. The **Skills** tab is the heart: 93 skills organized into 10 **Paths** (Body, War, Mind, Vitality, Craft, Command, Knowledge, Self, Hearth, Roots), each skill with a measurable level ladder (level = a thing you can *do*, anchored at the top to a documented human ceiling), decay over time (but never below level 1 once started), and an all-time **peak**. A **List ↔ Tree** toggle renders the skills as a Yggdrasil world-tree: a trunk with a seven-world crown and three foundational worlds in the roots. Other tabs cover the Army **AFT** (official scoring tables), **quizzes** + spaced-repetition, a **training planner**, vitals + Apple-Health import, awards/records, a counseling log, checklists, board prep, and a **Weight** promise-ledger that the **Integrity** skill mirrors read-only.
+Open it and the **Today** tab aggregates what to do now: habit quests, skills needing attention, the training advisory, vitals/donation reminders, AFT pass status, a unified "Upcoming" deadline view, and a cross-domain insight/leverage recommender. The **Skills** tab is the heart: 12,524 skills organized into 10 **Paths** (Body, War, Mind, Vitality, Craft, Command, Knowledge, Self, Hearth, Roots), structured as a five-tier synthesis pyramid (Common → Uncommon → Rare → Legendary → Mythic). Each skill has a measurable level ladder (level = a thing you can *do*, anchored at the top to a documented human ceiling), decay over time (but never below level 1 once started), and an all-time **peak**. A **List ↔ Tree** toggle renders the Paths as a Yggdrasil world-tree: a trunk with a seven-world crown and three foundational worlds in the roots. Other tabs cover the Army **AFT** (official scoring tables) with a guided mock-AFT walkthrough, **quizzes** + spaced-repetition, an adaptive **training planner** (gym-access-aware scheduling, equipment-profile-aware exercise pools, rep/set/weight targets that adapt to logged difficulty, plus gamified card-game workouts), 9 real cognitive-testing mini-games, vitals + Apple-Health import, awards/records, a structured After-Action Review journal, a counseling log, checklists, board prep, and a **Weight** promise-ledger that the **Integrity** skill mirrors read-only.
 
 ---
 
@@ -90,7 +98,7 @@ Open it and the **Today** tab aggregates what to do now: habit quests, skills ne
 5. **Auto skills are earned, never self-reported.** Skills with an `auto:` field level only from measured/logged data — there is no tap-to-level on them.
 6. **Symbolism is a feature.** The tree-of-growth / Yggdrasil theme is woven in intentionally, not decoration.
 
-A fuller list lives in `CLAUDE.md` and `OPERATIONS-HANDOFF.md`.
+A fuller list lives in `CLAUDE.md` and `docs/OPERATIONS-HANDOFF.md`.
 
 ---
 
