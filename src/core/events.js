@@ -27,6 +27,11 @@ document.querySelectorAll("nav.tabs button[data-tab]").forEach(b=>b.onclick=()=>
   const jb=document.getElementById("skJumpbar"); if(jb) jb.classList.toggle("show", b.dataset.tab==="skills");
   // if a secondary tab was clicked, ensure More section is open so it shows as active
   if(b.closest("#navMore") && !S.navExpanded){ S.navExpanded=true; save(); applyNavMore(); }
+  // Plan tab: expand today's actual scheduled session (per the adaptive
+  // scheduler), not always Session 1 — the layout should reflect what the
+  // coach actually has you doing today. Called once per visit, not on every
+  // render(), so it doesn't fight a manual collapse afterward.
+  if(b.dataset.tab==="plan" && typeof openTodaysSessionBlock==="function") openTodaysSessionBlock();
   closeMobileDrawer();
   window.scrollTo(0,0);
 });

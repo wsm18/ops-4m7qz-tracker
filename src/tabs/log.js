@@ -478,26 +478,5 @@ function computeTarget(name){
 }
 function fmtSec(s){s=Math.round(s);const m=Math.floor(s/60);const r=s%60;return m>0?`${m}:${String(r).padStart(2,'0')}`:`${r}s`;}
 
-function renderAdaptiveTargets(){
-  const el=document.getElementById("adaptiveTargets");
-  if(!el) return;
-  // unique exercise names from the log
-  const names=[...new Set((S.workouts||[]).flatMap(w=>(w.exercises||[]).map(e=>e.name)))];
-  if(!names.length){
-    el.innerHTML=`<div class="adapt-card"><h3>🎯 Adaptive Targets</h3><div class="adapt-empty">Log a few workouts (Log tab) and personalized next-session targets will appear here, auto-adjusting to your progress — pushing you when you're improving, holding when you've stalled.</div></div>`;
-    return;
-  }
-  const rows=names.map(n=>{
-    const t=computeTarget(n);
-    if(!t) return "";
-    return `<div class="adapt-row"><div class="adapt-ex"><div class="nm">${esc(n)}</div><div class="note">${esc(t.note||"")}</div></div><div class="adapt-tgt ${t.hold?'hold':''}">${esc(t.target)}</div></div>`;
-  }).filter(Boolean).join("");
-  el.innerHTML=`<div class="adapt-card">
-    <h3>🎯 Your Next-Session Targets</h3>
-    <div class="adapt-sub">Auto-calculated from your workout log. Green = push harder; amber = hold/fix before adding. Beat these and they climb.</div>
-    ${rows}
-  </div>`;
-}
-
 const AREA_LABEL={legs:"legs",push:"push (chest/shoulders)",pull:"pull (back)",core:"core",cardio:"cardio/running"};
 // Reads every Physical leaf skill, finds laggards vs strengths, and builds whole-body guidance.

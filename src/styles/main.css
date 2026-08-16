@@ -481,18 +481,10 @@
   .lg-hist .del-w{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:15px;float:right}
   .lg-hist .del-w:hover{color:var(--blood)}
 
-  /* ---- Adaptive targets (FM auto-rewrite) ---- */
+  /* ---- Branch-fact card (board.js reuses this base for its Cyber/branch card) ---- */
   .adapt-card{background:linear-gradient(180deg,#1d2416,#171c11);border:1px solid var(--jade);border-radius:var(--radius-lg);padding:var(--space-7);margin-bottom:var(--space-6)}
   .adapt-card h3{font-size:14px;color:var(--jade);letter-spacing:.05em;margin-bottom:4px;display:flex;align-items:center;gap:7px}
   .adapt-sub{font-size:12px;color:var(--ink-faint);margin-bottom:11px;line-height:1.5}
-  .adapt-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px;gap:10px}
-  .adapt-row:last-child{border-bottom:none}
-  .adapt-ex{flex:1;min-width:0}
-  .adapt-ex .nm{font-weight:600}
-  .adapt-ex .note{font-size:11.5px;color:var(--ink-faint);margin-top:2px}
-  .adapt-tgt{font-weight:700;color:var(--gold-bright);flex:none;text-align:right;font-size:14px}
-  .adapt-tgt.hold{color:var(--ember)}
-  .adapt-empty{font-size:13px;color:var(--ink-faint);padding:4px 0}
   .cy-fact{font-size:13px;color:var(--ink-dim);padding:6px 0;border-bottom:1px solid var(--line);line-height:1.5}
   .cy-fact:last-child{border-bottom:none}
   .cy-fact b{color:var(--violet)}
@@ -2284,6 +2276,10 @@
 .rx-table th{text-align:left;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);padding:0 6px 5px;border-bottom:1px solid var(--line)}
 .rx-table td{padding:5px 6px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--ink-dim)}
 .rx-table tr:last-child td{border-bottom:none}
+.rx-adaptive-row td{color:var(--ink)}
+.rx-adaptive{font-weight:700;color:var(--gold-bright)}
+.rx-adaptive.hold{color:var(--ember)}
+.rx-adapt-note{font-weight:400;color:var(--ink-faint);font-size:11px}
 
 /* ── Feature: Skill practiced button (v111) */
 .sk-footer-actions{display:flex;gap:6px;align-items:center}

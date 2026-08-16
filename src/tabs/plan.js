@@ -456,6 +456,21 @@ function renderEquipProfileUI(){
 }
 
 // Fill each session writeup's exercise list based on the active equipment profile (FM-2).
+// Expands the Session N reference block that matches today's actual
+// scheduled session (per the adaptive gym-access-aware scheduler,
+// assignWeekSessions()/todaysPlan()) instead of always Session 1 regardless
+// of what's really happening today. Deliberately only called once per tab
+// visit (from the nav click handler), not on every render() — re-forcing
+// it open on every render would fight a user who manually collapses it.
+function openTodaysSessionBlock(){
+  const p=typeof todaysPlan==="function"?todaysPlan():null;
+  const todayKey=p&&p.sessionKey;
+  document.querySelectorAll(".sess-ex").forEach(div=>{
+    const details=div.closest("details.wk");
+    if(!details) return;
+    details.open = (div.getAttribute("data-sess")===todayKey);
+  });
+}
 function renderSessionLists(){
   // weather picker
   const wp=document.getElementById("weatherBtns");
@@ -502,14 +517,27 @@ function renderSessionLists(){
       // exercise name than the session list just above it whenever today's
       // pick was an alt/swap. Rows with no honest starter data are skipped
       // rather than shown with a name that doesn't match what's above.
+      //
+      // Real logged/AFT history (computeTarget(), the same engine behind
+      // Coach Today and the Adaptive Targets card) takes priority over the
+      // static beginner-starter row whenever it exists — this table should
+      // show what YOU should actually do next, not a generic starting point
+      // you've already outgrown. The beginner row is only a fallback for an
+      // exercise with zero logged/AFT history.
       const rxRows=rich?rx.gym:rx.bw;
+      let anyAdaptive=false;
       const rows=workItems.map(e=>{
+        const at=typeof computeTarget==="function"?computeTarget(e.n):null;
+        if(at){ anyAdaptive=true; return `<tr class="rx-adaptive-row"><td>${esc(e.n)}</td><td colspan="4">🎯 <span class="rx-adaptive${at.hold?' hold':''}">${esc(at.target)}</span>${at.note?` <span class="rx-adapt-note">(${esc(at.note)})</span>`:''}</td></tr>`; }
         const match=typeof cgFindRxRow==="function"?cgFindRxRow(rxRows,e.n):null;
         return match?`<tr><td>${esc(match.name)}</td><td>${esc(String(match.sets))}</td><td>${esc(String(match.reps))}</td>${(rich&&match.weight)?`<td>${esc(match.weight)}</td>`:'<td></td>'}<td>${esc(match.rest||'')}</td></tr>`:'';
       }).filter(Boolean).join('');
       if(!rows) return;
+      const rxNote=anyAdaptive
+        ? "🎯 rows are your real next-session target, adapted from your own log/AFT history. Others are the beginner starting point — log a session to start adapting those too."
+        : "New to this? Start here. Add reps when all sets feel easy — not before.";
       div.insertAdjacentHTML('afterend',
-        `<div class="rx-card"><p class="rx-note">New to this? Start here. Add reps when all sets feel easy — not before.</p>
+        `<div class="rx-card"><p class="rx-note">${esc(rxNote)}</p>
         <table class="rx-table"><thead><tr><th>Exercise</th><th>Sets</th><th>Reps</th>${rich?'<th>Start weight</th>':'<th></th>'}<th>Rest</th></tr></thead>
         <tbody>${rows}</tbody></table>
         <p class="rx-effort">Stop each set when you could still do 2 clean reps. That margin is what makes this sustainable for months.</p></div>`

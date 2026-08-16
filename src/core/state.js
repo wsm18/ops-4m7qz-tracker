@@ -300,7 +300,6 @@ function render(){
   if(typeof renderEquipProfileUI==="function") renderEquipProfileUI();
   if(typeof renderCoachToday==="function") renderCoachToday();
   if(typeof renderSkillsTab==="function") renderSkillsTab();
-  if(typeof renderAdaptiveTargets==="function") renderAdaptiveTargets();
   if(typeof renderBaseline==="function") renderBaseline();
   if(typeof renderBoard==="function") renderBoard();
   if(typeof renderWeight==="function") renderWeight();
