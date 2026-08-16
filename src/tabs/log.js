@@ -334,9 +334,47 @@ function baselineTrend(bkey){
   return {def, latest, prev, latestVol:baselineVolume(def,latest), prevVol:prev?baselineVolume(def,prev):null};
 }
 
+// The 4 AFT events with a clean, unambiguous 1:1 exercise-name match (SDC has
+// no single canonical logged exercise — it's simulated via several different
+// carry/drag variants depending on equipment — so it's deliberately left out
+// rather than guessing at a fuzzy match).
+const AFT_EXERCISE_KEY={
+  "Trap-bar / barbell deadlift":"dl",
+  "Hand-release push-ups":"hrp",
+  "Plank":"plank",
+  "Timed 2-mile":"run",
+  "Timed 2-mile (treadmill)":"run",
+};
+const AFT_KEY_LOWER_BETTER={dl:false,hrp:false,plank:false,run:true};
+// last two real AFT raw event values for a logged exercise name (S.aft entries
+// are always appended in order, same "last two array elements" convention
+// already used elsewhere for S.aft — no date parsing needed).
+function aftTrendFor(name){
+  const key=AFT_EXERCISE_KEY[name];
+  if(!key) return null;
+  const entries=(S.aft||[]).filter(a=>a.raw&&a.raw[key]!=null);
+  if(!entries.length) return null;
+  const latest=entries[entries.length-1].raw[key];
+  const prev=entries.length>1?entries[entries.length-2].raw[key]:null;
+  return {key,latest,prev,lowerBetter:AFT_KEY_LOWER_BETTER[key]};
+}
 function computeTarget(name){
   const s=exerciseSeries(name);
-  if(!s.length) return null;
+  if(!s.length){
+    // No logged workout sets yet — if this exercise has a clean AFT-event
+    // match and real AFT history exists, seed from that real number instead
+    // of going silent. Deliberately doesn't invent a working-set percentage
+    // off a max-effort AFT test (a faked-formula risk) — just anchors to the
+    // real tested number and lets normal set-by-set progression take over
+    // once a first set is actually logged.
+    const at=aftTrendFor(name);
+    if(!at) return null;
+    if(at.key==="dl") return {target:`log your first working set (last AFT max: ${at.latest} lb)`, note:"no logged sets yet — start conservative below that max, then targets adapt from your own log"};
+    if(at.key==="hrp") return {target:`${at.latest} reps`, note:`based on your last AFT push-up count (${at.latest}) — not yet logged as a workout here`};
+    if(at.key==="plank") return {target:`${fmtSec(at.latest)}`, note:`based on your last AFT plank hold — not yet logged as a workout here`};
+    if(at.key==="run") return {target:`beat ${fmtSec(at.latest)}`, note:`based on your last AFT 2-mile time — not yet logged as a workout here`};
+    return null;
+  }
   const last=s[s.length-1];
   const ex=last.ex;
   const lowerBetter=(ex.type==="dist")||(ex.type==="time" && /run|sprint|drag|sdc|200m/i.test(name));
@@ -371,6 +409,22 @@ function computeTarget(name){
       }
     } else {
       baselineNote=" (anchored to this month's baseline)";
+    }
+  }
+  // ---- AFT BLENDING (same corroborating-signal pattern as baseline blending) ----
+  const at=aftTrendFor(name);
+  if(at){
+    if(at.prev!=null){
+      const aftBetter = at.lowerBetter ? at.latest<at.prev-0.01 : at.latest>at.prev+0.01;
+      const aftWorse  = at.lowerBetter ? at.latest>at.prev+0.01 : at.latest<at.prev-0.01;
+      if(aftBetter){
+        if(stalled||trend==="flat"||trend==="down"){ stalled=false; trend="up"; baselineNote+=" (your last AFT also improved on this event — keep climbing)"; }
+        else baselineNote+=" (your last AFT confirms progress on this event)";
+      } else if(aftWorse && (stalled||trend==="flat")){
+        baselineNote+=" (your last AFT also dropped on this event)";
+      }
+    } else {
+      baselineNote+=` (last real AFT on this event: ${at.key==="dl"?at.latest+" lb":at.key==="hrp"?at.latest+" reps":fmtSec(at.latest)})`;
     }
   }
   // ---- EFFORT / REDUCED SIGNAL (FM-Adapt) ----
