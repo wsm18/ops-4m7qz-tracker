@@ -17,11 +17,15 @@ function buildLogForm(skey){
   renderReadinessBtns();
   renderRpeBtns();
 }
-// Shared renderer for any 1-10 rating button group: matches buttons by their
-// data-attribute value against a current value, toggling the "on" class.
+// Shared renderer for any 1-10 rating button group: generates the 10 buttons
+// and marks the current value "on" in one pass. Replaces 3 near-identical
+// hand-copied 20-line button blocks that used to live in log.html — the
+// click delegation in this file already reads the same data-attributes off
+// whatever's in the DOM, so regenerating the markup here needs no other change.
 function renderRatingBtns(containerId, attr, value){
   const el=document.getElementById(containerId); if(!el) return;
-  el.querySelectorAll(`[data-${attr}]`).forEach(b=>b.classList.toggle("on", +b.dataset[attr]===value));
+  el.innerHTML=Array.from({length:10},(_,i)=>i+1)
+    .map(n=>`<button type="button" class="lg-ready-btn${n===value?' on':''}" data-${attr}="${n}">${n}</button>`).join("");
 }
 function renderReadinessBtns(){ if(LG) renderRatingBtns("lgReadinessBtns","readiness",LG.readiness); }
 function renderRpeBtns(){ if(LG) renderRatingBtns("lgRpeBtns","rpe",LG.rpe); }

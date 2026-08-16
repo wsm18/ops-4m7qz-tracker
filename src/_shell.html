@@ -9,9 +9,6 @@
 <meta name="apple-mobile-web-app-title" content="Operations">
 <title>OPERATIONS · Carved at the Root</title>
 <link rel="manifest" href="manifest.json">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
 @@INJECT_CSS@@
@@ -48,6 +45,11 @@
   </header>
 
   <div class="main-row">
+  <!-- Nav split rationale (GUI revamp): desktop primary-7 = tabs you open
+       every session; the "More" drawer groups the rest by actual function
+       instead of one flat historical list (previously: whichever 7 tabs
+       existed first stayed primary, every tab added since just got
+       appended to the bottom of More with no re-evaluation). -->
   <nav class="tabs" id="sideNav">
     <button class="nav-toggle" id="navToggle" title="Toggle labels"><span class="ic">≡</span><span class="lbl">Menu</span></button>
     <!-- Primary — always visible -->
@@ -60,18 +62,24 @@
     <button data-tab="skills"><span class="ic">🌳</span><span class="lbl">The Tree</span></button>
     <!-- More toggle -->
     <button class="nav-more-toggle" id="navMoreBtn"><span class="ic">···</span><span class="lbl">More</span></button>
-    <!-- Secondary — hidden until More is tapped -->
+    <!-- Secondary — hidden until More is tapped. Grouped by actual function
+         (testing/study, identity & record, objectives, reflection & reward)
+         instead of one flat undifferentiated list. -->
     <div class="nav-more" id="navMore">
-      <button data-tab="profile"><span class="ic">🪪</span><span class="lbl">Profile</span></button>
+      <div class="nav-group-h">Testing &amp; Study</div>
       <button data-tab="quizzes"><span class="ic">📚</span><span class="lbl">Quiz</span></button>
       <button data-tab="test"><span class="ic">🧪</span><span class="lbl">Test</span></button>
-      <button data-tab="garden"><span class="ic">🌿</span><span class="lbl">The Grove</span></button>
-      <button data-tab="bosses"><span class="ic">⚔️</span><span class="lbl">Trials</span></button>
-      <button data-tab="board"><span class="ic">📈</span><span class="lbl">Muster</span></button>
-      <button data-tab="shop"><span class="ic">🍺</span><span class="lbl">Mead Hall</span></button>
-      <button data-tab="trophies"><span class="ic">🏺</span><span class="lbl">Carved Rings</span></button>
+      <div class="nav-group-h">Identity &amp; Record</div>
+      <button data-tab="profile"><span class="ic">🪪</span><span class="lbl">Profile</span></button>
       <button data-tab="awards"><span class="ic">🏆</span><span class="lbl">The Wall</span></button>
       <button data-tab="records"><span class="ic">📖</span><span class="lbl">Saga</span></button>
+      <button data-tab="trophies"><span class="ic">🏺</span><span class="lbl">Carved Rings</span></button>
+      <div class="nav-group-h">Objectives</div>
+      <button data-tab="bosses"><span class="ic">⚔️</span><span class="lbl">Trials</span></button>
+      <button data-tab="board"><span class="ic">📈</span><span class="lbl">Muster</span></button>
+      <div class="nav-group-h">Reflection &amp; Reward</div>
+      <button data-tab="shop"><span class="ic">🍺</span><span class="lbl">Mead Hall</span></button>
+      <button data-tab="garden"><span class="ic">🌿</span><span class="lbl">The Grove</span></button>
       <button data-tab="weight"><span class="ic">⚖️</span><span class="lbl">Weight</span></button>
     </div>
   </nav>
@@ -82,9 +90,13 @@
   </div><!-- /content-col -->
   </div><!-- /main-row -->
 
-  <!-- Mobile-only bottom bar (≤560px) — the 4 most-used tabs, plus a Menu button
-       opening the drawer below for everything else. Buttons share class="tabs" with
-       #sideNav so the existing nav.tabs click-delegation picks them up for free. -->
+  <!-- Mobile-only bottom bar (≤560px) — the 4 tabs you open every day, in
+       seconds, without thinking (a bottom bar has a hard practical ceiling
+       around 4-5 + a Menu button on a phone screen — this is deliberately
+       NOT the same count as desktop's primary-7, which has room for tabs
+       you open every session but don't need instantly). Buttons share
+       class="tabs" with #sideNav so the existing nav.tabs click-delegation
+       picks them up for free. -->
   <nav class="tabs mobile-bar" id="mobileBar">
     <button data-tab="today"><span class="ic">🌅</span><span class="lbl">Dawn</span></button>
     <button data-tab="dailies"><span class="ic">📋</span><span class="lbl">Tasks</span></button>
@@ -94,20 +106,28 @@
   </nav>
   <div class="mobile-drawer" id="mobileDrawer">
     <div class="mobile-drawer-backdrop" id="mobileDrawerBackdrop"></div>
+    <!-- Plan/AFT/Log are desktop-primary but land here on mobile — pinned as
+         their own first, labeled group instead of buried alphabetically-by-
+         accident among the same 11 tabs desktop hides in "More". -->
     <nav class="tabs mobile-drawer-panel">
+      <div class="nav-group-h">Training</div>
       <button data-tab="plan"><span class="ic">📕</span><span class="lbl">FM Plan</span></button>
       <button data-tab="aft"><span class="ic">💪</span><span class="lbl">AFT</span></button>
       <button data-tab="log"><span class="ic">🏋️</span><span class="lbl">Log</span></button>
-      <button data-tab="profile"><span class="ic">🪪</span><span class="lbl">Profile</span></button>
+      <div class="nav-group-h">Testing &amp; Study</div>
       <button data-tab="quizzes"><span class="ic">📚</span><span class="lbl">Quiz</span></button>
       <button data-tab="test"><span class="ic">🧪</span><span class="lbl">Test</span></button>
-      <button data-tab="garden"><span class="ic">🌿</span><span class="lbl">The Grove</span></button>
-      <button data-tab="bosses"><span class="ic">⚔️</span><span class="lbl">Trials</span></button>
-      <button data-tab="board"><span class="ic">📈</span><span class="lbl">Muster</span></button>
-      <button data-tab="shop"><span class="ic">🍺</span><span class="lbl">Mead Hall</span></button>
-      <button data-tab="trophies"><span class="ic">🏺</span><span class="lbl">Carved Rings</span></button>
+      <div class="nav-group-h">Identity &amp; Record</div>
+      <button data-tab="profile"><span class="ic">🪪</span><span class="lbl">Profile</span></button>
       <button data-tab="awards"><span class="ic">🏆</span><span class="lbl">The Wall</span></button>
       <button data-tab="records"><span class="ic">📖</span><span class="lbl">Saga</span></button>
+      <button data-tab="trophies"><span class="ic">🏺</span><span class="lbl">Carved Rings</span></button>
+      <div class="nav-group-h">Objectives</div>
+      <button data-tab="bosses"><span class="ic">⚔️</span><span class="lbl">Trials</span></button>
+      <button data-tab="board"><span class="ic">📈</span><span class="lbl">Muster</span></button>
+      <div class="nav-group-h">Reflection &amp; Reward</div>
+      <button data-tab="shop"><span class="ic">🍺</span><span class="lbl">Mead Hall</span></button>
+      <button data-tab="garden"><span class="ic">🌿</span><span class="lbl">The Grove</span></button>
       <button data-tab="weight"><span class="ic">⚖️</span><span class="lbl">Weight</span></button>
     </nav>
   </div>

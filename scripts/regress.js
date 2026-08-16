@@ -10,7 +10,7 @@ const path = require("path");
 
 const ROOT = path.resolve(__dirname, "..");
 const SHOT = process.argv.includes("--shot");
-const MIME = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".png": "image/png", ".txt": "text/plain", ".webmanifest": "application/manifest+json" };
+const MIME = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".png": "image/png", ".txt": "text/plain", ".webmanifest": "application/manifest+json", ".woff2": "font/woff2" };
 
 const server = http.createServer((req, res) => {
   let p = decodeURIComponent(req.url.split("?")[0]);

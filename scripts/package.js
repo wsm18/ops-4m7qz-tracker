@@ -10,15 +10,16 @@ const ROOT = path.resolve(__dirname, "..");
 const DIST = path.join(ROOT, "dist");
 fs.mkdirSync(DIST, { recursive: true });
 
-const FILES = ["index.html", "quizbank.js", "sw.js", "manifest.json", "icon-192.png", "icon-512.png", "docs/HOW TO INSTALL.txt", "README.md"];
+const FILES = ["index.html", "quizbank.js", "sw.js", "manifest.json", "icon-192.png", "icon-512.png", "docs/HOW TO INSTALL.txt", "README.md", "fonts/oswald.woff2", "fonts/roboto-condensed.woff2"];
 const present = FILES.filter((f) => fs.existsSync(path.join(ROOT, f)));
 const out = path.join(DIST, "operations.zip");
 if (fs.existsSync(out)) fs.unlinkSync(out);
 
 try {
-  // system zip (quote filenames with spaces)
+  // system zip — NOT -j (junk paths): fonts/*.woff2 must keep their "fonts/"
+  // prefix, since main.css references them with that relative path.
   const list = present.map((f) => `"${f}"`).join(" ");
-  execSync(`zip -j "${out}" ${list}`, { cwd: ROOT, stdio: "ignore" });
+  execSync(`zip "${out}" ${list}`, { cwd: ROOT, stdio: "ignore" });
   console.log("packaged (system zip):", out);
 } catch (e) {
   // fallback: minimal store-only zip writer (no compression) in pure Node

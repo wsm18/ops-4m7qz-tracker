@@ -465,7 +465,15 @@ function renderSessionLists(){
     const swapped = list.some(e=>e._swapped);
     const pickOne = SESSIONS[skey] && SESSIONS[skey].pickOne;
     const pickNote = pickOne ? `<div class="pickone-note">Pick <b>one</b> per run day — the plan rotates these for you.</div>` : "";
-    const exLi=e=>`<li>${esc(e.n)}${e.w?' <span class="sess-eq">· equipment</span>':''}${e._swapped?` <span class="sess-swap">· indoors for weather</span>`:''}${(e._pool&&e._pool.length>1)?` <span class="sess-alt">· ${e._pool.length-1} alt${e._pool.length>2?'s':''}</span>`:''}</li>`;
+    // Per-exercise how-to, sourced live from the same EX_HOWTO array Coach
+    // Today already uses — replaces the old static "Glossary" details block,
+    // which hand-copied this same text and could silently drift out of sync
+    // if SESSIONS/EX_HOWTO ever changed. One source of truth, browsable here
+    // for any session (not just today's), on request instead of by default.
+    const exLi=e=>{
+      const how=exHowto(e.n);
+      return `<li>${esc(e.n)}${e.w?' <span class="sess-eq">· equipment</span>':''}${e._swapped?` <span class="sess-swap">· indoors for weather</span>`:''}${(e._pool&&e._pool.length>1)?` <span class="sess-alt">· ${e._pool.length-1} alt${e._pool.length>2?'s':''}</span>`:''}${how?`<details class="ex-how"><summary>ℹ️ how-to</summary><div class="ex-how-body">${esc(how)}</div></details>`:''}</li>`;
+    };
     const warmItems=list.filter(e=>e._phase==="warmup");
     const workItems=list.filter(e=>e._phase==="work"||e._phase==="flex"||e._phase==="balance"||!e._phase);
     const coolItems=list.filter(e=>e._phase==="cooldown");

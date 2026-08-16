@@ -4,29 +4,34 @@
     <div id="coachToday"></div>
     <div id="skillBalance"></div>
     <div id="recoveryAdvisory"></div>
-    <div id="adaptiveTargets"></div>
     <div class="plan-intro">
       Built to max your <b>AFT</b> (Deadlift · Hand-Release Push-up · Sprint-Drag-Carry · Plank · 2-Mile Run) and rebuild strength + endurance after your break. Runs <b>on top of ROTC PT</b>: on weeks you have PT, count it as one session and do the rest. Aim for <b>4 hard sessions/week</b> (never two hard days back-to-back) plus the <b>Mobility + Balance day</b> on an easy/rest day — it adds recovery, not fatigue.
     </div>
 
-    <div id="equipProfileArea"></div>
-
-    <div class="gym-toggle" id="weatherPick">
-      <div class="gym-toggle-row">
-        <div>
-          <div class="gym-toggle-label">Weather (outdoor work)</div>
-          <div class="gym-toggle-sub" id="weatherSub">Clear — outdoor runs as planned</div>
-        </div>
-      </div>
-      <div class="weather-btns" id="weatherBtns"></div>
-      <div class="gym-toggle-note">Set the conditions and outdoor work (runs, sprints) on days with no gym access swaps to indoor alternatives — same muscles and effort, just inside. Tap <b>Clear</b> when it's fine to head back outside.</div>
-    </div>
-    <div class="phase" style="background:rgba(184,160,106,.06);border-color:var(--line)">🔀 <b>Every slot in every session is a small pool of tagged variants</b>, not one fixed exercise — the coach suggests whichever your <b>active equipment profile</b> (above) unlocks, and a "swap" button on any exercise in Today's Orders lets you pick a different eligible one if you'd rather. That's also where day-to-day variety comes from, and where ROTC-trailer gear (water jugs, weighted stretcher) shows up as real alternates on the carry/drag slots. Opt into <b>Swim</b> or <b>Rock Climbing</b> in the Equipment Profiles card above and the coach will suggest them on days your profile has a pool or climbing-wall tag.</div>
-    <div class="phase" style="background:rgba(127,174,107,.08);border-color:#3c5230">🌱 <b style="color:var(--jade)">Lean &amp; bodyweight focus.</b> This plan builds relative strength and lean muscle — the kind that helps your run and push-up scores, not bulk that slows them. The trick: get stronger by making bodyweight moves <i>harder</i> (tougher leverage, slower tempo, more reps, less rest), not by adding mass. External load stays minimal and only where the AFT demands it (deadlift + carries).</div>
-
-    <div id="gymAccessArea"></div>
-
     <div id="planPriorities"></div>
+
+    <details class="wk card-raised">
+      <summary><span class="wk-day">⚙️ Setup</span> Equipment, weather, gym access &amp; adaptive targets</summary>
+      <div class="wk-body">
+        <div id="equipProfileArea"></div>
+
+        <div class="gym-toggle" id="weatherPick">
+          <div class="gym-toggle-row">
+            <div>
+              <div class="gym-toggle-label">Weather (outdoor work)</div>
+              <div class="gym-toggle-sub" id="weatherSub">Clear — outdoor runs as planned</div>
+            </div>
+          </div>
+          <div class="weather-btns" id="weatherBtns"></div>
+          <div class="gym-toggle-note">Set the conditions and outdoor work (runs, sprints) on days with no gym access swaps to indoor alternatives — same muscles and effort, just inside. Tap <b>Clear</b> when it's fine to head back outside.</div>
+        </div>
+        <div class="phase" style="background:rgba(var(--gold-rgb),.06);border-color:var(--line)">🔀 <b>Every slot in every session is a small pool of tagged variants</b>, not one fixed exercise — the coach suggests whichever your <b>active equipment profile</b> (above) unlocks, and a "swap" button on any exercise in Today's Orders lets you pick a different eligible one if you'd rather. That's also where day-to-day variety comes from, and where ROTC-trailer gear (water jugs, weighted stretcher) shows up as real alternates on the carry/drag slots. Opt into <b>Swim</b> or <b>Rock Climbing</b> in the Equipment Profiles card above and the coach will suggest them on days your profile has a pool or climbing-wall tag.</div>
+        <div class="phase" style="background:rgba(127,174,107,.08);border-color:#3c5230">🌱 <b style="color:var(--jade)">Lean &amp; bodyweight focus.</b> This plan builds relative strength and lean muscle — the kind that helps your run and push-up scores, not bulk that slows them. The trick: get stronger by making bodyweight moves <i>harder</i> (tougher leverage, slower tempo, more reps, less rest), not by adding mass. External load stays minimal and only where the AFT demands it (deadlift + carries).</div>
+
+        <div id="gymAccessArea"></div>
+        <div id="adaptiveTargets"></div>
+      </div>
+    </details>
 
     <details class="wk" open><summary><span class="wk-day">📅 Week</span> Your 7-day plan · something every day, no overload</summary>
       <div class="wk-body">
@@ -114,133 +119,6 @@
         </ul>
         <p class="wk-target">Why it matters for you: better single-leg stability transfers directly to lunges, the Sprint-Drag-Carry, rucking on uneven ground, and land nav — and it's a documented way to cut ankle/knee injury risk.</p>
         <p class="wk-target">⚠️ Always within reach of something to grab. If you have an injury or dizziness, keep eyes open and skip the unstable-surface levels.</p>
-      </div>
-    </details>
-
-    <details class="wk"><summary><span class="wk-day">📖 Glossary</span> How to perform every exercise (by session)</summary>
-      <div class="wk-body">
-        <p class="wk-target">Don't know a name? Find the session below and read the plain-language how-to. Each session lists its <b>No-equipment</b> moves and its <b>Gym</b> moves separately — they train the same muscles. "Reps" = one full movement; "each side/leg" = full count one side then the other.</p>
-
-        <p class="gl-h">🔥 Warm-up (dynamic) &amp; 🧊 Cool-down (static) — how every session actually starts and ends</p>
-        <p class="wk-target">Every session's own list below is just the <b>working sets</b>. The app automatically adds a real warm-up before and a real cool-down after, matched to that session's specific muscles — so a leg day gets leg-focused prep and a pull day gets shoulder/back-focused prep, not the same generic three stretches every time. That's a real distinction, not just labels: a <b>warm-up is dynamic</b> — moving drills that raise your heart rate and take the joint through its range — because holding a stretch on a cold muscle actually reduces power output and doesn't prepare you to lift or sprint hard. A <b>cool-down is static</b> — held stretches — because your muscles are warm by then, which is when holding a stretch actually helps range of motion and recovery. This is also exactly where Session 5's flexibility block draws from, so "cool-down stretch" and "flexibility work" are the same pool, not two different things to remember.</p>
-        <p class="wk-target">Warm-up moves (dynamic — keep moving, never hold these):</p>
-        <ul class="gl">
-          <li><b>Leg swings (front-back / side-side):</b> Hold a wall, swing one leg in a controlled arc, then switch. Warms the hips and hamstrings for a leg day.</li>
-          <li><b>Walking lunges with a torso twist:</b> Step into a lunge, rotate your torso toward the front leg as you stand, walk forward.</li>
-          <li><b>Bodyweight squats, slow:</b> Squat under control to near-parallel, stand. A leg-day opener, not a hard set.</li>
-          <li><b>Arm circles / arm swings:</b> Small-to-large circles, or swing your arms across your chest and back out — opens the shoulders for a push or pull day.</li>
-          <li><b>Cat-cow flow / standing torso twists:</b> Flow your spine through arch-and-sag on hands and knees, or rotate standing with loose arms — core/back prep.</li>
-          <li><b>High knees / butt kicks:</b> Jog in place driving knees up, or kicking heels to your glutes — raises your heart rate for a cardio or circuit day.</li>
-          <li><b>Inchworm to push-up:</b> Hinge over, walk your hands out to a push-up, do one, walk back up. Hamstrings, shoulders, and core together.</li>
-          <li><b>Hip circles / ankle circles:</b> Slow circles at the hip or ankle, both directions, to open the joint before loading it.</li>
-          <li><b>World's-greatest-stretch:</b> A deep lunge with a reaching torso rotation — despite the name, this one's dynamic (moving through it, not held). Opens hips, back, and shoulders together.</li>
-          <li><b>Band shoulder dislocates:</b> Take a band from in front of you, up and overhead, to behind you, then back — needs a resistance band.</li>
-        </ul>
-        <p class="wk-target">Cool-down stretches (static — hold each one, ~30s ×2/side, muscles already warm):</p>
-        <ul class="gl">
-          <li><b>Standing quad stretch:</b> Hold a wall, pull one heel toward your butt, knees together, hips forward. Hold, switch.</li>
-          <li><b>Standing hamstring stretch:</b> Heel out in front, leg straight, hinge forward at the hips with a flat back. Hold, switch.</li>
-          <li><b>Kneeling hip-flexor stretch:</b> Kneel on one knee, other foot flat in front, tuck your hips under and push gently forward. Hold, switch.</li>
-          <li><b>Figure-4 glute stretch:</b> Lying on your back, cross one ankle over the opposite knee, pull that thigh toward your chest. Hold, switch.</li>
-          <li><b>Calf stretch:</b> Hands on a wall, one foot back and straight, heel down; bend that knee to shift the stretch lower. Hold each, switch.</li>
-          <li><b>Doorway chest/shoulder stretch:</b> Forearm on a door frame, step through gently. Hold, switch arms.</li>
-          <li><b>Cross-body shoulder stretch:</b> Pull one straight arm across your chest with the other arm. Hold, switch.</li>
-          <li><b>Overhead lat stretch:</b> Reach one arm overhead, grab that wrist, lean your torso to the opposite side. Hold, switch.</li>
-          <li><b>Overhead triceps stretch:</b> Reach one arm overhead, bend the elbow, gently press it back with the other hand. Hold, switch.</li>
-          <li><b>Child's pose:</b> Sit back toward your heels, reach your arms forward, let your chest sink. Breathe and relax.</li>
-          <li><b>Seated spinal twist:</b> Sitting, rotate your torso to one side using your arm for leverage. Hold, switch.</li>
-          <li><b>Wrist/forearm stretch:</b> Extend one arm, palm up, gently pull the fingers back; repeat palm-down. Switch arms.</li>
-        </ul>
-
-        <p class="gl-h">Session 1 — Lower + Push</p>
-        <p class="wk-target">No-equipment:</p>
-        <p class="wk-target" style="margin-bottom:4px">🔥/🧊 Warm-up and cool-down for this session are composed automatically, matched to legs/push/core — see the section above.</p>
-        <ul class="gl">
-          <li><b>Reverse lunge (no support):</b> From standing, step one foot straight back and lower until both knees are about 90°, then drive through the front heel back to standing. No bench needed — you control the depth. Alternate or finish one leg then switch.</li>
-          <li><b>Single-leg glute bridge:</b> Lie on your back, knees bent, one foot flat and the other leg extended. Push through the planted heel to lift your hips into a straight line, squeeze the glute at the top, lower. Trains the same posterior chain a deadlift does, with zero gear.</li>
-          <li><b>Hand-release push-ups:</b> A push-up where, at the bottom, you lower fully to the floor and lift your hands off for a moment, then place them and press up. The AFT version — stops you bouncing out of the bottom.</li>
-          <li><b>Pike push-ups:</b> From a push-up position, walk your feet in and raise your hips into an upside-down V. Bend your elbows to lower the top of your head toward the floor between your hands, then press up. Bodyweight overhead-press for the shoulders.</li>
-          <li><b>Shrimp / split squat (floor):</b> A single-leg squat done flat on the floor — no bench. Stand on one leg, hold the other foot behind you (shrimp) or just keep it lifted, and lower under control as far as you can, then stand. Scale by holding a wall. Builds single-leg strength without a bench's "just-right height."</li>
-          <li><b>Hollow-body hold:</b> Lie on your back, press your lower back into the floor, lift shoulders and legs a few inches so your body makes a shallow banana. Hold and breathe. Bend knees or keep arms down to make it easier.</li>
-          <li><b>Single-leg hip hinge (airplane):</b> Stand on one leg, slight knee bend. Hinge at the hip — tip your torso forward and float the free leg straight behind you, arms out like wings — then stand tall. Hamstrings, glutes, and balance, no weight needed.</li>
-        </ul>
-        <p class="wk-target">Gym (equipment):</p>
-        <ul class="gl">
-          <li><b>Bulgarian split squat (bench):</b> Rest the top of your back foot on a bench behind you, lower the front leg until the thigh is ~parallel, drive back up through the front heel. Needs a bench of the right height — that's why it's the gym version.</li>
-          <li><b>Single-leg RDL (dumbbells):</b> The airplane hinge holding a dumbbell, for added load on the hamstrings/glutes.</li>
-          <li><b>Barbell / DB bench press:</b> Lying on a bench, press the bar or dumbbells from your chest to straight arms. The loaded chest press.</li>
-          <li><b>Overhead press:</b> Standing, press a barbell or dumbbells from your shoulders to overhead. The loaded version of the pike push-up.</li>
-          <li><b>Leg press or goblet squat:</b> Leg press = push a weighted platform with your legs on the machine. Goblet squat = hold a dumbbell at your chest and squat. Either loads the legs.</li>
-          <li><b>Cable / machine crunch:</b> Loaded core flexion on a cable or ab machine.</li>
-          <li><b>Trap-bar / barbell deadlift:</b> Lift a loaded bar from the floor — hinge with a flat back, grip it, stand tall driving the hips forward, bar close to the body, never round the lower back. Trap-bar (hexagon you stand in) is the back-friendly version. This directly trains your weakest AFT event.</li>
-        </ul>
-
-        <p class="gl-h">Session 2 — Run</p>
-        <p class="wk-target" style="margin-bottom:4px">🔥/🧊 Warm-up and cool-down for this session are composed automatically, matched to cardio/legs — see the section above. (Runs never had a real cool-down before; now they do.)</p>
-        <p class="wk-target">No-equipment:</p>
-        <ul class="gl">
-          <li><b>Intervals (sprint reps):</b> Short fast efforts with rest between — e.g. sprint ~400m or 60–90s hard, walk/jog 90s, repeat 4–6×. Any open ground works. Builds speed.</li>
-          <li><b>Tempo run:</b> A sustained "comfortably hard" pace (only a few words at a time) held 15–25 min. Builds your ability to hold a fast pace.</li>
-          <li><b>Long easy run:</b> Slow conversational-pace run, longer than usual (30–50 min). Builds the aerobic base behind the 2-mile.</li>
-          <li><b>Timed 2-mile:</b> Run 2 miles as fast as you can sustain and record the time — the AFT run, used as a test, not weekly.</li>
-        </ul>
-        <p class="wk-target">Gym (equipment):</p>
-        <ul class="gl">
-          <li><b>Treadmill intervals/tempo:</b> Same run workouts on a treadmill; add incline to build power and protect your joints.</li>
-          <li><b>Rower or bike intervals:</b> Hard/easy bursts on a rowing machine or stationary bike — cardio that spares your legs for lifting days.</li>
-        </ul>
-
-        <p class="gl-h">Session 3 — Upper + Core</p>
-        <p class="wk-target" style="margin-bottom:4px">🔥/🧊 Warm-up and cool-down for this session are composed automatically, matched to pull/push/core — see the section above.</p>
-        <p class="wk-target">No-equipment:</p>
-        <ul class="gl">
-          <li><b>Doorway/towel rows (isometric pull):</b> Loop a towel around a sturdy doorknob (both sides of a door) or a fixed post, lean back holding the ends with arms straight, then pull your chest toward your hands and squeeze your shoulder blades. No bar needed — it covers the pulling muscles a pull-up would.</li>
-          <li><b>Towel pull-aparts / Y-T-W raises:</b> Hold a towel at shoulder width and pull it apart hard — the tension works your back. Or lie face-down and lift your arms off the floor tracing a Y, then a T, then a W, squeezing the upper back each time. A second pulling movement so the day isn't push-heavy.</li>
-          <li><b>Decline push-ups:</b> Push-ups with your feet up on a step/ledge so you're angled head-down. Shifts load to the upper chest and shoulders.</li>
-          <li><b>Plank:</b> Forearms under shoulders, body a straight line head to heels, abs and glutes tight. Hold without sagging or piking.</li>
-          <li><b>Side plank:</b> On one forearm, body sideways in a straight line, hips lifted and stacked. Hold, switch sides. Trains the obliques.</li>
-          <li><b>Superman / back extension:</b> Lie face-down, arms ahead. Lift arms, chest, and legs together (like flying), hold, lower. Strengthens the lower back.</li>
-          <li><b>Grip squeeze:</b> Squeeze a grip trainer (or a rolled towel) hard for 20–40s, repeat. Builds the grip that carries the Sprint-Drag-Carry — the one small tool you said you'd have.</li>
-        </ul>
-        <p class="wk-target">Gym (equipment):</p>
-        <ul class="gl">
-          <li><b>Pull-ups / lat pulldown:</b> Pull-up = hang from a bar (palms away) and pull until your chin clears it. Lat pulldown = the seated machine version, pulling a bar down to your chest. The main back/biceps builder.</li>
-          <li><b>Seated cable row / barbell row:</b> Pull a cable handle or barbell toward your stomach, squeezing the shoulder blades. Horizontal pulling for the mid-back.</li>
-          <li><b>Incline DB press:</b> Dumbbell press on an inclined bench — upper chest and shoulders.</li>
-          <li><b>Cable face pulls:</b> Pull a rope to your face with elbows high — strengthens the rear shoulders and posture muscles.</li>
-          <li><b>Hanging knee raises:</b> Hang from a bar and raise your knees to your chest — core.</li>
-          <li><b>Back extension (machine/bench):</b> Hinge over a back-extension bench and raise your torso — loaded lower back.</li>
-          <li><b>Farmer's carry (dumbbells) / water jug carry / weighted stretcher carry / loaded ruck carry:</b> Hold or carry the load and walk tall and braced — grip, core, and carry strength for the SDC. Which one you see depends on your equipment profile.</li>
-        </ul>
-
-        <p class="gl-h">Session 4 — AFT Circuit</p>
-        <p class="wk-target" style="margin-bottom:4px">🔥/🧊 Warm-up and cool-down for this session are composed automatically, matched to legs/push/core/cardio — see the section above.</p>
-        <p class="wk-target">No-equipment:</p>
-        <ul class="gl">
-          <li><b>Shuttle sprints (SDC substitute):</b> Sprint to a line ~25m away, touch it, sprint back, repeat. Mimics the change-of-direction of the Sprint-Drag-Carry without a sled.</li>
-          <li><b>Bear crawl (drag substitute):</b> On hands and feet, knees just off the floor, crawl forward keeping your back flat. Replaces the SDC drag — taxes the same legs, shoulders, and core.</li>
-          <li><b>Hand-release push-ups:</b> (see Session 1) — 20 per round.</li>
-          <li><b>Squat jumps:</b> Drop into a squat, explode straight up, land soft with bent knees, immediately repeat. Explosive leg power.</li>
-          <li><b>Plank:</b> 30–60s hold per round.</li>
-          <li><b>200m run:</b> A half-lap at a hard pace — a short conditioning burst.</li>
-        </ul>
-        <p class="wk-target">Gym (equipment):</p>
-        <ul class="gl">
-          <li><b>Sled push/pull or SDC sim / weighted stretcher drag / tire flips:</b> Push, drag, or flip the load — the closest things to the real Sprint-Drag-Carry. Which one you see depends on your equipment profile.</li>
-          <li><b>Loaded carry (kettlebells) / water jug carry / sandbag carry:</b> Carry a heavy load a set distance — the carry portion of the SDC.</li>
-          <li><b>Box jumps:</b> Jump from a squat onto a sturdy box, step down, repeat. Explosive power with a target.</li>
-          <li><b>Rower 200m sprint / stationary bike sprint:</b> An all-out sprint on the rower or bike — full-body conditioning burst.</li>
-        </ul>
-
-        <p class="gl-h">Session 5 — Mobility + Balance</p>
-        <p class="wk-target">🤸 The flexibility half of this session is the full Warm-up &amp; Cool-down catalog above (every static stretch, not a subset) — that's the same "cool-down stretches double as flexibility work" idea, just given its own dedicated session. What's unique to Session 5 is the balance progression below.</p>
-        <ul class="gl">
-          <li><b>Single-leg stand:</b> Stand on one leg near a wall. Progress: eyes open → eyes closed → standing on a pillow/cushion. Hold for time, switch legs.</li>
-          <li><b>Single-leg RDL reach (balance version):</b> The seesaw hinge from Session 1, done slowly for balance — hinge forward on one leg reaching toward the floor, then stand tall. Control beats speed here.</li>
-          <li><b>Tandem (heel-to-toe) walk:</b> Walk a straight line placing the heel of each step directly against the toe of the other foot, like a tightrope. Arms out for balance. Try it eyes-closed once it's easy.</li>
-          <li><b>Y-balance reach:</b> Stand on one leg. With the free foot, reach as far as you can to the front, then the side, then behind you (tracing a Y on the floor) without touching down or losing balance. Return to center between reaches.</li>
-        </ul>
-        <p class="wk-target">⚠️ These are descriptions to get you started — for the loaded lifts (deadlift, squat, pistol) have a coach or cadre check your form before going heavy. Text can't see your back rounding.</p>
       </div>
     </details>
 
