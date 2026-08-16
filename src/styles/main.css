@@ -59,7 +59,6 @@
     overflow-x:hidden;
   }
   .wrap{max-width:760px;margin:0 auto;padding:18px 16px 120px}
-  .week-tbl{table-layout:fixed;word-break:break-word}
 
   /* ---- Hero / character header ---- */
   header.hero{
@@ -89,7 +88,6 @@
   }
   .who{flex:1;min-width:0}
   .lvl-line{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-  .lvl-num{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
   .title-name{font-size:20px;font-weight:700;letter-spacing:.01em}
   .editname{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:12px;padding:2px 4px}
   .editname:hover{color:var(--gold)}
@@ -234,7 +232,6 @@
   .tag.diff-easy{color:var(--jade);border-color:#3c5230}
   .tag.diff-med{color:var(--gold);border-color:#5e4715}
   .tag.diff-hard{color:var(--ember);border-color:#5e2f1c}
-  .tag.streakt{color:var(--ember);border-color:#5e2f1c;background:rgba(212,102,58,.08)}
   .tag.habitt{color:var(--jade);border-color:#3c5230;background:rgba(var(--jade-rgb),.08)}
   .del{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:18px;padding:4px 6px;flex:none}
   .del:hover{color:var(--blood)}
@@ -539,7 +536,6 @@
   .blood-compat span{display:block;font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
   .blood-compat b{font-size:13px;color:var(--jade)}
   .blood-note{font-size:12.5px;color:var(--gold);margin-top:10px;font-style:italic}
-  .blood-elig{margin-top:11px;font-size:13px;font-weight:600;padding:9px;border-radius:8px}
   .bl-elig{margin-top:11px;font-size:13px;font-weight:600;padding:9px 11px;border-radius:8px}
   .bl-elig.ok{background:rgba(var(--jade-rgb),.14);border:1px solid var(--jade);color:var(--jade)}
   .bl-elig.wait{background:rgba(var(--violet-rgb),.12);border:1px solid var(--violet);color:var(--violet)}
@@ -585,22 +581,7 @@
   .sk-addlevel{background:none;border:1px dashed var(--line);color:var(--ink-dim);padding:8px;border-radius:7px;font-family:inherit;font-size:12.5px;cursor:pointer;width:100%;margin-top:3px}
   .sk-addlevel:hover{border-color:var(--violet);color:var(--violet)}
   /* skill quest cards */
-  .sk-quest{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-left:3px solid var(--violet);border-radius:10px;padding:12px 14px;margin-bottom:9px}
-  .sk-quest.promote{border-left-color:var(--jade)}
-  .sk-quest.decay{border-left-color:var(--ember)}
-  .sk-quest-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-  .sk-quest-name{font-size:14px;font-weight:700}
-  .sk-quest-tag{font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:20px;border:1px solid;flex:none}
-  .sk-quest-tag.promote{color:var(--jade);border-color:#3c5230}
-  .sk-quest-tag.maintain{color:var(--violet);border-color:#5a4d72}
-  .sk-quest-tag.decay{color:var(--ember);border-color:#7a5e2a}
-  .sk-quest-ability{font-size:13px;color:var(--ink-dim);margin:7px 0;line-height:1.5}
-  .sk-quest-ability b{color:var(--ink)}
-  .sk-quest-btns{display:flex;gap:8px;margin-top:9px}
-  .sk-quest-btns button{flex:1;padding:9px;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;border:1px solid}
-  .sk-pass{background:rgba(var(--jade-rgb),.16);border-color:var(--jade);color:var(--jade)}
   .sk-pass:hover{background:rgba(var(--jade-rgb),.28)}
-  .sk-skip{background:transparent;border-color:var(--line);color:var(--ink-faint)}
   /* skill list — card table felt */
   #view-skills{background:linear-gradient(160deg,#0d2214 0%,#0a1a0f 100%);}
   /* Deck wrappers */
@@ -650,20 +631,7 @@
   .sk-deck-body .sk-fade-foot.warn{color:#c0392b}
   .sk-deck-body .sk-card-detail>summary{color:#333}
   /* Group suit symbol */
-  .sk-group-suit{font-size:1rem;margin-right:.3rem}
   /* Mini playing cards inside groups */
-  .sk-mini-grid{display:flex;flex-wrap:wrap;gap:8px;padding:.5rem .25rem .25rem}
-  .sk-mini-card{position:relative;flex:0 0 110px;background:var(--deck-light,#f5f5f0);border:1.5px solid var(--deck-col,#555);border-radius:.5rem;padding:.5rem .4rem .4rem;display:flex;flex-direction:column;align-items:center;gap:.2rem;font-size:.75rem;overflow:hidden}
-  .sk-mini-card.sk-mini-atrisk{border-color:var(--ember);opacity:.85}
-  .sk-mini-card.sk-mini-unstarted{opacity:.5}
-  .sk-mini-emb{width:36px;height:36px;color:#1a1a1a}
-  .sk-mini-emb svg{width:100%;height:100%}
-  .sk-mini-name{font-size:.72rem;font-weight:700;text-align:center;color:#1a1a1a;line-height:1.2;max-width:100px;overflow:hidden}
-  .sk-mini-tier{font-size:.62rem;color:#555;text-align:center}
-  .sk-mini-bar{width:100%;height:.3rem;background:rgba(0,0,0,.15);border-radius:1rem;overflow:hidden;margin-top:.1rem}
-  .sk-mini-fill{height:100%;border-radius:1rem}
-  .sk-mini-lvl{font-size:.68rem;font-weight:700;color:#333}
-  .sk-mini-prac{font-size:.65rem;padding:.1rem .3rem;border:1px solid var(--jade);color:var(--jade);background:transparent;border-radius:.2rem;cursor:pointer;margin-top:.1rem}
   /* Rarity borders on skill cards in an open deck */
   .sk-deck-body .sk-card{border-color:var(--rar-col,var(--deck-col,#555))}
   .sk-deck-body .sk-card.rarity-legendary{box-shadow:0 0 8px rgba(171,71,188,.35)}
@@ -715,7 +683,7 @@
   .sk-pyr-mythic-icon{font-size:1rem;color:var(--gold)}
   .sk-pyr-mythic-name{flex:1;font-weight:700;font-size:.82rem}
   .sk-pyr-mythic-pct{font-size:.62rem;color:var(--ink-faint)}
-  .sk-pyr-mythic.sk-pyr-maxed .sk-pyr-mythic-pct{color:var(--gold)}
+  .sk-pyr-maxed .sk-pyr-mythic-pct{color:var(--gold)}
   .sk-pyr-mythic-card{padding:.4rem .5rem 0}
   .sk-pyr-children{padding:.3rem .5rem .5rem 1rem;display:flex;flex-direction:column;gap:5px}
   .sk-pyr-legendary,.sk-pyr-rare,.sk-pyr-uncommon{border:1px solid var(--line);background:var(--panel-2)}
@@ -783,7 +751,6 @@
   .sk-card-path-lv{font-size:11px;font-weight:700;color:var(--ink);flex:none;opacity:.9}
   .sk-card-emblem{display:flex;align-items:center;justify-content:center;padding:14px 0 6px}
   .sk-emblem-placeholder{width:42px;height:42px;border-radius:50%;border:1px dashed;opacity:.3}
-  .sk-emblem-svg{display:block;filter:drop-shadow(0 0 4px currentColor)}
   .sk-card-name{font-size:17px;font-weight:700;text-align:center;padding:0 20px 4px;line-height:1.25}
   .sk-card-tier{font-size:11.5px;color:var(--ink-faint);text-align:center;padding:0 14px 12px;letter-spacing:.03em}
   .sk-level-bar{height:5px;background:rgba(0,0,0,.35);margin:0 14px;border-radius:3px;position:relative}
@@ -808,7 +775,6 @@
   .sk-card-detail-inner{padding:4px 14px 10px}
   .sk-max-badge{font-size:10px;font-weight:700;color:var(--gold);background:rgba(var(--gold-rgb),.2);border:1px solid var(--gold);border-radius:8px;padding:1px 5px;margin-left:4px;vertical-align:middle}
   .sk-peak-badge{font-size:10px;color:var(--ink-faint);opacity:.8;margin-left:4px}
-  .sk-level-badge{font-size:12px;font-weight:700;color:var(--violet);background:rgba(var(--violet-rgb),.12);border:1px solid #5a4d72;padding:3px 10px;border-radius:20px;flex:none}
   .sk-level-badge.maxed{color:var(--gold);border-color:var(--gold)}
   .sk-tier-band{display:inline-block;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);background:rgba(var(--gold-rgb),.14);border:1px solid var(--line);border-radius:4px;padding:0 5px;margin-right:6px;vertical-align:middle}
   .sk-fade-note.reclaim{color:var(--gold)}
@@ -853,7 +819,6 @@
   .hb-streak.broken{color:var(--ink-faint);border-color:var(--line);background:transparent}
   .hb-del{flex:none;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px}
   .hb-del:hover{color:var(--blood)}
-  .orders-week-summary{font-size:12px;color:var(--ink-dim);padding:6px 2px 10px;border-bottom:1px solid var(--line);margin-bottom:8px}
   .order-stale{font-size:10px;color:var(--ember);opacity:.7;margin-left:auto;align-self:center}
   li.card.paused{opacity:.45}
   .order-paused{font-size:10px;color:var(--ink-faint);margin-left:auto;align-self:center}
@@ -885,14 +850,9 @@
   .rx.result,.ds.result,.ty.result{background:#0e0f09;height:auto;padding:14px}
   /* digit span */
   .ds{min-height:110px;display:grid;place-items:center;background:#0e0f09;border-radius:10px;padding:14px;text-align:center}
-  .ds-digit{font-size:54px;font-weight:800;color:var(--gold);min-height:64px;line-height:64px}
   .ds-input{font-size:20px;letter-spacing:.2em;text-align:center;width:100%;max-width:240px;background:#14160f;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px}
-  .ds-ask,.ds-ok{font-size:14px;color:var(--ink-dim)}
-  .ds-ok{color:var(--jade)}
   /* typing */
-  .ty-text{font-size:14px;line-height:1.6;color:var(--gold-bright);background:#0e0f09;padding:11px;border-radius:8px;margin-bottom:9px}
   .ty-input{width:100%;background:#14160f;border:1px solid var(--line);color:var(--ink);padding:10px;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical}
-  .ty-live{font-size:11.5px;color:var(--ink-faint);margin-top:5px}
   /* shared result */
   .test-result{text-align:center}
   .test-result .big{font-size:34px;font-weight:800;color:var(--gold)}
@@ -900,8 +860,6 @@
   .test-result .sugg{font-size:12.5px;color:var(--ink-dim);margin-top:9px;line-height:1.5;font-style:italic}
   /* n-back */
   .nb-levels{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
-  .nb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;max-width:240px;margin:0 auto 10px}
-  .nb-cell{aspect-ratio:1;background:#0e0f09;border:1px solid var(--line);border-radius:8px;transition:.1s}
   .nb-cell.on{background:var(--violet);border-color:var(--violet)}
   .nb-status{text-align:center;font-size:13px;color:var(--ink-faint);margin-bottom:8px}
   #nbMatch.good{background:var(--jade)} #nbMatch.bad{background:var(--blood)}
@@ -1162,14 +1120,8 @@
   .sk-fade-note.warn{color:var(--ember)}
   .sk-card-del{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;flex:none}
   .sk-card-del:hover{color:var(--blood)}
-  .sk-cat-hd{display:none} /* replaced by .sk-deck-header */
   /* group (parent) skill */
-  .sk-group{border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:11px;padding:12px 13px;margin-bottom:11px;background:rgba(var(--gold-rgb),.04)}
-  .sk-group-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-  .sk-group-name{font-size:15px;font-weight:700;flex:1}
-  .sk-group-sub{font-size:11px;color:var(--ink-faint);font-weight:400}
   .sk-level-badge.group{color:var(--gold-bright);border-color:var(--gold)}
-  .sk-subs{display:flex;flex-direction:column;gap:8px;padding-left:6px;border-left:1px dashed var(--line);margin-left:3px}
   .sk-card.sk-sub{background:var(--panel);border-radius:9px}
   .sk-auto{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--jade);border:1px solid #3c5230;border-radius:10px;padding:1px 6px;margin-left:6px;vertical-align:middle}
   /* right-side category jump bar (skills tab only) */
@@ -1185,8 +1137,6 @@
   .sk-tree-ctrls button:hover{background:var(--gold);color:#14160f;border-color:var(--gold)}
   .sk-tree-legend{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;padding:10px 6px 4px;font-size:11.5px;color:var(--ink-dim)}
   .sk-tree-legend span{display:inline-flex;align-items:center;gap:5px}
-  .sk-tree-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
-  .sk-tree-tip{fill:var(--ink);font-family:'Roboto Condensed',sans-serif}
   .sk-jumpbar.show{display:flex}
   .sk-jumpbar button{background:var(--panel);border:1px solid var(--line);color:var(--ink-dim);width:38px;height:38px;border-radius:10px;font-family:inherit;font-size:16px;cursor:pointer;display:grid;place-items:center;transition:.15s}
   .sk-jumpbar button:hover{border-color:var(--violet);color:var(--violet);transform:scale(1.08)}
@@ -1316,9 +1266,6 @@
   .ks-card{background:linear-gradient(180deg,rgba(201,162,75,.08),transparent);border:1px solid rgba(201,162,75,.4);border-left:3px solid #c9a06a;border-radius:10px;padding:13px 15px}
   .ks-tag{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#c9a06a}
   .ks-vow{font-size:14px;color:var(--ink);margin-top:5px;line-height:1.5;font-style:italic}
-  .ks-bind{margin-top:9px}
-  .ks-bind button{background:rgba(201,162,75,.12);border:1px solid #c9a06a;color:#d8b06a;padding:8px 14px;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer}
-  .ks-bind button:hover{background:rgba(201,162,75,.22)}
 
   .weight-jars{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0 6px}
   @media(max-width:560px){.weight-jars{grid-template-columns:repeat(2,1fr);gap:16px}}
@@ -1338,7 +1285,6 @@
   .mem-flame{animation:memflicker 4s ease-in-out infinite}
   @keyframes memflicker{0%,100%{opacity:.85}50%{opacity:1}}
 
-  .weight-bind{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px;margin-top:18px}
   .weight-mirror{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px;margin-top:18px;text-align:center}
   .weight-sync-footer{font-size:11px;color:var(--ink-faint);text-align:center;padding-bottom:6px;min-height:0}
   .weight-sync-footer:empty{display:none}
@@ -1353,11 +1299,6 @@
   .wm-nudge.show{display:block;background:rgba(201,162,75,.1);border:1px solid #c9a06a;border-radius:9px;padding:11px 13px;margin-bottom:12px;font-size:13px;color:#d8b06a;line-height:1.5}
   .wm-nudge .wm-nudge-btn{display:inline-block;margin-top:8px;background:rgba(201,162,75,.18);border:1px solid #c9a06a;color:#e6c87f;padding:7px 14px;border-radius:7px;font-family:inherit;font-size:13px;cursor:pointer}
   .wm-nudge .wm-nudge-btn:hover{background:rgba(201,162,75,.3)}
-  .wb-title{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:10px}
-  .weight-bind input,.weight-bind select{width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:11px;border-radius:8px;font-family:inherit;font-size:15px}
-  .weight-bind input:focus,.weight-bind select:focus{outline:none;border-color:#c9a06a}
-  .wb-btn{width:100%;background:rgba(201,162,75,.14);border:1px solid #c9a06a;color:#d8b06a;padding:12px;border-radius:8px;font-family:inherit;font-weight:600;font-size:14px;letter-spacing:.04em;cursor:pointer;margin-top:10px}
-  .wb-btn:hover{background:rgba(201,162,75,.24)}
   .wb-note{font-size:12px;color:var(--ink-faint);margin-top:9px;line-height:1.5;font-style:italic}
 
   .weight-ledger{margin-top:18px}
@@ -1404,11 +1345,9 @@
   .wk-body ul{margin:0 0 4px;padding-left:20px}
   .wk-body li{margin-bottom:5px}
   .wk-target{color:var(--ink-faint);font-style:italic;font-size:13px;margin:2px 0 6px}
-  .week-tbl{width:100%;border-collapse:collapse;margin:8px 0 12px;font-size:13px}
   .week-tbl th{text-align:left;color:var(--gold);font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:4px 8px;border-bottom:1px solid var(--line)}
   .week-tbl td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.05);color:var(--ink-dim);vertical-align:top}
   .week-tbl td:first-child{color:var(--ink);font-weight:600;white-space:nowrap}
-  .i-hard{color:var(--blood);font-weight:600} .i-mod{color:var(--ember);font-weight:600} .i-easy{color:var(--jade);font-weight:600}
   .gl-h{color:var(--gold);font-weight:700;font-size:13px;margin:14px 0 4px;text-transform:uppercase;letter-spacing:.04em}
   ul.gl{margin:0 0 4px;padding-left:18px} ul.gl li{margin-bottom:8px;line-height:1.55} ul.gl b{color:var(--ink)}
   .gym-toggle{background:#0e0f09;border:1px solid var(--line);border-radius:var(--radius-md);padding:var(--space-6) var(--space-7);margin:var(--space-6) 0}
@@ -1416,8 +1355,6 @@
   .gym-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
   .gym-toggle-label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint)}
   .gym-toggle-sub{font-size:14px;font-weight:600;color:var(--ink);margin-top:2px}
-  .gym-btn{background:linear-gradient(180deg,var(--gold),#b3801f);color:#1a1208;border:none;border-radius:8px;padding:9px 14px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;flex:none}
-  .gym-toggle.on .gym-btn{background:transparent;border:1px solid var(--line);color:var(--ink-dim)}
   .gym-toggle-note{font-size:12px;color:var(--ink-faint);line-height:1.55;margin-top:9px}
   .sess-ex-tag{display:inline-block;font-size:11px;font-weight:600;color:var(--gold);background:rgba(var(--gold-rgb),.1);border:1px solid var(--line);border-radius:20px;padding:2px 9px;margin:2px 0 6px}
   .sess-eq{color:var(--ember);font-size:11px;font-style:italic}
@@ -1522,7 +1459,6 @@
   .streak-alert{background:rgba(255,140,0,.1);border-left:3px solid #ff8c00;border-radius:8px;padding:10px 13px;font-size:13px;color:#ffaa44;line-height:1.4}
 
   /* ── v95: Week training bar ── */
-  .ds-week{font-size:11px;color:var(--ink-dim);letter-spacing:.05em;padding:5px 0 3px;font-family:ui-monospace,monospace}
   .path-pips-card{padding:10px 14px}
   .path-pips-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
   .path-pip{display:flex;align-items:center;gap:5px;min-width:52px;flex:1 1 52px;max-width:70px}
@@ -2469,26 +2405,18 @@
 .hm-day.lv2{background:rgba(var(--jade-rgb),.55)}
 .hm-day.lv3{background:rgba(var(--jade-rgb),.9)}
 .hm-legend{display:flex;align-items:center;gap:5px;font-size:9.5px;color:var(--ink-faint)}
-.hm-legend-day{width:11px;height:11px;border-radius:2px}
 
-/* ── v117: Reading speed test (test tab) ── */
-.rd-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-md);padding:var(--space-7) var(--space-8);margin:var(--space-4) 0}
-.rd-passage-wrap{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:10px 0;max-height:240px;overflow-y:auto;font-size:14px;line-height:1.65;color:var(--ink)}
-.rd-passage-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint);margin-bottom:6px}
-.rd-timer{font-size:28px;font-weight:800;color:var(--gold);text-align:center;margin:8px 0;font-variant-numeric:tabular-nums}
-.rd-result-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px}
-.rd-result-row:last-of-type{border-bottom:none}
-.rd-result-label{color:var(--ink-dim)}
-.rd-result-val{color:var(--ink);font-weight:700}
-.rd-btn{background:var(--jade);color:#fff;border:none;border-radius:var(--radius-sm);padding:var(--space-5) var(--space-8);font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;display:block;width:100%;margin-top:var(--space-5)}
-.rd-btn:active{opacity:.85}
-.rd-btn-sm{background:var(--panel-2);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:6px 14px;font-family:inherit;font-size:12.5px;cursor:pointer;margin:4px 4px 0 0}
-.rd-btn-sm:active{background:var(--panel)}
-.rd-history{margin-top:10px}
-.rd-hist-row{display:flex;gap:8px;align-items:baseline;font-size:12px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);color:var(--ink-dim)}
-.rd-hist-row:last-child{border-bottom:none}
-.rd-hist-wpm{font-weight:700;color:var(--ink);min-width:52px}
-.rd-comprehension{font-size:10.5px;background:var(--panel-2);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+/* Intel Briefing (test tab reading test, Phase T / v187). This class
+   vocabulary (.rd-title/.rd-passage/.rd-instructions/.rd-comp-btns) had
+   zero matching CSS from the day it shipped — a leftover, differently-named
+   block from the pre-Phase-T reading test (.rd-card/.rd-passage-wrap/etc.)
+   sat here instead, so it never collided syntactically, it just silently
+   did nothing for the real UI. Found and fixed in the v192 cleanup pass. */
+.rd-title{font-size:15px;font-weight:700;margin-bottom:var(--space-3);color:var(--gold-bright)}
+.rd-passage{background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius-md);padding:var(--space-6) var(--space-7);margin-bottom:var(--space-4);font-size:14px;line-height:1.6;color:var(--ink);max-height:280px;overflow-y:auto}
+.rd-instructions{font-size:12px;color:var(--ink-faint);line-height:1.4;margin-bottom:var(--space-4)}
+.rd-choice-wrap{margin-top:var(--space-2)}
+.rd-comp-btns{display:flex;flex-direction:column;gap:var(--space-3);margin-top:var(--space-2)}
 
 /* ── v123: Weekly skill practice queue (Skills tab) ── */
 .sk-weekly-queue{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:6px 0}

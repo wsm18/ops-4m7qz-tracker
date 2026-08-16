@@ -298,11 +298,22 @@ function renderCoachToday(){
       // Adaptive coach call for the AFT-circuit slot (FM-1/§2b) — a full guided
       // mock or single-event practice instead of the normal fixed circuit.
       const weakest=typeof fmFocusLine==="function"?fmFocusLine():null;
+      // Real AFT events (a standardized deadlift 3RM + the actual SDC lane)
+      // genuinely require specific gear — they can't be honestly bodyweight-
+      // substituted the way a normal training exercise slot can, since the
+      // whole point of a mock AFT is rehearsing the real test. This doesn't
+      // block the flow (a partial mock with real events you DO have gear
+      // for is still worth doing) — it just tells you up front instead of
+      // finding out mid-event, closing a real gap the FM-1 design flagged.
+      const activeTags=typeof activeEquipTags==="function"?activeEquipTags():[];
+      const missingGear=["barbell","aftkit"].filter(t=>!activeTags.includes(t));
+      const gearNote=missingGear.length?`<p class="coach-tip">⚠️ Your active equipment profile (<b>${esc(S.activeEquipProfile||"")}</b>) is missing ${missingGear.map(t=>esc((EQUIP_TAGS[t]||{}).label||t)).join(" and ")} — the deadlift and/or Sprint-Drag-Carry events won't be realistic without it. Switch profiles first if you have access elsewhere today, or expect those specific events to be a rough estimate.</p>`:"";
       tHtml=`<div class="coach-body">
         <div class="coach-day-h">${esc(dayName)} · AFT Circuit <span class="coach-int">${intLabel}</span></div>
         <p class="coach-intro">${aftMode==="mock"
           ? "Today's call: a full guided mock AFT — all 5 events, timed, feeding straight into your real AFT history."
           : "Today's call: single-event practice, not a full mock." + (weakest?" "+esc(weakest):"")}</p>
+        ${gearNote}
         <button class="btn-add" data-mockaft="${aftMode}">${aftMode==="mock"?"🏁 Start guided mock AFT":"🎯 Start single-event practice"} →</button>
         <p class="coach-tip">The coach picks between a full mock, single-event practice, and the normal circuit based on how close your test date is, how long since your last AFT, and your recent recovery markers — not a fixed schedule.</p>
       </div>`;
@@ -484,8 +495,19 @@ function renderSessionLists(){
     if(prevRx&&prevRx.classList.contains('rx-card')) prevRx.remove();
     const rx=BEGINNER_RX[skey];
     if(rx){
-      const exList=rich?rx.gym:rx.bw;
-      const rows=exList.map(e=>`<tr><td>${esc(e.name)}</td><td>${esc(String(e.sets))}</td><td>${esc(String(e.reps))}</td>${(rich&&e.weight)?`<td>${esc(e.weight)}</td>`:'<td></td>'}<td>${esc(e.rest||'')}</td></tr>`).join('');
+      // Match each ACTUALLY-shown exercise (which may be a swap/alt pick,
+      // not the canonical bw/gym pair) to its real starter row via the same
+      // word-overlap matcher FM-3 uses, instead of always dumping the fixed
+      // canonical list — previously this table could show a different
+      // exercise name than the session list just above it whenever today's
+      // pick was an alt/swap. Rows with no honest starter data are skipped
+      // rather than shown with a name that doesn't match what's above.
+      const rxRows=rich?rx.gym:rx.bw;
+      const rows=workItems.map(e=>{
+        const match=typeof cgFindRxRow==="function"?cgFindRxRow(rxRows,e.n):null;
+        return match?`<tr><td>${esc(match.name)}</td><td>${esc(String(match.sets))}</td><td>${esc(String(match.reps))}</td>${(rich&&match.weight)?`<td>${esc(match.weight)}</td>`:'<td></td>'}<td>${esc(match.rest||'')}</td></tr>`:'';
+      }).filter(Boolean).join('');
+      if(!rows) return;
       div.insertAdjacentHTML('afterend',
         `<div class="rx-card"><p class="rx-note">New to this? Start here. Add reps when all sets feel easy — not before.</p>
         <table class="rx-table"><thead><tr><th>Exercise</th><th>Sets</th><th>Reps</th>${rich?'<th>Start weight</th>':'<th></th>'}<th>Rest</th></tr></thead>

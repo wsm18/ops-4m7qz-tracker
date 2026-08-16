@@ -339,7 +339,11 @@ function skDaysLeft(sk){
 //   stored, drop) — so the recommender only ever surfaces skills you've
 //   already started and either let slip or are about to. Fresh discovery
 //   is Today's Hand's job, not this one's.
-const SMARTFOCUS_PATH_WEIGHT={tactical:1.5, technical:1.5, academic:1.5, leadership:1.5};
+// physical added in the v192 cleanup pass — AFT score is one of the app's
+// own explicit OML inputs alongside GPA and leadership eval (see the board
+// tab's OML fields), so leaving it at the 1.0x default alongside Vitality/
+// Self/Hearth/Roots was an inconsistency, not a deliberate choice.
+const SMARTFOCUS_PATH_WEIGHT={tactical:1.5, technical:1.5, academic:1.5, leadership:1.5, physical:1.5};
 function smartFocusPathWeight(cat){ return SMARTFOCUS_PATH_WEIGHT[cat]||1.0; }
 function computeSmartFocus(){
   const skills=(S.lifeSkills||[]).filter(s=>!s.group && s.currentLevel>0 && s.levels && s.levels.length);

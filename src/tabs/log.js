@@ -73,6 +73,7 @@ function setInputs(ex,st,xi,si){
 }
 // delegated input + button handling for log form
 document.addEventListener("input",e=>{
+  if(e.target.id==="ptText"){ ptOnText(); return; }
   const f=e.target.dataset.f;
   if(f){const[xi,si,field]=f.split(".");LG.exercises[xi].sets[si][field]=e.target.value;return;}
   const cn=e.target.dataset.cn;

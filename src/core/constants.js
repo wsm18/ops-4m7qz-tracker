@@ -85,7 +85,7 @@ const DEFAULT = {
   // (which specific exercise fills a slot); gymAccess above still separately
   // decides which session TYPE lands on which day (FM-1) — the two compose.
   equipProfiles:{
-    "ROTC/Campus Gym":{tags:["barbell","dumbbells","kettlebell","machines","pullupbar","dipbars","bands","treadmill","rower","bike","pool","climbwall","aftkit","waterjugs","stretcher","ruck","sandbag","tires","agility","battlerope"]},
+    "ROTC/Campus Gym":{tags:["barbell","dumbbells","kettlebell","machines","pullupbar","dipbars","bands","treadmill","rower","bike","pool","climbwall","aftkit","waterjugs","stretcher","ruck","sandbag","tires"]},
     "Dorm":{tags:[]},
   },
   activeEquipProfile:"ROTC/Campus Gym",
@@ -189,8 +189,12 @@ const EQUIP_TAGS = {
   ruck:      {label:"Rucksack", unverified:true},
   sandbag:   {label:"Sandbag", unverified:true},
   tires:     {label:"Tires", unverified:true},
-  agility:   {label:"Agility ladder / cones", unverified:true},
-  battlerope:{label:"Battle ropes", unverified:true},
+  // agility (ladder/cones) and battlerope were removed in the v192 cleanup
+  // pass — confirmed toggleable in the UI and on by default in the seeded
+  // "ROTC/Campus Gym" profile, but zero exercises anywhere were tagged
+  // eq:["agility"] or eq:["battlerope"], so the toggle did nothing either
+  // way. Re-add properly (tag + real exercises using it) if these are ever
+  // genuinely wired to something.
 };
 // ── Stretch library (true warm-up vs. cool-down, not a relabeled duplicate) ──
 // Real exercise-science distinction the app already states elsewhere ("never

@@ -42,12 +42,29 @@ function cgParseLeadingInt(str, fallback){
   const m=String(str||"").match(/\d+/);
   return m ? parseInt(m[0]) : fallback;
 }
-// Fuzzy match against a BEGINNER_RX row list — substring either direction,
-// case-insensitive, the same looseness EX_HOWTO already relies on since
-// SESSIONS names and BEGINNER_RX names aren't guaranteed identical strings.
+// Word-overlap match against a BEGINNER_RX row list — SESSIONS names and
+// BEGINNER_RX names aren't guaranteed identical strings (e.g. SESSIONS'
+// "Trap-bar / barbell deadlift" vs BEGINNER_RX's "Trap-bar deadlift"). A
+// plain substring-either-direction check (the original approach) requires
+// the RX row's words to appear contiguously and in order in the target
+// name, which that exact real pair fails — "deadlift" isn't adjacent to
+// "trap-bar" once "barbell" sits between them, so the match silently missed
+// and fell through to a generic default (double the real prescribed volume,
+// found and fixed in the v192 cleanup pass). This checks word-overlap
+// instead — order-independent, tolerant of words like "barbell" or "/" in
+// between — and requires at least half the RX row's own words to appear in
+// the target name, picking the best-scoring match if more than one clears
+// that bar.
 function cgFindRxRow(rows, name){
-  const n=String(name||"").toLowerCase();
-  return (rows||[]).find(r=>{ const rn=r.name.toLowerCase(); return n.includes(rn)||rn.includes(n); }) || null;
+  const norm=s=>String(s||"").toLowerCase().replace(/[\/(),]/g," ").split(/\s+/).filter(Boolean);
+  const nameSet=new Set(norm(name));
+  let best=null, bestScore=0;
+  (rows||[]).forEach(r=>{
+    const rWords=norm(r.name); if(!rWords.length) return;
+    const score=rWords.filter(w=>nameSet.has(w)).length/rWords.length;
+    if(score>bestScore && score>=0.5){ bestScore=score; best=r; }
+  });
+  return best;
 }
 // Real prescribed volume for one slot: {repsPerSet, setsTarget, threshold, source}.
 // Same resolution order prescriptionFor() already uses (adaptive first,
@@ -112,6 +129,7 @@ function cgEquipStepHtml(){
   return `<div class="cg-setup">
     <div class="cg-setup-h">🎴 Card-Game Workout</div>
     <p class="plan-intro">Exercises get drawn as cards instead of handed to you as a fixed list — same real prescribed volume, just dealt out a few reps at a time. Pick your equipment for this session; it won't change your saved default.</p>
+    <p class="plan-intro">Covers rep-based exercise groups only — timed holds, runs, and distance carries aren't part of the deck yet, so a circuit-style session like the AFT Circuit will only cover a couple of its groups this way. The rest of today's session is still on the normal session list.</p>
     <div class="cg-profile-list">${profiles.map(n=>`<button class="cg-profile-btn${n===active?' on':''}" data-cgeq="${esc(n)}">${n===active?'✓ ':''}${esc(n)}</button>`).join("")}</div>
     <button class="btn-add" id="cgBeginBtn" style="margin-top:14px">Start the deal →</button>
   </div>`;

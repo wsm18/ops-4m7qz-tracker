@@ -226,6 +226,49 @@ function saveDefaultGymPattern(pattern){
   if(!S.gymAccess) S.gymAccess={default:{1:true,3:true,5:true},weekOf:null,week:{}};
   S.gymAccess.default=Object.assign({}, pattern);
 }
+// Which assigned session types count as "hard" for spacing purposes — kept
+// as its own set (not derived from SESSION_META) since s2's intensity is
+// itself day-dependent (see runSlotFor()) and s5 is always easy.
+const HARD_SESSIONS=new Set(["s1","s3","s4"]);
+// De-stack: the app tells the user elsewhere (renderSkillBalance, the
+// Week section's own copy in plan.html) "never two hard days back-to-back"
+// — but the plain greedy fill above assigns GYM_PREFERRED (all 3 hard) to
+// gym days in pure day order, so any run of 3+ consecutive gym days (or,
+// separately, any week with very few gym days, which pushes leftover hard
+// sessions onto trailing non-gym days in a block) produced straight runs of
+// hard days with nothing checking that promise. Three explicitly-hard
+// sessions (s1/s3/s4) and three non-hard ones (s2 x2, s5) is always
+// separable into a fully alternating week — this repeatedly finds any
+// remaining adjacent hard pair and swaps one side with the nearest non-hard
+// day in either direction, until a pass makes no more changes. Bounded to
+// a handful of passes; verified (see the v192 cleanup entry) to reach zero
+// adjacent hard days across every gym-access pattern tested, including zero
+// gym days at all. Doesn't account for s2's own hard/moderate split (which
+// SESSION_META_S2/runSlotFor only resolve chronologically, after this runs)
+// — a real, smaller residual gap, not silently claimed as solved.
+function spaceOutHardDays(assign, days){
+  let changed=true, guard=0;
+  while(changed && guard++<12){
+    changed=false;
+    for(let i=0;i<days.length-1;i++){
+      const next=days[i+1];
+      if(!HARD_SESSIONS.has(assign[days[i]]) || !HARD_SESSIONS.has(assign[next])) continue;
+      for(let off=1; off<days.length; off++){
+        const afterIdx=i+1+off, beforeIdx=i-off;
+        let swapIdx=-1;
+        if(afterIdx<days.length && !HARD_SESSIONS.has(assign[days[afterIdx]])) swapIdx=afterIdx;
+        else if(beforeIdx>=0 && !HARD_SESSIONS.has(assign[days[beforeIdx]])) swapIdx=beforeIdx;
+        if(swapIdx>=0){
+          const swapDay=days[swapIdx];
+          const tmp=assign[next]; assign[next]=assign[swapDay]; assign[swapDay]=tmp;
+          changed=true;
+          break;
+        }
+      }
+    }
+  }
+  return assign;
+}
 // Assign session types to Mon-Sat for the week containing mondayDate, based on
 // that week's per-day resolved gym access. Deterministic given the same
 // gym-access pattern (no randomness), so it doesn't flicker across renders.
@@ -241,7 +284,7 @@ function assignWeekSessions(mondayDate){
   nonGymDays.forEach(d=>{ if(!assign[d] && poolA.length) assign[d]=poolA.shift(); });
   gymDays.forEach(d=>{ if(!assign[d] && poolB.length) assign[d]=poolB.shift(); });
   days.forEach(d=>{ if(!assign[d]) assign[d]=null; });
-  return assign;
+  return spaceOutHardDays(assign, days);
 }
 // Which of this week's two s2 (Run) slots a given day is — "first" (earlier,
 // the quality/moderate run) or "second" (later, the hard/long one) — or null

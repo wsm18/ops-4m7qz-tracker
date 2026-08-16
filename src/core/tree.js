@@ -249,10 +249,17 @@ function renderSkillTree(){
   _treeApply();
   _treeWireGestures();
 }
-function svg2vbScale(vbW, pxW){ return vbW/(pxW||vbW); }
-
 // drag-to-pan + wheel/pinch zoom on the tree viewport
+// The svg itself is rebuilt fresh every renderSkillTree() call (host.innerHTML=),
+// so its own listeners die with it automatically — but window.addEventListener
+// does NOT die with the svg, so without this cleanup every render while the
+// Tree view is open (any toast/save/tick, not just a tab switch) permanently
+// added one more mousemove/mouseup listener, making panning progressively
+// faster/jumpier the longer a session stayed on this view. Fixed by tracking
+// and removing the previous call's window listeners before adding new ones.
+let _treeGestureCleanup=null;
 function _treeWireGestures(){
+  if(_treeGestureCleanup){ _treeGestureCleanup(); _treeGestureCleanup=null; }
   const svg=document.getElementById("skTreeSvg"); if(!svg) return;
   const zi=document.getElementById("skTreeZoomIn"), zo=document.getElementById("skTreeZoomOut"), rz=document.getElementById("skTreeReset");
   if(zi) zi.onclick=()=>treeZoom(1.25);
@@ -263,9 +270,11 @@ function _treeWireGestures(){
   const down=(x,y)=>{ dragging=true; lastX=x; lastY=y; _moved=false; svg.style.cursor="grabbing"; };
   const move=(x,y)=>{ if(!dragging) return; if(Math.abs(x-lastX)+Math.abs(y-lastY)>4) _moved=true; const f=scaleFactor(); _treeView.x+=(x-lastX)*f; _treeView.y+=(y-lastY)*f; lastX=x; lastY=y; _treeApply(); };
   const up=()=>{ dragging=false; svg.style.cursor="grab"; };
+  const windowMove=e=>move(e.clientX,e.clientY);
   svg.addEventListener("mousedown",e=>{ down(e.clientX,e.clientY); e.preventDefault(); });
-  window.addEventListener("mousemove",e=>move(e.clientX,e.clientY));
+  window.addEventListener("mousemove",windowMove);
   window.addEventListener("mouseup",up);
+  _treeGestureCleanup=()=>{ window.removeEventListener("mousemove",windowMove); window.removeEventListener("mouseup",up); };
   svg.addEventListener("wheel",e=>{ e.preventDefault(); treeZoom(e.deltaY<0?1.12:0.89); },{passive:false});
   // touch: one finger pan, two finger pinch
   let pinchDist=0;

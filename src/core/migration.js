@@ -129,28 +129,3 @@ function mergeNewSeedSkills(){
   if((S._skillLadderVer||0)!==SKILL_LADDER_VER){ S._skillLadderVer=SKILL_LADDER_VER; changed=true; }
   if(changed) save();
 }
-// Returns true if anything changed (so render can re-save).
-function aftLevelFromScores(scores){
-  if(!scores) return 0;
-  const vals=[scores.dl,scores.hrp,scores.sdc,scores.plank,scores.run].map(v=>v||0);
-  const min=Math.min(...vals), max=Math.max(...vals);
-  if(min<60) return 0;                 // not all events passed
-  if(min>=90 && max>=100) return 5;    // a max + 90s everywhere
-  if(min>=90) return 4;
-  if(min>=80) return 3;
-  if(min>=70) return 2;
-  return 1;                            // all passed (>=60)
-}
-// Map a single AFT event score (0-100) to a skill level on the (now 10-rung) ladder.
-// An AFT proves passing-to-strong performance, not the elite/record top end — so it
-// floors into roughly L2–L6 and leaves the upper rungs to dedicated training/tests.
-function eventScoreToLevel(score, maxLevels){
-  if(score==null||score<60) return 0;
-  let lvl;
-  if(score>=100) lvl=6;        // maxed the AFT event = strong, but not world-record
-  else if(score>=95) lvl=5;
-  else if(score>=85) lvl=4;
-  else if(score>=75) lvl=3;
-  else lvl=2;                  // passed (60-74)
-  return Math.min(maxLevels, lvl);
-}

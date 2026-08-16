@@ -721,7 +721,7 @@ function rdDone(){
   const wpm=Math.round(_rdState.passage.words/(secs/60));
   const p=_rdState.passage;
   const stage=document.getElementById("stage-reading"); if(!stage) return;
-  stage.innerHTML=`<div class="rd-comprehension">
+  stage.innerHTML=`<div class="rd-choice-wrap">
     <div style="font-size:12.5px;color:var(--ink-dim);margin-bottom:10px">${esc(p.scenario)}</div>
     <div class="rd-comp-btns">${p.actions.map((a,i)=>`<button class="hb-starter-btn" data-rdact="${i}">${esc(a)}</button>`).join("")}</div>
   </div>`;
