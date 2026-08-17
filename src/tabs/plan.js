@@ -130,7 +130,12 @@ function dawnSessionHtml(){
   const workOnly=p.exercises.filter(e=>!e._phase||e._phase==="work"||e._phase==="balance");
   const warmupCount=p.exercises.filter(e=>e._phase==="warmup").length;
   const cooldownCount=p.exercises.filter(e=>e._phase==="cooldown"||e._phase==="flex").length;
-  const exList=workOnly.slice(0,sess.pickOne?4:7).map(e=>`<div class="ds-ex">${esc(e.n)}${e._swapped?' <span class="ds-swap">· indoor</span>':''}</div>`).join("");
+  // Same computeTarget() call Coach Today/Session-N cards make — the compact
+  // preview shouldn't show a different (or absent) number than the full page.
+  const exList=workOnly.slice(0,sess.pickOne?4:7).map(e=>{
+    const tgt=typeof computeTarget==="function"?computeTarget(e,{skey:p.sessionKey,intensity,rich:todayGym}):null;
+    return `<div class="ds-ex"><span class="ds-ex-n">${esc(e.n)}${e._swapped?' <span class="ds-swap">· indoor</span>':''}</span>${tgt?`<span class="ds-ex-tgt">${esc(tgt.target)}</span>`:''}</div>`;
+  }).join("");
   const more=workOnly.length>(sess.pickOne?4:7)?`<div class="ds-ex ds-more">+${workOnly.length-(sess.pickOne?4:7)} more</div>`:"";
   const warmCoolNote=(warmupCount||cooldownCount)?`<div class="ds-warmcool">${warmupCount?`🔥 ${warmupCount}-move warm-up`:''}${warmupCount&&cooldownCount?' + ':''}${cooldownCount?`🧊 ${cooldownCount}-stretch cool-down`:''} included</div>`:"";
   const action=p.todayLogged

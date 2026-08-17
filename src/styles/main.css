@@ -948,9 +948,11 @@
   .ds-mode{background:rgba(255,255,255,.05);padding:1px 6px;border-radius:4px;font-size:11px}
   .ds-note{font-size:12.5px;color:var(--ink-dim);line-height:1.55;margin-top:2px}
   .ds-exlist{display:flex;flex-direction:column;gap:3px;margin-bottom:11px}
-  .ds-ex{font-size:12.5px;color:var(--ink-dim);padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+  .ds-ex{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--ink-dim);padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)}
   .ds-ex:last-child{border-bottom:none}
   .ds-ex.ds-more{color:var(--ink-faint);font-style:italic}
+  .ds-ex-n{flex:1;min-width:0}
+  .ds-ex-tgt{flex:none;font-weight:700;color:var(--gold-bright);font-size:11.5px;white-space:nowrap}
   .ds-swap{font-size:11px;color:var(--ember)}
   .ds-done{font-size:13px;color:var(--jade);font-weight:600;padding:4px 0}
   .ds-actions{display:flex;gap:8px}

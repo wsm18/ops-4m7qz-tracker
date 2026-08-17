@@ -1570,3 +1570,15 @@ Direct follow-up to v197: Wyatt asked to "do warmups" — the fix for the main s
 Verified against the real running app: "Leg swings, front-to-back (10/leg)" now shows "10/leg — easy and controlled" instead of "3–4 sets, leave 1–2 reps in the tank"; "Doorway chest/shoulder stretch (hold 30s ×2)" now shows "hold 30s ×2 — relaxed, breathe through it" instead of "3 sets, push the hold/effort"; the hardcoded cardio-raise warm-up (no real spec in its parenthetical) correctly falls back to "easy and controlled" alone. Work-phase exercises (adaptive/starter tiers, fixed in v197) are unaffected.
 
 Full ship checklist: `npm run build` → OK, `npm run check` → SYNTAX OK, `npm run regress` → `PAGEERRORS 0`, `badCount:0`, `total:12524`. No `SEED_SKILLS`/ladder content touched, `SKILL_LADDER_VER` stayed at 118. SW bumped to `operations-v198`. `npm run package` → produced `dist/operations.zip`.
+
+### v199 — Today tab's compact session preview now shows real numbers too
+
+**Files changed:** `src/tabs/plan.js`, `src/styles/main.css`.
+
+Closing the last piece of the "make everything use coach properly" ask: `dawnSessionHtml()` (the compact session card on the Today/Dashboard tab, above the Daily Orders checklist) only ever listed exercise names, by original design, as a lightweight teaser linking to "Full plan →" for detail. Asked Wyatt directly whether that was fine as a minimal preview or should also carry real numbers — he wanted the numbers.
+
+**Fix:** each exercise row now calls the same `computeTarget(e,{skey:p.sessionKey,intensity,rich:todayGym})` that Coach Today and the Session-N reference cards use — same engine, same tiers, so the compact preview can never show a different (or absent) number than the full Coach Hub page. Restructured `.ds-ex` into a flex row (`.ds-ex-n` name / `.ds-ex-tgt` target, name-left target-right, reusing the gold-bright target color already established by `.rx-ex-tgt`) instead of a single plain text line.
+
+Verified against the real running app and a real screenshot of the card: all 7 Session 1 exercises show their real target inline, readable at a glance, no wrapping/overflow issues even with the longest exercise/target strings in today's session.
+
+Full ship checklist: `npm run build` → OK, `npm run check` → SYNTAX OK, `npm run regress` → `PAGEERRORS 0`, `badCount:0`, `total:12524`. No `SEED_SKILLS`/ladder content touched, `SKILL_LADDER_VER` stayed at 118. SW bumped to `operations-v199`. `npm run package` → produced `dist/operations.zip`.
