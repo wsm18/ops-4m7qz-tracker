@@ -400,7 +400,7 @@ document.body.addEventListener("click",e=>{
   const voldel=e.target.closest("[data-voldel]"); if(voldel){ S.volunteer=S.volunteer.filter(v=>v.id!==voldel.dataset.voldel); save(); render(); return; }
   // Habit done/delete/starter/calendar-toggle handlers now live in events.js and
   // dailies.js — Habits merged into the unified S.dailies list in v168.
-  const teststart=e.target.closest("[data-teststart]"); if(teststart){ const tid=teststart.dataset.teststart; if(tid==="reaction")startReaction(); else if(tid==="digitspan")startDigitSpan(); else if(tid==="typing")startTyping(); else if(tid==="nback")startNback(); else if(tid==="gonogo")startGoNoGo(); else if(tid==="procspeed")startProcSpeed(); else if(tid==="mathsprint")startMathSprint(); return; }
+  const teststart=e.target.closest("[data-teststart]"); if(teststart){ const tid=teststart.dataset.teststart; if(tid==="reaction")startReaction(); else if(tid==="digitspan")startDigitSpan(); else if(tid==="typing")startTyping(); else if(tid==="nback")startNback(); else if(tid==="gonogo")startGoNoGo(); else if(tid==="procspeed")startProcSpeed(); else if(tid==="mathsprint")startMathSprint(); else if(tid==="patterns")startPatterns(); return; }
   const rdstart=e.target.closest("[data-rdstart]"); if(rdstart){ if(typeof startReading==="function") startReading(); return; }
   const srsReview=e.target.closest("[data-srsreview]"); if(srsReview){ startSrsReview(srsReview.dataset.srsreview); return; }
   const srsGradeBtn=e.target.closest("[data-srsgrade]"); if(srsGradeBtn){ srsGrade(parseInt(srsGradeBtn.dataset.srsgrade)); return; }

@@ -87,6 +87,28 @@ function syncSkillsFromActivity(){
       if(lvl>rsk.currentLevel){ rsk.currentLevel=lvl; skUpdatePeak(rsk); rsk.lastQuestTs=now; rsk.history.push({ts:now,type:"auto-rhr",level:lvl}); changed=true; }
     }
   }
+  // Memory retention skill: was locked auto:"quiz:retention" with nothing feeding
+  // it — permanently stuck at 0, self-contradicting its own howTo text ("there is
+  // no automatic leveling for this skill yet"). Levels from real SRS review
+  // quality: a card's SM-2 ease factor IS the standard measure of how easily
+  // material is actually being retained (repeated "Again" grades drag it down,
+  // "Good"/"Easy" grades raise it) — no invented formula, reusing srsGrade()'s
+  // existing math. Only counts "mature" cards (reps>=2 — survived past the
+  // initial-learning churn) so early noise doesn't move the level. The skill's
+  // full ladder references streaks/time-windows/memory-palace milestones this
+  // data doesn't track — deliberately capped at L5 ("Practitioner") rather than
+  // faking the upper System-Builder/Master tiers, same honest-capping precedent
+  // as nback (caps at L8) and Pattern recognition (caps at L7).
+  const msk=S.lifeSkills.find(s=>s.auto==="quiz:retention");
+  if(msk){
+    const matureCards=(S.srsDecks||[]).flatMap(d=>d.cards).filter(c=>(c.reps||0)>=2);
+    if(matureCards.length>=3){
+      const avgEase=matureCards.reduce((s,c)=>s+c.ease,0)/matureCards.length;
+      const lvl=Math.min(memRetentionLevel(matureCards.length, avgEase), msk.levels.length);
+      if(lvl>msk.currentLevel){ msk.currentLevel=lvl; skUpdatePeak(msk); msk.lastQuestTs=now; msk.history.push({ts:now,type:"auto-srs",level:lvl}); changed=true; }
+      else if(lvl>0 && lvl>=msk.currentLevel && msk.lastQuestTs<now-864e5){ msk.lastQuestTs=now; changed=true; }
+    }
+  }
   // Integrity skill: levels from the Weight ledger (read-only mirror). This is the
   // one auto skill that can move DOWN as well as up — broken vows cost integrity,
   // and a broken keystone/heavy vow costs far more than an ordinary one. Honest by
@@ -148,4 +170,14 @@ function integrityLevel(maxLevel){
 function rhrToLevel(rhr){
   if(rhr==null) return 0;
   return rhr<=40?10 : rhr<44?9 : rhr<48?8 : rhr<52?7 : rhr<56?6 : rhr<60?5 : rhr<65?4 : rhr<70?3 : rhr<75?2 : 1;
+}
+// Two-factor: deck scale (mature card count) gates the level, ease quality
+// (SM-2's own retention-difficulty signal, ~1.3 struggling to ~3.5+ retaining
+// easily) breaks ties within a scale band. Caps at 5 — see the call site's
+// comment for why the upper tiers aren't attempted.
+function memRetentionLevel(cardCount, avgEase){
+  if(cardCount<10) return avgEase>=2.3?1:0;
+  if(cardCount<50) return avgEase>=2.7?3: avgEase>=2.3?2:1;
+  if(cardCount<100) return avgEase>=2.7?4:3;
+  return avgEase>=2.7?5:4;
 }

@@ -15,6 +15,7 @@ const FOCUS_TILES=[
   {key:"procspeed",testId:"procspeed",icon:"🔐",label:"Processing speed",blurb:"Decode a stream of symbols fast."},
   {key:"math",testId:"mathsprint",icon:"💥",label:"Math",blurb:"Quick fire-mission arithmetic."},
   {key:"reading",testId:"reading",icon:"📡",label:"Reading",blurb:"Read fast, act on what it said."},
+  {key:"patterns",testId:"patterns",icon:"📶",label:"Pattern recognition",blurb:"Intercept a repeating signal — call the next blip."},
   {key:"knowledge",quiz:true,icon:"🐿️",label:"Knowledge",blurb:"Climb Yggdrasil on real ROTC knowledge."},
 ];
 function renderFocusPicker(){
@@ -57,6 +58,13 @@ const TESTS=[
    scoreToLevel:mpm=> mpm>=80?10: mpm>=70?9: mpm>=60?8: mpm>=52?7: mpm>=45?6: mpm>=38?5: mpm>=30?4: mpm>=22?3: mpm>=15?2: mpm>=1?1: 0},
   {id:"mathsprint", name:"Mental math sprint", skill:"Mental math", unit:"correct/min", dur:"60 sec",
    scoreToLevel:cpm=> cpm>=40?10: cpm>=34?9: cpm>=28?8: cpm>=24?7: cpm>=20?6: cpm>=16?5: cpm>=13?4: cpm>=10?3: cpm>=7?2: cpm>=1?1: 0},
+  // Caps at 7, not 10 — same honest-capping precedent as nback (caps at 8):
+  // this game format (modular/interleaved sequences) genuinely tests the
+  // skill's L1-L7 rule families, but not L8-L10 (subtle/positional rules,
+  // abstract matrix-style puzzles) — a different visual format this game
+  // doesn't attempt. Those top rungs stay unreached rather than faked.
+  {id:"patterns", name:"Pattern recognition", skill:"Pattern recognition", unit:"pattern round reached", dur:"~1 min per round",
+   scoreToLevel:round=> round>=8?7: round>=6?6: round>=5?5: round>=4?4: round>=3?3: round>=2?2: round>=1?1: 0},
 ];
 function testSkillOf(t){ return S.lifeSkills.find(s=>s.name===t.skill); }
 function lastTest(typeId){ const r=(S.tests||[]).filter(x=>x.type===typeId).sort((a,b)=>new Date(b.date)-new Date(a.date)); return r[0]||null; }
@@ -120,10 +128,15 @@ function testSuggestion(typeId, raw){
     if(raw<28) return "Good pace. Learn a couple of methods (left-to-right addition, ×11, doubling/halving) to speed multi-step problems. See the Mental math roadmap.";
     return "Fast — genuinely useful for land nav and logistics. The top levels use formal mental-calculation methods (Trachtenberg/Vedic); see the Mental math skill.";
   }
+  if(typeId==="patterns"){
+    if(raw<3) return "You're catching the simple modular patterns. The next step is holding two interleaved sequences in mind at once (the rounds where two symbol sets alternate) — watch a full repeat before answering rather than guessing early. The Pattern recognition skill lists every rule family.";
+    if(raw<6) return "Solid — you're reading moderate and interleaved patterns reliably. Push into the larger, faster symbol pools and don't let the pace rush you into guessing. See the Pattern recognition roadmap for what's next.";
+    return "Strong pattern extraction — consistently decoding complex, larger-pool sequences. The top of this skill (subtle/positional rules, abstract matrix-style puzzles) goes beyond what this game format tests; see the Pattern recognition skill for that path.";
+  }
   return "";
 }
 function testUnit(typeId, raw){
-  return raw + ({reaction:'ms', typing:' WPM', nback:'-back', gonogo:'%', procspeed:'/min', mathsprint:'/min'}[typeId]||'');
+  return raw + ({reaction:'ms', typing:' WPM', nback:'-back', gonogo:'%', procspeed:'/min', mathsprint:'/min', patterns:' rounds'}[typeId]||'');
 }
 function renderTests(){
   const wrap=document.getElementById("testList"); if(!wrap) return;
@@ -648,6 +661,124 @@ function startFireMission(){
     stageEl.innerHTML=`<div class="test-result"><div class="big">${cpm}/min</div><div>fire missions completed in 60s</div>
       ${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}
       <div class="sugg">${testSuggestion("mathsprint", cpm)}</div></div>`;
+  }
+}
+
+// ---- Signal Intercept: pattern recognition, disguised as decoding a repeating radio-blip transmission ----
+// A genuinely NEW construct, not a re-skin — "Pattern recognition" was a
+// seeded skill locked auto:"test:patterns" with no game ever built to feed
+// it (found by the v200-session audit; the skill was permanently stuck at
+// level 0). Measures real rule extraction: a flashed sequence of blips
+// follows a hidden modular (or two-interleaved-modular) rule; the player
+// predicts the next blip from 4 choices. Difficulty escalates via symbol-
+// pool size, step size, and single-vs-interleaved rule — not sequence
+// LENGTH alone, which would just be digit span again. Confirmed with Wyatt
+// via AskUserQuestion: sequence-prediction mechanic, "Signal Intercept"
+// theme. scoreToLevel deliberately caps at L7 of the skill's 10-level
+// ladder — same honest-capping precedent as nback capping at L8 (dual
+// n-back isn't built either): the top 2 rungs here describe subtle/
+// positional rules and abstract matrix-style puzzles, a different visual
+// format this game doesn't attempt, so they stay honestly unreached.
+let _siState=null;
+const SI_SET_A=["●","▲","■","◆","★","✦","♦","♣"];
+const SI_SET_B=["○","△","□","◇","☆","✧","♢","♧"];
+const SI_ROUNDS=[
+  {pool:3, mode:"cycle", step:1},
+  {pool:4, mode:"cycle", step:1},
+  {pool:4, mode:"cycle", step:2},
+  {pool:5, mode:"alt"},
+  {pool:5, mode:"cycle", step:2},
+  {pool:6, mode:"cycle", step:1},
+  {pool:6, mode:"alt"},
+  {pool:7, mode:"cycle", step:2},
+];
+// A generator closure is the single source of truth for both the flashed
+// sequence and the correct "next" answer — avoids re-deriving next from the
+// tail of the shown array, which is what actually breaks for alt-mode.
+function siMakeGenerator(cfg){
+  if(cfg.mode==="cycle"){
+    let cur=Math.floor(Math.random()*cfg.pool);
+    return ()=>{ const v=SI_SET_A[cur]; cur=(cur+cfg.step)%cfg.pool; return v; };
+  }
+  let a=Math.floor(Math.random()*cfg.pool), b=Math.floor(Math.random()*cfg.pool), i=0;
+  return ()=>{
+    let v;
+    if(i%2===0){ v=SI_SET_A[a]; a=(a+1)%cfg.pool; } else { v=SI_SET_B[b]; b=(b+1)%cfg.pool; }
+    i++; return v;
+  };
+}
+function siChoices(cfg, next){
+  const inPlay=new Set();
+  if(cfg.mode==="cycle"){ for(let k=0;k<cfg.pool;k++) inPlay.add(SI_SET_A[k]); }
+  else { for(let k=0;k<cfg.pool;k++){ inPlay.add(SI_SET_A[k]); inPlay.add(SI_SET_B[k]); } }
+  inPlay.delete(next);
+  let pool=shuffleInPlace([...inPlay]);
+  const fullPool=SI_SET_A.concat(SI_SET_B);
+  while(pool.length<3){
+    const extra=fullPool.filter(s=>s!==next && !pool.includes(s));
+    if(!extra.length) break;
+    pool.push(extra[Math.floor(Math.random()*extra.length)]);
+  }
+  return shuffleInPlace([next, ...pool.slice(0,3)]);
+}
+function startPatterns(){ startSignalIntercept(); }
+function startSignalIntercept(){
+  const stage=document.getElementById("stage-patterns"); if(!stage) return;
+  _siState={round:0, best:0, next:null};
+  siShow();
+  function siStageMap(){
+    stage.className="test-stage si";
+    stage.innerHTML=`<div class="si-display" id="siDisplay"></div><div class="si-note" id="siNote">Signal incoming — watch the pattern.</div><div class="si-choices" id="siChoices"></div>`;
+  }
+  function siShow(){
+    siStageMap();
+    const cfg=SI_ROUNDS[Math.min(_siState.round, SI_ROUNDS.length-1)];
+    const gen=siMakeGenerator(cfg);
+    const len=cfg.mode==="cycle"?cfg.pool*2+1:cfg.pool*2;
+    const seq=Array.from({length:len},()=>gen());
+    _siState.next=gen();
+    const disp=document.getElementById("siDisplay");
+    let i=0;
+    const show=()=>{
+      if(i<seq.length){
+        disp.innerHTML=`<span class="si-blip">${esc(seq[i])}</span>`;
+        i++;
+        setTimeout(()=>{ disp.innerHTML=""; setTimeout(show,220); },550);
+      } else { siAsk(cfg); }
+    };
+    setTimeout(show,400);
+  }
+  function siAsk(cfg){
+    const note=document.getElementById("siNote"); if(note) note.textContent="What comes next?";
+    const choices=siChoices(cfg, _siState.next);
+    const choicesEl=document.getElementById("siChoices");
+    choicesEl.innerHTML=choices.map(c=>`<button class="si-choice" data-sic="${esc(c)}">${esc(c)}</button>`).join("");
+    choicesEl.querySelectorAll("[data-sic]").forEach(btn=>{ btn.onclick=()=>siPick(btn.dataset.sic); });
+  }
+  function siPick(val){
+    const choicesEl=document.getElementById("siChoices");
+    if(choicesEl) choicesEl.querySelectorAll("[data-sic]").forEach(b=>b.onclick=null);
+    if(val===_siState.next){
+      _siState.best=_siState.round+1; _siState.round++;
+      stage.innerHTML=`<div class="si-ok">✓ Intercepted — pattern ${_siState.best} decoded. Tap to continue.</div>`;
+      // deferred a tick — the winning tap's click event is still bubbling up
+      // to this same `stage` element; attaching synchronously would let it
+      // fire immediately and skip the round (same fix as Land Nav Relay).
+      setTimeout(()=>{ stage.onclick=()=>{ stage.onclick=null; siShow(); }; },0);
+    } else {
+      siDone();
+    }
+  }
+  function siDone(){
+    const round=_siState.best;
+    if(round<1){ stage.className="test-stage si result"; stage.innerHTML=`<div class="test-result"><div class="big">0</div><div>Signal lost on the first pattern — stand by and try again. Watch for the repeat before answering.</div></div>`; _siState=null; return; }
+    const res=recordTest("patterns", round);
+    // see the comment in sentryDone() — render() wipes the stage, so write
+    // results into a fresh post-render reference.
+    _siState=null; render();
+    const stageEl=document.getElementById("stage-patterns"); if(!stageEl) return;
+    stageEl.className="test-stage si result";
+    stageEl.innerHTML=`<div class="test-result"><div class="big">${round}</div><div>pattern${round!==1?'s':''} decoded</div>${res.leveled?`<div class="leveled">⬆️ ${esc(res.sk.name)} → Level ${res.sk.currentLevel}</div>`:''}<div class="sugg">${testSuggestion("patterns",round)}</div></div>`;
   }
 }
 
