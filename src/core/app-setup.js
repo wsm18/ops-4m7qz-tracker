@@ -330,19 +330,40 @@ if(_cloudBtn) _cloudBtn.onclick=()=>{ if(fileHandle){ if(confirm("Unlink this cl
    file sync above, just a second, TOC-provided sync target. */
 const TOC_BASE="http://127.0.0.1:8799", TOC_PROJECT="operations";
 let _tocPresent=false, _tocDirty=false, _tocT=null;
+// Separate from _tocPresent (just "the TOC server answered the health
+// check") — this only becomes true once we have a DEFINITIVE read on
+// whether real saved data exists there: either we adopted it, or the
+// server gave a real "nothing here yet" answer. A real incident traced to
+// this distinction not existing: the data-fetch below has a short timeout
+// (TOC's backend can be slow to respond on a cold start), and on a timeout
+// the old code still marked TOC "present" and let writes proceed — so the
+// very next save() (anything at all — even an automatic checkDailyReset())
+// would flush whatever fresh/local state was already in memory over TOC's
+// real stored save, silently destroying it. Gating writes on a *confirmed*
+// read (not just "the server responded to a ping") closes that window: an
+// ambiguous outcome (timeout/network error) now leaves writes disabled for
+// the session instead of risking a clobber.
+let _tocDataConfirmed=false;
 function tocWriteDebounced(){
-  if(!_tocPresent) return;
+  if(!_tocPresent||!_tocDataConfirmed) return;
   _tocDirty=true; clearTimeout(_tocT);
   _tocT=setTimeout(tocFlush, 800);
 }
 async function tocFlush(){
-  if(!_tocPresent||!_tocDirty) return;
+  if(!_tocPresent||!_tocDataConfirmed||!_tocDirty) return;
   try{
     const r=await fetch(`${TOC_BASE}/api/projects/${TOC_PROJECT}/data`,{
       method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(S)
     });
     if(r.ok) _tocDirty=false;
   }catch(e){ /* TOC likely closed mid-session — next save retries */ }
+}
+// One fetch attempt for TOC's stored project data, with a given timeout —
+// factored out so tocInit() can retry once on a slow/cold first response
+// instead of writing the whole session off after a single 800ms miss.
+async function tocFetchData(timeoutMs){
+  const r=await fetch(`${TOC_BASE}/api/projects/${TOC_PROJECT}/data`,{signal:AbortSignal.timeout(timeoutMs)});
+  return r;
 }
 // on launch: if TOC is running and already opted this project in, adopt its
 // save (if any) — runs after cloudInit() so TOC, the most persistent source,
@@ -355,15 +376,30 @@ async function tocInit(){
     if(hbody.app!=="TOC") return;
   }catch(e){ return; } // no TOC on this machine/port — silently do nothing
   _tocPresent=true;
-  try{
-    const r=await fetch(`${TOC_BASE}/api/projects/${TOC_PROJECT}/data`,{signal:AbortSignal.timeout(800)});
-    if(r.ok){
-      const body=await r.json();
-      if(body.ok&&body.data&&typeof body.data==="object"){
-        localStorage.setItem(KEY,JSON.stringify(body.data)); S=load(); seedSkillsIfEmpty(); render();
+  // Try the real data fetch twice (800ms, then a more generous 3000ms) before
+  // giving up — a local backend can be genuinely slow to answer its first
+  // request after a cold start, and treating that as "confirmed empty" is
+  // exactly the bug that caused real save data to be overwritten before.
+  for(const timeoutMs of [800,3000]){
+    try{
+      const r=await tocFetchData(timeoutMs);
+      if(r.ok){
+        const body=await r.json();
+        if(body.ok&&body.data&&typeof body.data==="object"){
+          localStorage.setItem(KEY,JSON.stringify(body.data)); S=load(); seedSkillsIfEmpty(); render();
+        }
+        // A real, well-formed response either way (with or without data) is
+        // a definitive answer — safe to allow writes from here on.
+        _tocDataConfirmed=true;
       }
+      break; // got a real HTTP response (ok or not) — stop retrying either way
+    }catch(e){
+      // timeout/network error — genuinely ambiguous, try again once before
+      // giving up; on the final failure _tocDataConfirmed stays false, so
+      // tocWriteDebounced() keeps refusing to write for this whole session
+      // rather than guessing.
     }
-  }catch(e){ /* TOC's running but this project isn't opted in / a transient hiccup — keep syncing writes */ }
+  }
   setCloudStatus(null);
 }
 cloudInit().then(tocInit);
