@@ -31,6 +31,7 @@ const BEGINNER_RX = {
       {name:"Reverse lunge",          sets:3, reps:"8/leg",  rest:"90s"},
       {name:"Single-leg glute bridge", sets:3, reps:"10/leg", rest:"60s"},
       {name:"Hand-release push-ups",  sets:3, reps:"6–8",    rest:"90s"},
+      {name:"Knee push-ups",          sets:3, reps:"6–8",    rest:"90s"},
       {name:"Pike push-ups",          sets:2, reps:"6–8",    rest:"90s"},
       {name:"Hollow-body hold",       sets:3, reps:"20s",    rest:"45s"},
     ],
@@ -46,6 +47,12 @@ const BEGINNER_RX = {
       {name:"Intervals",     sets:"4×", reps:"400m hard",                          rest:"90s walk"},
       {name:"Tempo run",     sets:1,    reps:"15 min at only-a-few-words pace",     rest:"—"},
       {name:"Long easy run", sets:1,    reps:"25 min conversational",               rest:"—"},
+      // Named to avoid cgFindRxRow() word-overlap collisions with the
+      // "Intervals" row above — "Walk/run intervals" would score a tied 1.0
+      // against both rows (every one of "Intervals"'s words also appears in
+      // that name), and ties resolve to whichever row comes first in the
+      // array, silently matching the wrong (harder) row.
+      {name:"Run-walk build-up (beginner)", sets:1, reps:"20 min: 1 min run / 2 min walk, repeat", rest:"—"},
     ],
     gym: [
       {name:"Treadmill intervals", sets:"4×", reps:"400m, 1% incline", rest:"90s"},
@@ -56,6 +63,7 @@ const BEGINNER_RX = {
     bw: [
       {name:"Doorway/towel rows",  sets:3, reps:"8–10",        rest:"90s"},
       {name:"Decline push-ups",   sets:3, reps:"6–8",          rest:"90s"},
+      {name:"Knee push-ups",      sets:3, reps:"6–8",          rest:"90s"},
       {name:"Plank",              sets:3, reps:"20–30s",        rest:"45s"},
       {name:"Side plank",         sets:2, reps:"15–20s/side",  rest:"45s"},
       {name:"Superman",           sets:3, reps:"10",            rest:"45s"},
@@ -72,6 +80,7 @@ const BEGINNER_RX = {
     bw: [
       {name:"Shuttle sprints",       sets:"3 rounds", reps:"4 lengths ~25m",     rest:"2 min between rounds"},
       {name:"Hand-release push-ups", sets:"3 rounds", reps:"10 (first day: 5)",  rest:""},
+      {name:"Knee push-ups",         sets:"3 rounds", reps:"8 (first day: 5)",   rest:""},
       {name:"Squat jumps",           sets:"3 rounds", reps:"8",                   rest:""},
       {name:"Plank",                 sets:"3 rounds", reps:"30s",                 rest:""},
       {name:"200m run / jog",        sets:"3 rounds", reps:"1 lap",               rest:""},

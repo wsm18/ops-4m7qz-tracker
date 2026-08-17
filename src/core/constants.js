@@ -282,7 +282,11 @@ const SESSIONS = {
       {n:"Cable / machine crunch", t:"reps", w:true, eq:["machines"], m:["core"]},
       {n:"Trap-bar / barbell deadlift", t:"reps", w:true, eq:["barbell"], m:["hamstrings","glutes","back"]},
     ],
-    alt:{4:[{n:"Kettlebell goblet squat", t:"reps", w:true, eq:["kettlebell"], m:["quads","glutes"]}]}},
+    // slot 2's "Knee push-ups" alt: found by the v200-session FM audit —
+    // the push-up slot had no easier variant, so anyone who can't yet do a
+    // full hand-release push-up had nothing to substitute. Swappable via the
+    // existing "🔀 swap" affordance, not auto-prescribed.
+    alt:{2:[{n:"Knee push-ups", t:"reps", m:["chest","triceps"]}], 4:[{n:"Kettlebell goblet squat", t:"reps", w:true, eq:["kettlebell"], m:["quads","glutes"]}]}},
   s2:{name:"Session 2 · Run", areas:["cardio","legs"], pickOne:true,
     bw:[
       {n:"Intervals (sprint reps, any open ground)", t:"dist", out:true, m:["cardio","legs"], indoor:{n:"Indoor intervals — 30s hard / 60s easy ×8, rotating burpees → high-knees → mountain-climbers → squat jumps", t:"time"}},
@@ -296,7 +300,16 @@ const SESSIONS = {
       {n:"Rower intervals", t:"time", w:true, eq:["rower"], m:["cardio","back"]},
       {n:"Timed 2-mile (treadmill)", t:"dist", w:true, eq:["treadmill"], m:["cardio"]},
     ],
-    alt:{2:[{n:"Stationary bike intervals", t:"time", w:true, eq:["bike"], m:["cardio","legs"]}]}},
+    // "Run-walk build-up" alt on every run slot: found by the v200-session
+    // FM audit — the easiest bw run option was a straight 25-min continuous
+    // run, no on-ramp for someone who can't run continuously yet. Swappable
+    // via the existing "🔀 swap" affordance on any run day, not just one.
+    alt:{
+      0:[{n:"Run-walk build-up (beginner)", t:"dist", m:["cardio","legs"]}],
+      1:[{n:"Run-walk build-up (beginner)", t:"dist", m:["cardio","legs"]}],
+      2:[{n:"Stationary bike intervals", t:"time", w:true, eq:["bike"], m:["cardio","legs"]}, {n:"Run-walk build-up (beginner)", t:"dist", m:["cardio","legs"]}],
+      3:[{n:"Run-walk build-up (beginner)", t:"dist", m:["cardio","legs"]}],
+    }},
   s3:{name:"Session 3 · Upper + Core", areas:["pull","push","core"],
     bw:[
       {n:"Doorway/towel rows (isometric pull)", t:"reps", m:["back","biceps"]},
@@ -319,6 +332,7 @@ const SESSIONS = {
     alt:{
       0:[{n:"Lat pulldown (machine)", t:"reps", w:true, eq:["machines"], m:["back","biceps"]}],
       1:[{n:"Barbell row", t:"reps", w:true, eq:["barbell"], m:["back","biceps"]}],
+      2:[{n:"Knee push-ups", t:"reps", m:["chest","shoulders"]}],
       6:[
         {n:"Water jug carry", t:"dist", w:true, eq:["waterjugs"], m:["grip","core"]},
         {n:"Weighted stretcher carry (2-person)", t:"dist", w:true, eq:["stretcher"], m:["grip","core","shoulders"]},
@@ -351,6 +365,7 @@ const SESSIONS = {
         {n:"Water jug carry", t:"dist", w:true, eq:["waterjugs"], m:["grip","core"]},
         {n:"Sandbag carry", t:"dist", w:true, eq:["sandbag"], m:["grip","core"]},
       ],
+      2:[{n:"Knee push-ups", t:"reps", m:["chest","triceps"]}],
       5:[{n:"Stationary bike 500m sprint", t:"time", w:true, eq:["bike"], m:["cardio"]}],
     }},
   // Flexibility block is intentionally NOT listed here — flexFromLibrary tells

@@ -408,9 +408,15 @@ function renderBaseline(){
   const form=`<div class="bl-card ${due?'due':''}">
     ${BASELINE_TEST.map(def=>{
       const last=lastBaselineVal(def.key);
+      const warmupHtml=def.warmupProtocol
+        ? `<details class="bl-warmup"><summary>⚠️ Before you test</summary><ol>${def.warmupProtocol.map(s=>`<li>${esc(s)}</li>`).join("")}</ol><div class="bl-warmup-stop">${esc(def.warmupStop||"")}</div></details>`
+        : def.warmupNote ? `<details class="bl-warmup"><summary>⚠️ Before you test</summary><div class="bl-warmup-stop">${esc(def.warmupNote)}</div></details>` : '';
       return `<div class="bl-ex">
-        <div class="bl-ex-name">${esc(def.name)}${last?`<div class="prev">last: ${esc(fmtBaselineVal(def,last))}</div>`:''}</div>
-        <div class="units">${baselineInputs(def)}</div>
+        <div class="bl-ex-row">
+          <div class="bl-ex-name">${esc(def.name)}${last?`<div class="prev">last: ${esc(fmtBaselineVal(def,last))}</div>`:''}</div>
+          <div class="units">${baselineInputs(def)}</div>
+        </div>
+        ${warmupHtml}
       </div>`;
     }).join("")}
     <button class="btn-add" id="blSave" style="margin-top:12px">${due?'Log This Month&rsquo;s Baseline':'Save Baseline (updates targets)'}</button>

@@ -308,6 +308,7 @@ const EX_HOWTO=[
   ["reverse lunge","From standing, step one foot straight back and lower until both knees are ~90°, then drive through the front heel back up. Alternate legs."],
   ["single-leg glute bridge","Lie on your back, one knee bent with that foot flat, other leg straight out. Push through the planted heel to lift your hips into a line, squeeze, lower."],
   ["hand-release push-up","A push-up where, at the bottom, you lower fully to the floor and lift your hands off for a moment, then place them and press up."],
+  ["knee push-up","A push-up with your knees on the floor instead of your toes — same hand position and chest-to-floor range of motion, just less bodyweight to press. The real regression if a full push-up isn't there yet: build reps here first, then move to toes."],
   ["pike push-up","From a push-up position, walk your feet in and raise your hips into an upside-down V. Bend your elbows to lower your head toward the floor, then press up."],
   ["shrimp","A single-leg squat on the floor: stand on one leg, hold the other foot behind you (or just keep it lifted), and lower under control as far as you can, then stand. Hold a wall to balance."],
   ["hollow-body","Lie on your back, press your lower back into the floor, and lift your shoulders and legs a few inches so your body makes a shallow banana. Hold and breathe."],
@@ -326,6 +327,7 @@ const EX_HOWTO=[
   ["tempo run","A sustained 'comfortably hard' pace you can only say a few words at — hold it for 15–25 minutes."],
   ["long easy run","A slow, conversational-pace run, longer than usual (30–50 min). Builds the aerobic base behind the 2-mile."],
   ["timed 2-mile","Run 2 miles as fast as you can sustain and record the time — the AFT run, used as a test, not every week."],
+  ["run-walk build-up","The real on-ramp if continuous running isn't there yet: run 1 minute, walk 2 minutes, repeat for the session. As it gets easier over a few weeks, stretch the run minute and shrink the walk — that's the whole progression, no app tracking needed. Swap to this on any run day."],
   // --- gym cardio ---
   ["treadmill interval","Run hard/easy bursts on a treadmill; add incline to build power and spare your joints."],
   ["treadmill tempo","Hold a comfortably-hard pace on the treadmill for 15–25 min."],
@@ -616,14 +618,31 @@ function weekTrainingStats(){
   return {done,sched};
 }
 
+// Generic reminder for the bodyweight/timed max-effort tests below — real
+// warm-up matters for all of them, but a staged % ramp only makes sense for
+// a loaded lift (see max_deadlift's warmupProtocol).
+const BL_WARMUP_GENERIC="Warm up first — a few easy reps or light effort, not cold. Never test max effort on a cold body.";
 // Monthly baseline = one max-effort set per key movement. These map to AFT
 // events + the plan's core lifts so the updater can re-anchor each month.
+// warmupProtocol/warmupNote: found by the v200-session FM audit as the
+// single highest injury-risk gap in the subsystem — the deadlift 3RM test
+// previously had no ramp, just "one all-out set." Framed as % of your OWN
+// best guess (never a fabricated formula) — matches computeTarget()'s
+// existing refusal to invent percentage-of-max math elsewhere in FM.
 const BASELINE_TEST = [
-  {key:"max_pushups", name:"Max hand-release push-ups (2 min)", type:"reps", aft:"hrp"},
-  {key:"max_plank",   name:"Max plank hold", type:"time", aft:"plank"},
-  {key:"max_deadlift",name:"3-rep max deadlift (lbs)", type:"reps", w:true, aft:"dl"},
-  {key:"max_pullups", name:"Max pull-ups (one set)", type:"reps"},
-  {key:"max_squat",   name:"Max bodyweight squats (2 min)", type:"reps"},
-  {key:"run_2mi",     name:"Timed 2-mile run", type:"dist", aft:"run", lowerBetter:true},
-  {key:"sdc_sim",     name:"Sprint-Drag-Carry sim (time)", type:"time", aft:"sdc", lowerBetter:true},
+  {key:"max_pushups", name:"Max hand-release push-ups (2 min)", type:"reps", aft:"hrp", warmupNote:BL_WARMUP_GENERIC},
+  {key:"max_plank",   name:"Max plank hold", type:"time", aft:"plank", warmupNote:BL_WARMUP_GENERIC},
+  {key:"max_deadlift",name:"3-rep max deadlift (lbs)", type:"reps", w:true, aft:"dl",
+   warmupProtocol:[
+     "Empty bar or very light — 5–8 reps to groove the pattern",
+     "~50% of what you think you'll hit for 3 — 5 reps",
+     "~70% — 3 reps",
+     "~85% — 1 rep",
+     "Now attempt your real 3-rep max",
+   ],
+   warmupStop:"Stop the moment your form breaks down — a slower clean pull beats a fast one with a rounded back. If you have someone who can check your form, use them."},
+  {key:"max_pullups", name:"Max pull-ups (one set)", type:"reps", warmupNote:BL_WARMUP_GENERIC},
+  {key:"max_squat",   name:"Max bodyweight squats (2 min)", type:"reps", warmupNote:BL_WARMUP_GENERIC},
+  {key:"run_2mi",     name:"Timed 2-mile run", type:"dist", aft:"run", lowerBetter:true, warmupNote:BL_WARMUP_GENERIC},
+  {key:"sdc_sim",     name:"Sprint-Drag-Carry sim (time)", type:"time", aft:"sdc", lowerBetter:true, warmupNote:BL_WARMUP_GENERIC},
 ];
