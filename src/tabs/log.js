@@ -660,9 +660,17 @@ function computeTargetFallback(exArg, name, opts){
   // by the user's own AFT fitness level (aftFitnessMultiplier, aft-scoring.js)
   // — a plain, honest, single multiplier reused from the app's existing
   // 300/350 standard bands, never a per-exercise invented formula.
-  if(opts.skey && typeof BEGINNER_RX!=="undefined" && typeof cgFindRxRow==="function"){
+  const phase=typeof exArg==="object" && exArg ? exArg._phase : null;
+  const isWarmCool=phase==="warmup"||phase==="cooldown"||phase==="flex";
+  if(!isWarmCool && opts.skey && typeof BEGINNER_RX!=="undefined" && typeof cgFindRxRow==="function"){
     const rx=BEGINNER_RX[opts.skey];
-    const rows=rx?(opts.rich?rx.gym:rx.bw):null;
+    // A session's work list mixes bodyweight-only accessory moves (glute
+    // bridge, hollow-body hold) with gym-equipment lifts even on a gym day —
+    // SESSIONS doesn't swap every exercise wholesale. So on a rich/gym day,
+    // check both lists (gym first) rather than only rx.gym, or bodyweight
+    // accessories with no gym row of their own silently lose their starter
+    // number and fall through to vague generic effort text instead.
+    const rows=rx?(opts.rich?(rx.gym||[]).concat(rx.bw||[]):(rx.bw||[]).concat(rx.gym||[])):null;
     const row=rows?cgFindRxRow(rows,name):null;
     if(row){
       let weightNote="";
