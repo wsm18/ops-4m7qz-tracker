@@ -697,6 +697,19 @@ function computeTargetFallback(exArg, name, opts){
   // training.js keeping an independent copy.
   if(opts.intensity && typeof exArg==="object" && exArg){
     const t=exArg.type||exArg.t;
+    // Warm-up/cool-down/flex movements are prep, not a graded work set —
+    // the intensity-based strength prose below ("leave 1-2 reps in the
+    // tank", "3 sets") is actively wrong here (nobody grades effort on a
+    // leg swing). Most STRETCH_LIBRARY names already carry their own real
+    // rep/hold spec in a trailing "(...)" (e.g. "(10/leg)", "(hold 30s
+    // ×2/side)") — surface that as the real target instead of vague copy.
+    // Require a digit inside the parens so descriptive asides (e.g. "(don't
+    // hold stretches cold yet)") aren't mistaken for a spec.
+    if(isWarmCool){
+      const m=/\(([^()]*\d[^()]*)\)\s*$/.exec(exArg.n||"");
+      const qualifier=phase==="warmup"?"easy and controlled":"relaxed, breathe through it";
+      return {target: m?`${m[1]} — ${qualifier}`:qualifier, note:null, tier:"generic"};
+    }
     let base="as prescribed";
     if(opts.intensity==="hard"){
       if(t==="reps") base="3–4 sets, leave 1–2 reps in the tank";
