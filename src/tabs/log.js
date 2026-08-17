@@ -203,6 +203,32 @@ function recoveryLoad(){
   });
   return load;
 }
+// Macro-level deload/overtraining signal — deliberately distinct from
+// recoveryLoad()'s 4-day per-muscle-group window and computeTarget()'s
+// per-exercise hold-on-hard-effort logic. Found by the v204-session FM
+// audit as a real structural gap: real overtraining often shows up as
+// SEVERAL exercises each individually within normal bounds — no single
+// exercise or muscle group ever trips its own threshold — but the whole
+// log, across 2-3 weeks, shows a real struggle pattern. Looks at real
+// logged struggle signals (session RPE, per-exercise effort, cut-short),
+// nothing invented or estimated.
+function detectOvertrainingTrend(){
+  const now=Date.now();
+  const windowDays=21;
+  const recent=(S.workouts||[]).filter(w=>w.ts && (now-w.ts)/864e5<=windowDays).sort((a,b)=>a.ts-b.ts);
+  if(recent.length<4) return null; // too few logged sessions to see a real trend, not just noise
+  const struggled=w=>{
+    if(w.rpe!=null && w.rpe>=9) return true;
+    const exs=w.exercises||[];
+    if(exs.some(e=>e.reduced)) return true;
+    if(exs.filter(e=>e.effort!=null && e.effort>=9).length>=2) return true;
+    return false;
+  };
+  const strugglingCount=recent.filter(struggled).length;
+  const rate=strugglingCount/recent.length;
+  if(rate<0.5) return null; // under half struggling — normal week-to-week variation, not a trend
+  return {sessionsLogged:recent.length, strugglingCount, rate, windowDays};
+}
 function savePT(){
   const eff=ptEffectiveAreas();
   const text=document.getElementById("ptText").value.trim();

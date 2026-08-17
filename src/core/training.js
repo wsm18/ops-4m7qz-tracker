@@ -437,11 +437,25 @@ function planForDay(dateObj){
   const assign=assignWeekSessions(weekMonday(dateObj));
   const skey=assign[day];
   if(!skey) return REST_DAY_META;
+  let plan;
   if(skey==="s2"){
     const slot=runSlotFor(dateObj)||"first";
-    return Object.assign({session:"s2"}, SESSION_META_S2[slot]);
+    plan=Object.assign({session:"s2"}, SESSION_META_S2[slot]);
+  } else {
+    plan=Object.assign({session:skey}, SESSION_META[skey]);
   }
-  return Object.assign({session:skey}, SESSION_META[skey]);
+  // Taper window: found by the v204-session FM audit as a real structural
+  // gap — the app had no macro-level volume reduction before a declared AFT
+  // test date at all, every week identical regardless of proximity. In the
+  // final 6 days before a real test, downgrade hard sessions to moderate so
+  // the user arrives fresh instead of fatigued from a full-intensity week
+  // right up to test day. Doesn't touch easy/rest days (nothing to taper).
+  const testDate=S.aftTestDate;
+  const daysToTest=testDate?dayDiff(localYMD(dateObj),testDate):null;
+  if(daysToTest!=null && daysToTest>=1 && daysToTest<=6 && plan.intensity==="hard"){
+    plan=Object.assign({}, plan, {intensity:"moderate", taper:true, label:plan.label+" — taper week, ease off"});
+  }
+  return plan;
 }
 // For "pick one" sessions (the run), choose which variant to do today, with a
 // sensible rotation. The week's earlier run slot = the easier/quality
@@ -477,8 +491,17 @@ function pickAftMode(){
   const rec=typeof recoveryReadiness==="function"?recoveryReadiness():null;
   const notRecovered=rec&&rec.level==="easy"; // two-or-more negative recovery flags
   if(notRecovered) return "circuit"; // lower-demand default when markers say ease off
-  // close to a real test -> rehearse full conditions
-  if(daysToTest!=null && daysToTest>=0 && daysToTest<=14) return "mock";
+  // Taper window (found by the v204-session FM audit): the final week before
+  // a real test is for arriving fresh, not rehearsing at full effort again —
+  // a full mock AFT IS itself a hard, near-max-effort session. This used to
+  // return "mock" for the entire 0-14 day window, meaning mock-AFT frequency
+  // actually INCREASED right up to test day — the opposite of standard taper
+  // practice. Cap at single-event practice (lighter) here instead.
+  if(daysToTest!=null && daysToTest>=1 && daysToTest<=6) return "practice";
+  // 7-14 days out: one last full-conditions rehearsal is genuinely useful —
+  // real value in practicing pacing/nerves under test conditions — with
+  // enough runway left to recover before the taper window above kicks in.
+  if(daysToTest!=null && daysToTest>=7 && daysToTest<=14) return "mock";
   // haven't tested in a long time -> a full mock re-baselines
   if(daysSinceTest>=45) return "mock";
   // otherwise: sharpen the weakest single event

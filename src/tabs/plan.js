@@ -227,6 +227,51 @@ function renderSkillBalance(){
   el.innerHTML=`<div class="forge-recovery-card balance">${lines}</div>`;
 }
 
+// Nutrition basics — found by the v204-session FM audit as a real, total
+// blank in an otherwise carefully evidence-based system: zero protein/
+// caloric guidance anywhere, despite under-eating protein being one of the
+// most common reasons a novice strength program stalls. Wyatt confirmed he
+// wants this via AskUserQuestion. Kept deliberately honest: a real protein
+// target range using the user's own logged bodyweight when known (no
+// fabricated number if it isn't), qualitative calorie framing rather than a
+// precise TDEE estimate (a real BMR/TDEE number would need sex/activity-
+// level data this app doesn't collect and would read as more precise than
+// it actually is), and the same "informational, not medical advice" framing
+// already used on the Vitals section (profile.html).
+function renderNutritionCard(){
+  const el=document.getElementById("nutritionCard"); if(!el) return;
+  const bw=S.profile&&S.profile.weightLb;
+  let proteinLine;
+  if(bw>0){
+    const lo=Math.round(bw*0.7), hi=Math.round(bw*1.0);
+    proteinLine=`At your logged bodyweight (${bw} lb), that's roughly <b>${lo}–${hi}g of protein a day</b> — spread across 3-4 meals rather than one big serving, since your body can only use so much at once.`;
+  } else {
+    proteinLine=`As a rule of thumb: <b>~0.7–1g of protein per pound of bodyweight per day</b>. Log your weight in Profile and this line will show your actual target range.`;
+  }
+  el.innerHTML=`<div class="forge-recovery-card balance">
+    <div class="recovery-line">Training is the stimulus — protein, calories, and sleep are what actually let your body adapt to it. Skipping this half is a common reason a program stalls even when the workouts themselves are solid.</div>
+    <div class="recovery-line">🍗 <b>Protein:</b> ${proteinLine}</div>
+    <div class="recovery-line">🔥 <b>Calories:</b> If your weight has been flat or dropping while you're training hard and getting stronger, you're likely undereating for what this program is asking of you — a modest surplus, not a deficit, is what builds real strength from a weak baseline. Track your weight in Profile weekly to see the real trend, not day-to-day noise.</div>
+    <div class="recovery-line">😴 <b>Sleep:</b> 7–9 hours is when the actual adaptation happens — the workout is the stimulus, sleep is where the strength gets built. This is worth taking as seriously as the sessions themselves.</div>
+    <div class="recovery-line" style="color:var(--ink-faint);font-style:italic">Informational only — not medical or dietary advice. See a clinician or registered dietitian for anything specific to you.</div>
+  </div>`;
+}
+
+// Macro-level companion to renderRecoveryAdvisory() below — that one reads
+// a 4-day per-muscle-group window; this reads detectOvertrainingTrend()'s
+// 2-3 week whole-log struggle pattern. Genuinely different timescale and
+// question ("should I ease off legs today" vs "should this whole week be
+// lighter"), so both can show at once without contradicting each other.
+function renderDeloadAdvisory(){
+  const el=document.getElementById("deloadAdvisory"); if(!el) return;
+  const sig=typeof detectOvertrainingTrend==="function"?detectOvertrainingTrend():null;
+  if(!sig){ el.innerHTML=""; return; }
+  el.innerHTML=`<div class="deload-card">
+    <div class="deload-h">⚠️ Deload week recommended</div>
+    <div class="deload-body">${sig.strugglingCount} of your last ${sig.sessionsLogged} logged sessions (past ${sig.windowDays} days) hit real struggle signals — cut short, or rated 9+/10 effort. That pattern across multiple sessions, not just one hard day, is how real overtraining shows up before it becomes an injury or a plateau.</div>
+    <div class="deload-body"><b>This week:</b> cut your working sets by about half, keep the same movements and technique, aim for RPE 5–6 (comfortable, not grinding), and prioritize sleep. Resume normal programming next week — the fitness doesn't disappear in a week off the edge, but a real injury costs a lot more than that.</div>
+  </div>`;
+}
 function renderRecoveryAdvisory(){
   const el=document.getElementById("recoveryAdvisory"); if(!el) return;
   const load=recoveryLoad();

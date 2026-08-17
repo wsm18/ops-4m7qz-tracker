@@ -558,6 +558,11 @@
   .forge-recovery-card.balance{background:linear-gradient(180deg,rgba(var(--violet-rgb),.1),transparent);border-color:var(--violet)}
   .forge-recovery-card.balance h3{color:var(--violet)}
   .forge-recovery-card.balance .recovery-line b{color:var(--violet)}
+  /* macro-level deload advisory — distinct signal from the per-muscle-group recovery card above */
+  .deload-card{background:linear-gradient(180deg,rgba(var(--ember-rgb),.15),transparent);border:1.5px solid var(--ember);border-radius:var(--radius-lg);padding:var(--space-6) var(--space-7);margin-bottom:var(--space-6)}
+  .deload-h{font-size:14px;font-weight:700;color:var(--ember);letter-spacing:.02em;margin-bottom:8px}
+  .deload-body{font-size:13px;color:var(--ink-dim);line-height:1.55;padding:3px 0}
+  .deload-body b{color:var(--ember)}
 
   /* ---- Skills ---- */
   .sk-form-title{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:10px}

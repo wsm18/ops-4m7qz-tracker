@@ -294,6 +294,8 @@ function render(){
   if(typeof renderPlanRec==="function") renderPlanRec();
   if(typeof renderPlanPriorities==="function") renderPlanPriorities();
   if(typeof renderSkillBalance==="function") renderSkillBalance();
+  if(typeof renderNutritionCard==="function") renderNutritionCard();
+  if(typeof renderDeloadAdvisory==="function") renderDeloadAdvisory();
   if(typeof renderRecoveryAdvisory==="function") renderRecoveryAdvisory();
   if(typeof renderSessionLists==="function") renderSessionLists();
   if(typeof renderGymAccessUI==="function") renderGymAccessUI();
