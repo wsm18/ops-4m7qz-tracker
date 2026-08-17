@@ -19,9 +19,13 @@ function getWarriorsFocus(){
   // 3. Habits due today
   const habitDue=(S.dailies||[]).find(h=>h.kind==="habit"&&h.lastDone!==localYMD());
   if(habitDue) return {icon:"📋", action:habitDue.name, sub:"Habit due today", btn:"All habits →", tab:"dailies"};
-  // 4. Fading skill
-  const fading=(S.lifeSkills||[]).filter(s=>!s.group).map(s=>({s,q:typeof skQuest==="function"?skQuest(s):null})).filter(x=>x.q&&x.q.type==="decay")[0];
-  if(fading) return {icon:"🌳", action:`Reclaim ${fading.s.name}`, sub:"A branch fades — address it before it drops further", btn:"Tend the Tree →", tab:"skills"};
+  // 4. Highest-leverage skill needing attention — computeSmartFocus() (skills-core.js)
+  // is the one real urgency+opportunity ranker; this used to be a separate
+  // first-match-in-array-order pick that could disagree with the Dawn callout
+  // recommending a different skill in the same render (found by the v200-
+  // session audit — 5 independent "what needs attention" algorithms).
+  const smart=typeof computeSmartFocus==="function"?computeSmartFocus():null;
+  if(smart) return {icon:"🌳", action:`Reclaim ${smart.sk.name}`, sub:smart.why, btn:"Tend the Tree →", tab:"skills", skId:smart.sk.id};
   // 5. SRS cards due
   const srsDue=typeof srsTotalDue==="function"?srsTotalDue():0;
   if(srsDue>0) return {icon:"📚", action:`${srsDue} SRS card${srsDue!==1?"s":""} ready for review`, sub:"Spaced repetition keeps knowledge from fading", btn:"Review now →", tab:"test"};
@@ -477,25 +481,20 @@ function renderToday(){
       notes.push(`<div class="fn-row"><span class="fn-dot">🏋️</span><span><b>This week:</b> ${_parts.join(' · ')} logged</span><button class="td-go-sm" data-gototab="log">Log →</button></div>`);
     }
   }
-  // skill of the day — urgency-first: skills ≤3 days from fade shown first with ⚠ label
-  const _skElig=(S.lifeSkills||[]).filter(s=>!s.group&&s.currentLevel>0&&!s.auto);
-  if(_skElig.length>0){
-    const _dayIdx=Math.floor(Date.now()/864e5);
-    // Urgency: any skill at risk within 3 days takes priority
-    const _urgentSks=_skElig.filter(s=>{ const d=typeof skDaysLeft==="function"?skDaysLeft(s):null; return d!==null&&d<=3; });
-    const _urgentFocal=_urgentSks.length>0?_urgentSks.sort((a,b)=>(typeof skDaysLeft==="function"?skDaysLeft(a)||999:999)-(typeof skDaysLeft==="function"?skDaysLeft(b)||999:999))[0]:null;
-    // Normal cycle: sort soonest-to-fade first then cycle by day
-    const _sortedElig=_skElig.slice().sort((a,b)=>(typeof skDaysLeft==="function"?skDaysLeft(a)||999:999)-(typeof skDaysLeft==="function"?skDaysLeft(b)||999:999));
-    const _focal=_urgentFocal||_sortedElig[_dayIdx%_sortedElig.length];
-    if(_focal){
-      const _eff=typeof skEffectiveLevel==="function"?skEffectiveLevel(_focal):_focal.currentLevel;
-      const _dl=typeof skDaysLeft==="function"?skDaysLeft(_focal):null;
-      const _isUrgent=_dl!==null&&_dl<=3;
-      const _urgentBadge=_isUrgent?` <span class="sk-focal-urgent">⚠ ${_dl}d left</span>`:'';
-      const _dlStr=!_isUrgent&&_dl!==null?`, ${_dl}d until fade`:'';
-      const _label=_isUrgent?`<b>Urgent — practice now:</b>`:`<b>Skill of the day:</b>`;
-      notes.push(`<div class="fn-row${_isUrgent?' sk-focal-urgent-row':''}"><span class="fn-dot">🎯</span><span>${_label} ${esc(_focal.name)} — L${_eff}${_dlStr}${_urgentBadge}</span><button class="td-go-sm" data-skpractice="${esc(_focal.id)}" title="Mark as practiced — resets fade timer">✓ practiced</button><button class="td-go-sm" data-gototab="skills">→</button></div>`);
-    }
+  // Skill needing attention — was its own 3rd independent urgency algorithm
+  // (a ≤3-day threshold plus day-index cycling through all eligible skills),
+  // disagreeing with Warrior's Focus and the Dawn callout above (found by the
+  // v200-session audit — 5 competing "what needs attention" pickers). Now
+  // reads computeSmartFocus()'s single real urgency+opportunity ranking
+  // instead. Silent when nothing has real urgency or peak/effective gap —
+  // Today's Hand already covers "something to practice" for the no-urgency
+  // case, so a rotating filler pick here would just be a second, weaker copy
+  // of that job. Suppressed if Warrior's Focus (above) is already showing
+  // this exact skill, so the two don't literally repeat the same line twice.
+  const smartDay=typeof computeSmartFocus==="function"?computeSmartFocus():null;
+  if(smartDay && !(focus&&focus.skId===smartDay.sk.id)){
+    const _eff=typeof skEffectiveLevel==="function"?skEffectiveLevel(smartDay.sk):smartDay.sk.currentLevel;
+    notes.push(`<div class="fn-row"><span class="fn-dot">🎯</span><span><b>Needs attention:</b> ${esc(smartDay.sk.name)} — L${_eff} — ${esc(smartDay.why)}</span><button class="td-go-sm" data-skpractice="${esc(smartDay.sk.id)}" title="Mark as practiced — resets fade timer">✓ practiced</button><button class="td-go-sm" data-gototab="skills">→</button></div>`);
   }
   // Synthesis-ready alert — any set with all members mastered but card not yet unlocked
   if(typeof SEED_SKILLS!=="undefined" && typeof skSetCanCombine==="function"){

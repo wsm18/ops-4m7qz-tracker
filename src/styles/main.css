@@ -696,9 +696,6 @@
   .sk-path-badge.mastered{background:rgba(255,215,0,.2);color:var(--gold);border:1px solid rgba(255,215,0,.4)}
   /* Synergy indicator */
   .sk-synergy-foot{font-size:.58rem;color:var(--gold);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
-  /* Urgent focal skill */
-  .sk-focal-urgent{background:rgba(192,57,43,.15);color:#c0392b;font-weight:700;padding:.05rem .3rem;border-radius:.25rem;font-size:.8em}
-  .sk-focal-urgent-row{background:rgba(192,57,43,.08);border-left:3px solid #c0392b;padding-left:.4rem;border-radius:.2rem}
   /* Synthesis chain view */
   .sc-toggle{font-size:.55rem;padding:.2rem .4rem;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#ccc;border-radius:.25rem;cursor:pointer;margin-left:auto;flex-shrink:0}
   .sc-toggle.active{background:rgba(255,215,0,.15);border-color:var(--gold);color:var(--gold)}
