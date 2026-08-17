@@ -33,6 +33,22 @@ function renderQuizzes(){
 // score that actually counts (and feeds the pass/fail + rewards below) is
 // the first-attempt accuracy — retries let you keep climbing, but they
 // don't inflate the honest measurement of what you knew on first read.
+// Auto-feed a missed quiz question into a per-category SRS deck, reusing
+// the existing SM-2-lite scheduler (srsGrade(), test.js) as-is — this only
+// adds a new insertion point, no new scheduling logic. One deck per quiz
+// category ("Quiz misses: <name>"), auto-created on first miss. Deduped by
+// {quizKey, qIndex} so re-missing the same question across attempts doesn't
+// pile up duplicate cards.
+function feedQuizMissToSrs(quizKey, quizName, qIndex, q){
+  if(!S.srsDecks) S.srsDecks=[];
+  let deck=S.srsDecks.find(d=>d.quizMissDeck===quizKey);
+  if(!deck){ deck={id:id(), name:"Quiz misses: "+quizName, cards:[], quizMissDeck:quizKey}; S.srsDecks.push(deck); }
+  if(deck.cards.some(c=>c.quizKey===quizKey && c.qIndex===qIndex)) return; // already added from an earlier miss
+  const front=q.q+"\n"+q.a.map((opt,i)=>String.fromCharCode(65+i)+". "+opt).join("\n");
+  const back=String.fromCharCode(65+q.c)+". "+q.a[q.c]+" — "+q.e;
+  deck.cards.push({id:id(), front, back, quizKey, qIndex});
+  save();
+}
 let QZ=null; // {key, idx, firstCorrect, retried, order}
 function startQuiz(key){
   const t=window.QUIZ_BANK[key]; if(!t) return;
@@ -66,10 +82,19 @@ function showQuizQ(){
 }
 function answerQuiz(choice){
   const t=window.QUIZ_BANK[QZ.key];
-  const q=t.questions[QZ.order[QZ.idx]];
+  const qIndex=QZ.order[QZ.idx];
+  const q=t.questions[qIndex];
   const opts=document.querySelectorAll("#qmOpts .qm-opt");
   opts.forEach((o,i)=>{o.disabled=true;if(i===q.c)o.classList.add("correct");if(i===choice&&choice!==q.c)o.classList.add("wrong");});
   const correct=choice===q.c;
+  // Missed on the first real attempt (not a retry) -> auto-feed the SRS
+  // system instead of leaving it dead until the whole quiz is retaken.
+  // Found by the v204-session quiz audit as the single biggest mechanism
+  // gap: SRS existed but was 100% manually authored, so a wrong answer
+  // just... stayed wrong until you happened to retake the same quiz.
+  if(!correct && !QZ.retried && typeof feedQuizMissToSrs==="function"){
+    feedQuizMissToSrs(QZ.key, t.name, qIndex, q);
+  }
   const body=document.getElementById("qmBody");
   const exp=document.createElement("div");
   exp.className="qm-exp";

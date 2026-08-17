@@ -243,5 +243,73 @@ window.QUIZ_BANK = {
       {q:"The chain of command and NCO support channel are addressed primarily in:", a:["AR 600-20","AR 670-1","AR 600-9","AR 350-1"], c:0, e:"AR 600-20. (AR 600-20)"},
       {q:"SHARP's two reporting options for victims are:", a:["Restricted and Unrestricted","Verbal and written","Formal and informal","Open and closed"], c:0, e:"Restricted (confidential) and Unrestricted reporting. (AR 600-20 / SHARP)"},
     ]
+  },
+  ranks: {
+    name: "Rank Structure & Insignia",
+    icon: "🪪",
+    pass: 0.8,
+    questions: [
+      {q:"Which is the correct order of company-grade officer ranks, lowest to highest?", a:["Second Lieutenant, First Lieutenant, Captain","First Lieutenant, Second Lieutenant, Captain","Captain, First Lieutenant, Second Lieutenant","Second Lieutenant, Captain, First Lieutenant"], c:0, e:"2LT → 1LT → CPT are the three company-grade officer ranks. (AS – Rank Structure)"},
+      {q:"A single gold/butter bar is the insignia of a:", a:["Second Lieutenant","First Lieutenant","Captain","Warrant Officer 1"], c:0, e:"Second Lieutenant (2LT) wears one gold bar. (AS – Rank Structure)"},
+      {q:"A single silver bar is the insignia of a:", a:["Second Lieutenant","First Lieutenant","Captain","Major"], c:1, e:"First Lieutenant (1LT) wears one silver bar. (AS – Rank Structure)"},
+      {q:"Two silver bars (\"railroad tracks\") is the insignia of a:", a:["First Lieutenant","Captain","Major","Lieutenant Colonel"], c:1, e:"Captain (CPT) wears two silver bars. (AS – Rank Structure)"},
+      {q:"A gold oak leaf is the insignia of a:", a:["Captain","Major","Lieutenant Colonel","Colonel"], c:1, e:"Major (MAJ) wears a gold oak leaf. (AS – Rank Structure)"},
+      {q:"A silver oak leaf is the insignia of a:", a:["Major","Lieutenant Colonel","Colonel","Brigadier General"], c:1, e:"Lieutenant Colonel (LTC) wears a silver oak leaf. (AS – Rank Structure)"},
+      {q:"A silver eagle is the insignia of a:", a:["Lieutenant Colonel","Colonel","Brigadier General","Major General"], c:1, e:"Colonel (COL) wears a silver eagle. (AS – Rank Structure)"},
+      {q:"A Brigadier General wears how many stars?", a:["1","2","3","4"], c:0, e:"Brigadier General (BG) is a one-star general officer. (AS – Rank Structure)"},
+      {q:"Which of these is a Warrant Officer rank?", a:["CW2","SFC","1LT","SSG"], c:0, e:"CW2 (Chief Warrant Officer 2) is a warrant officer grade; the others are NCO/officer ranks. (AS – Rank Structure)"},
+      {q:"Correct order of NCO ranks E-5 through E-9?", a:["Sergeant, Staff Sergeant, Sergeant First Class, Master Sergeant, Sergeant Major","Corporal, Sergeant, Staff Sergeant, Sergeant First Class, First Sergeant","Sergeant, Corporal, Staff Sergeant, Sergeant First Class, Master Sergeant","Private First Class, Sergeant, Staff Sergeant, Sergeant First Class, Master Sergeant"], c:0, e:"SGT (E5) → SSG (E6) → SFC (E7) → MSG (E8) → SGM (E9). (AS – Rank Structure)"},
+      {q:"The Sergeant Major of the Army is:", a:["The senior enlisted advisor to the Chief of Staff of the Army","The senior enlisted Soldier in a division","A Warrant Officer rank","An honorary title with no insignia"], c:0, e:"SMA is the senior enlisted advisor to the Chief of Staff of the Army — a unique, Army-wide position. (AS – Rank Structure)"},
+      {q:"An E-4 who is a team leader on a promotable NCO track typically holds the rank of:", a:["Specialist","Corporal","Sergeant","Private First Class"], c:1, e:"Corporal (CPL) is the E-4 rank associated with NCO leadership status, distinct from Specialist (SPC), the more common non-leadership E-4. (AS – Rank Structure)"},
+    ]
+  },
+  radiocomms: {
+    name: "Radio Comms & Reports",
+    icon: "📻",
+    pass: 0.8,
+    questions: [
+      {q:"In the phonetic alphabet, which word represents the letter \"A\"?", a:["Alpha","Able","Adam","Apple"], c:0, e:"Alpha is the modern (NATO) phonetic word for \"A\". (AS – Radio Communications)"},
+      {q:"The correct phonetic alphabet word for \"M\" is:", a:["Mike","Mama","Marine","Mango"], c:0, e:"Mike is the phonetic word for \"M\". (AS – Radio Communications)"},
+      {q:"The proword that means \"I have received and understood your last transmission\" is:", a:["Roger","Wilco","Over","Break"], c:0, e:"\"Roger\" acknowledges receipt and understanding. (AS – Radio Communications)"},
+      {q:"The proword \"Wilco\" means:", a:["I will comply","I do not understand","Say again","Stand by"], c:0, e:"\"Wilco\" = \"will comply\" — acknowledges the message AND commits to carrying it out. (AS – Radio Communications)"},
+      {q:"The proword used to end a transmission when you expect a reply is:", a:["Over","Out","Roger","Wilco"], c:0, e:"\"Over\" hands the transmission back and invites a response. (AS – Radio Communications)"},
+      {q:"The proword \"Out\" means:", a:["This is the end of my transmission and no response is expected","This is the end of my transmission and a response is expected","Repeat your last transmission","I did not understand, say again"], c:0, e:"\"Out\" ends the exchange — never combined with \"Over\" (\"Over and out\" is not correct radio procedure). (AS – Radio Communications)"},
+      {q:"To ask another station to repeat their last transmission, the correct proword is:", a:["Say again","Roger","Wilco","Read back"], c:0, e:"\"Say again\" requests a repeat. (AS – Radio Communications)"},
+      {q:"In a 9-line MEDEVAC request, Line 1 is:", a:["Location of the pickup site","Radio frequency and call sign","Number of patients by precedence","Special equipment required"], c:0, e:"Line 1: Location of pickup site (grid coordinate). (AS – 9-Line MEDEVAC)"},
+      {q:"In the 9-line MEDEVAC format, the number of patients by precedence (urgent/priority/routine) is:", a:["Line 2","Line 3","Line 5","Line 6"], c:1, e:"Line 3: Number of patients by precedence. (AS – 9-Line MEDEVAC)"},
+      {q:"In the 9-line MEDEVAC format, security at the pickup site is reported on:", a:["Line 3","Line 5","Line 6","Line 9"], c:2, e:"Line 6: Security at pickup site. (AS – 9-Line MEDEVAC)"},
+      {q:"SALUTE report stands for:", a:["Size, Activity, Location, Unit, Time, Equipment","Size, Activity, Location, Uniform, Type, Enemy","Situation, Action, Location, Unit, Time, Equipment","Size, Actions, Location, Unit, Terrain, Equipment"], c:0, e:"Size, Activity, Location, Unit, Time, Equipment — the standard format for reporting an enemy observation. (AS – SALUTE Report)"},
+      {q:"In a SALUTE report, the \"S\" stands for:", a:["Size","Situation","Security","Status"], c:0, e:"Size — how many of the enemy were observed. (AS – SALUTE Report)"},
+    ]
+  },
+  drill: {
+    name: "Drill & Ceremony",
+    icon: "🥾",
+    pass: 0.8,
+    questions: [
+      {q:"The command that brings Soldiers from at ease to the position of attention is:", a:["Attention","Rest","Fall In","Dismissed"], c:0, e:"\"Attention\" (a one-part command, execution only). (AS – Drill & Ceremony)"},
+      {q:"\"Right, FACE\" turns a Soldier:", a:["90 degrees to the right","90 degrees to the left","180 degrees","45 degrees"], c:0, e:"A quarter turn (90°) to the right. (AS – Drill & Ceremony)"},
+      {q:"\"About, FACE\" turns a Soldier:", a:["90 degrees","180 degrees","270 degrees","360 degrees"], c:1, e:"A half turn (180°), executed by pivoting on the ball of the right foot and heel of the left. (AS – Drill & Ceremony)"},
+      {q:"A standard drill command has two parts: the preparatory command and the:", a:["Command of execution","Command of formation","Command of assembly","Command of dismissal"], c:0, e:"The preparatory command tells you WHAT to do; the command of execution tells you WHEN. (AS – Drill & Ceremony)"},
+      {q:"In \"Forward, MARCH\" — which word is the command of execution?", a:["Forward","MARCH","Both together","Neither — it's a one-part command"], c:1, e:"\"Forward\" is the preparatory command; \"MARCH\" is the command of execution — the exact moment to step off. (AS – Drill & Ceremony)"},
+      {q:"The position of Parade Rest is executed from:", a:["Attention","At Ease","Rest","Stand at Ease"], c:0, e:"Parade Rest is commanded from the position of Attention. (AS – Drill & Ceremony)"},
+      {q:"A line of Soldiers standing side by side, shoulder to shoulder, is called a:", a:["File","Rank","Column","Element"], c:1, e:"A \"rank\" is a line side by side; a \"file\" is a column front to back. (AS – Drill & Ceremony)"},
+      {q:"A formation of Soldiers standing one behind another is called a:", a:["Rank","File","Line","Flank"], c:1, e:"A \"file\" is a column, one Soldier behind the next. (AS – Drill & Ceremony)"},
+    ]
+  },
+  aftknowledge: {
+    name: "AFT Standards Knowledge",
+    icon: "🏋️",
+    pass: 0.8,
+    questions: [
+      {q:"How many events make up the Army Fitness Test (AFT)?", a:["3","4","5","6"], c:2, e:"Five events: 3-Rep Max Deadlift, Hand-Release Push-up, Sprint-Drag-Carry, Plank, 2-Mile Run. (AS – AFT Standards)"},
+      {q:"Which of these is NOT one of the 5 AFT events?", a:["3-Repetition Deadlift","Hand-Release Push-up","Sprint-Drag-Carry","Sit-up"], c:3, e:"The sit-up was replaced by the Plank in the current AFT event lineup. (AS – AFT Standards)"},
+      {q:"The AFT event that measures core endurance and replaced the traditional sit-up is the:", a:["Leg Tuck","Plank","Sprint-Drag-Carry","Standing Power Throw"], c:1, e:"The Plank (max time held) replaced the sit-up. (AS – AFT Standards)"},
+      {q:"The minimum passing score on each individual AFT event is:", a:["50 points","60 points","70 points","75 points"], c:1, e:"60 points minimum on every individual event — falling below any one event's minimum is a no-go regardless of total score. (AS – AFT Standards)"},
+      {q:"To meet the general fitness standard, a Soldier's total AFT score must be at least:", a:["270","300","350","400"], c:1, e:"300 points total is the general fitness standard. (AS – AFT Standards)"},
+      {q:"The higher \"combat fitness\" AFT total score standard is:", a:["300","320","350","380"], c:2, e:"350 points total for the combat/higher standard, tied to certain roles/units. (AS – AFT Standards)"},
+      {q:"The AFT's timed run event is the:", a:["1-mile run","1.5-mile run","2-mile run","3-mile run"], c:2, e:"A timed 2-mile run. (AS – AFT Standards)"},
+      {q:"The Sprint-Drag-Carry event is designed to simulate:", a:["Buddy rescue and casualty evacuation under load","A land navigation course","An obstacle course","A ruck march"], c:0, e:"SDC simulates dragging/carrying a casualty or heavy equipment under time pressure. (AS – AFT Standards)"},
+    ]
   }
 };
