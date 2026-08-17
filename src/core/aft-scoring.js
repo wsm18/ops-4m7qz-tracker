@@ -101,4 +101,15 @@ function score_sdc(sec){ if(sec==null)return null; const c=aftCtx(); return aftL
 function score_plank(sec){ if(sec==null)return null; const c=aftCtx(); return aftLookup("plk",c.band,"M",sec); } // plank identical M/F/C
 function score_run(sec){ if(sec==null)return null; const c=aftCtx(); return aftLookup("run",c.band,aftScale(c),sec); }
 function clampScore(x){return Math.max(0,Math.min(100,Math.round(x)));}
+// A plain, honest fitness-level signal from the user's own last real AFT
+// total, reused to gently scale generic beginner-starter weights (see
+// computeTarget()'s "starter" tier, log.js) — never a per-exercise invented
+// formula. Reuses the exact <300/300-349/>=350 bands already established
+// elsewhere for pass-standard coloring (aftSparkline in aft.js) rather than
+// inventing new cutoffs. No AFT history at all → neutral (1), no change.
+function aftFitnessMultiplier(){
+  const last=(S.aft||[])[S.aft.length-1];
+  if(!last) return 1;
+  return last.total<300 ? 0.9 : last.total<350 ? 1.0 : 1.1;
+}
 

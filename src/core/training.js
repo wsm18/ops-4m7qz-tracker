@@ -486,35 +486,16 @@ function pickAftMode(){
 }
 // Most recent logged weight for a named weighted exercise, straight from real
 // Set/rep/weight prescription per intensity — how to actually run today's exercises, in order.
-function prescriptionFor(intensity, ex){
-  // returns a short "what to do" string for an exercise given the day's intensity
-  const t=ex.type||ex.t;
-  let base="as prescribed";
-  if(intensity==="hard"){
-    if(t==="reps") base="3–4 sets, leave 1–2 reps in the tank";
-    else if(t==="time") base="3 sets, push the hold/effort";
-    else if(t==="dist") base="main effort — see the session note for distance/pace";
-  } else if(intensity==="moderate"){
-    if(t==="reps") base="2–3 sets, controlled";
-    else if(t==="time") base="2–3 sets, steady";
-    else if(t==="dist") base="easy–tempo pace, conversational";
-  } else { // easy / recovery / rest
-    if(t==="reps") base="1–2 easy sets, focus on form";
-    else if(t==="time") base="hold as prescribed, relaxed";
-    else if(t==="dist") base="easy pace only";
-  }
-  // Adaptive target (FM-Adapt) — computeTarget() (log.js) reads this exercise's
-  // real logged trend: raw performance (reps/weight/time), stall detection,
-  // monthly-baseline blending, and — new — your own per-exercise difficulty
-  // rating and "had to cut it short" flag from the log form. One shared engine
-  // instead of a separate simpler guess here; falls back to a plain "no
-  // history" note for a never-logged weighted exercise, never invents a number.
-  if(typeof computeTarget==="function"){
-    const tgt=computeTarget(ex.n);
-    if(tgt) base += ` · next: ${tgt.target}${tgt.note?` (${tgt.note})`:""}`;
-    else if(t==="reps" && ex.w) base += " · no logged weight yet — start conservative and find a load where the last 1–2 reps are genuinely hard";
-  }
-  return base;
+// Thin wrapper: computeTarget() (log.js) is the single source of truth for
+// "what should I do" everywhere in the app now — this used to keep its own
+// independent intensity-based guess and only append computeTarget()'s answer
+// as an afterthought, which is exactly how the app ended up with competing
+// prescriptions for the same exercise on the same page (the redesign this
+// session set out to fix). All of the intensity/type prose that used to live
+// here now lives inside computeTarget()'s tier-4 ("generic") fallback.
+function prescriptionFor(intensity, ex, skey, rich){
+  const tgt=computeTarget(ex, {skey, intensity, rich});
+  return tgt ? tgt.target+(tgt.note?` (${tgt.note})`:"") : "as prescribed";
 }
 // Did the user log a workout on a given Date (local day)?
 function workoutOnDay(dateObj){

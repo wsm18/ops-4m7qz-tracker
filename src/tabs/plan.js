@@ -200,7 +200,14 @@ function renderSkillBalance(){
     if(Math.abs(d)>=1) ctx+=`<div class="recovery-line">⚖️ <b>Weight trend:</b> ${d>0?"+":""}${d.toFixed(1)} lb since ${new Date(first.date).toLocaleDateString()} — ${d>0?"if this is muscle, your strength ratios will follow; watch the run":"lighter bodyweight raises your strength-to-weight ratios"}.</div>`;
   }
   if(ctx) lines+=ctx;
-  el.innerHTML=`<div class="forge-recovery-card balance"><h3>📊 Whole-body balance (from your skill levels)</h3>${lines}</div>`;
+  // No inner heading here — the collapsed <details> summary in plan.html
+  // ("📊 Whole-body balance — beyond the AFT") already labels this section;
+  // a second heading inside would just repeat it. This deliberately sits
+  // secondary to #planPriorities (the AFT-weakest-event line) in the Coach
+  // Hub: that one is tied to the actual graded test, this one is a broader,
+  // whole-body-skill-level lens — two different questions, not competing
+  // answers to the same one.
+  el.innerHTML=`<div class="forge-recovery-card balance">${lines}</div>`;
 }
 
 function renderRecoveryAdvisory(){
@@ -240,17 +247,17 @@ function exSwapHtml(sessKey, e){
 }
 // One exercise <li>, shared by the warm-up/cool-down blocks and the main
 // working-set list so they render identically.
-function exLiHtml(e, intensity, sessKey){
-  const rx=prescriptionFor(intensity, e);
+function exLiHtml(e, intensity, sessKey, rich){
+  const rx=prescriptionFor(intensity, e, sessKey, rich);
   const desc=exHowto(e.n);
   return `<li><div class="coach-ex-n"><b>${esc(e.n)}</b>${e.w?' <span class="sess-eq">· equipment</span>':''}${e._swapped?' <span class="sess-swap">· indoors for weather</span>':''}${exSwapHtml(sessKey,e)}</div>${desc?`<div class="coach-ex-how">${esc(desc)}</div>`:''}<div class="coach-ex-rx">${esc(rx)}</div></li>`;
 }
 // A labeled Warm-up/Cool-down/Flexibility group — real dynamic-before,
 // static-after stretches composed from STRETCH_LIBRARY (see training.js),
 // not the working set. Renders nothing if this session has none (e.g. `other`).
-function warmCoolBlockHtml(items, sessKey, intensity, label, cls){
+function warmCoolBlockHtml(items, sessKey, intensity, label, cls, rich){
   if(!items || !items.length) return "";
-  return `<div class="coach-phase-h ${cls}">${esc(label)}</div><ol class="coach-list coach-list-sm">${items.map(e=>exLiHtml(e,intensity,sessKey)).join("")}</ol>`;
+  return `<div class="coach-phase-h ${cls}">${esc(label)}</div><ol class="coach-list coach-list-sm">${items.map(e=>exLiHtml(e,intensity,sessKey,rich)).join("")}</ol>`;
 }
 // Optional-session suggestion (FM-2): shown when the user has opted in and
 // today's active equipment profile actually unlocks it (pool/climbwall tag) —
@@ -323,10 +330,10 @@ function renderCoachToday(){
       const workEx=p.exercises.filter(x=>x._phase==="work");
       const e=workEx.find(x=>x._slotIdx===idx) || workEx[0] || p.exercises[0];
       const desc=exHowto(e.n);
-      const rx=prescriptionFor(intensity, e);
+      const rx=prescriptionFor(intensity, e, p.sessionKey, todayGym);
       const otherNames=workEx.filter(x=>x._slotIdx!==idx).map(x=>x.n.replace(/\s*\(.*$/,"").trim());
-      const warmHtml=warmCoolBlockHtml(p.exercises.filter(x=>x._phase==="warmup"), p.sessionKey, intensity, "🔥 Warm-up (dynamic — keep moving)", "warm");
-      const coolHtml=warmCoolBlockHtml(p.exercises.filter(x=>x._phase==="cooldown"), p.sessionKey, intensity, "🧊 Cool-down (hold each stretch)", "cool");
+      const warmHtml=warmCoolBlockHtml(p.exercises.filter(x=>x._phase==="warmup"), p.sessionKey, intensity, "🔥 Warm-up (dynamic — keep moving)", "warm", todayGym);
+      const coolHtml=warmCoolBlockHtml(p.exercises.filter(x=>x._phase==="cooldown"), p.sessionKey, intensity, "🧊 Cool-down (hold each stretch)", "cool", todayGym);
       tHtml=`<div class="coach-body">
         <div class="coach-day-h">${esc(dayName)} · ${esc(sess.name.split(" · ")[0])} <span class="coach-int">${intLabel}</span></div>
         <p class="coach-intro">${esc(p.dayPlan.label)}. <span class="coach-mode">${modeTag}</span> — this is a <b>pick-one</b> session: you do <b>one</b> run today, not all of them. Today's pick:</p>
@@ -348,9 +355,9 @@ function renderCoachToday(){
       const warmItems=p.exercises.filter(x=>x._phase==="warmup");
       const workItems=p.exercises.filter(x=>x._phase==="work"||x._phase==="flex"||x._phase==="balance"||!x._phase);
       const coolItems=p.exercises.filter(x=>x._phase==="cooldown");
-      const items=workItems.map((e,i)=>exLiHtml(e,intensity,p.sessionKey)).join("");
-      const warmHtml=warmCoolBlockHtml(warmItems, p.sessionKey, intensity, "🔥 Warm-up (dynamic — keep moving)", "warm");
-      const coolHtml=warmCoolBlockHtml(coolItems, p.sessionKey, intensity, "🧊 Cool-down (hold each stretch)", "cool");
+      const items=workItems.map((e,i)=>exLiHtml(e,intensity,p.sessionKey,todayGym)).join("");
+      const warmHtml=warmCoolBlockHtml(warmItems, p.sessionKey, intensity, "🔥 Warm-up (dynamic — keep moving)", "warm", todayGym);
+      const coolHtml=warmCoolBlockHtml(coolItems, p.sessionKey, intensity, "🧊 Cool-down (hold each stretch)", "cool", todayGym);
       tHtml=`<div class="coach-body">
         <div class="coach-day-h">${esc(dayName)} · ${esc(sess.name.split(" · ")[0])} <span class="coach-int">${intLabel}</span></div>
         <p class="coach-intro">${esc(p.dayPlan.label)}. <span class="coach-mode">${modeTag}</span>${isFlexSession?' — a real, dedicated flexibility sweep plus balance work, not a throwaway day.':` — do all of these, in order${intensity==="hard"?", resting 60–90s between sets":""}. ${intensity==="hard"?"Leave 1–2 reps in the tank.":intensity==="moderate"?"Keep the effort conversational.":"Move easy — this is for recovery."}`}</p>
@@ -508,189 +515,32 @@ function renderSessionLists(){
     // remove any previous rx-card for this session, then inject fresh
     const prevRx=div.nextElementSibling;
     if(prevRx&&prevRx.classList.contains('rx-card')) prevRx.remove();
-    const rx=BEGINNER_RX[skey];
-    if(rx){
-      // Match each ACTUALLY-shown exercise (which may be a swap/alt pick,
-      // not the canonical bw/gym pair) to its real starter row via the same
-      // word-overlap matcher FM-3 uses, instead of always dumping the fixed
-      // canonical list — previously this table could show a different
-      // exercise name than the session list just above it whenever today's
-      // pick was an alt/swap. Rows with no honest starter data are skipped
-      // rather than shown with a name that doesn't match what's above.
-      //
-      // Real logged/AFT history (computeTarget(), the same engine behind
-      // Coach Today and the Adaptive Targets card) takes priority over the
-      // static beginner-starter row whenever it exists — this table should
-      // show what YOU should actually do next, not a generic starting point
-      // you've already outgrown. The beginner row is only a fallback for an
-      // exercise with zero logged/AFT history.
-      const rxRows=rich?rx.gym:rx.bw;
-      let anyAdaptive=false;
-      const rows=workItems.map(e=>{
-        const at=typeof computeTarget==="function"?computeTarget(e.n):null;
-        if(at){ anyAdaptive=true; return `<tr class="rx-adaptive-row"><td>${esc(e.n)}</td><td colspan="4">🎯 <span class="rx-adaptive${at.hold?' hold':''}">${esc(at.target)}</span>${at.note?` <span class="rx-adapt-note">(${esc(at.note)})</span>`:''}</td></tr>`; }
-        const match=typeof cgFindRxRow==="function"?cgFindRxRow(rxRows,e.n):null;
-        return match?`<tr><td>${esc(match.name)}</td><td>${esc(String(match.sets))}</td><td>${esc(String(match.reps))}</td>${(rich&&match.weight)?`<td>${esc(match.weight)}</td>`:'<td></td>'}<td>${esc(match.rest||'')}</td></tr>`:'';
-      }).filter(Boolean).join('');
-      if(!rows) return;
-      const rxNote=anyAdaptive
-        ? "🎯 rows are your real next-session target, adapted from your own log/AFT history. Others are the beginner starting point — log a session to start adapting those too."
-        : "New to this? Start here. Add reps when all sets feel easy — not before.";
-      div.insertAdjacentHTML('afterend',
-        `<div class="rx-card"><p class="rx-note">${esc(rxNote)}</p>
-        <table class="rx-table"><thead><tr><th>Exercise</th><th>Sets</th><th>Reps</th>${rich?'<th>Start weight</th>':'<th></th>'}<th>Rest</th></tr></thead>
-        <tbody>${rows}</tbody></table>
-        <p class="rx-effort">Stop each set when you could still do 2 clean reps. That margin is what makes this sustainable for months.</p></div>`
-      );
-    }
+    // computeTarget() is the single source of truth here too — same engine,
+    // same call shape as Coach Today and card-game, so this reference card
+    // can never quietly disagree with what those show for the same exercise.
+    // Tiers surface as an icon only: 🎯 adaptive (your real trend/AFT-blended
+    // target), 🔰 starter (BEGINNER_RX, AFT-fitness-nudged if weighted),
+    // 📋 generic (no starter row exists — plain intensity-based prose).
+    const intensity=(typeof SESSION_META!=="undefined"&&SESSION_META[skey]&&SESSION_META[skey].intensity)||"moderate";
+    const tierIcon={adaptive:"🎯","aft-anchor":"🎯",starter:"🔰",generic:"📋"};
+    let anyAdaptive=false;
+    const rows=workItems.map(e=>{
+      const tgt=computeTarget(e,{skey,intensity,rich});
+      if(!tgt) return '';
+      if(tgt.tier==="adaptive"||tgt.tier==="aft-anchor") anyAdaptive=true;
+      const cls=tgt.tier==="adaptive"||tgt.tier==="aft-anchor"?' rx-adaptive-row':'';
+      return `<li class="rx-row${cls}"><span class="rx-ex-n">${tierIcon[tgt.tier]||''} ${esc(e.n)}</span><span class="rx-ex-tgt${tgt.hold?' hold':''}">${esc(tgt.target)}</span>${tgt.note?`<span class="rx-adapt-note">${esc(tgt.note)}</span>`:''}</li>`;
+    }).filter(Boolean).join('');
+    if(!rows) return;
+    const rxNote=anyAdaptive
+      ? "🎯 rows are your real next-session target, adapted from your own log/AFT history. 🔰 is a beginner starting point (nudged for your AFT level where it's a weighted lift) — log a session to start adapting those too."
+      : "🔰 New to this? These are beginner starting points. Add reps when all sets feel easy — not before.";
+    div.insertAdjacentHTML('afterend',
+      `<div class="rx-card"><p class="rx-note">${esc(rxNote)}</p>
+      <ul class="rx-list">${rows}</ul>
+      <p class="rx-effort">Stop each set when you could still do 2 clean reps. That margin is what makes this sustainable for months.</p></div>`
+    );
   });
-}
-
-/* ---------------- MONTHLY BASELINE ---------------- */
-function currentMonth(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
-function monthLabel(m){const[y,mo]=m.split("-");return new Date(y,mo-1,1).toLocaleDateString(undefined,{month:"long",year:"numeric"});}
-function baselineDueThisMonth(){
-  return !S.baselines.some(b=>b.month===currentMonth());
-}
-let BL_DRAFT=null;
-function baselinePrCard(){
-  const entries=(S.baselines||[]);
-  if(entries.length<1) return "";
-  const sorted=entries.slice().sort((a,b)=>a.ts-b.ts);
-  const latest=sorted[sorted.length-1];
-  const rows=BASELINE_TEST.map(def=>{
-    const allVals=sorted.filter(b=>b.results&&b.results[def.key]);
-    if(!allVals.length) return null;
-    const best=allVals.reduce((bst,b)=>{
-      const v=baselineVolume(def,b.results[def.key]); if(v==null) return bst;
-      const bv=bst?baselineVolume(def,bst.results[def.key]):null;
-      return (bv==null||(def.lowerBetter?v<bv:v>bv))?b:bst;
-    },null);
-    if(!best) return null;
-    const isCurrent=latest&&best===latest;
-    const valStr=fmtBaselineVal(def,best.results[def.key]);
-    const shortName=def.name.replace(/ \(.*\)/,'');
-    return `<div class="bl-pr-row"><span class="bl-pr-label">${esc(shortName)}</span><span class="bl-pr-val">${esc(valStr)}${isCurrent?' <span class="bl-pr-star">⭐</span>':''}</span><span class="bl-pr-date">${esc(monthLabel(best.month))}</span></div>`;
-  }).filter(Boolean);
-  if(!rows.length) return "";
-  return `<div class="bl-pr-card"><div class="bl-pr-title">🏅 Baseline Personal Records</div>${rows.join("")}</div>`;
-}
-
-function renderBaseline(){
-  const area=document.getElementById("baselineArea");
-  const prompt=document.getElementById("baselinePrompt");
-  if(!area) return;
-  const due=baselineDueThisMonth();
-  // prompt banner
-  if(due){
-    prompt.innerHTML=`<div class="bl-prompt">📅 <b>New month — baseline due.</b> Run a max-effort test on the movements below (one all-out set each). This re-anchors your training targets so they track your real strength, not just day-to-day noise.</div>`;
-  } else {
-    const thisMonth=S.baselines.filter(b=>b.month===currentMonth()).pop();
-    prompt.innerHTML=`<div class="bl-prompt" style="background:rgba(111,158,84,.1);border-color:#3c5230">✅ <b style="color:var(--jade)">${monthLabel(currentMonth())} baseline logged.</b> Targets are anchored to it. Next baseline prompts at the start of next month.</div>`;
-  }
-  // latest baseline summary (with month-over-month deltas)
-  let latestHtml="";
-  if(S.baselines.length){
-    const sorted=S.baselines.slice().sort((a,b)=>a.ts-b.ts);
-    const latest=sorted[sorted.length-1];
-    const prev=sorted.length>1?sorted[sorted.length-2]:null;
-    latestHtml=`<div class="bl-latest"><h4>Latest baseline — ${monthLabel(latest.month)}</h4>`+
-      BASELINE_TEST.map(def=>{
-        const v=latest.results[def.key]; if(!v) return "";
-        const disp=fmtBaselineVal(def,v);
-        let delta="";
-        if(prev&&prev.results[def.key]){
-          const a=baselineVolume(def,v), b=baselineVolume(def,prev.results[def.key]);
-          const better=def.lowerBetter? a<b : a>b;
-          const same=Math.abs(a-b)<0.01;
-          delta=same?`<span class="delta" style="color:var(--ink-faint)">—</span>`:
-            better?`<span class="delta" style="color:var(--jade)">▲ improved</span>`:
-            `<span class="delta" style="color:var(--ember)">▼ down</span>`;
-        }
-        return `<div class="bl-latest-row"><span>${esc(def.name.replace(/ \(.*\)/,''))}: <b>${esc(disp)}</b></span>${delta}</div>`;
-      }).filter(Boolean).join("")+`</div>`;
-  }
-  // input form
-  if(!BL_DRAFT) BL_DRAFT={};
-  const form=`<div class="bl-card ${due?'due':''}">
-    ${BASELINE_TEST.map(def=>{
-      const last=lastBaselineVal(def.key);
-      return `<div class="bl-ex">
-        <div class="bl-ex-name">${esc(def.name)}${last?`<div class="prev">last: ${esc(fmtBaselineVal(def,last))}</div>`:''}</div>
-        <div class="units">${baselineInputs(def)}</div>
-      </div>`;
-    }).join("")}
-    <button class="btn-add" id="blSave" style="margin-top:12px">${due?'Log This Month&rsquo;s Baseline':'Save Baseline (updates targets)'}</button>
-  </div>`;
-  area.innerHTML=baselinePrCard()+latestHtml+baselineSparklines()+form;
-  const btn=document.getElementById("blSave");
-  if(btn) btn.onclick=saveBaseline;
-}
-function baselineSparklines(){
-  if((S.baselines||[]).length<2) return "";
-  const sorted=S.baselines.slice().sort((a,b)=>a.ts-b.ts);
-  const rows=BASELINE_TEST.map(def=>{
-    const entries=sorted.filter(b=>b.results&&b.results[def.key]);
-    const vals=entries.map(b=>baselineVolume(def,b.results[def.key])).filter(v=>v!=null&&v>0);
-    if(vals.length<2) return "";
-    const bestEntry=entries.reduce((bst,b)=>{
-      const v=baselineVolume(def,b.results[def.key]); if(v==null) return bst;
-      const bv=bst?baselineVolume(def,bst.results[def.key]):null;
-      return (bv==null||(def.lowerBetter?v<bv:v>bv))?b:bst;
-    },null);
-    const bestLabel=bestEntry?`Best: <b>${esc(fmtBaselineVal(def,bestEntry.results[def.key]))}</b> (${esc(monthLabel(bestEntry.month))})`:"";
-    return `<div class="bl-spark-row">
-      <div class="bl-spark-name">${esc(def.name.replace(/ \(.*\)/,''))}</div>
-      <div class="wl-spark">${miniSparkline(vals,240,40)}</div>
-      <div class="bl-spark-best">${bestLabel}</div>
-    </div>`;
-  }).filter(Boolean).join("");
-  if(!rows) return "";
-  return `<div class="bl-sparks"><div class="sec-h" style="margin-bottom:8px"><h2>Baseline History</h2><span class="hint">month-over-month</span></div>${rows}</div>`;
-}
-function baselineInputs(def){
-  if(def.type==="reps"){
-    return `<input type="number" placeholder="reps" data-bl="${def.key}.reps">`+(def.w?`<input type="number" placeholder="lb" data-bl="${def.key}.weight">`:'');
-  }
-  if(def.type==="time") return `<input type="text" class="wide" placeholder="m:ss" data-bl="${def.key}.time">`;
-  if(def.type==="dist") return `<input type="text" class="wide" placeholder="time m:ss" data-bl="${def.key}.time">`;
-  return "";
-}
-function lastBaselineVal(key){
-  const e=S.baselines.filter(b=>b.results&&b.results[key]).sort((a,b)=>a.ts-b.ts);
-  return e.length?e[e.length-1].results[key]:null;
-}
-function fmtBaselineVal(def,v){
-  if(def.type==="reps") return v.reps+(v.weight?`×${v.weight}lb`:"")+" reps";
-  if(def.type==="time") return v.time;
-  if(def.type==="dist") return v.time;
-  return "";
-}
-// capture baseline inputs
-document.addEventListener("input",e=>{
-  const b=e.target.dataset.bl;
-  if(b){const[key,field]=b.split(".");if(!BL_DRAFT)BL_DRAFT={};(BL_DRAFT[key]=BL_DRAFT[key]||{})[field]=e.target.value;}
-});
-function saveBaseline(){
-  if(!BL_DRAFT||!Object.keys(BL_DRAFT).length){toast("Enter at least one baseline result");return;}
-  // keep only keys with real data
-  const results={};
-  Object.keys(BL_DRAFT).forEach(k=>{
-    const v=BL_DRAFT[k];
-    const has=(v.reps&&v.reps!=="")||(v.time&&v.time!=="");
-    if(has) results[k]=v;
-  });
-  if(!Object.keys(results).length){toast("Enter at least one baseline result");return;}
-  const m=currentMonth();
-  // replace existing baseline for this month if re-logging
-  S.baselines=S.baselines.filter(b=>b.month!==m);
-  S.baselines.push({date:new Date().toLocaleDateString(),ts:Date.now(),month:m,results});
-  S.lastBaselineMonth=m;
-  if(!S.pathXP) S.pathXP={};
-  S.pathXP.physical=(S.pathXP.physical||0)+60; S.gold+=25;
-  BL_DRAFT=null;
-  save();render();
-  toast(`<span class="t-xp">Baseline logged · +60 Fitness XP +25 pts</span> · targets re-anchored`);
 }
 
 /* ---------------- BRANCH / BOARD PREP ---------------- */

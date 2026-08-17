@@ -431,7 +431,6 @@
   .aft-event .ev-score{font-weight:700}
   .aft-event.weak{color:var(--ember)}
   .aft-event.weak .ev-score{color:var(--ember)}
-  .aft-drill{font-size:11px;color:var(--ink-faint);font-style:italic;margin-top:3px;line-height:1.4;width:100%}
   .aft-tgt-gap{font-size:11px;margin-left:auto;padding-left:8px}
   .aft-target-set{margin:10px 0;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:8px 12px}
   .aft-target-grid{display:flex;flex-wrap:wrap;gap:8px;padding:8px 0}
@@ -1940,6 +1939,14 @@
   #view-aft .aft-hist-row .ttl {
     font-size: 16px;
   }
+  /* Newer additions (guided mock-AFT entry, the Coach-Hub link) weren't
+     covered when the theme block was first written — bring them into the
+     same ember/combat-readiness identity instead of leaving them generic. */
+  #aftMockCta { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+  .aft-coach-link { margin-top: 10px; }
+  #mockAftModal { border-top: 3px solid rgba(var(--ember-rgb), .5); }
+  #mockAftModal .mockaft-timer-disp { color: var(--ember); }
+  #mockAftModal .mockaft-instructions { border-left-color: var(--ember); }
 
   /* === LOG TAB THEME (view-log) ===
      Warrior's journal — hand-written ledger */
@@ -1965,6 +1972,13 @@
     border-left: 3px solid rgba(var(--gold-rgb),.30);
     padding-left: 11px;
   }
+  /* Monthly Baseline (relocated here from plan.js — see log.js) and the new
+     Coach-Hub link, brought into the same ledger/gold identity. */
+  #view-log .bl-pr-card, #view-log .bl-card, #view-log .bl-latest {
+    background: rgba(var(--gold-rgb),.05);
+    border-color: rgba(var(--gold-rgb),.2);
+  }
+  .lg-coach-link { margin: 10px 0; }
 
   /* === PLAN TAB THEME (view-plan) ===
      Tactical map — grid paper, mission briefing */
@@ -2002,6 +2016,16 @@
     border-right: none;
     border-radius: 0;
   }
+  /* Coach Hub wrapper — a tight vertical stack of already-themed cards, no
+     box of its own needed. Newer FM-1/2/3 additions (equipment profiles,
+     gym access, card-game) weren't covered when the theme was first written
+     — bring them into the same gold/tactical-map identity. */
+  #coachHub { display: flex; flex-direction: column; gap: 2px; }
+  #view-plan .gym-access-card, #view-plan .equip-profile-card {
+    background: linear-gradient(180deg, rgba(var(--gold-rgb),.06), var(--panel));
+    border-color: rgba(var(--gold-rgb),.20);
+  }
+  #cardGameModal { border-top: 3px solid rgba(var(--gold-rgb),.5); }
 
   /* === AWARDS TAB THEME (view-awards) ===
      Trophy case / shadow box — honor, permanence */
@@ -2243,10 +2267,6 @@
 
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
-/* ── Feature: AFT trend sparkline (Feature 4) */
-.aft-trend-wrap{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
-.aft-trend-range{font-size:12px;color:var(--ink-faint);white-space:nowrap}
-
 /* ── Feature: Oath path distribution (Feature 5) */
 .q-path-dist{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
 .q-path-chip{font-size:12px;font-weight:600;background:var(--panel-2);border:1px solid var(--line);padding:3px 9px;border-radius:20px}
@@ -2272,14 +2292,17 @@
 .rx-card{background:rgba(var(--jade-rgb),.07);border:1px solid rgba(var(--jade-rgb),.25);border-radius:var(--radius-sm);padding:var(--space-6) var(--space-7);margin-top:var(--space-5)}
 .rx-note{font-size:12px;color:var(--jade);font-weight:600;margin-bottom:8px;margin-top:0}
 .rx-effort{font-size:11.5px;color:var(--ink-dim);margin-top:8px;font-style:italic;margin-bottom:0}
-.rx-table{width:100%;font-size:12px;border-collapse:collapse}
-.rx-table th{text-align:left;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);padding:0 6px 5px;border-bottom:1px solid var(--line)}
-.rx-table td{padding:5px 6px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--ink-dim)}
-.rx-table tr:last-child td{border-bottom:none}
-.rx-adaptive-row td{color:var(--ink)}
-.rx-adaptive{font-weight:700;color:var(--gold-bright)}
-.rx-adaptive.hold{color:var(--ember)}
-.rx-adapt-note{font-weight:400;color:var(--ink-faint);font-size:11px}
+/* Single-column reference list — replaces the old fixed-column table now that
+   a row's content varies by tier (adaptive/starter/generic) rather than
+   always being sets/reps/weight/rest in fixed slots. */
+.rx-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.rx-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12.5px}
+.rx-row:last-child{border-bottom:none}
+.rx-ex-n{color:var(--ink-dim);flex:1;min-width:120px}
+.rx-ex-tgt{font-weight:700;color:var(--gold-bright)}
+.rx-ex-tgt.hold{color:var(--ember)}
+.rx-adaptive-row .rx-ex-n{color:var(--ink)}
+.rx-adapt-note{font-weight:400;color:var(--ink-faint);font-size:11px;width:100%}
 
 /* ── Feature: Skill practiced button (v111) */
 .sk-footer-actions{display:flex;gap:6px;align-items:center}
@@ -2583,6 +2606,10 @@
 .ds-warmcool{font-size:11px;color:var(--ink-faint);margin-top:4px}
 
 /* ── FM-Adapt: readiness check-in + per-exercise difficulty rating ── */
+.lg-targets-group{background:rgba(var(--gold-rgb),.05);border:1px solid rgba(var(--gold-rgb),.2);border-radius:var(--radius-sm);padding:var(--space-4) var(--space-5);margin-top:10px}
+.lg-record-group{border:1px dashed var(--line);border-radius:var(--radius-sm);padding:var(--space-4) var(--space-5);margin-top:10px}
+.lg-group-h{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:4px}
+.lg-targets-group .lg-group-h{color:var(--gold)}
 .lg-readiness-row{margin:10px 0}
 .lg-label-sub{font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-faint);display:block;margin-top:2px;font-size:11px}
 .lg-readiness-btns{display:flex;gap:4px;margin-top:6px}

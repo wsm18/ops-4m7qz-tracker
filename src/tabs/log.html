@@ -25,13 +25,19 @@
       <div class="row" style="margin-top:9px;gap:9px">
         <label class="lg-label" style="flex:1">Duration (min)<input id="lgDur" type="number" min="1" max="300" placeholder="e.g. 45"></label>
       </div>
-      <div class="lg-readiness-row">
-        <span class="lg-label">Session RPE (opt) <span class="lg-label-sub">1 = very easy · 10 = max effort</span></span>
-        <div class="lg-readiness-btns" id="lgRpeBtns"></div>
+      <div class="lg-targets-group">
+        <div class="lg-group-h">🎯 Affects your next-session targets</div>
+        <div class="lg-readiness-row">
+          <span class="lg-label">Session RPE (opt) <span class="lg-label-sub">1 = very easy · 10 = max effort</span></span>
+          <div class="lg-readiness-btns" id="lgRpeBtns"></div>
+        </div>
       </div>
-      <div class="lg-readiness-row">
-        <span class="lg-label">How do you feel today? <span class="lg-label-sub">1 = rough · 10 = strong — logged for your record; the per-exercise rating below is what actually adjusts next time's suggestion</span></span>
-        <div class="lg-readiness-btns" id="lgReadinessBtns"></div>
+      <div class="lg-record-group">
+        <div class="lg-group-h">📝 For your own record only — not used in targets</div>
+        <div class="lg-readiness-row">
+          <span class="lg-label">How do you feel today? <span class="lg-label-sub">1 = rough · 10 = strong</span></span>
+          <div class="lg-readiness-btns" id="lgReadinessBtns"></div>
+        </div>
       </div>
       <div id="lgExercises" style="margin-top:12px"></div>
       <textarea id="lgNote" class="lg-note" placeholder="Optional note — conditions, felt strong, modified…" rows="2" maxlength="120"></textarea>
@@ -39,6 +45,7 @@
     </div>
     <div id="lgWeekSummary"></div>
     <div class="sec-h" style="margin-top:18px"><h2>Progress by Exercise</h2><span class="hint">spot stalls</span></div>
+    <div class="lg-coach-link"><button class="hb-starter-btn" data-gototab="plan">🎯 See today's adaptive targets & AFT focus → Coach Hub</button></div>
     <div id="lgProgress"></div>
     <div class="sec-h" style="margin-top:18px"><h2>Recent Workouts</h2></div>
     <div id="lgHistory"></div>

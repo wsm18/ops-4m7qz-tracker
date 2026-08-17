@@ -67,24 +67,19 @@ function cgFindRxRow(rows, name){
   return best;
 }
 // Real prescribed volume for one slot: {repsPerSet, setsTarget, threshold, source}.
-// Same resolution order prescriptionFor() already uses (adaptive first,
-// starter table second, generic default last) — just split into the two
-// numbers the threshold math needs separately.
-function cgSlotVolume(skey, exName){
-  let repsPerSet=null, source="default";
-  if(typeof computeTarget==="function"){
-    const tgt=computeTarget(exName);
-    if(tgt && tgt.target){
-      const n=cgParseLeadingInt(tgt.target, null);
-      if(n!=null){ repsPerSet=n; source="adaptive"; }
-    }
-  }
-  const rx=BEGINNER_RX[skey];
-  const row = rx ? (cgFindRxRow(rx.bw,exName) || cgFindRxRow(rx.gym,exName)) : null;
-  if(repsPerSet==null && row){ repsPerSet=cgParseLeadingInt(row.reps, 10); source="starter"; }
+// computeTarget() is the single source of truth (same call shape as Coach
+// Today and the Session N reference cards) — card-game only needs the rep
+// count out of whichever tier it resolves to, not the full target string.
+function cgSlotVolume(skey, exName, rich){
+  const tgt=typeof computeTarget==="function"?computeTarget(exName,{skey,rich}):null;
+  // Tier "starter" carries a structured reps field (use it directly); other
+  // tiers only have the target string, but it's always reps-first by
+  // convention ("14 reps", "3 reps × 15 lb"), so the leading-number parse
+  // still gets the right number for them.
+  let repsPerSet=tgt&&tgt.reps!=null?cgParseLeadingInt(String(tgt.reps),null):(tgt?cgParseLeadingInt(tgt.target, null):null);
+  const setsTarget=(tgt&&tgt.sets)?cgParseLeadingInt(String(tgt.sets),3):3;
   if(repsPerSet==null) repsPerSet=10;
-  const setsTarget = row ? cgParseLeadingInt(String(row.sets), 3) : 3;
-  return {repsPerSet, setsTarget, threshold:repsPerSet*setsTarget, source};
+  return {repsPerSet, setsTarget, threshold:repsPerSet*setsTarget, source:(tgt&&tgt.tier)||"default"};
 }
 // Is there a card-game-eligible session today at all? (at least one
 // reps-type work-phase slot, using the normal daily equipment resolution —
@@ -144,10 +139,11 @@ function cgWireEquipStep(){
 }
 function cgBegin(profileName){
   const tags=(S.equipProfiles[profileName]||{}).tags||[];
+  const rich=tags.length>0;
   const exs=sessionExForProfile(_cgSetup.sessionKey, tags, new Date()).filter(e=>e._phase==="work" && e.t==="reps");
   if(!exs.length){ toast("No reps-based exercises available with that equipment today"); return; }
   const workSlots=exs.map(e=>{
-    const vol=cgSlotVolume(_cgSetup.sessionKey, e.n);
+    const vol=cgSlotVolume(_cgSetup.sessionKey, e.n, rich);
     return Object.assign({slotIdx:e._slotIdx, pool:e._pool, progress:0, bias:0, draws:[], done:false}, vol);
   });
   _cg={sessionKey:_cgSetup.sessionKey, tags, workSlots, curSlot:0, curCard:null, startedAt:Date.now(), sessionLog:{}, ended:false};

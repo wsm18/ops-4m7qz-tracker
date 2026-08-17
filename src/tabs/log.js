@@ -50,7 +50,7 @@ function renderLogForm(){
       </div>`).join("")}
       <button class="lg-addset" data-addset="${xi}">+ add set</button>
       <div class="lg-diff-row">
-        <span class="lg-diff-lbl">Effort (RPE) <span class="lg-diff-hint">1 = very easy · 10 = max effort</span></span>
+        <span class="lg-diff-lbl">🎯 Effort (RPE) <span class="lg-diff-hint">1 = very easy · 10 = max effort — affects your next target for this exercise</span></span>
         <div class="lg-effort-scale">${Array.from({length:10},(_,i)=>i+1).map(n=>`<button type="button" class="lg-effort-btn${ex.effort===n?' on':''}" data-effort="${xi}.${n}">${n}</button>`).join("")}</div>
         <label class="lg-reduced-lbl"><input type="checkbox" data-reduced="${xi}" ${ex.reduced?'checked':''}> had to cut it short</label>
       </div>
@@ -334,6 +334,158 @@ function baselineTrend(bkey){
   return {def, latest, prev, latestVol:baselineVolume(def,latest), prevVol:prev?baselineVolume(def,prev):null};
 }
 
+/* ---------------- MONTHLY BASELINE ---------------- */
+// Relocated here from plan.js — this is real data-entry + history, matching
+// Log's role in the redesign ("raw data entry + history"), and log.js
+// already owned every *consumer* of this data (baselineTrend/baselineVolume/
+// baselineKeyFor above) — this reunites data that was artificially split
+// across two files, not a new split.
+function currentMonth(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
+function monthLabel(m){const[y,mo]=m.split("-");return new Date(y,mo-1,1).toLocaleDateString(undefined,{month:"long",year:"numeric"});}
+function baselineDueThisMonth(){
+  return !S.baselines.some(b=>b.month===currentMonth());
+}
+let BL_DRAFT=null;
+function baselinePrCard(){
+  const entries=(S.baselines||[]);
+  if(entries.length<1) return "";
+  const sorted=entries.slice().sort((a,b)=>a.ts-b.ts);
+  const latest=sorted[sorted.length-1];
+  const rows=BASELINE_TEST.map(def=>{
+    const allVals=sorted.filter(b=>b.results&&b.results[def.key]);
+    if(!allVals.length) return null;
+    const best=allVals.reduce((bst,b)=>{
+      const v=baselineVolume(def,b.results[def.key]); if(v==null) return bst;
+      const bv=bst?baselineVolume(def,bst.results[def.key]):null;
+      return (bv==null||(def.lowerBetter?v<bv:v>bv))?b:bst;
+    },null);
+    if(!best) return null;
+    const isCurrent=latest&&best===latest;
+    const valStr=fmtBaselineVal(def,best.results[def.key]);
+    const shortName=def.name.replace(/ \(.*\)/,'');
+    return `<div class="bl-pr-row"><span class="bl-pr-label">${esc(shortName)}</span><span class="bl-pr-val">${esc(valStr)}${isCurrent?' <span class="bl-pr-star">⭐</span>':''}</span><span class="bl-pr-date">${esc(monthLabel(best.month))}</span></div>`;
+  }).filter(Boolean);
+  if(!rows.length) return "";
+  return `<div class="bl-pr-card"><div class="bl-pr-title">🏅 Baseline Personal Records</div>${rows.join("")}</div>`;
+}
+
+function renderBaseline(){
+  const area=document.getElementById("baselineArea");
+  const prompt=document.getElementById("baselinePrompt");
+  if(!area) return;
+  const due=baselineDueThisMonth();
+  // prompt banner
+  if(due){
+    prompt.innerHTML=`<div class="bl-prompt">📅 <b>New month — baseline due.</b> Run a max-effort test on the movements below (one all-out set each). This re-anchors your training targets so they track your real strength, not just day-to-day noise.</div>`;
+  } else {
+    const thisMonth=S.baselines.filter(b=>b.month===currentMonth()).pop();
+    prompt.innerHTML=`<div class="bl-prompt" style="background:rgba(111,158,84,.1);border-color:#3c5230">✅ <b style="color:var(--jade)">${monthLabel(currentMonth())} baseline logged.</b> Targets are anchored to it. Next baseline prompts at the start of next month.</div>`;
+  }
+  // latest baseline summary (with month-over-month deltas)
+  let latestHtml="";
+  if(S.baselines.length){
+    const sorted=S.baselines.slice().sort((a,b)=>a.ts-b.ts);
+    const latest=sorted[sorted.length-1];
+    const prev=sorted.length>1?sorted[sorted.length-2]:null;
+    latestHtml=`<div class="bl-latest"><h4>Latest baseline — ${monthLabel(latest.month)}</h4>`+
+      BASELINE_TEST.map(def=>{
+        const v=latest.results[def.key]; if(!v) return "";
+        const disp=fmtBaselineVal(def,v);
+        let delta="";
+        if(prev&&prev.results[def.key]){
+          const a=baselineVolume(def,v), b=baselineVolume(def,prev.results[def.key]);
+          const better=def.lowerBetter? a<b : a>b;
+          const same=Math.abs(a-b)<0.01;
+          delta=same?`<span class="delta" style="color:var(--ink-faint)">—</span>`:
+            better?`<span class="delta" style="color:var(--jade)">▲ improved</span>`:
+            `<span class="delta" style="color:var(--ember)">▼ down</span>`;
+        }
+        return `<div class="bl-latest-row"><span>${esc(def.name.replace(/ \(.*\)/,''))}: <b>${esc(disp)}</b></span>${delta}</div>`;
+      }).filter(Boolean).join("")+`</div>`;
+  }
+  // input form
+  if(!BL_DRAFT) BL_DRAFT={};
+  const form=`<div class="bl-card ${due?'due':''}">
+    ${BASELINE_TEST.map(def=>{
+      const last=lastBaselineVal(def.key);
+      return `<div class="bl-ex">
+        <div class="bl-ex-name">${esc(def.name)}${last?`<div class="prev">last: ${esc(fmtBaselineVal(def,last))}</div>`:''}</div>
+        <div class="units">${baselineInputs(def)}</div>
+      </div>`;
+    }).join("")}
+    <button class="btn-add" id="blSave" style="margin-top:12px">${due?'Log This Month&rsquo;s Baseline':'Save Baseline (updates targets)'}</button>
+  </div>`;
+  area.innerHTML=baselinePrCard()+latestHtml+baselineSparklines()+form;
+  const btn=document.getElementById("blSave");
+  if(btn) btn.onclick=saveBaseline;
+}
+function baselineSparklines(){
+  if((S.baselines||[]).length<2) return "";
+  const sorted=S.baselines.slice().sort((a,b)=>a.ts-b.ts);
+  const rows=BASELINE_TEST.map(def=>{
+    const entries=sorted.filter(b=>b.results&&b.results[def.key]);
+    const vals=entries.map(b=>baselineVolume(def,b.results[def.key])).filter(v=>v!=null&&v>0);
+    if(vals.length<2) return "";
+    const bestEntry=entries.reduce((bst,b)=>{
+      const v=baselineVolume(def,b.results[def.key]); if(v==null) return bst;
+      const bv=bst?baselineVolume(def,bst.results[def.key]):null;
+      return (bv==null||(def.lowerBetter?v<bv:v>bv))?b:bst;
+    },null);
+    const bestLabel=bestEntry?`Best: <b>${esc(fmtBaselineVal(def,bestEntry.results[def.key]))}</b> (${esc(monthLabel(bestEntry.month))})`:"";
+    return `<div class="bl-spark-row">
+      <div class="bl-spark-name">${esc(def.name.replace(/ \(.*\)/,''))}</div>
+      <div class="wl-spark">${miniSparkline(vals,240,40)}</div>
+      <div class="bl-spark-best">${bestLabel}</div>
+    </div>`;
+  }).filter(Boolean).join("");
+  if(!rows) return "";
+  return `<div class="bl-sparks"><div class="sec-h" style="margin-bottom:8px"><h2>Baseline History</h2><span class="hint">month-over-month</span></div>${rows}</div>`;
+}
+function baselineInputs(def){
+  if(def.type==="reps"){
+    return `<input type="number" placeholder="reps" data-bl="${def.key}.reps">`+(def.w?`<input type="number" placeholder="lb" data-bl="${def.key}.weight">`:'');
+  }
+  if(def.type==="time") return `<input type="text" class="wide" placeholder="m:ss" data-bl="${def.key}.time">`;
+  if(def.type==="dist") return `<input type="text" class="wide" placeholder="time m:ss" data-bl="${def.key}.time">`;
+  return "";
+}
+function lastBaselineVal(key){
+  const e=S.baselines.filter(b=>b.results&&b.results[key]).sort((a,b)=>a.ts-b.ts);
+  return e.length?e[e.length-1].results[key]:null;
+}
+function fmtBaselineVal(def,v){
+  if(def.type==="reps") return v.reps+(v.weight?`×${v.weight}lb`:"")+" reps";
+  if(def.type==="time") return v.time;
+  if(def.type==="dist") return v.time;
+  return "";
+}
+// capture baseline inputs
+document.addEventListener("input",e=>{
+  const b=e.target.dataset.bl;
+  if(b){const[key,field]=b.split(".");if(!BL_DRAFT)BL_DRAFT={};(BL_DRAFT[key]=BL_DRAFT[key]||{})[field]=e.target.value;}
+});
+function saveBaseline(){
+  if(!BL_DRAFT||!Object.keys(BL_DRAFT).length){toast("Enter at least one baseline result");return;}
+  // keep only keys with real data
+  const results={};
+  Object.keys(BL_DRAFT).forEach(k=>{
+    const v=BL_DRAFT[k];
+    const has=(v.reps&&v.reps!=="")||(v.time&&v.time!=="");
+    if(has) results[k]=v;
+  });
+  if(!Object.keys(results).length){toast("Enter at least one baseline result");return;}
+  const m=currentMonth();
+  // replace existing baseline for this month if re-logging
+  S.baselines=S.baselines.filter(b=>b.month!==m);
+  S.baselines.push({date:new Date().toLocaleDateString(),ts:Date.now(),month:m,results});
+  S.lastBaselineMonth=m;
+  if(!S.pathXP) S.pathXP={};
+  S.pathXP.physical=(S.pathXP.physical||0)+60; S.gold+=25;
+  BL_DRAFT=null;
+  save();render();
+  toast(`<span class="t-xp">Baseline logged · +60 Fitness XP +25 pts</span> · targets re-anchored`);
+}
+
 // The 4 AFT events with a clean, unambiguous 1:1 exercise-name match (SDC has
 // no single canonical logged exercise — it's simulated via several different
 // carry/drag variants depending on equipment — so it's deliberately left out
@@ -358,22 +510,44 @@ function aftTrendFor(name){
   const prev=entries.length>1?entries[entries.length-2].raw[key]:null;
   return {key,latest,prev,lowerBetter:AFT_KEY_LOWER_BETTER[key]};
 }
-function computeTarget(name){
+// computeTarget() is the single source of truth for "what should I do on this
+// exercise" everywhere in the app — Coach Today, the Session N reference
+// cards, and the card-game mode all call this one function instead of each
+// keeping its own guess. It resolves through up to 4 tiers, tiers 1-2 are the
+// original FM-Adapt/AFT-blended engine (unconditional); tiers 3-4 are an
+// opt-in fallback (see below) added when this was unified.
+//
+// exArg: a string exercise name (back-compat with existing bare callers), OR
+//        the real exercise object ({n, t/type, w, ...}) SESSIONS/BEGINNER_RX
+//        callers already have on hand — required for tier 4's type-aware prose.
+// opts:  {skey, intensity, rich} — all optional. Tiers 3/4 are STRICTLY
+//        opt-in: a bare computeTarget(name) call with no opts must keep
+//        returning tiers 1-2 or null exactly as before. This matters concretely
+//        for the save-toast diff in lgSave's onclick below (`_tBefore`/`_changed`),
+//        which uses "did a real target appear that wasn't there before" as its
+//        signal — if bare calls started returning tier-4 generic prose
+//        unconditionally, that diff would break. Only call sites with real
+//        skey/intensity context in hand (Coach Today, Session N cards,
+//        card-game) should pass opts.
+function computeTarget(exArg, opts){
+  opts = opts || {};
+  const name = typeof exArg==="string" ? exArg : exArg.n;
   const s=exerciseSeries(name);
   if(!s.length){
-    // No logged workout sets yet — if this exercise has a clean AFT-event
-    // match and real AFT history exists, seed from that real number instead
-    // of going silent. Deliberately doesn't invent a working-set percentage
-    // off a max-effort AFT test (a faked-formula risk) — just anchors to the
-    // real tested number and lets normal set-by-set progression take over
-    // once a first set is actually logged.
+    // Tier "aft-anchor": no logged workout sets yet — if this exercise has a
+    // clean AFT-event match and real AFT history exists, seed from that real
+    // number instead of going silent. Deliberately doesn't invent a
+    // working-set percentage off a max-effort AFT test (a faked-formula
+    // risk) — just anchors to the real tested number and lets normal
+    // set-by-set progression take over once a first set is actually logged.
     const at=aftTrendFor(name);
-    if(!at) return null;
-    if(at.key==="dl") return {target:`log your first working set (last AFT max: ${at.latest} lb)`, note:"no logged sets yet — start conservative below that max, then targets adapt from your own log"};
-    if(at.key==="hrp") return {target:`${at.latest} reps`, note:`based on your last AFT push-up count (${at.latest}) — not yet logged as a workout here`};
-    if(at.key==="plank") return {target:`${fmtSec(at.latest)}`, note:`based on your last AFT plank hold — not yet logged as a workout here`};
-    if(at.key==="run") return {target:`beat ${fmtSec(at.latest)}`, note:`based on your last AFT 2-mile time — not yet logged as a workout here`};
-    return null;
+    if(at){
+      if(at.key==="dl") return {target:`log your first working set (last AFT max: ${at.latest} lb)`, note:"no logged sets yet — start conservative below that max, then targets adapt from your own log", tier:"aft-anchor"};
+      if(at.key==="hrp") return {target:`${at.latest} reps`, note:`based on your last AFT push-up count (${at.latest}) — not yet logged as a workout here`, tier:"aft-anchor"};
+      if(at.key==="plank") return {target:`${fmtSec(at.latest)}`, note:`based on your last AFT plank hold — not yet logged as a workout here`, tier:"aft-anchor"};
+      if(at.key==="run") return {target:`beat ${fmtSec(at.latest)}`, note:`based on your last AFT 2-mile time — not yet logged as a workout here`, tier:"aft-anchor"};
+    }
+    return computeTargetFallback(exArg, name, opts);
   }
   const last=s[s.length-1];
   const ex=last.ex;
@@ -453,26 +627,84 @@ function computeTarget(name){
   if(ex.type==="reps"){
     const r=parseFloat(last.best.reps)||0; const w=parseFloat(last.best.weight)||0;
     if(w>0){
-      if(trend==="down"||stalled) return {target:`${r} reps × ${w} lb (hold & nail form)`, hold:true, note:(stalled?"stalled — deload slightly or fix technique before adding":"dropped last time — repeat it clean")+baselineNote};
-      if(r>=10) return {target:`${r-2} reps × ${w+5} lb`, note:"add weight, reset reps"+baselineNote};
-      return {target:`${r+1} reps × ${w} lb`, note:"add a rep"+baselineNote};
+      if(trend==="down"||stalled) return {target:`${r} reps × ${w} lb (hold & nail form)`, hold:true, tier:"adaptive", note:(stalled?"stalled — deload slightly or fix technique before adding":"dropped last time — repeat it clean")+baselineNote};
+      if(r>=10) return {target:`${r-2} reps × ${w+5} lb`, tier:"adaptive", note:"add weight, reset reps"+baselineNote};
+      return {target:`${r+1} reps × ${w} lb`, tier:"adaptive", note:"add a rep"+baselineNote};
     } else {
-      if(trend==="down"||stalled) return {target:`${r} reps (hold)`, hold:true, note:(stalled?"stalled — try slower tempo or a harder variation":"dropped — repeat it")+baselineNote};
-      return {target:`${r+2} reps`, note:"+2 reps"+baselineNote};
+      if(trend==="down"||stalled) return {target:`${r} reps (hold)`, hold:true, tier:"adaptive", note:(stalled?"stalled — try slower tempo or a harder variation":"dropped — repeat it")+baselineNote};
+      return {target:`${r+2} reps`, tier:"adaptive", note:"+2 reps"+baselineNote};
     }
   }
   if(ex.type==="time"){
     const sec=parseTime(last.best.time)||parseFloat(last.best.time)||0;
     if(lowerBetter){
-      if(trend==="down"||stalled) return {target:`${fmtSec(sec)} (hold)`, hold:true, note:(stalled?"not getting faster — add a focused speed session":"slower last time — repeat & beat it")+baselineNote};
-      return {target:`beat ${fmtSec(sec)}`, note:"shave a few seconds"+baselineNote};
+      if(trend==="down"||stalled) return {target:`${fmtSec(sec)} (hold)`, hold:true, tier:"adaptive", note:(stalled?"not getting faster — add a focused speed session":"slower last time — repeat & beat it")+baselineNote};
+      return {target:`beat ${fmtSec(sec)}`, tier:"adaptive", note:"shave a few seconds"+baselineNote};
     } else {
-      if(trend==="down"||stalled) return {target:`${fmtSec(sec)} (hold)`, hold:true, note:(stalled?"plateaued — add side planks / hollow holds":"dropped — repeat it")+baselineNote};
-      return {target:`${fmtSec(sec+10)}`, note:"+10 sec"+baselineNote};
+      if(trend==="down"||stalled) return {target:`${fmtSec(sec)} (hold)`, hold:true, tier:"adaptive", note:(stalled?"plateaued — add side planks / hollow holds":"dropped — repeat it")+baselineNote};
+      return {target:`${fmtSec(sec+10)}`, tier:"adaptive", note:"+10 sec"+baselineNote};
     }
   }
   if(ex.type==="dist"){
-    return {target:`log distance + time`, note:(trend==="up"?"trending faster — keep pushing":trend==="down"?"slower last run — focus the next one":"build consistency")+baselineNote};
+    return {target:`log distance + time`, tier:"adaptive", note:(trend==="up"?"trending faster — keep pushing":trend==="down"?"slower last run — focus the next one":"build consistency")+baselineNote};
+  }
+  return computeTargetFallback(exArg, name, opts);
+}
+// Tiers 3 ("starter") and 4 ("generic") — reached only when tiers 1-2 (above)
+// found nothing AND the caller opted in via `opts` (see computeTarget's own
+// header comment for why bare callers must not reach these unconditionally).
+function computeTargetFallback(exArg, name, opts){
+  // Tier "starter": no logged/AFT history, but a BEGINNER_RX row exists for
+  // this session. Reuses the same word-overlap matcher FM-3 already uses
+  // (cgFindRxRow) instead of a second lookup style. Weighted rows get nudged
+  // by the user's own AFT fitness level (aftFitnessMultiplier, aft-scoring.js)
+  // — a plain, honest, single multiplier reused from the app's existing
+  // 300/350 standard bands, never a per-exercise invented formula.
+  if(opts.skey && typeof BEGINNER_RX!=="undefined" && typeof cgFindRxRow==="function"){
+    const rx=BEGINNER_RX[opts.skey];
+    const rows=rx?(opts.rich?rx.gym:rx.bw):null;
+    const row=rows?cgFindRxRow(rows,name):null;
+    if(row){
+      let weightNote="";
+      let weightOut=row.weight;
+      const m=typeof row.weight==="string"?row.weight.match(/^(\d+(?:\.\d+)?)(.*)$/):null;
+      if(m && typeof aftFitnessMultiplier==="function"){
+        const mult=aftFitnessMultiplier();
+        if(mult!==1){
+          const scaled=Math.round((parseFloat(m[1])*mult)/5)*5;
+          if(scaled!==parseFloat(m[1])){ weightOut=`${scaled}${m[2]}`; weightNote=" · nudged for your AFT level"; }
+        }
+      }
+      // Leads with reps (not sets) to match the adaptive tier's target-string
+      // convention ("14 reps", "3 reps × 15 lb") — cgSlotVolume() derives
+      // card-game's rep count from this string's LEADING number, so a
+      // sets-first format would silently hand it the sets count instead.
+      const target=`${row.reps}`+(weightOut?` @ ${weightOut}`:"")+` × ${row.sets} sets`+(row.rest?` (rest ${row.rest})`:"");
+      return {target, note:"beginner starting point"+weightNote, tier:"starter", sets:row.sets, reps:row.reps, rest:row.rest};
+    }
+  }
+  // Tier "generic": no history, no AFT anchor, no BEGINNER_RX row (a fully
+  // custom/off-plan exercise). The old prescriptionFor() intensity-based
+  // prose, moved here so every call site shares one fallback instead of
+  // training.js keeping an independent copy.
+  if(opts.intensity && typeof exArg==="object" && exArg){
+    const t=exArg.type||exArg.t;
+    let base="as prescribed";
+    if(opts.intensity==="hard"){
+      if(t==="reps") base="3–4 sets, leave 1–2 reps in the tank";
+      else if(t==="time") base="3 sets, push the hold/effort";
+      else if(t==="dist") base="main effort — see the session note for distance/pace";
+    } else if(opts.intensity==="moderate"){
+      if(t==="reps") base="2–3 sets, controlled";
+      else if(t==="time") base="2–3 sets, steady";
+      else if(t==="dist") base="easy–tempo pace, conversational";
+    } else {
+      if(t==="reps") base="1–2 easy sets, focus on form";
+      else if(t==="time") base="hold as prescribed, relaxed";
+      else if(t==="dist") base="easy pace only";
+    }
+    if(t==="reps" && exArg.w) base+=" · no logged weight yet — start conservative and find a load where the last 1–2 reps are genuinely hard";
+    return {target:base, note:null, tier:"generic"};
   }
   return null;
 }
