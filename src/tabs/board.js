@@ -39,7 +39,7 @@ function renderBoard(){
 }
 document.body.addEventListener("click",e=>{
   const t=e.target;
-  if(t.dataset.bt){const task=S.boardTasks.find(x=>x.id===t.dataset.bt);if(task){const was=task.done;task.done=!task.done;if(!was&&task.done){grant(20,10,"Board prep task done","knowledge");}else{save();render();}}return;}
+  if(t.dataset.bt){const task=S.boardTasks.find(x=>x.id===t.dataset.bt);if(task){const was=task.done;task.done=!task.done;if(!was&&task.done){grant(20,10,"Board prep task done","academic");}else{save();render();}}return;}
   if(t.dataset.dbt){S.boardTasks=S.boardTasks.filter(x=>x.id!==t.dataset.dbt);save();render();return;}
 });
 const _btAdd=document.getElementById("btAdd");

@@ -197,8 +197,8 @@ function exportBattleBuddyReport(){
   const aftRows=aftArr.slice(-5).reverse().map(a=>`<tr><td>${a.date}</td><td>${a.total}</td><td>${a.scores.dl||"—"}</td><td>${a.scores.hrp||"—"}</td><td>${a.scores.sdc||"—"}</td><td>${a.scores.plank||"—"}</td><td>${a.scores.run||"—"}</td></tr>`).join("");
   const topSkills=(S.lifeSkills||[]).filter(s=>!s.group&&skEffectiveLevel(s)>0).sort((a,b)=>skEffectiveLevel(b)-skEffectiveLevel(a)).slice(0,12);
   const skillRows=topSkills.map(s=>`<li>${s.name} — Level ${skEffectiveLevel(s)} / ${s.levels&&s.levels.length}</li>`).join("");
-  const awardRows=(S.awards||[]).map(a=>`<li>${a.n}</li>`).join("");
-  const volHours=(S.events||[]).reduce((s,e)=>s+(e.hours||0),0);
+  const awardRows=(S.awards||[]).map(a=>`<li>${a.title}</li>`).join("");
+  const volHours=(S.volunteer||[]).reduce((s,v)=>s+(parseFloat(v.hours)||0),0);
   const counselRows=(S.counseling||[]).slice(-5).reverse().map(c=>`<li><b>${c.date}</b> [${c.type}]${c.people?" · "+c.people:""} — ${c.summary||""}</li>`).join("");
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Battle Buddy Report — ${name}</title>
 <style>body{font-family:Arial,sans-serif;color:#111;max-width:720px;margin:20px auto;padding:0 20px}h1{font-size:22px;border-bottom:3px solid #333;padding-bottom:8px;margin-bottom:4px}h2{font-size:15px;margin-top:20px;border-bottom:1px solid #ccc;padding-bottom:4px}table{border-collapse:collapse;width:100%;font-size:13px;margin-top:8px}th,td{border:1px solid #ccc;padding:5px 8px;text-align:left}th{background:#f5f5f5}ul{margin:6px 0;padding-left:20px;font-size:13px}li{margin-bottom:3px}.meta{font-size:12px;color:#777;margin-bottom:16px}p{font-size:13px}@media print{body{margin:0;padding:12px}}</style>

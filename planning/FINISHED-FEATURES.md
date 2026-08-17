@@ -1582,3 +1582,16 @@ Closing the last piece of the "make everything use coach properly" ask: `dawnSes
 Verified against the real running app and a real screenshot of the card: all 7 Session 1 exercises show their real target inline, readable at a glance, no wrapping/overflow issues even with the longest exercise/target strings in today's session.
 
 Full ship checklist: `npm run build` → OK, `npm run check` → SYNTAX OK, `npm run regress` → `PAGEERRORS 0`, `badCount:0`, `total:12524`. No `SEED_SKILLS`/ladder content touched, `SKILL_LADDER_VER` stayed at 118. SW bumped to `operations-v199`. `npm run package` → produced `dist/operations.zip`.
+
+### v200 — Two real, confirmed bugs found by a fresh 3-agent audit of the rest of the app
+
+**Files changed:** `src/tabs/board.js`, `src/tabs/records.js`.
+
+Wyatt asked for another audit-driven redesign candidate, comparable in scope to the FM subsystem work. Ran 3 parallel read-only audit agents covering everything not recently touched: (1) skills/pyramid/tree/garden/trophies, (2) test/quizzes/records/board/awards, (3) the daily-loop tabs (Today/Quests/Dailies/Bosses/Shop/Weight/Profile). All 3 surfaced genuine "FM-redesign-sized" candidates (see the next planning-doc entry for the chosen one and the full list); this entry covers two small, unambiguous, live bugs found along the way and fixed immediately rather than bundled into a larger redesign:
+
+- **`board.js`'s Board-task completion handler called `grant(20,10,"Board prep task done","knowledge")`** — `"knowledge"` isn't a real path key (the valid keys are `SK_CAT_ORDER`; `"knowledge"` is only ever the *display name* substring of `academic`, "Path of Knowledge"). This silently created and grew an `S.pathXP.knowledge` bucket that Garden/Tree/every category-driven loop never reads — completing Board tasks granted XP into a black hole, invisible forever, and any level-up would have shown a broken toast (`{icon:"⭐",name:"knowledge",idol:"knowledge"}` fallback). Fixed to `"academic"`, matching the intent (Board prep for academic/officer requirements).
+- **`records.js`'s `exportBattleBuddyReport()` read the wrong fields**: `a.n` (should be `a.title` — confirmed against every award-writing call site, which never write `.n`) and `S.events`'s nonexistent `.hours` field instead of the real `S.volunteer` array. Every Battle Buddy Report ever generated showed blank/undefined bullets under Awards and always reported "Volunteer hours logged: 0," even for a save with real awards and volunteer history.
+
+Verified behaviorally: seeded a fake award + volunteer entry and confirmed the export logic now reads `"Test Award"` and sums `12.5` hours correctly; confirmed `grant(...,"academic")` credits the real `academic` bucket and no `knowledge` bucket is created.
+
+Full ship checklist: `npm run build` → OK, `npm run check` → SYNTAX OK, `npm run regress` → `PAGEERRORS 0`, `badCount:0`, `total:12524`. No `SEED_SKILLS`/ladder content touched, `SKILL_LADDER_VER` stayed at 118. SW bumped to `operations-v200`. `npm run package` → produced `dist/operations.zip`.
