@@ -59,7 +59,11 @@ const skEmblemSvg = (function(){
   // PHYSICAL — Ember flame
   // Base: single teardrop flame. Diverges in lean, inner flame, tongues, ember field.
   function _physical(t,s){
-    const s0=s%3, s1=s>>2&2;
+    // s1 must be 0 or 1 here (not 0 or 2 — that was a copy-paste mask bug):
+    // `ns=1+s1` below indexes a 2-element position array [-3,3], so s1===2
+    // (ns=3) read a 3rd, nonexistent array slot as `undefined`, producing a
+    // NaN circle cx and a real (if silent, never-thrown) console warning.
+    const s0=s%3, s1=s>>2&1;
     let o=[];
     const lean=[-1.5,0,1.5][s0]*t, fh=_f(10+5*t);
     o.push(`<path d="M${_f(24+lean)},${_f(27-parseFloat(fh))} C${_f(21+lean)},23 22,28 24,30 C26,28 ${_f(27)},23 ${_f(24+lean)},${_f(27-parseFloat(fh))}" fill="none" stroke="currentColor" stroke-width="1.4"/>`);
@@ -732,8 +736,11 @@ function skProgressBlock(sk, eff){
   // every one of its ~158 member skills also has a real slot inside the Pyramid
   // tree below (confirmed by walking every Mythic tree's setKey chain), so it was
   // rendering the exact same skills twice. skRolledLevel()/skSubsOf() are still
-  // used elsewhere (e.g. catRolledLevel for the path-level "Lv X" badges) — only
-  // the duplicate card rendering here is gone, not the underlying group data model.
+  // used elsewhere (group-skill rollup math) — only the duplicate card rendering
+  // here is gone, not the underlying group data model. (The deck header's corner
+  // badges used to show catRolledLevel's "Lv X" — since Commons-layer added
+  // ~1,500+ flat skills/Path, that average permanently rounds to ~0; they now show
+  // catProgressFraction's % instead, the same metric the Tree's world-glow uses.)
 
   // ============ PYRAMID TREE BROWSER — Mythic → Legendary → Rare → Uncommon → Common ============
   // Replaces the old "started vs unstarted, chunked by 13" browsing scheme for
@@ -852,7 +859,12 @@ function skProgressBlock(sk, eff){
   SK_CAT_ORDER.forEach(cat=>{
     const tops=skTopLevelInCat(cat);
     if(!tops.length) return;
-    const catLvl=catRolledLevel(cat);
+    // catProgressFraction (not catRolledLevel) is the canonical "how developed
+    // is this Path" number — catRolledLevel averages over EVERY top-level skill
+    // in the Path, which post-Commons-layer (~1,500+ skills/Path) permanently
+    // rounds to ~0 regardless of real progress. catProgressFraction correctly
+    // scales as a % of total level-depth across the whole seeded pyramid.
+    const catProg=typeof catProgressFraction==="function"?catProgressFraction(cat):0;
     const pathCol=PATH_COL[cat]||"#3a3a3a";
     const pathIcon=(typeof SK_PATH_ICON!=="undefined"&&SK_PATH_ICON[cat])||"🌿";
     const pathName=(typeof SK_CAT!=="undefined"&&SK_CAT[cat])||cat||"";
@@ -956,14 +968,14 @@ function skProgressBlock(sk, eff){
 
     html+=`<div class="sk-deck" id="skcat-${cat}" style="--deck-col:${suit.col};--deck-light:${suit.light}">
       <div class="sk-deck-header${isOpen?' open':''}" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
-        <div class="sdb-corner tl"><div class="sdb-rank">Lv${fmtLvl(catLvl)}</div><div class="sdb-suit">${suit.sym}</div></div>
+        <div class="sdb-corner tl"><div class="sdb-rank">${Math.round(catProg*100)}%</div><div class="sdb-suit">${suit.sym}</div></div>
         <div class="sdb-center">
           <div class="sdb-emblem">${deckEmblemSvg}</div>
           <div class="sdb-path-name">${esc(pathName)}${pathBadges?` ${pathBadges}`:''}</div>
           <div class="sdb-suit-name">${esc(suit.name)}</div>
           <div class="sdb-count">${pathStartedCount}/${totalLeaves} skill${totalLeaves!==1?'s':''}${fadingCount?` · <span class="sdb-fading">🍂${fadingCount}</span>`:''}${multiTag}</div>
         </div>
-        <div class="sdb-corner br"><div class="sdb-rank">Lv${fmtLvl(catLvl)}</div><div class="sdb-suit">${suit.sym}</div></div>
+        <div class="sdb-corner br"><div class="sdb-rank">${Math.round(catProg*100)}%</div><div class="sdb-suit">${suit.sym}</div></div>
         <button class="sc-toggle" data-sctoggle="${cat}">⛓ Chain</button>
       </div>
       <div class="sk-deck-body${isOpen?' open':''}">

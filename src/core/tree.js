@@ -143,7 +143,6 @@ function renderSkillTree(){
   paths.forEach((cat,i)=>{
     const slot=SLOT_BY_CAT[cat] || fallbackSlots[i%fallbackSlots.length];
     const totalCatSkills=skTopLevelInCat(cat).length;
-    const catLvl=catRolledLevel(cat);
     const pal=realmPal[cat]||{core:"#9ec46a",edge:"#4f6a2c"};
     // How far along this whole Path is (0-1) — drives how brightly the world is lit.
     // A category can hold 700-1500+ skills once its pyramid is seeded, far too many
@@ -207,7 +206,7 @@ function renderSkillTree(){
     leaves.push(`<text x="${slot.rx.toFixed(0)}" y="${(slot.ry+realmR*0.16).toFixed(0)}" text-anchor="middle" font-size="${Math.min(34,realmR*0.78).toFixed(0)}" pointer-events="none">${SK_PATH_ICON[cat]||""}</text>`);
     const nm=esc(SK_CAT[cat]||cat);
     leaves.push(`<text x="${slot.rx.toFixed(0)}" y="${(slot.ry+realmR+20).toFixed(0)}" text-anchor="middle" font-size="16" font-weight="700" fill="var(--gold-bright)" style="text-shadow:0 1px 4px #000,0 0 3px #000" pointer-events="none">${nm}</text>`);
-    leaves.push(`<text x="${slot.rx.toFixed(0)}" y="${(slot.ry+realmR+37).toFixed(0)}" text-anchor="middle" font-size="12" fill="var(--ink-dim)" style="text-shadow:0 1px 3px #000" pointer-events="none">World Lv ${fmtLvl(catLvl)} · ${Math.round(progress*100)}% along</text>`);
+    leaves.push(`<text x="${slot.rx.toFixed(0)}" y="${(slot.ry+realmR+37).toFixed(0)}" text-anchor="middle" font-size="12" fill="var(--ink-dim)" style="text-shadow:0 1px 3px #000" pointer-events="none">${Math.round(progress*100)}% along</text>`);
     if(completion>0) leaves.push(`<text x="${slot.rx.toFixed(0)}" y="${(slot.ry+realmR+52).toFixed(0)}" text-anchor="middle" font-size="10" fill="${studCol}" style="text-shadow:0 1px 3px #000" pointer-events="none">${Math.round(completion*100)}% pyramid mastered</text>`);
   });
 

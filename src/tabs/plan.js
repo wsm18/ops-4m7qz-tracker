@@ -164,8 +164,11 @@ function renderSkillBalance(){
   // laggards: clearly below your average (and not already maxed); strengths: at/above avg
   const lag=withLvl.filter(s=>s.l < avg-0.5 || s.l===0);
   const strong=withLvl.filter(s=>s.l>=avg && s.l>0).slice(-3).reverse();
-  const overall=fmtLvl(catRolledLevel("physical"));
-  let lines=`<div class="recovery-line">Overall physical level: <b>${overall}</b> (average across every physical skill). The way up is to raise your lowest areas while holding your best.</div>`;
+  // catProgressFraction (not catRolledLevel) — catRolledLevel averages over
+  // every top-level skill in the Path, which post-Commons-layer (~1,500+
+  // skills) permanently rounds to ~0 regardless of real progress.
+  const overall=typeof catProgressFraction==="function"?Math.round(catProgressFraction("physical")*100):0;
+  let lines=`<div class="recovery-line">Overall physical development: <b>${overall}%</b> of your full physical pyramid's level-depth reached so far. The way up is to raise your lowest areas while holding your best.</div>`;
   if(lag.length){
     const names=lag.slice(0,5).map(s=>`${esc(s.name)} (Lv ${fmtLvl(s.l)})`);
     lines+=`<div class="recovery-line">🎯 <b>Prioritize these</b> — they're dragging your whole-body level down: ${names.join(", ")}. Put extra volume here.</div>`;

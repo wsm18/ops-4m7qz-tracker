@@ -55,12 +55,6 @@ function skRolledLevel(sk){
   }
   return skEffectiveLevel(sk);
 }
-// a category's rolled level = average of its top-level skills' rolled levels
-function catRolledLevel(cat){
-  const tops=skTopLevelInCat(cat);
-  if(!tops.length) return 0;
-  return tops.reduce((s,x)=>s+skRolledLevel(x),0)/tops.length;
-}
 function fmtLvl(n){ return (Math.round(n*10)/10).toFixed(1); }
 // Rarity tier — explicit `rarity` field on seed takes priority; falls back to level-count inference
 const _RARITY_MAP={
@@ -405,8 +399,9 @@ function skPass(skId){
   // maintain just refreshes the timer
   sk.lastQuestTs=Date.now();
   sk.history.push({ts:Date.now(),type:q.type,level:q.level});
-  // skill growth feeds the Academic path lightly (earned, not gamifying the skill itself)
-  if(!S.pathXP) S.pathXP={}; S.pathXP.academic=(S.pathXP.academic||0)+15;
+  // Skill growth feeds its OWN Path's Grove idol — every Path's idol should
+  // actually reflect the skills leveled within it, not just Academic.
+  if(!S.pathXP) S.pathXP={}; S.pathXP[sk.cat]=(S.pathXP[sk.cat]||0)+15;
   save();render();
   toast(q.type==="promote"?`⬆️ Promoted to Level ${sk.currentLevel} — ${esc(sk.name)}`:q.type==="decay"?`Reclaimed Level ${sk.currentLevel}`:`Maintained — ${esc(sk.name)}`);
 }
@@ -427,7 +422,8 @@ function skReachLevel(skId, level, note){
   const entry={ts:Date.now(),type:prevType,level};
   if(note&&note.trim()) entry.note=note.trim();
   sk.history.push(entry);
-  if(!S.pathXP) S.pathXP={}; S.pathXP.academic=(S.pathXP.academic||0)+15;
+  // Same as skPass() — feeds the skill's OWN Path idol, not always Academic.
+  if(!S.pathXP) S.pathXP={}; S.pathXP[sk.cat]=(S.pathXP[sk.cat]||0)+15;
   save();render();
   if(typeof getTierLabelForLevel==="function"){
     const tierLabel=getTierLabelForLevel(sk,level);
