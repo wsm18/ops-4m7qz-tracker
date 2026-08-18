@@ -67,6 +67,7 @@ const BEGINNER_RX = {
       {name:"Plank",              sets:3, reps:"20–30s",        rest:"45s"},
       {name:"Side plank",         sets:2, reps:"15–20s/side",  rest:"45s"},
       {name:"Superman",           sets:3, reps:"10",            rest:"45s"},
+      {name:"Loaded backpack carry", sets:3, reps:"40 ft",      rest:"90s"},
       {name:"Grip squeeze",       sets:3, reps:"30s",           rest:"30s"},
     ],
     gym: [

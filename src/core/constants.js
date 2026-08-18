@@ -318,7 +318,16 @@ const SESSIONS = {
       {n:"Plank", t:"time", m:["core"]},
       {n:"Side plank", t:"time", m:["obliques"]},
       {n:"Superman / back extension", t:"reps", m:["lower back"]},
-      {n:"Grip squeeze (grip trainer / towel)", t:"time", m:["grip"]},
+      // Was "Grip squeeze" — real but isolated grip work, not an actual
+      // loaded-carry stimulus. Found by the v204-session FM audit: SDC gets
+      // the least frequency/specificity of any AFT event, and this bw slot's
+      // weak default was a real, fixable part of that — a loaded carry with
+      // whatever's on hand (books, a full water jug, a duffel bag) is the
+      // honest no-equipment substitute for the gym's Farmer's carry at this
+      // same slot, and directly trains the SDC's loaded-locomotion demand
+      // instead of just grip in isolation. Grip squeeze stays as an alt for
+      // whoever genuinely has nothing loadable to carry.
+      {n:"Loaded backpack carry (books/household items)", t:"dist", m:["grip","core","legs"]},
     ],
     gym:[
       {n:"Pull-ups", t:"reps", w:true, eq:["pullupbar"], m:["back","biceps"]},
@@ -334,6 +343,7 @@ const SESSIONS = {
       1:[{n:"Barbell row", t:"reps", w:true, eq:["barbell"], m:["back","biceps"]}],
       2:[{n:"Knee push-ups", t:"reps", m:["chest","shoulders"]}],
       6:[
+        {n:"Grip squeeze (grip trainer / towel)", t:"time", m:["grip"]},
         {n:"Water jug carry", t:"dist", w:true, eq:["waterjugs"], m:["grip","core"]},
         {n:"Weighted stretcher carry (2-person)", t:"dist", w:true, eq:["stretcher"], m:["grip","core","shoulders"]},
         {n:"Loaded ruck carry", t:"dist", w:true, eq:["ruck"], m:["grip","core"]},

@@ -188,7 +188,17 @@ function renderProfile(){
   if(p.weightLb>0 && l.benchLb) rows.push(`<div class="r-row"><span>Bench</span><b>${(l.benchLb/p.weightLb).toFixed(2)}× bodyweight</b></div>`);
   if(p.weightDate) rows.push(`<div class="r-row"><span>Weight measured</span><b>${fmtMeasDate(p.weightDate)}</b></div>`);
   if(p.heightDate) rows.push(`<div class="r-row"><span>Height measured</span><b>${fmtMeasDate(p.heightDate)}</b></div>`);
-  ro.innerHTML=rows.length?(rows.join("")+`<div style="margin-top:8px;color:var(--ink-faint);font-style:italic">Your bodyweight drives the Deadlift & Squat skills automatically.</div>`):`<div style="color:var(--ink-faint)">Fill in your profile above to see computed stats and power the strength skills.</div>`;
+  // AR 600-9 note: found by the v204-session FM audit as a real, unaddressed
+  // gap — BMI isn't how the Army actually screens height/weight/body
+  // composition. Deliberately informational only, no hard-coded screening-
+  // weight or body-fat % tables: those figures are age/gender-banded and
+  // get updated periodically, and getting a real compliance-adjacent number
+  // wrong (vs. a training-target number) carries real stakes. Confirmed
+  // this scope with Wyatt directly before writing it.
+  const ar6009Note = (p.heightIn>0 && p.weightLb>0)
+    ? `<div style="margin-top:8px;color:var(--ink-faint);font-style:italic">Heads up: the Army's actual height/weight/body-fat standard (AR 600-9) doesn't use BMI — it's a screening-weight table by height; only over that weight does a body-fat % tape test apply, against age/gender-banded standards. Those tables get updated periodically, so check the current AR 600-9 tables with your cadre rather than this BMI number for anything compliance-related.</div>`
+    : '';
+  ro.innerHTML=rows.length?(rows.join("")+`<div style="margin-top:8px;color:var(--ink-faint);font-style:italic">Your bodyweight drives the Deadlift & Squat skills automatically.</div>`+ar6009Note):`<div style="color:var(--ink-faint)">Fill in your profile above to see computed stats and power the strength skills.</div>`;
   // Weight log section
   const wlEl=document.getElementById("wlSection"); if(!wlEl) return;
   const wlLogs=(S.weightLog||[]).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));

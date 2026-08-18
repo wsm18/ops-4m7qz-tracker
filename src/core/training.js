@@ -359,6 +359,7 @@ const EX_HOWTO=[
   ["hanging knee raise","Hang from a bar and raise your knees toward your chest, then lower under control. Core."],
   ["back extension","Hinge over a back-extension bench or machine and raise your torso to a straight line, then lower. Loaded lower back."],
   ["farmer's carry","Hold a heavy dumbbell or kettlebell in each hand and walk a set distance, standing tall and braced. Grip, core, and carry strength."],
+  ["loaded backpack carry","Load a backpack or duffel bag with books or anything heavy you have, put it on (or carry it at your chest for a front-loaded carry), and walk a set distance standing tall and braced. The honest no-equipment version of the farmer's carry — same grip/core/loaded-locomotion demand the Sprint-Drag-Carry actually tests. Add weight or distance as it gets easy."],
   // --- ROTC-trailer carries/drags (confirmed equipment: full AFT kit, water jugs, weighted stretcher) ---
   ["water jug carry","Hold a filled water jug in each hand (or one held at your chest with both hands) and walk a set distance, standing tall and braced. Grip, core, and carry strength — same movement as the farmer's carry, trailer-equipment version."],
   ["stretcher carry","With a partner, grip the stretcher's handles at each end (add weight — sandbags, plates, or more water jugs — across it) and carry it a set distance, staying tall and in step with each other. Grip, core, and shoulders — mirrors a real casualty-carry load."],
