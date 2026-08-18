@@ -56,6 +56,34 @@ function mergeNewSeedSkills(){
     }
     S.lifeSkills=S.lifeSkills.filter(s=>s!==dupBal); changed=true;
   }
+  // De-duplicate live skills sharing the exact same name+cat — found in v210:
+  // several SEED_SKILLS entries independently reused the same display name
+  // (an accidental collision between unrelated content, or a higher-tier
+  // capstone reusing a lower tier's flagship name). skSeedOf()'s first-wins
+  // name+cat lookup always resolved both to the SAME (first) entry's guidance/
+  // ladder/rarity, but this loop below still pushes a live skill object for
+  // EVERY seed entry regardless — so affected saves ended up with confusing
+  // duplicate cards that always showed identical, and for one of them wrong,
+  // content. The seed-side fix is renaming the shadowed entry to a distinct
+  // name (see the v210 renames below/above in this file's history) — this is
+  // the live-save cleanup half of it. A shadowed duplicate could never have
+  // shown its own real content to level meaningfully, so any group of 2+ live
+  // skills sharing name+cat where at most one has ever been touched collapses
+  // to just that one (or the first, if neither was touched). If 2+ in a group
+  // show real progress, nothing is touched — no way to tell which is "real"
+  // without guessing, so leave both rather than risk losing a level.
+  {
+    const groups={};
+    S.lifeSkills.forEach(s=>{ const k=s.name+"|"+s.cat; (groups[k]=groups[k]||[]).push(s); });
+    Object.values(groups).forEach(group=>{
+      if(group.length<2) return;
+      const touched=group.filter(s=>(s.currentLevel||0)>0||(s.peakLevel||0)>0);
+      if(touched.length>1) return; // ambiguous — don't guess, leave all as-is
+      const keep=touched[0]||group[0];
+      const drop=new Set(group.filter(s=>s!==keep));
+      if(drop.size){ S.lifeSkills=S.lifeSkills.filter(s=>!drop.has(s)); changed=true; }
+    });
+  }
   const have=new Set(S.lifeSkills.map(s=>s.name));
   SEED_SKILLS.forEach(s=>{
     if(!have.has(s.name)){

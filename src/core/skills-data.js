@@ -11185,7 +11185,7 @@ const SEED_SKILLS=[
    advance:["Memorize using any mnemonic; write it 10 times from memory.","Practice with a written casualty scenario.","Practice verbal transmission with a partner.","Do a stress drill — sprint then transmit.","Help a peer learn all 9 lines.","Run a CASEVAC lane at your next FTX."],
    maintain:["Hold L1: recite 9 lines monthly.","Hold L2: do one written transmission drill per month.","Hold L3: do one verbal drill per month.","Hold L4: include in every FTX after-action review.","Hold L5: teach at least one Soldier per semester.","Hold L6: run a CASEVAC drill at least once per semester."]},
 
-  {name:"Personal finance", cat:"personal", fadeDays:180,
+  {name:"Military Pay & Allowances", cat:"personal", fadeDays:180,
    rarity:"uncommon", setKey:"pers_u_life_admin", synthesizedFrom:"pers_c_life_admin",
    tiers:[{label:"Basics",upTo:2},{label:"Building",upTo:4},{label:"Invested",upTo:7}],
    targets:{MS2:2, MS3:3, LDAC:3, MS4:4, commission:5, O1:6},
@@ -39408,7 +39408,7 @@ const SEED_SKILLS=[
    advance:["Reach L1: read and explain 5 CVEs.","Reach L2: reproduce a documented PoC in a lab.","Reach L3: diff and identify the exact vulnerable lines.","Reach L4: file a documented bug report.","Reach L5: independent assessment with disclosure report."],
    maintain:["Hold L1-L5: keep reading CVEs; keep practicing in labs."]},
 
-  {name:"Penetration testing methodology", cat:"technical", rarity:"uncommon",
+  {name:"Pentest Methodology Fundamentals", cat:"technical", rarity:"uncommon",
    setKey:"tech_u_advanced_cyber", synthesizedFrom:"tech_c_pentest_method", fadeDays:21,
    why:"Penetration testing is structured adversarial simulation — not random hacking. The methodology (scoping, reconnaissance, exploitation, post-exploitation, reporting) is what separates a professional assessment from a chaotic attack. Understanding the methodology is required to plan, execute, or evaluate a pentest.",
    howTo:"Start with a guided platform (TryHackMe, HackTheBox) that walks through the 5 phases on real lab targets. Once the phases are second nature, practice writing the supporting documents (scope, findings report) that make an assessment professional rather than ad hoc.",
@@ -39437,7 +39437,7 @@ const SEED_SKILLS=[
    advance:["Reach L1: define 5-year goal and 3 milestones.","Reach L2: personal development plan with quarterly benchmarks.","Reach L3: substantive career conversation with a senior.","Reach L4: record accurately reflects current abilities.","Reach L5: actively managed trajectory."],
    maintain:["Hold L1-L5: review and update the plan each quarter."]},
 
-  {name:"Legal literacy", cat:"personal", rarity:"uncommon",
+  {name:"Legal Systems Navigation", cat:"personal", rarity:"uncommon",
    setKey:"pers_u_life_admin", synthesizedFrom:"pers_c_legal_nav", fadeDays:60,
    why:"Officers sign contracts, buy property, execute wills, navigate employment law, and make binding commitments. Not knowing the legal implications of a decision is not a defense. Legal literacy is the ability to recognize when legal advice is needed and to understand the basic structure of the relevant law.",
    howTo:"Start with a document you've already signed — read every clause and look up anything unfamiliar. Then learn your rights in a few likely real-world situations (traffic stop, lease, employment) before attempting anything that needs a lawyer's input.",
@@ -39742,7 +39742,7 @@ const SEED_SKILLS=[
    howTo:"Synthesized from the DFIR Uncommon set.",
    levels:["Acquire a forensic image of a disk using write-blocking and verify hash integrity","Parse Windows event logs to identify a lateral movement event (logon type, source, destination)","Build a timeline of attacker activity from memory, logs, and disk artifacts","Identify persistence mechanisms (run keys, scheduled tasks, services) on a compromised host","Complete a DFIR challenge that requires timeline reconstruction from multiple evidence sources","Write an incident report that includes: initial vector, timeline, impact, and recommended remediation","Lead a DFIR investigation for a simulated intrusion: triage, contain, analyze, report","Conduct malware triage: sandbox execution, static analysis, behavioral indicators, YARA rule","Peak: you investigate incidents that others cannot scope — timeline, root cause, and impact are yours to deliver"]},
 
-  {name:"Threat Intelligence Analysis", cat:"technical", rarity:"rare", fadeDays:60,
+  {name:"Advanced Threat Intelligence Analysis", cat:"technical", rarity:"rare", fadeDays:60,
    setKey:"tech_r_advanced_cyber", synthesizedFrom:"tech_u_threat_intel2",
    unlockHint:"Master the Threat Intelligence Uncommons to unlock this card.",
    why:"Threat intelligence connects adversary behavior to defender priorities. An officer who can analyze TTPs, map them to MITRE ATT&CK, and produce finished intelligence products gives commanders the context to make decisions. Raw data is not intelligence; analyzed, attributed, and prioritized data is.",
@@ -42150,7 +42150,7 @@ const SEED_SKILLS=[
    howTo:"Synthesized from the Joint/Interagency Coordination Uncommon set.",
    levels:["Identify the other organizations (branch, agency, or civilian) relevant to a given event or exercise","Coordinate a shared requirement with a representative from another organization or branch","Translate your organization's terminology or intent for an audience from a different organization","Participate in a joint or interagency planning event, correctly representing your element's capabilities and constraints","Resolve a coordination gap between organizations (differing priorities, unclear authority) without escalating unnecessarily","Coordinate a joint or interagency event (exercise, ceremony, community engagement) from planning through execution","Build a working relationship with a counterpart in another organization that improves future coordination","Peak: you can coordinate effectively across organizational, branch, or agency lines without friction or lost intent"]},
   // ── Phase 7 (v146): Cyber Operator Mythic tree — Technical path ──────────
-  {name:"Cyber Operator", cat:"technical", rarity:"mythic", fadeDays:365,
+  {name:"Mythic Cyber Operator", cat:"technical", rarity:"mythic", fadeDays:365,
    setKey:"tech2_mythic", synthesizedFrom:"tech2_leg",
    unlockHint:"Forge all 5 tech2_leg Legendaries (Cyber Operations Mastery, Offensive Cyber Mastery, Defensive Cyber Operations, Cyber Intelligence, Mission Command Integration) to unlock this card.",
    why:"Cyber Operations Mastery, Offensive Cyber Mastery, Defensive Cyber Operations, Cyber Intelligence, and Mission Command Integration synthesize into a complete cyber operator: someone who can find and exploit weaknesses under authorization, defend a network against real threats, understand the threat landscape, and integrate cyber effects into a military operation — the full range of what an Army Cyber officer is expected to do.",
@@ -42227,7 +42227,7 @@ const SEED_SKILLS=[
    howTo:"Synthesized from the Network Defense Architecture Uncommon set.",
    levels:["Diagram a basic network topology and identify its trust boundaries","Design a network segmentation scheme separating at least 3 trust zones for a lab network","Identify the correct placement for monitoring/logging points in a network design","Design a defense-in-depth architecture incorporating at least 3 layered controls","Identify a segmentation weakness in an existing lab or reference network design","Build and configure a segmented lab network implementing your own design","Present a network defense architecture proposal with a clear risk-reduction justification","Peak: you can design a defensible network architecture from scratch that meaningfully limits lateral movement and blast radius"]},
 
-  {name:"SIEM & Log Management", cat:"technical", rarity:"rare", fadeDays:90,
+  {name:"Advanced SIEM & Log Analysis", cat:"technical", rarity:"rare", fadeDays:90,
    setKey:"tech2_r_defensive", synthesizedFrom:"tech2_u_def_siem",
    unlockHint:"Master the SIEM & Log Management Uncommons to unlock this card.",
    why:"Logs are the raw evidence of everything that happens on a network, but they're useless without a system to collect, correlate, and alert on them. SIEM and log management is the discipline of turning raw log noise into actionable detection.",
@@ -42346,7 +42346,7 @@ const SEED_SKILLS=[
    howTo:"Achieved automatically by synthesizing the 5 Advanced Learning Systems Rare cards.",
    levels:["All 5 Advanced Learning Systems Rares mastered","Learn a new skill from zero to a defined competency benchmark using a deliberate practice plan, with the timeline documented","Build and maintain a personal knowledge management system (notes, spaced repetition, or equivalent) used consistently for a full semester","Diagnose your own learning plateau on a specific skill and apply a targeted strategy to break through it","Teach a skill to someone else using a retention-focused method (active recall, spaced repetition, or teaching-back) and measure their retention after 2+ weeks","Compare 2 different learning strategies on 2 similar skills and document which was more efficient and why","Apply metacognitive monitoring (accurately predicting your own test performance before taking it) with less than 10% error","Build a structured curriculum or study plan for a complex subject and follow it to completion","Mentor another person in building their own personal learning system","Peak: you can learn any new skill efficiently by deliberately selecting and applying the right learning strategy for that skill — and you can teach that process to others"]},
 
-  {name:"Cognitive Resilience", cat:"cognitive", rarity:"legendary", fadeDays:180,
+  {name:"Legendary Cognitive Resilience", cat:"cognitive", rarity:"legendary", fadeDays:180,
    setKey:"cog2_leg", synthesizedFrom:"cog2_r_cog_resilience",
    unlockHint:"Master all 5 Cognitive Resilience Rares to forge this card.",
    why:"Stress inoculation, cognitive reappraisal, attention under threat, decision fatigue recovery, and adversity recovery patterns synthesize into the ability to keep thinking clearly when conditions are bad — sleep-deprived, threatened, overloaded, or freshly set back — rather than falling apart the moment training conditions end.",
@@ -42542,14 +42542,14 @@ const SEED_SKILLS=[
    howTo:"Synthesized from the Investment Fundamentals Uncommon set.",
    levels:["Open and fund a brokerage or investment account","Explain the difference between a stock, a bond, and an index fund in your own words","Build a diversified portfolio allocation appropriate to your age and risk tolerance","Set up an automatic recurring contribution to your investment account","Explain and calculate the effect of compounding on a real investment example using your own numbers","Rebalance a portfolio that has drifted from its target allocation","Avoid a common investing mistake (panic selling, chasing a trend) during a real market downturn","Peak: investing is automatic, diversified, and low-cost — a system running in the background that you understand well enough to explain to someone else"]},
 
-  {name:"Tax Strategy", cat:"personal", rarity:"rare", fadeDays:90,
+  {name:"Wealth-Building Tax Strategy", cat:"personal", rarity:"rare", fadeDays:90,
    setKey:"pers2_r_wealth", synthesizedFrom:"pers2_u_wealth_tax",
    unlockHint:"Master the Tax Strategy Uncommons to unlock this card.",
    why:"Military pay has unique tax features — non-taxable allowances, combat zone tax exclusions, state residency options — that most service members never learn to use, leaving money on the table every year.",
    howTo:"Synthesized from the Tax Strategy Uncommon set.",
    levels:["File your own taxes (or fully understand a filed return) for one tax year","Identify which parts of your military pay are taxable and which are not","Choose and document a legal state of residency decision with the tax implications understood","Use a tax-advantaged account (Roth TSP, Roth IRA, or HSA) deliberately based on your tax situation","Identify and claim a tax credit or deduction you were previously missing","Estimate your tax liability before filing season and confirm the estimate was accurate within a small margin","Explain your full tax strategy (accounts used, residency, filing status) to someone else considering the same decisions","Peak: your tax situation is optimized deliberately every year using the specific advantages available to your income and service status, not filed on autopilot"]},
 
-  {name:"Debt Management", cat:"personal", rarity:"rare", fadeDays:90,
+  {name:"Wealth-Building Debt Management", cat:"personal", rarity:"rare", fadeDays:90,
    setKey:"pers2_r_wealth", synthesizedFrom:"pers2_u_wealth_debt",
    unlockHint:"Master the Debt Management Uncommons to unlock this card.",
    why:"Not all debt is equal — a mortgage and a credit card balance are different tools with very different costs. Debt management is the skill of using debt deliberately where it makes sense and eliminating it aggressively where it doesn't.",
@@ -49288,7 +49288,7 @@ const SEED_SKILLS=[
    advance:["Reach L1: match a finding to a known CVE","Reach L2: get a shell with a public exploit","Reach L3: write exact repro steps","Reach L4: manually adapt an exploit","Reach L5: 3 footholds, 3 vuln classes"],
    maintain:["Hold L1: keep scanning for known CVEs","Hold L2: repeat on new lab boxes","Hold L3: keep documenting steps","Hold L4: keep practicing manual adaptation","Hold L5: rotate through vuln classes"]},
 
-  {name:"Privilege Escalation", cat:"technical", rarity:"uncommon",
+  {name:"Network Privilege Escalation", cat:"technical", rarity:"uncommon",
    setKey:"tech2_u_off_netpen", synthesizedFrom:"tech2_c_off_netpen_privesc", fadeDays:45,
    unlockHint:"This card feeds the Network Penetration Testing Rare.",
    why:"An initial foothold is usually low-privilege — escalating to administrator/root on a compromised lab host is what turns limited access into full control of the system, and is a distinct skill from gaining the foothold itself.",
