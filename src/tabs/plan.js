@@ -144,7 +144,17 @@ function dawnSessionHtml(){
     }
     // "circuit" mode falls through to the normal exercise-list rendering below.
   }
-  const workOnly=p.exercises.filter(e=>!e._phase||e._phase==="work"||e._phase==="balance");
+  let workOnly=p.exercises.filter(e=>!e._phase||e._phase==="work"||e._phase==="balance");
+  // "Pick-one" sessions (the run) offer several variants in SESSIONS, but only
+  // ONE is meant to be done today — Coach Today already resolves this via
+  // pickRunIndex(); this compact card used to just list all of them
+  // side-by-side with no indication only one was today's pick, contradicting
+  // the "you do one run today, not all of them" copy shown elsewhere.
+  if(sess.pickOne && typeof pickRunIndex==="function"){
+    const idx=pickRunIndex(p.now);
+    const picked=workOnly.find(e=>e._slotIdx===idx);
+    if(picked) workOnly=[picked];
+  }
   const warmupCount=p.exercises.filter(e=>e._phase==="warmup").length;
   const cooldownCount=p.exercises.filter(e=>e._phase==="cooldown"||e._phase==="flex").length;
   // Same computeTarget() call Coach Today/Session-N cards make — the compact

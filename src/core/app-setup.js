@@ -225,6 +225,16 @@ const _volSave=document.getElementById("volSave"); if(_volSave) _volSave.onclick
    Not supported on iPhone/iPad Safari — those fall back to export/import. */
 const FS_SUPPORTED = ("showSaveFilePicker" in window) && ("showOpenFilePicker" in window);
 let fileHandle=null, cloudDirty=false, _cloudT=null;
+// A generation counter, not just the `cloudDirty` boolean below — a write to
+// the cloud file routinely takes >1s (OneDrive/iCloud sync backends), and if
+// a NEW change came in while a flush was already in flight, the in-flight
+// flush's completion used to unconditionally clear cloudDirty — so the
+// already-scheduled next flush (its setTimeout still pending) would see
+// cloudDirty===false when it fired and silently skip, permanently dropping
+// that last change from the cloud copy. Comparing generations instead of a
+// boolean means a flush only "counts" if nothing newer has queued since it
+// started.
+let _cloudGen=0;
 
 // tiny IndexedDB to persist the file handle across sessions
 function idbOpen(){return new Promise((res,rej)=>{const r=indexedDB.open("ops_cloud",1);r.onupgradeneeded=()=>r.result.createObjectStore("h");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
@@ -240,17 +250,21 @@ async function verifyPerm(handle, write){
 }
 function cloudWriteDebounced(){
   if(!fileHandle) return;
-  cloudDirty=true; clearTimeout(_cloudT);
+  cloudDirty=true; _cloudGen++; clearTimeout(_cloudT);
   _cloudT=setTimeout(cloudFlush, 800);
 }
 async function cloudFlush(){
   if(!fileHandle||!cloudDirty) return;
+  const gen=_cloudGen; // snapshot — see _cloudGen's declaration for why
   try{
     if(!(await verifyPerm(fileHandle,true))){ setCloudStatus("permission needed — tap 'link cloud file' to re-grant", true); return; }
     const w=await fileHandle.createWritable();
     await w.write(JSON.stringify(S,null,2));
     await w.close();
-    cloudDirty=false; setCloudStatus(null);
+    if(gen===_cloudGen){ cloudDirty=false; }
+    // else: a newer change queued while this write was in flight — leave
+    // cloudDirty true so the already-scheduled next flush actually runs.
+    setCloudStatus(null);
   }catch(e){ setCloudStatus("couldn't write the cloud file — re-link or export", true); }
 }
 async function linkCloudFile(){
@@ -266,7 +280,22 @@ async function linkCloudFile(){
       // read it in and adopt that data
       if(await verifyPerm(handle,false)){
         const f=await handle.getFile(); const txt=await f.text();
-        if(txt.trim()){ try{ const data=JSON.parse(txt); if(data&&typeof data==="object"){ localStorage.setItem(KEY,JSON.stringify(data)); S=load(); seedSkillsIfEmpty(); } }catch(_){} }
+        if(txt.trim()){
+          // A genuinely empty file is fine (a new/blank OneDrive placeholder) —
+          // proceed to the initial write below, which fills it with the
+          // current local state. But a NON-empty file that fails to parse (a
+          // 0-byte-turned-partial sync, truncated mid-write) used to be
+          // silently swallowed here and then immediately overwritten by that
+          // same initial write a few lines down — destroying whatever real
+          // data was actually in the file, with no warning at all. Abort the
+          // link instead so the user can investigate/re-sync before anything
+          // gets overwritten.
+          let data;
+          try{ data=JSON.parse(txt); }
+          catch(_){ setCloudStatus("that file didn't parse as valid JSON — link aborted so nothing got overwritten. Check the file, then try again.", true); return; }
+          if(data&&typeof data==="object"&&!Array.isArray(data)){ localStorage.setItem(KEY,JSON.stringify(data)); S=load(); seedSkillsIfEmpty(); }
+          else { setCloudStatus("that file isn't a recognizable Operations save — link aborted so nothing got overwritten.", true); return; }
+        }
       }
     } else {
       handle=await window.showSaveFilePicker({suggestedName:"operations-data.json",types:[{description:"Operations data",accept:{"application/json":[".json"]}}]});
@@ -290,7 +319,12 @@ function setCloudStatus(msg,warn){
   if(foot){
     const synced=[];
     if(fileHandle) synced.push("your linked cloud file");
-    if(typeof _tocPresent!=="undefined"&&_tocPresent) synced.push("TOC");
+    // Gated on _tocDataConfirmed too, not just _tocPresent — TOC answering
+    // the health check doesn't mean writes are actually enabled (see
+    // _tocDataConfirmed's own comment); the footer used to claim "synced to
+    // TOC" for the whole session even when both data-fetch attempts timed
+    // out and tocWriteDebounced() was silently refusing every write.
+    if(typeof _tocPresent!=="undefined"&&_tocPresent&&typeof _tocDataConfirmed!=="undefined"&&_tocDataConfirmed) synced.push("TOC");
     foot.textContent = synced.length ? "OPERATIONS · synced to "+synced.join(" & ") : "OPERATIONS · all data lives only on this device";
     foot.className = synced.length?"linked":"";
   }
@@ -305,7 +339,10 @@ async function cloudInit(){
       fileHandle=h;
       if(await verifyPerm(h,false)){
         const f=await h.getFile(); const txt=await f.text();
-        if(txt.trim()){ try{ const data=JSON.parse(txt); if(data&&typeof data==="object"){ localStorage.setItem(KEY,JSON.stringify(data)); S=load(); seedSkillsIfEmpty(); render(); } }catch(_){} }
+        // `typeof x==="object"` alone also accepts an array — silently adopts
+        // as a save whose every top-level key becomes a numeric index,
+        // effectively a factory reset with no warning. Require a real object.
+        if(txt.trim()){ try{ const data=JSON.parse(txt); if(data&&typeof data==="object"&&!Array.isArray(data)){ localStorage.setItem(KEY,JSON.stringify(data)); S=load(); seedSkillsIfEmpty(); render(); } }catch(_){} }
       }
     }
   }catch(e){}
@@ -344,18 +381,20 @@ let _tocPresent=false, _tocDirty=false, _tocT=null;
 // ambiguous outcome (timeout/network error) now leaves writes disabled for
 // the session instead of risking a clobber.
 let _tocDataConfirmed=false;
+let _tocGen=0; // same generation-counter fix as cloudFlush() above — see _cloudGen's comment
 function tocWriteDebounced(){
   if(!_tocPresent||!_tocDataConfirmed) return;
-  _tocDirty=true; clearTimeout(_tocT);
+  _tocDirty=true; _tocGen++; clearTimeout(_tocT);
   _tocT=setTimeout(tocFlush, 800);
 }
 async function tocFlush(){
   if(!_tocPresent||!_tocDataConfirmed||!_tocDirty) return;
+  const gen=_tocGen;
   try{
     const r=await fetch(`${TOC_BASE}/api/projects/${TOC_PROJECT}/data`,{
       method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(S)
     });
-    if(r.ok) _tocDirty=false;
+    if(r.ok && gen===_tocGen) _tocDirty=false;
   }catch(e){ /* TOC likely closed mid-session — next save retries */ }
 }
 // One fetch attempt for TOC's stored project data, with a given timeout —
@@ -385,7 +424,7 @@ async function tocInit(){
       const r=await tocFetchData(timeoutMs);
       if(r.ok){
         const body=await r.json();
-        if(body.ok&&body.data&&typeof body.data==="object"){
+        if(body.ok&&body.data&&typeof body.data==="object"&&!Array.isArray(body.data)){
           localStorage.setItem(KEY,JSON.stringify(body.data)); S=load(); seedSkillsIfEmpty(); render();
         }
         // A real, well-formed response either way (with or without data) is

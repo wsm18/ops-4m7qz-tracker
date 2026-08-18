@@ -72,14 +72,25 @@ function cgFindRxRow(rows, name){
 // count out of whichever tier it resolves to, not the full target string.
 function cgSlotVolume(skey, exName, rich){
   const tgt=typeof computeTarget==="function"?computeTarget(exName,{skey,rich}):null;
+  // Tier "aft-anchor" never returns a real per-set rep prescription — its
+  // target string is either a plain reference weight with no rep count at
+  // all ("log your first working set (last AFT max: 340 lb)") or a whole
+  // 2-minute-test total ("45 reps" from AFT push-ups, not a per-set number).
+  // The leading-number parse below used to grab whatever digits it found
+  // regardless — for the weight case that's the AFT MAX itself misread as a
+  // rep count (threshold up to 1,020 reps for one deadlift group), for the
+  // reps case it's a whole-test count misread as a per-set number (×3 sets).
+  // Treat this tier as "no usable data" and fall through to the same safe
+  // default every other no-data case already uses.
+  const usable=tgt && tgt.tier!=="aft-anchor";
   // Tier "starter" carries a structured reps field (use it directly); other
-  // tiers only have the target string, but it's always reps-first by
+  // usable tiers only have the target string, but it's always reps-first by
   // convention ("14 reps", "3 reps × 15 lb"), so the leading-number parse
   // still gets the right number for them.
-  let repsPerSet=tgt&&tgt.reps!=null?cgParseLeadingInt(String(tgt.reps),null):(tgt?cgParseLeadingInt(tgt.target, null):null);
-  const setsTarget=(tgt&&tgt.sets)?cgParseLeadingInt(String(tgt.sets),3):3;
+  let repsPerSet=usable&&tgt.reps!=null?cgParseLeadingInt(String(tgt.reps),null):(usable?cgParseLeadingInt(tgt.target, null):null);
+  const setsTarget=(usable&&tgt.sets)?cgParseLeadingInt(String(tgt.sets),3):3;
   if(repsPerSet==null) repsPerSet=10;
-  return {repsPerSet, setsTarget, threshold:repsPerSet*setsTarget, source:(tgt&&tgt.tier)||"default"};
+  return {repsPerSet, setsTarget, threshold:repsPerSet*setsTarget, source:(usable&&tgt.tier)||"default"};
 }
 // Is there a card-game-eligible session today at all? (at least one
 // reps-type work-phase slot, using the normal daily equipment resolution —

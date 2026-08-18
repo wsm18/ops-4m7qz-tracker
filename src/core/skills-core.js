@@ -145,16 +145,47 @@ function skHydrateAll(list){
   (list||[]).forEach(sk=>{ if(skHydrate(sk)) strippedAny=true; });
   return strippedAny;
 }
-// All SEED_SKILLS belonging to a set (by setKey), excluding group entries
+// All SEED_SKILLS belonging to a set (by setKey), excluding group entries.
+// Memoized: SEED_SKILLS never changes at runtime (same premise as
+// skSeedIndex()/skPyramidTrees() above), but this used to re-filter the full
+// ~12,500-entry array on every call — and it's called once per Uncommon/Rare/
+// Legendary node across the whole pyramid, every render. Confirmed by the
+// v212-session audit as a multi-second-per-render cost at full skill scale.
+let _skSetMembersCache=null;
 function skSetMembers(setKey){
   if(!setKey||typeof SEED_SKILLS==="undefined") return [];
-  return SEED_SKILLS.filter(s=>s.setKey===setKey&&!s.group);
+  if(!_skSetMembersCache){
+    _skSetMembersCache=new Map();
+    SEED_SKILLS.forEach(s=>{ if(s.setKey&&!s.group){ if(!_skSetMembersCache.has(s.setKey)) _skSetMembersCache.set(s.setKey,[]); _skSetMembersCache.get(s.setKey).push(s); } });
+  }
+  return _skSetMembersCache.get(setKey)||[];
 }
+// Live skill lookup by name+cat, indexed once and reused for the rest of the
+// current render pass — skInvalidateLiveIndex() (called at the top of
+// render(), state.js) forces a fresh rebuild next time it's needed. Skill
+// objects are mutated in place (level-ups don't replace them), so a cached
+// entry always reflects the current level even between rebuilds; only a
+// change to WHICH skills exist (a push/filter on S.lifeSkills) needs a
+// rebuild, which a per-render invalidation always catches. Replaces what
+// used to be an O(n) Array.find() per member per set — with ~2,500 sets and
+// ~12,500 skills, that alone was the majority of the multi-second-per-render
+// cost the v212-session audit measured in skReadyToCombine()/
+// catPyramidCompletion().
+let _skLiveIdx=null;
+function skLiveIndex(){
+  if(!_skLiveIdx){
+    _skLiveIdx=new Map();
+    (S.lifeSkills||[]).forEach(s=>{ _skLiveIdx.set(s.name+"|"+s.cat, s); });
+  }
+  return _skLiveIdx;
+}
+function skInvalidateLiveIndex(){ _skLiveIdx=null; }
 // How many of a set are fully mastered (currentLevel >= levels.length) in S.lifeSkills
 function skSetMasteredCount(setKey){
   const members=skSetMembers(setKey);
+  const idx=skLiveIndex();
   return members.filter(m=>{
-    const live=(S.lifeSkills||[]).find(s=>s.name===m.name&&s.cat===m.cat);
+    const live=idx.get(m.name+"|"+m.cat);
     return live&&(live.levels||[]).length>0&&live.currentLevel>=(live.levels||[]).length;
   }).length;
 }
@@ -167,9 +198,9 @@ function skSetCanCombine(setKey){
 function skCombineSet(setKey){
   if(!skSetCanCombine(setKey)) return false;
   const synthSeed=(typeof SEED_SKILLS!=="undefined"?SEED_SKILLS:[]).find(s=>s.synthesizedFrom===setKey);
-  if(!synthSeed) return false;
-  const live=(S.lifeSkills||[]).find(s=>s.name===synthSeed.name&&s.cat===synthSeed.cat);
-  if(!live) return false;
+  if(!synthSeed){ toast("⚠️ Couldn't find what this set combines into — nothing to do."); return false; }
+  const live=skLiveIndex().get(synthSeed.name+"|"+synthSeed.cat);
+  if(!live){ toast("⚠️ The skill this combines into is missing from your tree — reload the app and try again."); return false; }
   live.synthesisUnlocked=true;
   save(); render();
   toast(`⚡ Synthesis complete — <b>${esc(synthSeed.name)}</b> is now active!`);
@@ -181,12 +212,20 @@ function skCombineSet(setKey){
 function skReadyToCombine(){
   if(typeof SEED_SKILLS==="undefined") return [];
   const seen=new Set(), ready=[];
+  const idx=skLiveIndex();
   SEED_SKILLS.forEach(seed=>{
     if(!seed.synthesizedFrom||seen.has(seed.synthesizedFrom)) return;
     seen.add(seed.synthesizedFrom);
     if(!skSetCanCombine(seed.synthesizedFrom)) return;
-    const live=(S.lifeSkills||[]).find(s=>s.name===seed.name&&s.cat===seed.cat);
-    if(live&&(live.synthesisUnlocked||live.currentLevel>0)) return; // already combined/started
+    const live=idx.get(seed.name+"|"+seed.cat);
+    // Missing live entry used to be treated as "ready" (never combined) even
+    // when it was really just deleted after being started/combined — silently
+    // resurfacing a dead Combine button. Migration always keeps every seed's
+    // live skill present (see mergeNewSeedSkills' name+cat keying), so a
+    // truly missing entry here means the skill was deleted mid-session; treat
+    // that the same as "already handled" rather than re-offering a broken
+    // Combine action for it.
+    if(!live || live.synthesisUnlocked || live.currentLevel>0) return;
     ready.push(seed);
   });
   return ready;
@@ -227,9 +266,9 @@ function catPyramidCompletion(cat){
   if(typeof SEED_SKILLS==="undefined") return 0;
   const pyramidSeeds=SEED_SKILLS.filter(s=>s.cat===cat&&!s.group&&(s.setKey||s.synthesizedFrom));
   if(!pyramidSeeds.length) return 0;
-  const getLive=(name)=>(S.lifeSkills||[]).find(s=>s.name===name&&s.cat===cat);
+  const idx=skLiveIndex();
   const maxedCount=pyramidSeeds.filter(s=>{
-    const live=getLive(s.name);
+    const live=idx.get(s.name+"|"+s.cat);
     return live&&live.levels&&live.currentLevel>=live.levels.length;
   }).length;
   return maxedCount/pyramidSeeds.length;
@@ -278,7 +317,14 @@ function skHasSynergy(sk){
 
 function skEffectiveLevel(sk){
   if(sk.currentLevel<=0) return 0;
-  const elapsed=Date.now()-(sk.lastQuestTs||Date.now());
+  // Clamped at 0 — a lastQuestTs in the future (a device-clock error, or a
+  // cloud/TOC restore of a save written on a device with a fast clock) would
+  // otherwise make `elapsed` negative, and Math.floor of a negative ratio
+  // rounds toward -Infinity, so `intervals` goes negative and gets ADDED to
+  // currentLevel instead of subtracted — producing an effective level ABOVE
+  // the real ladder length. skReachLevel()'s no-op guard (`level<=eff`) then
+  // blocks every rung tap until real time catches up to the bad timestamp.
+  const elapsed=Math.max(0, Date.now()-(sk.lastQuestTs||Date.now()));
   const fd=sk.fadeDays||30;
   // 20% grace buffer: a skill doesn't drop the instant fadeDays elapses
   const grace=fd*0.2;
@@ -289,7 +335,7 @@ function skEffectiveLevel(sk){
 // "current" = within fadeDays, "at-risk" = in grace period (fadeDays to fadeDays+grace), "decayed" = dropped
 function skFadeState(sk){
   if(sk.currentLevel<=0) return "current";
-  const elapsed=Date.now()-(sk.lastQuestTs||Date.now());
+  const elapsed=Math.max(0, Date.now()-(sk.lastQuestTs||Date.now())); // see skEffectiveLevel()
   const fd=sk.fadeDays||30;
   const grace=fd*0.2;
   if(elapsed<fd*864e5) return "current";
@@ -306,9 +352,16 @@ function skDaysLeft(sk){
   if(sk.currentLevel<=0) return null;
   const fd=sk.fadeDays||30;
   const grace=fd*0.2;
-  // returns days until the skill actually drops (after the grace buffer)
+  // returns days until the skill actually drops (after the grace buffer),
+  // floored at 0 — a skill that's been stale for years otherwise returns a
+  // large negative number, which every "days left" display/sort site treats
+  // inconsistently (some guard days<=0 as 'overdue', some don't and just
+  // print the raw negative, e.g. "Fades in -1064 days"), and ascending sorts
+  // by this value (Decaying-soon column, Weekly Queue) ranked the MOST
+  // abandoned skills as the safest, monopolizing the "at risk" slots with
+  // exactly the skills that least need surfacing there.
   const next=(sk.lastQuestTs||Date.now())+(fd+grace)*864e5;
-  return Math.ceil((next-Date.now())/864e5);
+  return Math.max(0, Math.ceil((next-Date.now())/864e5));
 }
 // ===== X-SmartFocus: whole-tree leverage recommender (idea B) =====
 // Surfaces the single highest-leverage already-started skill to re-engage

@@ -1,4 +1,4 @@
-const SKILL_LADDER_VER=119;
+const SKILL_LADDER_VER=120;
 const PYRAMID_RESET_VER=1;
 // Returns the user's current ROTC/Army career stage based on S.rank.
 function careerStage(){
@@ -84,9 +84,18 @@ function mergeNewSeedSkills(){
       if(drop.size){ S.lifeSkills=S.lifeSkills.filter(s=>!drop.has(s)); changed=true; }
     });
   }
-  const have=new Set(S.lifeSkills.map(s=>s.name));
+  // Keyed by name+cat, not name alone — 21 SEED_SKILLS entries share a name
+  // across two different categories (e.g. "Movement Quality" exists in both
+  // physical and physiological with different ladder lengths). A name-only
+  // key here meant the wrong entry's live skill could get clamped to the
+  // wrong category's max level, and a seed in the second category could be
+  // treated as "already have it" and never get created at all — silently
+  // capping progress and permanently blocking every synthesis set those
+  // seeds belonged to. Found by the v212-session full-project audit.
+  const have=new Set(S.lifeSkills.map(s=>s.name+"|"+s.cat));
   SEED_SKILLS.forEach(s=>{
-    if(!have.has(s.name)){
+    const key=s.name+"|"+s.cat;
+    if(!have.has(key)){
       // Guidance text and the level ladder are resolved live from SEED_SKILLS via
       // skHydrateAll() below — not copied here, so they're never persisted.
       S.lifeSkills.push({
@@ -102,7 +111,7 @@ function mergeNewSeedSkills(){
       // to resync. Only reconcile things that depend on the user's own progress numbers:
       // clamp currentLevel/peakLevel if the seed's ladder length changed, and backfill a
       // target level the user never set.
-      const ex=S.lifeSkills.find(x=>x.name===s.name);
+      const ex=S.lifeSkills.find(x=>x.name===s.name && x.cat===s.cat);
       if(ex){
         // Backfill the seeded flag on a skill that predates it — skHydrate()
         // (skills-core.js) only ever hydrates live guidance/ladder text for
@@ -137,24 +146,42 @@ function mergeNewSeedSkills(){
   });
   // Reconcile parent/branch assignments to the current seed (so existing saves get the new
   // sub-path branching). Only touches skills whose seed defines a parent; preserves user skills.
-  const seedByName={}; SEED_SKILLS.forEach(s=>{ seedByName[s.name]=s; });
+  const seedByKey={}; SEED_SKILLS.forEach(s=>{ seedByKey[s.name+"|"+s.cat]=s; });
   S.lifeSkills.forEach(ex=>{
-    const seed=seedByName[ex.name];
+    const seed=seedByKey[ex.name+"|"+ex.cat];
     if(seed && seed.parent && ex.parent!==seed.parent){ ex.parent=seed.parent; changed=true; }
   });
-  // Pyramid reset — wipe progress on skills newly assigned to the pyramid (user-authorized)
-  const seedByName2={}; SEED_SKILLS.forEach(s=>{ seedByName2[s.name]=s; });
-  S.lifeSkills.forEach(live=>{
-    const seed=seedByName2[live.name];
-    if(seed && seed.setKey && !live.pyramidResetApplied){
-      live.currentLevel=0;
-      live.history=[];
-      live.lastQuestTs=null;
-      delete live.synthesisUnlocked;
-      live.pyramidResetApplied=PYRAMID_RESET_VER;
-      changed=true;
-    }
-  });
+  // Pyramid reset — wipe progress on skills newly assigned to the pyramid
+  // (user-authorized, one-time historical migration). Originally tracked
+  // with a per-skill `pyramidResetApplied` boolean, which (a) used a
+  // name-only seed lookup — same cross-category bug as above, so on the
+  // 21 duplicate-name pairs it could stamp the flag on the WRONG category's
+  // live skill, leaving the real target still unreset or double-reset later
+  // — and (b) permanently bloats every save by ~300KB (one boolean field on
+  // ~12,500 skills) for a migration that, once complete, never needs to run
+  // again. Collapsed to a single save-level version flag: once every live
+  // pyramid-tagged skill has been swept, record it once on S and drop the
+  // now-redundant per-skill flags. (This also makes PYRAMID_RESET_VER an
+  // actually-live comparison again — bumping it re-triggers a fresh sweep
+  // for any newly pyramid-tagged skill added in a future content update,
+  // which the old per-skill-only design could never do — see the
+  // v212-session audit's "PYRAMID_RESET_VER is dead" finding.)
+  if((S._pyramidResetVer||0)!==PYRAMID_RESET_VER){
+    S.lifeSkills.forEach(live=>{
+      const seed=seedByKey[live.name+"|"+live.cat];
+      if(seed && seed.setKey && !live.pyramidResetApplied){
+        live.currentLevel=0;
+        live.history=[];
+        live.lastQuestTs=null;
+        delete live.synthesisUnlocked;
+        live.pyramidResetApplied=true;
+        changed=true;
+      }
+    });
+    S.lifeSkills.forEach(live=>{ if(live.pyramidResetApplied!==undefined){ delete live.pyramidResetApplied; changed=true; } });
+    S._pyramidResetVer=PYRAMID_RESET_VER;
+    changed=true;
+  }
   // Strip any legacy duplicated guidance/ladder text still sitting on old saves (from
   // before static content moved to live SEED_SKILLS lookups) and attach live getters in
   // its place. This is what actually shrinks an existing user's save — force a save()

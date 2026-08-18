@@ -343,7 +343,7 @@ function _mockAftCurrentEvent(){
 function _mockAftCaptureInput(){
   const ev=_mockAftCurrentEvent(); if(!ev) return;
   const inp=document.getElementById("mockAftValueInput"); if(!inp) return;
-  const raw = ev.valueType==="time" ? parseTime(inp.value) : (parseInt(inp.value)||null);
+  const raw = ev.valueType==="time" ? parseTime(inp.value) : intOrNull(inp.value);
   _mockAft.results[ev.k]=raw;
 }
 function mockAftNext(){
@@ -427,9 +427,20 @@ function renderMockAftStep(){
 
 const _mockAftCloseBtn=document.getElementById("mockAftClose"); if(_mockAftCloseBtn) _mockAftCloseBtn.onclick=closeMockAft;
 
+// parseInt(x)||null treats a genuine "0" the same as an empty/unparseable
+// field — a cadet who really did 0 hand-release push-ups (injury, profile, a
+// bad day) had that real, failing score silently discarded as "not
+// attempted" instead of recorded and flagged. Only an empty/whitespace field
+// means "not attempted"; "0" is a real answer.
+function intOrNull(str){
+  const t=String(str==null?"":str).trim();
+  if(t==="") return null;
+  const n=parseInt(t);
+  return isNaN(n)?null:n;
+}
 document.getElementById("aftSave").onclick=()=>{
-  const dl=parseInt(document.getElementById("aDl").value)||null;
-  const hrp=parseInt(document.getElementById("aHrp").value)||null;
+  const dl=intOrNull(document.getElementById("aDl").value);
+  const hrp=intOrNull(document.getElementById("aHrp").value);
   const sdc=parseTime(document.getElementById("aSdc").value);
   const plank=parseTime(document.getElementById("aPlank").value);
   const run=parseTime(document.getElementById("aRun").value);

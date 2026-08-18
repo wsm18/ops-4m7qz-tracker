@@ -50,7 +50,7 @@ function renderWeight(){
   // keystone
   const ks=wKeystone();
   const ksEl=document.getElementById("weightKeystone");
-  if(ks){ ksEl.innerHTML=`<div class="ks-card"><div class="ks-tag">${discLabel(ks)} · Keystone · ${ks.status}</div><div class="ks-vow">"${esc(ks.text)}"</div></div>`; }
+  if(ks){ ksEl.innerHTML=`<div class="ks-card"><div class="ks-tag">${discLabel(ks)} · Keystone · ${esc(ks.status)}</div><div class="ks-vow">"${esc(ks.text)}"</div></div>`; }
   else if(proms.length){ ksEl.innerHTML=`<div class="ks-card"><div class="ks-tag">Keystone · not in this ledger</div><div class="ks-vow" style="color:var(--ink-faint)">No keystone (M-001) found in the imported ledger.</div></div>`; }
   else { ksEl.innerHTML=`<div class="ks-card"><div class="ks-tag">The Keystone</div><div class="ks-vow">"I will do what I believe is right, and bear the cost of it."</div></div>`; }
   // jars (read-only — no data-wjar binding hooks)
@@ -72,7 +72,7 @@ function renderWeight(){
       return `<div class="wl-entry ${isKeystoneP(p)?'keystone':''}">
         <span class="wl-disc">${discLabel(p)}</span>
         <div class="wl-body"><div class="wl-text">${esc(p.text||"")}</div><div class="wl-meta">${p.who==='self'?'to self':'to another'}${p.name?' · '+esc(p.name):''} · ${esc(p.tier||'')}${when?' · '+when:''}</div></div>
-        <span class="wl-status ${p.status}">${p.status==='broken'?'dead':p.status}</span>
+        <span class="wl-status ${esc(p.status)}">${esc(p.status==='broken'?'dead':p.status)}</span>
       </div>`;
     }).join("");
   } else {
@@ -114,7 +114,7 @@ function importWeightLedger(obj){
     promises: obj.promises.map(p=>({
       id:p.id||id(), disc:p.disc, favor:!!p.favor, text:p.text||"", who:p.who||"self",
       name:p.name||"", tier:p.tier||"ordinary", keyword:p.keyword||"",
-      status:p.status||"open", verify:p.verify||null, stamped:!!p.stamped,
+      status:["open","standing","kept","broken"].includes(p.status)?p.status:"open", verify:p.verify||null, stamped:!!p.stamped,
       date_made:p.date_made||null, date_closed:p.date_closed||null, reason:p.reason||""
     })),
     memorial: Array.isArray(obj.memorial)? obj.memorial.map(m=>({name:m.name||"",date_gone:m.date_gone||"",note:m.note||""})) : []

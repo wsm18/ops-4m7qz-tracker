@@ -20,7 +20,7 @@ function renderAwards(){
       og.items.push(a);
     });
     const card=a=>{
-      const meta=[a.year?String(a.year):null, a.org?("from "+esc(a.org)):null].filter(Boolean).join(" · ");
+      const meta=[a.year?esc(String(a.year)):null, a.org?("from "+esc(a.org)):null].filter(Boolean).join(" · ");
       return `<div class="aw-card"><button class="aw-del" data-daw="${a.id}">✕</button><button class="aw-edit" data-awedit="${a.id}">✎</button><div class="aw-ic">${AW_IC[a.kind]||"🏆"}</div><div class="aw-title">${esc(a.title)}</div>${meta?`<div class="aw-meta">${meta}</div>`:""}${a.note?`<div class="aw-note">${esc(a.note)}</div>`:""}<div class="aw-date">added ${esc(a.date||"")}</div></div>`;
     };
     el.innerHTML=years.map(yg=>`<div class="wall-year-hd">${yg.yr}</div>`+
@@ -61,7 +61,7 @@ function renderEvents(){
   if(!S.events.length){ el.innerHTML=`<div class="aw-empty"><span class="big">📅</span>No events yet. Add competitions, ceremonies, or activities you took part in.</div>`; return; }
   const sorted=S.events.slice().sort((a,b)=>(b.year||0)-(a.year||0));
   el.innerHTML=sorted.map(ev=>{
-    const meta=[ev.year?String(ev.year):null, ev.org?esc(ev.org):null].filter(Boolean).join(" · ");
+    const meta=[ev.year?esc(String(ev.year)):null, ev.org?esc(ev.org):null].filter(Boolean).join(" · ");
     return `<div class="ev-card"><button class="ev-del" data-evdel="${ev.id}">✕</button><button class="ev-edit" data-evedit="${ev.id}">✎</button>
       <div class="ev-title">${esc(ev.title)}</div>
       ${meta?`<div class="ev-meta">${meta}</div>`:""}
@@ -100,7 +100,7 @@ function renderAcademicHonors(){
   if(!ah.length){el.innerHTML=`<div class="aw-empty"><span class="big">📚</span>No academic honors yet. Add Dean's List, scholarships, honor societies, or other academic recognitions above.</div>`;return;}
   const sorted=ah.slice().sort((a,b)=>(b.year||0)-(a.year||0));
   el.innerHTML=sorted.map(a=>{
-    const meta=[a.year?String(a.year):null, a.org?esc(a.org):null].filter(Boolean).join(" · ");
+    const meta=[a.year?esc(String(a.year)):null, a.org?esc(a.org):null].filter(Boolean).join(" · ");
     return `<div class="aw-card"><button class="aw-del" data-daoh="${a.id}">✕</button><button class="aw-edit" data-ahedit="${a.id}">✎</button><div class="aw-ic">📚</div><div class="aw-title">${esc(a.title)}</div>${meta?`<div class="aw-meta">${meta}</div>`:""}${a.note?`<div class="aw-note">${esc(a.note)}</div>`:""}<div class="aw-date">added ${esc(a.date||"")}</div></div>`;
   }).join("");
 }
@@ -142,9 +142,9 @@ function ahEdit(ahId){
 function renderRotcRecord(){
   const rr=S.rotcRecord||{positions:[],competitions:[],campResults:[]};
   const posEl=document.getElementById("rpList"), compEl=document.getElementById("rcList"), campEl=document.getElementById("campList");
-  if(posEl) posEl.innerHTML=(rr.positions||[]).length?rr.positions.slice().sort((a,b)=>(b.startSem||"")>(a.startSem||"")?1:-1).map(p=>`<div class="rotc-item"><button class="aw-del" data-drotcpos="${p.id}">✕</button><button class="aw-edit" data-rpedit="${p.id}">✎</button><div class="rotc-title">${esc(p.title)}</div><div class="rotc-meta">${p.startSem||""}${p.endSem?("–"+p.endSem):""}</div>${p.note?`<div class="aw-note">${esc(p.note)}</div>`:""}</div>`).join(""):`<div class="aw-empty" style="padding:10px">No positions yet.</div>`;
-  if(compEl) compEl.innerHTML=(rr.competitions||[]).length?rr.competitions.slice().sort((a,b)=>(b.year||0)-(a.year||0)).map(c=>`<div class="rotc-item"><button class="aw-del" data-drotccomp="${c.id}">✕</button><button class="aw-edit" data-rcedit="${c.id}">✎</button><div class="rotc-title">${esc(c.name)}</div><div class="rotc-meta">${c.year||""}${c.placement?" · "+esc(c.placement):""}</div>${c.note?`<div class="aw-note">${esc(c.note)}</div>`:""}</div>`).join(""):`<div class="aw-empty" style="padding:10px">No competitions yet.</div>`;
-  if(campEl) campEl.innerHTML=(rr.campResults||[]).length?rr.campResults.slice().sort((a,b)=>(b.year||0)-(a.year||0)).map(c=>`<div class="rotc-item"><button class="aw-del" data-drotccamp="${c.id}">✕</button><button class="aw-edit" data-campedit="${c.id}">✎</button><div class="rotc-title">${esc(c.camp)}</div><div class="rotc-meta">${c.year||""}${c.rating?" · "+esc(c.rating):""}</div>${c.note?`<div class="aw-note">${esc(c.note)}</div>`:""}</div>`).join(""):`<div class="aw-empty" style="padding:10px">No camp results yet.</div>`;
+  if(posEl) posEl.innerHTML=(rr.positions||[]).length?rr.positions.slice().sort((a,b)=>termSortKey(b.startSem)-termSortKey(a.startSem)).map(p=>`<div class="rotc-item"><button class="aw-del" data-drotcpos="${p.id}">✕</button><button class="aw-edit" data-rpedit="${p.id}">✎</button><div class="rotc-title">${esc(p.title)}</div><div class="rotc-meta">${esc(p.startSem||"")}${p.endSem?("–"+esc(p.endSem)):""}</div>${p.note?`<div class="aw-note">${esc(p.note)}</div>`:""}</div>`).join(""):`<div class="aw-empty" style="padding:10px">No positions yet.</div>`;
+  if(compEl) compEl.innerHTML=(rr.competitions||[]).length?rr.competitions.slice().sort((a,b)=>(b.year||0)-(a.year||0)).map(c=>`<div class="rotc-item"><button class="aw-del" data-drotccomp="${c.id}">✕</button><button class="aw-edit" data-rcedit="${c.id}">✎</button><div class="rotc-title">${esc(c.name)}</div><div class="rotc-meta">${esc(c.year||"")}${c.placement?" · "+esc(c.placement):""}</div>${c.note?`<div class="aw-note">${esc(c.note)}</div>`:""}</div>`).join(""):`<div class="aw-empty" style="padding:10px">No competitions yet.</div>`;
+  if(campEl) campEl.innerHTML=(rr.campResults||[]).length?rr.campResults.slice().sort((a,b)=>(b.year||0)-(a.year||0)).map(c=>`<div class="rotc-item"><button class="aw-del" data-drotccamp="${c.id}">✕</button><button class="aw-edit" data-campedit="${c.id}">✎</button><div class="rotc-title">${esc(c.camp)}</div><div class="rotc-meta">${esc(c.year||"")}${c.rating?" · "+esc(c.rating):""}</div>${c.note?`<div class="aw-note">${esc(c.note)}</div>`:""}</div>`).join(""):`<div class="aw-empty" style="padding:10px">No camp results yet.</div>`;
 }
 let _rpEditId=null,_rcEditId=null,_campEditId=null;
 function rpEdit(pId){

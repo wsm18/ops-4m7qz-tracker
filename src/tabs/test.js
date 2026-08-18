@@ -53,7 +53,13 @@ const TESTS=[
   {id:"nback", name:"N-back (working memory)", skill:"Working memory (n-back)", unit:"highest n passed", dur:"~1 min per round",
    scoreToLevel:n=> n>=5?8: n>=4?6: n>=3?4: n>=2?2: n>=1?1: 0},
   {id:"gonogo", name:"Go / No-Go (attention)", skill:"Attention / sustained focus", unit:"accuracy %", dur:"~45 sec · 25 signals",
-   scoreToLevel:acc=> acc>=100?10: acc>=99?9: acc>=98?8: acc>=97?7: acc>=96?6: acc>=94?5: acc>=92?4: acc>=90?3: acc>=85?2: acc>=70?1: 0},
+   // 25 trials means every achievable accuracy is a multiple of 4% (0,4,8,…,96,100)
+   // — the old thresholds (99,98,97,94,92,90,85 — not multiples of 4) meant
+   // levels 3,5,7,8,9 could never be reached by any real score, no matter how
+   // well the player did. Rebuilt using only the 11 accuracies 25 trials can
+   // actually produce, one real correct-answer improvement per level:
+   // 15,17,18,19,20,21,22,23,24,25 correct.
+   scoreToLevel:acc=> acc>=100?10: acc>=96?9: acc>=92?8: acc>=88?7: acc>=84?6: acc>=80?5: acc>=76?4: acc>=72?3: acc>=68?2: acc>=60?1: 0},
   {id:"procspeed", name:"Processing speed", skill:"Cognitive / processing speed", unit:"matches/min", dur:"60 sec",
    scoreToLevel:mpm=> mpm>=80?10: mpm>=70?9: mpm>=60?8: mpm>=52?7: mpm>=45?6: mpm>=38?5: mpm>=30?4: mpm>=22?3: mpm>=15?2: mpm>=1?1: 0},
   {id:"mathsprint", name:"Mental math sprint", skill:"Mental math", unit:"correct/min", dur:"60 sec",
@@ -427,7 +433,7 @@ function startNback(){ startPerimeterWatch(); }
 function startPerimeterWatch(){
   const stage=document.getElementById("stage-nback"); if(!stage) return;
   stage.innerHTML=`<div class="pw-setup">Set the watch depth:
-    <div class="nb-levels">${[1,2,3,4].map(n=>`<button class="hb-starter-btn" data-nbn="${n}">${n}-back</button>`).join("")}</div>
+    <div class="nb-levels">${[1,2,3,4,5].map(n=>`<button class="hb-starter-btn" data-nbn="${n}">${n}-back</button>`).join("")}</div>
     <div class="nb-hint" style="font-size:12px;color:var(--ink-faint);margin-top:6px">Posts light up in rotation. Tap "Report repeat" when the currently lit post matches the one N steps back. Start at 1.</div></div>`;
   stage.querySelectorAll("[data-nbn]").forEach(btn=>btn.onclick=()=>nbRun(parseInt(btn.dataset.nbn)));
   function nbRun(n){
@@ -1050,4 +1056,4 @@ function renderStudy(){
     }).join("");
   });
 }
-function studyDaysLeft(pl){ return Math.ceil((new Date(pl.testDate)-Date.now())/864e5); }
+function studyDaysLeft(pl){ return Math.ceil((new Date(pl.testDate+"T12:00:00")-Date.now())/864e5); } // see makeStudyPlan()'s comment on the UTC/local parsing mismatch

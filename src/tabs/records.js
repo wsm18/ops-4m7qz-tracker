@@ -136,14 +136,20 @@ function renderChecklists(){
 }
 // ===== CSV export =====
 function downloadCSV(filename, rows){
-  const csv=rows.map(r=>r.map(c=>`"${String(c==null?"":c).replace(/"/g,'""')}"`).join(",")).join("\n");
+  // A cell starting with =/+/-/@ is read as a live formula by Excel/Sheets —
+  // these exports are explicitly meant to be shared with a battle buddy/
+  // cadre, and free-text fields (titles, notes, summaries) could contain
+  // one, intentionally or via an imported/adversarial save. Prefixing with a
+  // leading quote defuses it without changing what the cell displays.
+  const csvSafe=c=>{ const s=String(c==null?"":c); return /^[=+\-@]/.test(s)?"'"+s:s; };
+  const csv=rows.map(r=>r.map(c=>`"${csvSafe(c).replace(/"/g,'""')}"`).join(",")).join("\n");
   const blob=new Blob([csv],{type:"text/csv"}); const url=URL.createObjectURL(blob);
   const a=document.createElement("a"); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url);
 }
 function exportData(kind){
   if(kind==="aft"){ const rows=[["Date","Deadlift","Push-ups","SDC","Plank","Run","Total"]]; (S.aft||[]).forEach(a=>rows.push([new Date(a.date).toLocaleDateString(),a.scores.dl,a.scores.hrp,a.scores.sdc,a.scores.plank,a.scores.run,a.total])); downloadCSV("aft-history.csv",rows); }
   else if(kind==="awards"){ const rows=[["Title","Org","Year"]]; (S.awards||[]).forEach(a=>rows.push([a.title||a.name,a.org||"",a.year||""])); downloadCSV("awards.csv",rows); }
-  else if(kind==="volunteer"){ const rows=[["Date","Activity","Hours"]]; (S.volunteer||[]).forEach(v=>rows.push([v.date||"",v.name||v.activity||"",v.hours||""])); downloadCSV("volunteer-hours.csv",rows); }
+  else if(kind==="volunteer"){ const rows=[["Year","Org","Hours","Note"]]; (S.volunteer||[]).forEach(v=>rows.push([v.year||"",v.org||"",v.hours||"",v.note||""])); downloadCSV("volunteer-hours.csv",rows); }
   else if(kind==="counseling"){ const rows=[["Date","Type","People","Summary","Plan"]]; (S.counseling||[]).forEach(c=>rows.push([new Date(c.date).toLocaleDateString(),c.type,c.people,c.summary,c.plan])); downloadCSV("counseling-log.csv",rows); }
   else if(kind==="aar"){ const rows=[["Date","Title","Planned","Actual","Why","Sustain","Improve"]]; (S.aarLog||[]).forEach(a=>rows.push([new Date(a.date).toLocaleDateString(),a.title,a.planned,a.actual,a.why,a.sustain,a.improve])); downloadCSV("aar-log.csv",rows); }
   toast("📄 CSV exported");

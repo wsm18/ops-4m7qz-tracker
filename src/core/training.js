@@ -642,8 +642,21 @@ function parsePT(text){
 function trackMissedSessions(){
   if(!S.missedTraining) S.missedTraining=[];
   const now=new Date();
+  const curWeekMon=localYMD(weekMonday(now));
   for(let i=1;i<=7;i++){
     const d=new Date(now); d.setDate(now.getDate()-i);
+    // gymAccessForDate()/ptDayForDate() only trust S.gymAccess.week/S.ptDays.week
+    // when weekOf matches THAT date's Monday — a deliberate simplification for
+    // displaying/confirming the CURRENT week (no full frozen per-date history
+    // is kept). Reusing planForDay() here for a date outside the current week
+    // reconstructs it from the DEFAULT pattern instead, which silently
+    // disagrees with reality the moment the user has since confirmed a new
+    // week (e.g. a declared PT day differing from default, from a week that's
+    // now "in the past" as far as gymAccess/ptDays are concerned) — producing
+    // a false "you missed this session" accusation for a day the user
+    // actually handled correctly. Only the current week's reconstruction is
+    // reliable, so cap the lookback there.
+    if(localYMD(weekMonday(d))!==curWeekMon) continue;
     const plan=planForDay(d);
     if(!plan||!plan.session) continue;
     const dayStr=localYMD(d);

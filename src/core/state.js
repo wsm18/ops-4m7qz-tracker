@@ -8,6 +8,16 @@ function load(){
     const r=JSON.parse(localStorage.getItem(KEY));
     if(!r) return structuredClone(DEFAULT);
     const merged=Object.assign(structuredClone(DEFAULT),r);
+    // Any field DEFAULT declares as an array must actually BE an array after
+    // merging in the raw save — a single corrupted field (null, a string, a
+    // stray object — a truncated cloud/TOC sync, a hand-edited backup) used to
+    // throw deep inside a later .forEach/.push/.every call, and that throw was
+    // caught by this function's own try/catch below, which silently replaced
+    // the WHOLE save with a fresh DEFAULT. One bad field could wipe a real
+    // save, and (via cloudWriteDebounced/tocWriteDebounced in save()) propagate
+    // that wipe to the cloud file and TOC too. Coercing shape here means a
+    // malformed field degrades to empty instead of nuking everything else.
+    Object.keys(DEFAULT).forEach(k=>{ if(Array.isArray(DEFAULT[k]) && !Array.isArray(merged[k])) merged[k]=[]; });
     // ensure nested structures exist after upgrades
     const defaultPXP={tactical:0,physical:0,cognitive:0,physiological:0,technical:0,leadership:0,academic:0,personal:0,hearth:0,roots:0};
     merged.pathXP=Object.assign({...defaultPXP},r.pathXP||{});
@@ -165,7 +175,22 @@ function today(){return new Date().toDateString()}
 function checkDailyReset(){
   const t=today();
   if(S.lastDaily===t) return;
-  const orders=S.dailies.filter(d=>d.kind==="order");
+  // paused orders are excluded everywhere they count toward "did you clear
+  // the day" — matches events.js's own Perfect-Day check. Previously only
+  // that one check excluded them; this function, readiness(), and render()'s
+  // order-count all still counted a paused order against the user, meaning
+  // pausing even one order made a genuine 100%-of-active-orders day
+  // permanently unable to increment the streak.
+  const orders=S.dailies.filter(d=>d.kind==="order"&&!d.paused);
+  // This function runs exactly once per calendar day, right as the date
+  // rolls over — at this exact moment, before the reset below, S.dailies'
+  // .done flags still reflect what was actually completed YESTERDAY. So
+  // "yesterday complete" is always freshly, correctly available right here;
+  // it never needs to be carried across calls in a stored field. (It used to
+  // be stored as S._yesterdayComplete and read one call before it was
+  // written for the day it actually described — the streak was silently
+  // crediting/missing the wrong day ever since streaks were introduced.)
+  const yesterdayComplete = orders.length>0 && orders.every(d=>d.done);
   if(S.lastDaily){
     // record yesterday's completion rate before resetting
     if(orders.length>0){
@@ -176,7 +201,7 @@ function checkDailyReset(){
       S.streakLog=S.streakLog.slice(-90);
     }
     const diff=Math.round((new Date(t)-new Date(S.lastDaily))/864e5);
-    if(diff===1 && S._yesterdayComplete){ S.streak++; S.missedYesterday=false; }
+    if(diff===1 && yesterdayComplete){ S.streak++; S.missedYesterday=false; }
     else {
       if(S.streak>0){ S.missedYesterday=true; S.streakBrokenDate=localYMD(); }
       S.streak=0;
@@ -184,14 +209,13 @@ function checkDailyReset(){
   }
   if(S.streak>=3) S.streakBrokenDate=null; // recovery complete
   if(S.streak>S.bestStreak) S.bestStreak=S.streak;
-  S._yesterdayComplete = orders.length>0 && orders.every(d=>d.done);
   S.dailies.forEach(d=>d.done=false);
   S.lastDaily=t;
   save();
 }
 // readiness status — degrades as undone dailies pile up; this is the "don't slip" signal
 function readiness(){
-  const orders=S.dailies.filter(d=>d.kind==="order");
+  const orders=S.dailies.filter(d=>d.kind==="order"&&!d.paused);
   const total=orders.length||1;
   const done=orders.filter(d=>d.done).length;
   const pct=done/total;
@@ -245,6 +269,7 @@ function onPerfectDay(){
 /* ---------------- Render ---------------- */
 function render(){
   checkDailyReset();
+  if(typeof skInvalidateLiveIndex==="function") skInvalidateLiveIndex();
   document.getElementById("heroName").textContent=S.name;
   document.getElementById("rankLine").textContent=S.rank;
   document.getElementById("posLine").textContent=S.position;
@@ -253,7 +278,7 @@ function render(){
   document.getElementById("sBest").textContent=S.bestStreak||0;
   // readiness bar
   const rd=readiness();
-  const done=S.dailies.filter(d=>d.kind==="order"&&d.done).length, total=S.dailies.filter(d=>d.kind==="order").length;
+  const done=S.dailies.filter(d=>d.kind==="order"&&!d.paused&&d.done).length, total=S.dailies.filter(d=>d.kind==="order"&&!d.paused).length;
   document.getElementById("rdLabel").textContent=rd.label;
   document.getElementById("rdLabel").style.color=rd.color;
   document.getElementById("rdPct").textContent=done+"/"+total+" orders today";
@@ -345,33 +370,33 @@ function renderQuests(){
     });
     el.innerHTML=sorted.map(q=>{
       const overdue=!q.done&&q.due&&q.due<today;
-      const dueTag=q.due?`<span class="tag ${overdue?'overdue-tag':'due-tag'}">${overdue?'OVERDUE':'due '+q.due}</span>`:'';
+      const dueTag=q.due?`<span class="tag ${overdue?'overdue-tag':'due-tag'}">${overdue?'OVERDUE':'due '+esc(q.due)}</span>`:'';
       const ageDays=q.createdDate&&!q.done?dayDiff(q.createdDate,today):0;
       const ageTag=ageDays>3?`<span class="quest-age${ageDays>14?' old':''}">open ${ageDays}d</span>`:'';
       const snoozeCount=q.snoozeCount||0;
       const snoozeWarn=(!q.done&&snoozeCount>=2)?`<span class="oath-postpone-warn">postponed ${snoozeCount}×</span>`:'';
-      const snoozeBtn=(!q.done&&q.due)?`<button class="q-snooze" data-qsnooze="${q.id}" title="Postpone 3 days">+3d</button>${snoozeWarn}`:'';
+      const snoozeBtn=(!q.done&&q.due)?`<button class="q-snooze" data-qsnooze="${esc(q.id)}" title="Postpone 3 days">+3d</button>${snoozeWarn}`:'';
       const updatesHtml=(q.updates&&q.updates.length)?`<div class="q-updates">${q.updates.slice().reverse().map(u=>`<div class="q-update-item"><span class="q-update-ts">${new Date(u.ts).toLocaleDateString()}</span>${esc(u.text)}</div>`).join("")}</div>`:"";
-      const updateForm=`<div class="q-update-form"><input class="q-update-input" data-qupdateid="${q.id}" placeholder="Log a dispatch…" maxlength="120"><button class="q-update-add" data-qupdateadd="${q.id}">→</button></div>`;
-      const stepsProg=q.steps>=2&&!q.done?`<div class="q-steps-row"><div class="q-steps-bar"><div class="q-steps-fill" style="width:${Math.round((q.progress||0)/q.steps*100)}%"></div></div><span class="q-steps-count">${q.progress||0}/${q.steps}</span><button class="q-step-btn" data-qprogress="${q.id}">+1 step</button></div>`:'';
+      const updateForm=`<div class="q-update-form"><input class="q-update-input" data-qupdateid="${esc(q.id)}" placeholder="Log a dispatch…" maxlength="120"><button class="q-update-add" data-qupdateadd="${esc(q.id)}">→</button></div>`;
+      const stepsProg=q.steps>=2&&!q.done?`<div class="q-steps-row"><div class="q-steps-bar"><div class="q-steps-fill" style="width:${Math.round((q.progress||0)/q.steps*100)}%"></div></div><span class="q-steps-count">${q.progress||0}/${q.steps}</span><button class="q-step-btn" data-qprogress="${esc(q.id)}">+1 step</button></div>`:'';
       const startedSkills=!q.done?(S.lifeSkills||[]).filter(s=>!s.group&&(s.currentLevel||0)>0):[];
       const skillLinkHtml=!q.done&&startedSkills.length?`<div class="q-skilllink">
-        <select class="q-skilllink-sel" data-qsklink="${q.id}">
+        <select class="q-skilllink-sel" data-qsklink="${esc(q.id)}">
           <option value="">link to skill…</option>${startedSkills.map(s=>`<option value="${s.id}"${q.linkedSkillId===s.id?' selected':''}>${esc(s.name)}</option>`).join('')}
         </select>
         <span class="q-skilllink-type">
-          <label><input type="radio" name="qlt${q.id}" value="practice"${q.linkedSkillType!=='level'?' checked':''}> practice</label>
-          <label><input type="radio" name="qlt${q.id}" value="level"${q.linkedSkillType==='level'?' checked':''}> level up</label>
+          <label><input type="radio" name="qlt${esc(q.id)}" value="practice"${q.linkedSkillType!=='level'?' checked':''}> practice</label>
+          <label><input type="radio" name="qlt${esc(q.id)}" value="level"${q.linkedSkillType==='level'?' checked':''}> level up</label>
         </span>
       </div>`:'';
       return `<li class="card ${q.done?'done':''}${overdue?' overdue':''}">
-        <div class="check" data-q="${q.id}">${q.done?'✓':''}</div>
+        <div class="check" data-q="${esc(q.id)}">${q.done?'✓':''}</div>
         <div class="c-body"><div class="c-name">${esc(q.name)}</div>
           ${q.notes?`<div class="q-notes">${esc(q.notes)}</div>`:''}
           <div class="c-meta">${diffTag('quest',q.diff)}${pathTag(q.path)}${dueTag}${ageTag}</div>
           ${stepsProg}${updatesHtml}${updateForm}${skillLinkHtml}</div>
         ${snoozeBtn}
-        <button class="del" data-dq="${q.id}">✕</button>
+        <button class="del" data-dq="${esc(q.id)}">✕</button>
       </li>`;
     }).join("");
     // path distribution breakdown: shows balance of active oaths across paths
@@ -413,22 +438,22 @@ function renderBosses(){
   const bossCard=b=>{
     const pct=Math.max(0,b.hp/b.maxhp*100);
     const checks=(b.checkpoints||[]);
-    const checksHtml=checks.length?`<div class="boss-checks">${checks.map((c,i)=>`<div class="boss-check-item${c.done?' done':''}"><button class="boss-check-btn" data-bcheck="${b.id}" data-bchkidx="${i}">${c.done?'✓':'○'}</button><span>${esc(c.name)}</span></div>`).join("")}</div>`:"";
+    const checksHtml=checks.length?`<div class="boss-checks">${checks.map((c,i)=>`<div class="boss-check-item${c.done?' done':''}"><button class="boss-check-btn" data-bcheck="${esc(b.id)}" data-bchkidx="${i}">${c.done?'✓':'○'}</button><span>${esc(c.name)}</span></div>`).join("")}</div>`:"";
     const doneChecks=checks.filter(c=>c.done).length;
     const checksMeta=checks.length?` · ${doneChecks}/${checks.length} checkpoints`:"";
     return `<li class="card boss">
       <div class="boss-top">
         <div class="boss-skull">⚔️</div>
         <div class="boss-name">${esc(b.name)}</div>
-        <button class="del" data-db="${b.id}">✕</button>
+        <button class="del" data-db="${esc(b.id)}">✕</button>
       </div>
       <div class="hpbar"><div class="hpfill" style="width:${pct}%"></div></div>
       <div class="hp-meta"><span>${b.hp} / ${b.maxhp} steps remaining${checksMeta}</span><span>+${b.maxhp*8} XP · ${b.maxhp*4} pts when conquered</span></div>
-      ${(()=>{if(!b.targetDate||b.hp<=0)return "";const daysLeft=Math.ceil((new Date(b.targetDate+"T12:00:00")-Date.now())/864e5);if(daysLeft<=0)return `<div class="boss-pace overdue">⚠ Target date passed — ${b.hp} steps remain</div>`;const needed=(b.hp/daysLeft).toFixed(1);const onPace=parseFloat(needed)<=1;return `<div class="boss-pace${onPace?' on-pace':''}">${onPace?"✓":"⚠"} ${needed} steps/day to finish by ${b.targetDate} · ${daysLeft}d left</div>`;})()}
+      ${(()=>{if(!b.targetDate||b.hp<=0)return "";const daysLeft=Math.ceil((new Date(b.targetDate+"T12:00:00")-Date.now())/864e5);if(daysLeft<=0)return `<div class="boss-pace overdue">⚠ Target date passed — ${b.hp} steps remain</div>`;const needed=(b.hp/daysLeft).toFixed(1);const onPace=parseFloat(needed)<=1;return `<div class="boss-pace${onPace?' on-pace':''}">${onPace?"✓":"⚠"} ${needed} steps/day to finish by ${esc(b.targetDate)} · ${daysLeft}d left</div>`;})()}
       ${checksHtml}
       <div class="boss-add-check">
-        <input class="boss-check-input" data-baddcheck="${b.id}" placeholder="Add a milestone…" maxlength="80">
-        <button class="boss-check-add-btn" data-baddcheckbtn="${b.id}">+</button>
+        <input class="boss-check-input" data-baddcheck="${esc(b.id)}" placeholder="Add a milestone…" maxlength="80">
+        <button class="boss-check-add-btn" data-baddcheckbtn="${esc(b.id)}">+</button>
       </div>
       ${(()=>{
         const tc=b.todayCommit; const td=typeof localYMD==="function"?localYMD():"";
@@ -442,10 +467,10 @@ function renderBosses(){
           const missed=(tc.startHp||b.maxhp)-b.hp < tc.hp;
           return missed?`<div class="boss-sprint missed">⚠ Yesterday's sprint (${tc.hp} step${tc.hp!==1?"s":""}) was not completed</div>`:``;
         }
-        return `<div class="boss-sprint-setter"><span class="boss-sprint-lbl">Today's commitment:</span><input class="boss-sprint-input" type="number" min="1" max="${b.hp}" step="1" placeholder="steps" id="bsprint-${b.id}"><button class="boss-sprint-btn" data-bsprintset="${b.id}">Set</button></div>`;
+        return `<div class="boss-sprint-setter"><span class="boss-sprint-lbl">Today's commitment:</span><input class="boss-sprint-input" type="number" min="1" max="${b.hp}" step="1" placeholder="steps" id="bsprint-${esc(b.id)}"><button class="boss-sprint-btn" data-bsprintset="${esc(b.id)}">Set</button></div>`;
       })()}
       <div class="boss-actions">
-        ${b.cpDriven&&b.hp===1?`<button class="hit conquer" data-hit="${b.id}">🏆 Conquer the Trial</button>`:b.cpDriven&&b.hp>1?`<div class="boss-no-strike">Complete a milestone to make progress</div>`:`<button class="hit" data-hit="${b.id}">⚔️ Strike it</button>`}
+        ${b.cpDriven&&b.hp===1?`<button class="hit conquer" data-hit="${esc(b.id)}">🏆 Conquer the Trial</button>`:b.cpDriven&&b.hp>1?`<div class="boss-no-strike">Complete a milestone to make progress</div>`:`<button class="hit" data-hit="${esc(b.id)}">⚔️ Strike it</button>`}
       </div>
     </li>`;
   };
@@ -457,7 +482,7 @@ function renderBosses(){
         <div class="boss-archive-name">${esc(b.name)}</div>
         <div class="boss-conquered-date">Conquered ${esc(b.completedAt)} · ${b.maxhp} steps total</div>
       </div>
-      <button class="del" data-db="${b.id}" title="Remove">✕</button>
+      <button class="del" data-db="${esc(b.id)}" title="Remove">✕</button>
     </div>`).join("")}
   </details>`:"";
   el.innerHTML=(active.length?active.map(bossCard).join(""):
@@ -472,9 +497,9 @@ function renderShop(){
       <div class="c-body reward">
         <div style="flex:1"><div class="c-name">${esc(r.name)}</div>
           <div class="c-meta"><span class="cost">🎖️ ${r.cost} merit</span></div></div>
-        <button class="btn-buy" data-buy="${r.id}" ${S.gold<r.cost?'disabled':''}>Claim Rest</button>
+        <button class="btn-buy" data-buy="${esc(r.id)}" ${S.gold<r.cost?'disabled':''}>Claim Rest</button>
       </div>
-      <button class="del" data-dr="${r.id}">✕</button>
+      <button class="del" data-dr="${esc(r.id)}">✕</button>
     </li>`).join("");
 }
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}

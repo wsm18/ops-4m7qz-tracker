@@ -36,8 +36,15 @@ function insightStreakVsAft(){
   tests.forEach(t=>{
     const window=log.filter(l=>l.ts<=t.ts && l.ts>=t.ts-14*864e5);
     if(!window.length) return;
+    // streakLog[].pct is stored as an integer 0-100 (state.js: Math.round(done/orders.length*100)),
+    // not a 0-1 fraction — every other consumer (today.js, dailies.js) treats it that way.
+    // Comparing it against 0.7 here meant any window averaging >=1% completion
+    // was bucketed as "consistent," which either made this check permanently
+    // inert (rarely finding 2+ genuinely-inconsistent windows) or, worse,
+    // let it publish "a real pattern" using a "consistent" bucket that
+    // actually averaged single-digit completion.
     const avgPct=window.reduce((s,l)=>s+l.pct,0)/window.length;
-    (avgPct>=0.7?consistent:inconsistent).push(t.total);
+    (avgPct>=70?consistent:inconsistent).push(t.total);
   });
   if(consistent.length<INSIGHT_MIN_PER_BUCKET || inconsistent.length<INSIGHT_MIN_PER_BUCKET) return null;
   const avg=arr=>arr.reduce((a,b)=>a+b,0)/arr.length;

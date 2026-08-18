@@ -69,11 +69,22 @@ function syncSkillsFromActivity(){
     // practice in Log/PT refreshes the fade timer so it doesn't decay
     if(sk.currentLevel>0 && practiced(key) && sk.lastQuestTs<now-864e5){ sk.lastQuestTs=now; changed=true; }
   });
-  // ROTC knowledge skill: level from number of quiz banks passed
+  // ROTC knowledge skill: level from FRACTION of quiz banks passed, not a raw
+  // count — this used to be hardcoded against "16 quiz banks" (passed>=16?6:
+  // passed>=14?5:...), which the boss objective right next to it (quizzes.js)
+  // already had to self-heal once for the exact same reason: the bank has
+  // grown past that (21 categories as of the v212-session audit that found
+  // this) and just kept growing since. A cadet who'd passed 16 of the live 21
+  // categories was being shown as fully "Knowledgeable" (max level) while 5
+  // real categories — including CBRN and Radio Comms — sat untouched.
+  // Fractions scale automatically as the bank grows, mirroring the same
+  // self-heal pattern quizzes.js already uses for the boss objective.
   const qsk=S.lifeSkills.find(s=>s.auto==="quiz");
   if(qsk){
     const passed=Object.values(S.quizzes||{}).filter(x=>x.passed).length;
-    const lvl = passed>=16?6 : passed>=14?5 : passed>=11?4 : passed>=8?3 : passed>=5?2 : passed>=2?1 : 0;
+    const total=(typeof window!=="undefined"&&window.QUIZ_BANK)?Object.keys(window.QUIZ_BANK).length:16;
+    const frac=total>0?passed/total:0;
+    const lvl = frac>=1?6 : frac>=0.875?5 : frac>=0.6875?4 : frac>=0.5?3 : frac>=0.3125?2 : frac>=0.125?1 : 0;
     const capped=Math.min(lvl, qsk.levels.length);
     if(capped>qsk.currentLevel){ qsk.currentLevel=capped; skUpdatePeak(qsk); qsk.lastQuestTs=now; qsk.history.push({ts:now,type:"auto-quiz",level:capped}); changed=true; }
   }

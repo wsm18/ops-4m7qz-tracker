@@ -363,6 +363,7 @@ let _skSideDeckCache = {};
 // walk the tree and lazily reveal a match the same way a manual click would.
 let _skPyrCache = {};
 let _pyrBuildTierBodyFn = null;
+let _skPyrToggleHandler = null; // see its addEventListener call site below — removed+re-added each render to avoid leaking one more listener per render
 // Find a search match anywhere in a category's pyramid tree; returns the index path
 // to it ([mythicIdx], [mythicIdx,legIdx], ... down to Uncommon) or null. Doesn't
 // address individual Commons (the leaf tier) — revealing their Uncommon is enough
@@ -751,7 +752,11 @@ function skProgressBlock(sk, eff){
   // tier only when opened (same reasoning as the Side Deck fix above — thousands of
   // cards in the DOM even collapsed is real cost, not just visual clutter).
   _skPyrCache={}; // file-scope cache reset fresh each render pass — see declaration above
-  const pyrLiveOf=seed=>(S.lifeSkills||[]).find(s=>s.name===seed.name&&s.cat===seed.cat);
+  // O(1) via the shared per-render live-skill index (skills-core.js) instead
+  // of an O(n) Array.find() per seed — this is called once per Common skill
+  // under every Mythic tree (thousands of times per render at full scale);
+  // see skInvalidateLiveIndex()'s call at the top of render() (state.js).
+  const pyrLiveOf=seed=>(typeof skLiveIndex==="function"?skLiveIndex():new Map()).get(seed.name+"|"+seed.cat);
   const pyrCardFace=(seed,suit,rank)=>{
     const live=pyrLiveOf(seed); if(!live) return '';
     if(live.currentLevel>0) return leafCard(live,false,suit,rank);
@@ -1033,7 +1038,16 @@ function skProgressBlock(sk, eff){
   // querySelectorAll-once pass can't wire them. <details>'s `toggle` event also
   // doesn't bubble, so a single delegated listener needs the capture phase to see
   // toggles from dynamically-injected descendants at any depth.
-  listEl.addEventListener("toggle",e=>{
+  // Removed before re-adding: #skList is a static container whose innerHTML
+  // gets replaced (not the node itself, so old listeners on IT persist), and
+  // this closure captures the current render's pyrBuildTierBody — without
+  // this cleanup, every render() call (dozens of call sites across the app)
+  // permanently added one more capture-phase listener here, each of which
+  // keeps firing on every future toggle for the rest of the session (found
+  // by the v212-session audit; same leak class tree.js's pan/zoom cleanup
+  // already guards against, just missed here).
+  if(_skPyrToggleHandler) listEl.removeEventListener("toggle",_skPyrToggleHandler,true);
+  _skPyrToggleHandler=e=>{
     const det=e.target;
     if(!det.classList||!det.classList.contains("sk-pyr-tier")||!det.open) return;
     const body=det.querySelector("[data-pyrbody]");
@@ -1042,7 +1056,8 @@ function skProgressBlock(sk, eff){
     const parts=det.dataset.pyr.split("|");
     const pcat=parts[0], path=parts.slice(1).map(Number);
     body.innerHTML=pyrBuildTierBody(pcat,path);
-  },true);
+  };
+  listEl.addEventListener("toggle",_skPyrToggleHandler,true);
   // wire search input — persist term across re-renders, filter immediately
   const srchEl=document.getElementById("skSearch");
   if(srchEl){

@@ -199,7 +199,12 @@ document.body.addEventListener("click",e=>{
   // add checkpoint to existing boss
   if(t.dataset.baddcheckbtn){
     const b=S.bosses.find(x=>x.id===t.dataset.baddcheckbtn);
-    const inp=document.querySelector(`[data-baddcheck="${t.dataset.baddcheckbtn}"]`);
+    // Scoped to the sibling input inside the same .boss-add-check block,
+    // rather than building a CSS selector string out of the boss id — a
+    // malformed/adversarial save (a corrupted import, an unvalidated
+    // cloud/TOC restore) with a quote or bracket in an id would otherwise
+    // throw a SyntaxError out of this handler.
+    const inp=t.closest(".boss-add-check")?.querySelector("[data-baddcheck]");
     const name=inp&&inp.value.trim();
     if(b&&name){b.checkpoints=b.checkpoints||[];b.checkpoints.push({name,done:false});if(b.cpDriven){b.hp++;b.maxhp++;}inp.value="";save();renderBosses();}
     return;
@@ -365,7 +370,7 @@ document.getElementById("importFile").onchange=e=>{
   rd.onload=()=>{
     try{
       const parsed=JSON.parse(rd.result);
-      if(!parsed||typeof parsed!=="object") throw new Error("bad");
+      if(!parsed||typeof parsed!=="object"||Array.isArray(parsed)) throw new Error("bad");
       // Route the backup through the SAME path as normal startup: write to storage,
       // re-run load() (which merges in any new DEFAULT fields), then run the skill
       // migration so a backup from an older version GAINS the new skills instead of

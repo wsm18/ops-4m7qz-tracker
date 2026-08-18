@@ -500,10 +500,11 @@ function renderToday(){
   if(typeof SEED_SKILLS!=="undefined" && typeof skSetCanCombine==="function"){
     const synthReady=[];
     const seenSets=new Set();
+    const _synthLiveIdx=typeof skLiveIndex==="function"?skLiveIndex():null;
     SEED_SKILLS.forEach(target=>{
       if(!target.synthesizedFrom||seenSets.has(target.name)) return;
       seenSets.add(target.name);
-      const live=(S.lifeSkills||[]).find(s=>s.name===target.name&&s.cat===target.cat);
+      const live=_synthLiveIdx?_synthLiveIdx.get(target.name+"|"+target.cat):(S.lifeSkills||[]).find(s=>s.name===target.name&&s.cat===target.cat);
       if(live&&live.synthesisUnlocked) return;
       if(skSetCanCombine(target.synthesizedFrom)) synthReady.push(target.name);
     });
@@ -735,7 +736,13 @@ function renderDayLog(){
 
 function makeStudyPlan(title,testDate,topics){
   const today=new Date(); today.setHours(0,0,0,0);
-  const test=new Date(testDate); test.setHours(0,0,0,0);
+  // testDate is a bare "YYYY-MM-DD" from <input type=date> — parsed as UTC
+  // midnight by the Date constructor, not local midnight, which for anyone
+  // west of UTC (all of the Americas) silently shifts it back a day once
+  // .setHours(0,0,0,0) floors that already-shifted instant to LOCAL
+  // midnight. Anchoring to local noon first (same fix already used for
+  // quest snoozing in events.js) avoids the UTC/local mismatch entirely.
+  const test=new Date(testDate+"T12:00:00"); test.setHours(0,0,0,0);
   const totalDays=Math.max(1, Math.round((test-today)/864e5));
   let offsets=[0,1,3,6,10,14,20,27].filter(o=>o<=totalDays);
   if(totalDays>0 && !offsets.includes(totalDays-1) && (totalDays-1)>=0) offsets.push(totalDays-1);
