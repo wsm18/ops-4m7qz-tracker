@@ -2,6 +2,7 @@
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}
 
 seedSkillsIfEmpty();
+if(typeof mergeBoardTaskSeeds==="function") mergeBoardTaskSeeds();
 // Snapshot the gap since the last open, once, BEFORE overwriting the
 // timestamp — this app has irregular ROTC-semester-driven usage, so
 // re-orientation after a real break matters more than a stranger-facing

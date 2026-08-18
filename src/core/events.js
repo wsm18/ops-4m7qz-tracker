@@ -294,6 +294,8 @@ document.body.addEventListener("click",e=>{
   if(t.dataset.copyskillssummary){ if(typeof copySkillsSummary==="function") copySkillsSummary(); return; }
   // update all skill targets to current stage
   if(t.dataset.updateskilltgts){ if(typeof updateAllSkillTargets==="function") updateAllSkillTargets(); return; }
+  // add current-career-stage default board tasks not already present
+  if(t.dataset.syncboardtasks){ if(typeof syncBoardTasksToStage==="function") syncBoardTasksToStage(); return; }
   // global tab navigation — any button with data-gototab anywhere in the app
   const goBtn=t.closest("[data-gototab]");
   if(goBtn){

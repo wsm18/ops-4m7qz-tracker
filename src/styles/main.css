@@ -226,6 +226,7 @@
   li.card.done .check{background:linear-gradient(180deg,var(--jade),#557a44);border-color:var(--jade);color:#fff}
   .c-body{flex:1;min-width:0}
   .c-name{font-size:15.5px;font-weight:600;word-wrap:break-word}
+  .c-note{display:block;font-size:12px;color:var(--ink-faint);margin-top:3px;line-height:1.4}
   .c-meta{display:flex;gap:7px;align-items:center;margin-top:4px;flex-wrap:wrap}
   .tag{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:20px;border:1px solid}
   .tag.xp{color:var(--gold);border-color:#5e4715;background:rgba(224,169,59,.08)}

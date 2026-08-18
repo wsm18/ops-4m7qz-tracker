@@ -1,5 +1,6 @@
 const SKILL_LADDER_VER=122;
 const PYRAMID_RESET_VER=1;
+const BOARD_TASKS_VER=1;
 // Returns the user's current ROTC/Army career stage based on S.rank.
 function careerStage(){
   const r=((S.profile&&S.profile.rank)||S.rank||"").toUpperCase();
@@ -196,4 +197,37 @@ function mergeNewSeedSkills(){
   if(skHydrateAll(S.lifeSkills)) changed=true;
   if((S._skillLadderVer||0)!==SKILL_LADDER_VER){ S._skillLadderVer=SKILL_LADDER_VER; changed=true; }
   if(changed) save();
+}
+// One-time retag of a save's existing board tasks with the new seedKey/stage
+// fields (the season-aware Board tab feature). Matches by the ORIGINAL 10
+// tasks' frozen wording, not by live BOARD_TASK_SEEDS content, so a future
+// wording tweak to that seed text can never break this historical match. A
+// task the user has since renamed simply won't match and stays
+// seedKey:null/stage:null — lands in the ungrouped "Your Tasks" bucket
+// rather than risk mis-tagging it. Never touches id/done/due. Only ever
+// backfills identity fields — never adds new stage content (MS1/MS2/LDAC/
+// MS4/O1 tasks); that's deliberately gated behind the explicit "Sync tasks
+// to my stage" button so nothing new ever appears on screen unprompted.
+function mergeBoardTaskSeeds(){
+  if((S._boardTasksVer||0)>=BOARD_TASKS_VER) return;
+  const LEGACY_MS3_MAP={
+    "Create / verify your CC IMS (Cadet Command) & TBB account":"ms3_ims_account",
+    "Build your Talent-Based Branching (TBB) accessions file":"ms3_accessions_file",
+    "Write & polish your branch résumé":"ms3_branch_resume",
+    "Research your top branch choices and their OML requirements":"ms3_research_branch",
+    "Request branch interviews with your top-choice branch(es)":"ms3_branch_interview",
+    "Enter & rank your branch preferences in TBB":"ms3_rank_prefs",
+    "Decide on BrADSO (Branch Active Duty Service Obligation) strategy":"ms3_bradso",
+    "Max your OML inputs: GPA, AFT score, leadership eval (CDT OER)":"ms3_oml_inputs",
+    "Research branch-relevant certifications and coursework":"ms3_certs",
+    "Confirm your clearance eligibility for your desired branch":"ms3_clearance",
+  };
+  (S.boardTasks||[]).forEach(t=>{
+    if(t.seedKey===undefined) t.seedKey=null;
+    if(t.stage===undefined) t.stage=null;
+    if(t.due===undefined) t.due=null;
+    if(!t.seedKey && LEGACY_MS3_MAP[t.name]){ t.seedKey=LEGACY_MS3_MAP[t.name]; t.stage="MS3"; }
+  });
+  S._boardTasksVer=BOARD_TASKS_VER;
+  save();
 }

@@ -113,6 +113,68 @@ function ok(fails, label, cond) {
   });
   ok(fails, "integrityLevel: broken keystone caps level <=2 despite 10 kept vows", integrityKeystone <= 2);
 
+  // ---- mergeBoardTaskSeeds: existing users' original 10 (untagged) board
+  // tasks must survive with done-state intact and get retagged to MS3, and
+  // the migration must be idempotent (version-gated).
+  const boardMigResult = await page.evaluate(() => {
+    S.boardTasks = [
+      { id: "a", name: "Build your Talent-Based Branching (TBB) accessions file", done: true, due: null },
+      { id: "b", name: "Write & polish your branch résumé", done: true, due: null },
+      { id: "c", name: "Confirm your clearance eligibility for your desired branch", done: false, due: null },
+    ];
+    S._boardTasksVer = 0;
+    mergeBoardTaskSeeds();
+    const firstPassVer = S._boardTasksVer;
+    const snapshot = JSON.stringify(S.boardTasks);
+    mergeBoardTaskSeeds(); // second call must be a no-op
+    return { tasks: S.boardTasks, verAfterFirst: firstPassVer, stableAcrossSecondCall: JSON.stringify(S.boardTasks) === snapshot };
+  });
+  ok(fails, "mergeBoardTaskSeeds: all 3 tasks survive with original ids", boardMigResult.tasks.length === 3 && boardMigResult.tasks.every((t, i) => t.id === ["a", "b", "c"][i]));
+  ok(fails, "mergeBoardTaskSeeds: done-state preserved (a,b done; c not)", boardMigResult.tasks[0].done === true && boardMigResult.tasks[1].done === true && boardMigResult.tasks[2].done === false);
+  ok(fails, "mergeBoardTaskSeeds: all retagged to MS3 with a matching seedKey", boardMigResult.tasks.every((t) => t.stage === "MS3" && typeof t.seedKey === "string" && t.seedKey.startsWith("ms3_")));
+  eq(fails, "mergeBoardTaskSeeds: version stamped", boardMigResult.verAfterFirst, 1);
+  ok(fails, "mergeBoardTaskSeeds: second call is a no-op (version-gated)", boardMigResult.stableAcrossSecondCall);
+
+  // ---- syncBoardTasksToStage: idempotent (no duplicates on a second call),
+  // and a dismissed seed never reappears on a later sync.
+  const boardSyncResult = await page.evaluate(() => {
+    S.rank = "MS1 Cadet"; // careerStage() reads S.rank directly
+    S.boardTasks = [];
+    S.boardDismissedSeeds = [];
+    syncBoardTasksToStage();
+    const firstCount = S.boardTasks.length;
+    syncBoardTasksToStage(); // second call should add nothing
+    const secondCount = S.boardTasks.length;
+    const seedKeys = S.boardTasks.map((t) => t.seedKey);
+    const noDupes = new Set(seedKeys).size === seedKeys.length;
+    // dismiss one, then sync again — it must not come back
+    const dismissedKey = S.boardTasks[0].seedKey;
+    S.boardDismissedSeeds.push(dismissedKey);
+    S.boardTasks = S.boardTasks.filter((t) => t.seedKey !== dismissedKey);
+    syncBoardTasksToStage();
+    const afterDismissAndResync = S.boardTasks.some((t) => t.seedKey === dismissedKey);
+    return { firstCount, secondCount, noDupes, dismissedKey, afterDismissAndResync, finalCount: S.boardTasks.length };
+  });
+  ok(fails, "syncBoardTasksToStage: adds MS1 seeds on first call", boardSyncResult.firstCount > 0);
+  eq(fails, "syncBoardTasksToStage: second call adds nothing", boardSyncResult.secondCount, boardSyncResult.firstCount);
+  ok(fails, "syncBoardTasksToStage: no duplicate seedKeys", boardSyncResult.noDupes);
+  ok(fails, "syncBoardTasksToStage: a dismissed task never reappears on resync", !boardSyncResult.afterDismissAndResync);
+  eq(fails, "syncBoardTasksToStage: resync only backfills the other (non-dismissed) MS1 seeds", boardSyncResult.finalCount, boardSyncResult.firstCount - 1);
+
+  // ---- Fresh-install seeding: DEFAULT's 10 board tasks are all correctly
+  // pre-tagged MS3, and boardDismissedSeeds starts empty.
+  const boardFreshResult = await page.evaluate(() => {
+    const fresh = structuredClone(DEFAULT);
+    return {
+      count: fresh.boardTasks.length,
+      allMs3Tagged: fresh.boardTasks.every((t) => t.stage === "MS3" && typeof t.seedKey === "string"),
+      dismissedEmpty: Array.isArray(fresh.boardDismissedSeeds) && fresh.boardDismissedSeeds.length === 0,
+    };
+  });
+  eq(fails, "DEFAULT.boardTasks: exactly 10 tasks", boardFreshResult.count, 10);
+  ok(fails, "DEFAULT.boardTasks: all pre-tagged MS3 with a seedKey", boardFreshResult.allMs3Tagged);
+  ok(fails, "DEFAULT.boardDismissedSeeds: starts empty", boardFreshResult.dismissedEmpty);
+
   console.log("UNIT CHECKS", fails.length === 0 ? "PASS" : "FAIL");
   fails.forEach((f) => console.log("  FAIL: " + f));
   if (pageErrors.length) { console.log("PAGEERRORS DURING SETUP", pageErrors.length); pageErrors.forEach((e) => console.log("  " + e)); }

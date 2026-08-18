@@ -24,9 +24,30 @@ function renderBoardBranchCard(){
     </div>`;
   }
 }
+// Career-stage vocabulary and per-stage framing — same 6 values careerStage()
+// (migration.js) resolves to, and the same ones BOARD_TASK_SEEDS (constants.js)
+// tags its content with.
+const STAGE_ORDER=["MS1","MS2","MS3","LDAC","MS4","O1"];
+const STAGE_INFO={
+  MS1:{label:"MS1 — Early Groundwork", blurb:"No real Talent-Based Branching engagement yet. This stage is about building the baseline — PT, GPA, leadership record — that becomes your OML later, and getting an honest early picture of what branches actually do."},
+  MS2:{label:"MS2 — Building Your Case", blurb:"Still no TBB file yet, but OML-input discipline and real branch research here pay off once MS3's board season hits."},
+  MS3:{label:"MS3 — Board Season", blurb:"The path runs through the Order of Merit List (OML). Talent-Based Branching mostly happens here: you build an accessions file, interview with branches, and rank preferences for the branching board. Your OML — driven by GPA, AFT, and leadership evaluations — is the biggest lever you control."},
+  LDAC:{label:"LDAC — Cadet Summer Training", blurb:"LDAC isn't a board-prep activity itself, but your Camp OML score is a direct, real input into your final national OML — perform here, and square away the admin basics before you go."},
+  MS4:{label:"MS4 — Post-Board", blurb:"TBB is mostly behind you. This stage is about finalizing your branch result and getting square for commissioning and BOLC."},
+  O1:{label:"O1 — Commissioned", blurb:"You're commissioned. The checklist shifts from ROTC/branching to transitioning into your gaining unit and BOLC."},
+};
+function boardTaskLi(t){
+  const seed=t.seedKey?BOARD_TASK_SEEDS.find(s=>s.key===t.seedKey):null;
+  const why=seed&&seed.why?`<div class="c-note">${esc(seed.why)}</div>`:'';
+  return `<li class="card board-item ${t.done?'done':''}">
+    <div class="check" data-bt="${t.id}">${t.done?'✓':''}</div>
+    <div class="c-body"><div class="c-name">${esc(t.name)}</div>${why}${t.due?`<span class="tag" style="color:var(--ink-faint)">due ${esc(t.due)}</span>`:''}${t.done?'':`<span class="tag xp">+${VALUES.board.xp} XP · ${VALUES.board.g} pts</span>`}</div>
+    <button class="del" data-dbt="${t.id}">✕</button>
+  </li>`;
+}
 function renderBoard(){
-  const list=document.getElementById("boardList");
-  if(!list) return;
+  const listWrap=document.getElementById("boardList");
+  if(!listWrap) return;
   renderBoardBranchCard();
   // Board/branch readiness used to be 3 disconnected screens sharing a
   // database (this checklist, Quiz's per-category readiness, Profile's
@@ -35,24 +56,73 @@ function renderBoard(){
   if(typeof renderBoardReadiness==="function") renderBoardReadiness("boardQuizReadiness");
   if(typeof renderCommReadiness==="function") renderCommReadiness("boardCommReadiness");
   document.getElementById("branchGoalHint").textContent="goal: "+(S.branchGoal||"Cyber");
+
+  const stage=typeof careerStage==="function"?careerStage():"MS2";
+  const stageHint=document.getElementById("boardStageHint");
+  if(stageHint) stageHint.textContent="your stage: "+stage;
+
+  const byStage={}; STAGE_ORDER.forEach(s=>byStage[s]=[]);
+  const custom=[];
+  S.boardTasks.forEach(t=>{ (t.stage&&byStage[t.stage])?byStage[t.stage].push(t):custom.push(t); });
+
   const done=S.boardTasks.filter(t=>t.done).length;
   document.getElementById("boardProg").textContent=done+"/"+S.boardTasks.length+" complete";
-  list.innerHTML=S.boardTasks.map(t=>`<li class="card board-item ${t.done?'done':''}">
-    <div class="check" data-bt="${t.id}">${t.done?'✓':''}</div>
-    <div class="c-body"><div class="c-name">${esc(t.name)}</div>${t.due?`<span class="tag" style="color:var(--ink-faint)">due ${esc(t.due)}</span>`:''}${t.done?'':`<span class="tag xp">+${VALUES.board.xp} XP · ${VALUES.board.g} pts</span>`}</div>
-    <button class="del" data-dbt="${t.id}">✕</button>
-  </li>`).join("");
+
+  const stageBlocks=STAGE_ORDER.map(s=>{
+    const tasks=byStage[s], info=STAGE_INFO[s], isCur=(s===stage);
+    const doneCt=tasks.filter(t=>t.done).length;
+    const body=tasks.length
+      ? `<ul class="list">${tasks.map(boardTaskLi).join("")}</ul>`
+      : `<div class="sk-assess-empty">No tasks yet for this stage — tap ↑ Sync when you reach it.</div>`;
+    return `<details class="wk" ${isCur?'open':''}>
+      <summary><span class="wk-day">${esc(info.label)}</span> ${doneCt}/${tasks.length} complete</summary>
+      <div class="wk-body">
+        <p class="wk-target">${esc(info.blurb)}</p>
+        ${body}
+      </div>
+    </details>`;
+  }).join("");
+
+  const customBlock=custom.length
+    ? `<div class="sec-h" style="margin-top:14px"><h2>Your Tasks</h2><span class="hint">not tied to a career stage</span></div><ul class="list">${custom.map(boardTaskLi).join("")}</ul>`
+    : "";
+
+  listWrap.innerHTML=stageBlocks+customBlock;
+}
+// Additive-only: adds any current-stage default task the user doesn't
+// already have and hasn't deliberately deleted before. Never removes or
+// re-adds anything on its own — the explicit button click is the only
+// trigger, mirroring Skills' own career-stage sync pattern (updateAllSkillTargets()).
+function syncBoardTasksToStage(){
+  const stage=typeof careerStage==="function"?careerStage():"MS2";
+  const have=new Set(S.boardTasks.filter(t=>t.seedKey).map(t=>t.seedKey));
+  const dismissed=new Set(S.boardDismissedSeeds||[]);
+  const toAdd=BOARD_TASK_SEEDS.filter(s=>s.stage===stage && !have.has(s.key) && !dismissed.has(s.key));
+  if(!toAdd.length){ toast(`All ${stage} default tasks already on your board`); return; }
+  toAdd.forEach(s=>S.boardTasks.push({id:id(), seedKey:s.key, stage:s.stage, name:s.name, done:false, due:null}));
+  save(); render();
+  toast(`↑ ${toAdd.length} ${stage} task${toAdd.length!==1?'s':''} added`);
 }
 document.body.addEventListener("click",e=>{
   const t=e.target;
   if(t.dataset.bt){const task=S.boardTasks.find(x=>x.id===t.dataset.bt);if(task){const was=task.done;task.done=!task.done;if(!was&&task.done){grant(VALUES.board.xp,VALUES.board.g,"Board prep task done","academic");}else{save();render();}}return;}
-  if(t.dataset.dbt){if(confirm("Delete this board task?")){S.boardTasks=S.boardTasks.filter(x=>x.id!==t.dataset.dbt);save();render();}return;}
+  if(t.dataset.dbt){
+    if(confirm("Delete this board task?")){
+      const task=S.boardTasks.find(x=>x.id===t.dataset.dbt);
+      if(task&&task.seedKey){
+        S.boardDismissedSeeds=S.boardDismissedSeeds||[];
+        if(!S.boardDismissedSeeds.includes(task.seedKey)) S.boardDismissedSeeds.push(task.seedKey);
+      }
+      S.boardTasks=S.boardTasks.filter(x=>x.id!==t.dataset.dbt);save();render();
+    }
+    return;
+  }
 });
 const _btAdd=document.getElementById("btAdd");
 if(_btAdd) _btAdd.onclick=()=>{
   const n=document.getElementById("btName").value.trim();if(!n)return;
   const due=(document.getElementById("btDue")||{}).value||null;
-  S.boardTasks.push({id:id(),name:n,done:false,due});
+  S.boardTasks.push({id:id(),seedKey:null,stage:null,name:n,done:false,due});
   document.getElementById("btName").value="";
   const btDue=document.getElementById("btDue"); if(btDue) btDue.value="";
   save();render();

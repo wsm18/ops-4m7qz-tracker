@@ -1,6 +1,6 @@
 {
   "name": "operations-pwa",
-  "version": "214.0.0",
+  "version": "215.0.0",
   "private": true,
   "description": "Operations — a gamified ROTC + life-tracker Progressive Web App (single-file, offline).",
   "scripts": {

@@ -109,18 +109,23 @@ const DEFAULT = {
   dayLog:[],              // [{date:"YYYY-MM-DD", trained, wins, notes}]
   _seeded:false,     // whether starter skills have been seeded
   _skillLadderVer:0, // bumped whenever seed ladders change; forces a full ladder resync on load
+  // Every default task is MS3-flavored (TBB/board season) and tagged as such
+  // via seedKey/stage — see BOARD_TASK_SEEDS below for the other 5 career
+  // stages. Fresh installs land pre-tagged; existing saves get retagged once
+  // by mergeBoardTaskSeeds() (migration.js) matching this exact wording.
   boardTasks:[
-    {id:id(), name:"Create / verify your CC IMS (Cadet Command) & TBB account", done:false},
-    {id:id(), name:"Build your Talent-Based Branching (TBB) accessions file", done:false},
-    {id:id(), name:"Write & polish your branch résumé", done:false},
-    {id:id(), name:"Research your top branch choices and their OML requirements", done:false},
-    {id:id(), name:"Request branch interviews with your top-choice branch(es)", done:false},
-    {id:id(), name:"Enter & rank your branch preferences in TBB", done:false},
-    {id:id(), name:"Decide on BrADSO (Branch Active Duty Service Obligation) strategy", done:false},
-    {id:id(), name:"Max your OML inputs: GPA, AFT score, leadership eval (CDT OER)", done:false},
-    {id:id(), name:"Research branch-relevant certifications and coursework", done:false},
-    {id:id(), name:"Confirm your clearance eligibility for your desired branch", done:false},
+    {id:id(), seedKey:"ms3_ims_account", stage:"MS3", name:"Create / verify your CC IMS (Cadet Command) & TBB account", done:false, due:null},
+    {id:id(), seedKey:"ms3_accessions_file", stage:"MS3", name:"Build your Talent-Based Branching (TBB) accessions file", done:false, due:null},
+    {id:id(), seedKey:"ms3_branch_resume", stage:"MS3", name:"Write & polish your branch résumé", done:false, due:null},
+    {id:id(), seedKey:"ms3_research_branch", stage:"MS3", name:"Research your top branch choices and their OML requirements", done:false, due:null},
+    {id:id(), seedKey:"ms3_branch_interview", stage:"MS3", name:"Request branch interviews with your top-choice branch(es)", done:false, due:null},
+    {id:id(), seedKey:"ms3_rank_prefs", stage:"MS3", name:"Enter & rank your branch preferences in TBB", done:false, due:null},
+    {id:id(), seedKey:"ms3_bradso", stage:"MS3", name:"Decide on BrADSO (Branch Active Duty Service Obligation) strategy", done:false, due:null},
+    {id:id(), seedKey:"ms3_oml_inputs", stage:"MS3", name:"Max your OML inputs: GPA, AFT score, leadership eval (CDT OER)", done:false, due:null},
+    {id:id(), seedKey:"ms3_certs", stage:"MS3", name:"Research branch-relevant certifications and coursework", done:false, due:null},
+    {id:id(), seedKey:"ms3_clearance", stage:"MS3", name:"Confirm your clearance eligibility for your desired branch", done:false, due:null},
   ],
+  boardDismissedSeeds:[], // seedKeys the user deliberately deleted — sync never re-adds these
   quests:[
     {id:id(), name:"Find your baseline: test 2-mile run time", diff:"med", path:"physical", done:false},
     {id:id(), name:"Find your baseline: max push-ups in 2 min", diff:"easy", path:"physical", done:false},
@@ -159,6 +164,54 @@ const VALUES = {
   daily:{easy:{xp:10,g:4},med:{xp:20,g:8},hard:{xp:40,g:16}},
   board:{xp:20,g:10}, // board-prep tasks have no difficulty tiers — one flat reward
 };
+// Season-aware Board tab content — real, doctrine-grounded Talent-Based
+// Branching program tasks per career stage (careerStage()'s exact 6-value
+// vocabulary, migration.js). Deliberately short per stage and free of
+// invented dates/specifics; hedging ("verify with cadre/current handbook")
+// lives once in board.html's disclaimer + each stage's blurb (board.js),
+// not repeated per task. `key` is a stable identity separate from `name` —
+// used by syncBoardTasksToStage()/mergeBoardTaskSeeds() so a user renaming
+// or deleting their copy never breaks or gets silently overwritten.
+const BOARD_TASK_SEEDS = [
+  {key:"ms1_meet_cadre", stage:"MS1", name:"Meet with your cadre/PMS to understand how contracting and the OML process work", why:"No TBB engagement yet — this is about knowing what's coming."},
+  {key:"ms1_baseline", stage:"MS1", name:"Set your PT & AFT baseline (see FM tab)", why:"OML weighs AFT heavily later — an early honest baseline pays off."},
+  {key:"ms1_gpa_tracking", stage:"MS1", name:"Start logging your GPA every semester (Profile → GPA Semester Log)", why:"GPA is an OML input from day one, not just MS3 year."},
+  {key:"ms1_branch_explore", stage:"MS1", name:"Informally explore Army branches that interest you — attend any branch orientation events your battalion offers", why:null},
+  {key:"ms1_learn_tbb", stage:"MS1", name:"Learn what Talent-Based Branching (TBB) actually is and roughly when it happens for your year group", why:"Ask your cadre — timelines shift year to year."},
+
+  {key:"ms2_oml_discipline", stage:"MS2", name:"Keep building GPA, AFT, and leadership record — all three feed your OML", why:null},
+  {key:"ms2_narrow_branches", stage:"MS2", name:"Narrow your branch interest list to a few realistic top choices", why:null},
+  {key:"ms2_research_reqs", stage:"MS2", name:"Research your top branches' real requirements against DA PAM 600-3", why:"Reputation isn't the same as requirements — check the actual pamphlet."},
+  {key:"ms2_ask_upperclass", stage:"MS2", name:"Ask upper-class cadets or cadre what made past TBB accessions files strong", why:null},
+  {key:"ms2_service_oblig", stage:"MS2", name:"If contracted, confirm your understanding of your service obligation type (Active/Guard/Reserve) with cadre", why:null},
+
+  {key:"ms3_ims_account", stage:"MS3", name:"Create / verify your CC IMS (Cadet Command) & TBB account", why:null},
+  {key:"ms3_accessions_file", stage:"MS3", name:"Build your Talent-Based Branching (TBB) accessions file", why:null},
+  {key:"ms3_branch_resume", stage:"MS3", name:"Write & polish your branch résumé", why:null},
+  {key:"ms3_research_branch", stage:"MS3", name:"Research your top branch choices and their OML requirements", why:null},
+  {key:"ms3_branch_interview", stage:"MS3", name:"Request branch interviews with your top-choice branch(es)", why:null},
+  {key:"ms3_rank_prefs", stage:"MS3", name:"Enter & rank your branch preferences in TBB", why:null},
+  {key:"ms3_bradso", stage:"MS3", name:"Decide on BrADSO (Branch Active Duty Service Obligation) strategy", why:null},
+  {key:"ms3_oml_inputs", stage:"MS3", name:"Max your OML inputs: GPA, AFT score, leadership eval (CDT OER)", why:null},
+  {key:"ms3_certs", stage:"MS3", name:"Research branch-relevant certifications and coursework", why:null},
+  {key:"ms3_clearance", stage:"MS3", name:"Confirm your clearance eligibility for your desired branch", why:null},
+
+  {key:"ldac_confirm_dates", stage:"LDAC", name:"Confirm your LDAC/CST dates and any pre-camp requirements with cadre", why:null},
+  {key:"ldac_oml_link", stage:"LDAC", name:"Understand how your Camp OML score factors into your final national OML", why:"LDAC isn't board-prep itself, but it's a direct OML input."},
+  {key:"ldac_precamp_admin", stage:"LDAC", name:"Complete required pre-camp packing, medical, and administrative requirements", why:null},
+  {key:"ldac_perform", stage:"LDAC", name:"Perform your best at LDAC — Camp leadership evaluations are a real, direct OML input", why:null},
+
+  {key:"ms4_confirm_oml", stage:"MS4", name:"Confirm your final OML placement and branch result", why:null},
+  {key:"ms4_branch_orders", stage:"MS4", name:"Review and process your branch orders per current TBB/HRC guidance", why:null},
+  {key:"ms4_accessions_pkt", stage:"MS4", name:"Finalize your accessions packet (medical, background/clearance paperwork) for your branch", why:null},
+  {key:"ms4_bolc_prep", stage:"MS4", name:"Research your branch's Basic Officer Leader Course (BOLC) — timeline, location, prerequisites", why:null},
+  {key:"ms4_commission_reqs", stage:"MS4", name:"Confirm your commissioning date and any outstanding degree/commissioning requirements with cadre", why:null},
+
+  {key:"o1_gaining_unit", stage:"O1", name:"Confirm your gaining unit / first duty station and projected BOLC report date", why:null},
+  {key:"o1_bolc_inprocess", stage:"O1", name:"Complete BOLC in-processing / pre-arrival requirements (medical, packing list, admin)", why:null},
+  {key:"o1_train_transition", stage:"O1", name:"Shift training focus toward BOLC and your branch's officer fundamentals", why:null},
+  {key:"o1_outprocess", stage:"O1", name:"Out-process from ROTC/Cadet Command records and complete final cadet administrative requirements", why:null},
+];
 // ── Equipment taxonomy (FM-2) ────────────────────────────────────────────
 // A deliberately coarse tag set (machines is one umbrella tag, not per-machine)
 // so a profile is a short, honest checklist, not an unmaintainable catalog.
