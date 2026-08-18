@@ -345,7 +345,17 @@ function baselineKeyFor(name){
   if(/deadlift/.test(n)) return "max_deadlift";
   if(/pull-?up|inverted row/.test(n)) return "max_pullups";
   if(/squat/.test(n)&&!/bulgarian|split|pistol|jump/.test(n)) return "max_squat";
-  if(/2-?mile|long easy|tempo|interval/.test(n)) return "run_2mi";
+  // "tempo"/"interval" alone used to match ANY cardio exercise with that word
+  // in its name — "Rower intervals," "Stationary bike intervals," "Swim
+  // intervals," and the indoor bodyweight-circuit swaps ("Indoor intervals,"
+  // "Indoor tempo") all got bucketed under the 2-mile-run baseline even
+  // though none of them are running. computeTarget()'s baseline-blending
+  // could then attribute an unrelated exercise's monthly improvement (or
+  // plateau) to whichever of these the user actually did, masking a real
+  // trend on the thing they were really training. Treadmill variants stay
+  // included — a treadmill genuinely is running.
+  if(/2-?mile|long easy/.test(n)) return "run_2mi";
+  if(/tempo|interval/.test(n) && !/row|bike|swim|indoor/.test(n)) return "run_2mi";
   if(/sprint-drag|sdc/.test(n)) return "sdc_sim";
   return null;
 }

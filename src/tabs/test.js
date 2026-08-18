@@ -146,13 +146,33 @@ function testUnit(typeId, raw){
 }
 function renderTests(){
   const wrap=document.getElementById("testList"); if(!wrap) return;
-  wrap.innerHTML=TESTS.map(t=>{
+  // render() is called from dozens of unrelated triggers app-wide (an SRS
+  // deck edit, a study-plan checkoff — both live on this same Test tab), and
+  // this used to unconditionally rebuild the whole list every single time,
+  // including every #stage-X div — silently detaching a live in-progress
+  // stage (a running Cipher Desk pad, a ticking Fire Mission countdown) or a
+  // just-shown result screen, with no visible sign anything happened. A
+  // non-empty stage is a reliable generic signal that a test is either
+  // mid-play or showing a result worth keeping — for that one card, only the
+  // chrome (level/best/last) is refreshed in place; the live stage subtree
+  // (and its real event listeners) is left completely untouched. The Start
+  // button click is handled by a body-level delegated listener (awards.js),
+  // not a per-node handler, so it stays functional either way.
+  TESTS.forEach(t=>{
+    const stageEl=document.getElementById("stage-"+t.id);
+    const isLive=stageEl && stageEl.innerHTML.trim()!=="";
     const sk=testSkillOf(t);
     const best=bestTest(t.id), last=lastTest(t.id);
     const lvl = sk ? skEffectiveLevel(sk) : 0;
     const bestStr = best ? testUnit(t.id, best.raw) : "—";
     const lastStr = last ? testUnit(t.id, last.raw) : "—";
-    return `<div class="test-card" id="test-${t.id}">
+    const existing=document.getElementById("test-"+t.id);
+    if(isLive && existing){
+      const lvlEl=existing.querySelector(".test-lvl"); if(lvlEl) lvlEl.textContent=sk?('Lv '+lvl):'';
+      const statsEl=existing.querySelector(".test-stats"); if(statsEl) statsEl.innerHTML=`Best: <b>${bestStr}</b> · Last: <b>${lastStr}</b> · feeds <b>${esc(t.skill)}</b>`;
+      return;
+    }
+    const html=`<div class="test-card" id="test-${t.id}">
       <div class="test-head">
         <div class="test-title">${esc(t.name)} <span class="test-dur">⏱ ${esc(t.dur)}</span></div>
         <span class="test-lvl">${sk?('Lv '+lvl):''}</span>
@@ -164,7 +184,9 @@ function renderTests(){
       <div class="test-stage" id="stage-${t.id}"></div>
       <button class="btn-add test-start" data-teststart="${t.id}">Start (${esc(t.dur)})</button>
     </div>`;
-  }).join("");
+    if(existing) existing.outerHTML=html;
+    else wrap.insertAdjacentHTML("beforeend", html);
+  });
 }
 
 // ---- Sentry: reaction time, disguised as a night-watch game (Phase T / idea #1) ----
@@ -691,7 +713,14 @@ const SI_SET_B=["○","△","□","◇","☆","✧","♢","♧"];
 const SI_ROUNDS=[
   {pool:3, mode:"cycle", step:1},
   {pool:4, mode:"cycle", step:1},
-  {pool:4, mode:"cycle", step:2},
+  // step:2 over a pool of 4 has gcd(2,4)=2, so the cycle only ever visits 2
+  // of the 4 symbols (a trivial alternation) — easier than round 2, not
+  // harder as intended. step:3 has gcd(3,4)=1 (visits all 4 symbols) and,
+  // since a 4-symbol pool wraps a step of 3 to a visual jump ("0,3,2,1,..."
+  // instead of the ascending "0,1,2,3..."), still reads as a genuinely
+  // different/harder pattern to a human even though it's mathematically a
+  // reversed step-1 cycle.
+  {pool:4, mode:"cycle", step:3},
   {pool:5, mode:"alt"},
   {pool:5, mode:"cycle", step:2},
   {pool:6, mode:"cycle", step:1},
@@ -854,7 +883,12 @@ function startIntelBriefing(){
 }
 function rdDone(){
   if(!_rdState||!_rdState.t0) return;
-  const secs=(performance.now()-_rdState.t0)/1000;
+  // Floored at a real minimum, same guard Comms Relay already uses right
+  // next to this construct — without it, an instant Begin->Done tap (a fast
+  // double-click, or an automated one) divides by a near-zero elapsed time
+  // and fabricates an astronomical WPM that permanently overwrites the
+  // "Best" record and insta-maxes the Reading speed skill.
+  const secs=Math.max(3,(performance.now()-_rdState.t0)/1000);
   const wpm=Math.round(_rdState.passage.words/(secs/60));
   const p=_rdState.passage;
   const stage=document.getElementById("stage-reading"); if(!stage) return;

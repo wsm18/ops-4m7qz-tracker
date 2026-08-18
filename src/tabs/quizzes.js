@@ -31,9 +31,31 @@ function renderBoardReadiness(){
     <div class="br-foot">A category can show passed but still carry tracked weak spots — questions missed on first attempt, sitting in your Memory Track SRS decks. Clear those for genuine readiness, not just a passing score.</div>
   </div>`;
 }
+// Keeps the "pass all quizzes" boss objective's maxhp/name/hp in sync with
+// the live quiz bank size — self-heals since the seeded value goes stale the
+// moment quizbank.js grows (v208-session finding). Previously only ran
+// reactively inside finishQuiz()'s firstPass branch, so a bank that grew
+// AFTER the user had already passed everything (objective already showing
+// "complete") stayed stale indefinitely — passing a brand-new quiz, the one
+// action that would trigger the fix, is exactly what a "complete" badge
+// discourages. Also called from renderQuizzes() (every Quiz-tab visit) so it
+// self-heals proactively too. Returns true if the objective is now complete.
+function syncQuizBossObjective(){
+  const obj=S.bosses.find(b=>b.auto==="quizzes");
+  if(!obj) return false;
+  const liveTotal=Object.keys(window.QUIZ_BANK||{}).length||obj.maxhp;
+  let changed=false;
+  if(obj.maxhp!==liveTotal){ obj.maxhp=liveTotal; obj.name="Pass all "+liveTotal+" officer-knowledge quizzes"; changed=true; }
+  const passedCount=Object.values(S.quizzes).filter(x=>x.passed).length;
+  const newHp=Math.max(0,obj.maxhp-passedCount);
+  if(newHp!==obj.hp){ obj.hp=newHp; changed=true; }
+  if(changed) save();
+  return obj.hp<=0;
+}
 function renderQuizzes(){
   const el=document.getElementById("quizList");
   if(!el) return;
+  if(typeof syncQuizBossObjective==="function") syncQuizBossObjective();
   const bank=window.QUIZ_BANK||{};
   el.innerHTML=Object.keys(bank).map(key=>{
     const t=bank[key];
@@ -87,8 +109,11 @@ const QZ_TIME_PER_Q=15; // seconds — real boards are rapid-fire verbal, not un
 function startQuiz(key){
   const t=window.QUIZ_BANK[key]; if(!t) return;
   if(QZ&&QZ.tick) clearInterval(QZ.tick);
-  // shuffle a copy of questions
-  const order=t.questions.map((q,i)=>i).sort(()=>Math.random()-0.5);
+  // shuffle a copy of questions — shuffleInPlace() (test.js) is a real
+  // Fisher-Yates; sort(()=>Math.random()-0.5) is a well-known biased "shuffle"
+  // whose output distribution isn't actually uniform, especially for small
+  // arrays like these
+  const order=typeof shuffleInPlace==="function"?shuffleInPlace(t.questions.map((q,i)=>i)):t.questions.map((q,i)=>i).sort(()=>Math.random()-0.5);
   QZ={key,idx:0,firstCorrect:0,retried:false,order,timed:_qzTimedMode};
   document.getElementById("qmTitle").textContent="🐿️ Climb the Tree — "+t.icon+" "+t.name;
   document.getElementById("quizModal").classList.add("show");
@@ -117,7 +142,7 @@ function showQuizQ(){
   // quiz risked a cadet learning "it's the 2nd button" instead of the
   // content — the opposite of the "board readiness" this tool is meant to
   // build.
-  const optOrder=q.a.map((opt,i)=>i).sort(()=>Math.random()-0.5);
+  const optOrder=typeof shuffleInPlace==="function"?shuffleInPlace(q.a.map((opt,i)=>i)):q.a.map((opt,i)=>i).sort(()=>Math.random()-0.5);
   body.innerHTML=`${ctPathHtml(total,QZ.idx)}
     <div class="qm-qnum">${QZ.retried?"Same junction — try again":`Junction ${QZ.idx+1} of ${total}`}</div>
     <div class="qm-q">${esc(q.q)}</div>
@@ -195,20 +220,12 @@ function finishQuiz(){
     if(!S.dailies.some(d=>d.review===QZ.key)){
       S.dailies.push({id:id(),name:reviewName,kind:"order",diff:"easy",track:"knowledge",done:false,best:0,streak:0,lastDone:null,graceUsed:false,history:[],review:QZ.key});
     }
-    // advance the "pass every quiz" objective — self-heals maxhp/name to the
-    // live bank size on every completion, since the seeded value goes stale
-    // the moment quizbank.js grows (found by the v208-session second-pass
-    // audit: this was still hardcoded to the old "16" even after the bank
-    // reached 20 categories, so it falsely declared "all quizzes passed"
-    // 4 categories early — same staleness class as the records.js tally fix).
-    const obj=S.bosses.find(b=>b.auto==="quizzes");
-    if(obj){
-      const liveTotal=Object.keys(window.QUIZ_BANK||{}).length||obj.maxhp;
-      if(obj.maxhp!==liveTotal){ obj.maxhp=liveTotal; obj.name="Pass all "+liveTotal+" officer-knowledge quizzes"; }
-      const passedCount=Object.values(S.quizzes).filter(x=>x.passed).length;
-      obj.hp=Math.max(0,obj.maxhp-passedCount);
-      if(obj.hp<=0){toast("⭐ All quizzes passed — Knowledge objective secured!");}
-    }
+    // advance the "pass every quiz" objective — only toast if this specific
+    // completion is what pushed it to 0 (not if it was already complete)
+    const objBefore=S.bosses.find(b=>b.auto==="quizzes");
+    const wasIncomplete=objBefore&&objBefore.hp>0;
+    syncQuizBossObjective();
+    if(wasIncomplete && objBefore.hp<=0){ toast("⭐ All quizzes passed — Knowledge objective secured!"); }
   }
   save();
   const body=document.getElementById("qmBody");

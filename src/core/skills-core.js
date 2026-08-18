@@ -65,12 +65,23 @@ const _RARITY_MAP={
   mythic:    {name:"Mythic",   col:"#b8860b",light:"#fffde7",sym:"✦",border:"#ffd700"},
 };
 function skRarity(sk){
-  if(sk.joker||sk.auto) return {name:"Joker",col:"#c62828",light:"#fff0f0",sym:"🃏",border:"#ef5350"};
+  // An explicitly user-tagged wildcard is always a Joker. An `auto` skill is
+  // NOT automatically one too, though — 23 of the app's 24 auto skills
+  // (Reaction speed, Push-ups, Integrity, etc.) have a real pyramid setKey
+  // and rarity; forcing them all to Joker masked their real tier AND, since
+  // skills.js separately routes any auto|joker skill into the Wildcards
+  // deck, made each one render TWICE — once correctly under its real Path
+  // deck, once again as a Joker. Checked below: explicit rarity (live or
+  // seed) always wins first: only an auto skill with genuinely no pyramid
+  // seed data at all (Blood Donation is the one real example) falls through
+  // to Joker.
+  if(sk.joker) return {name:"Joker",col:"#c62828",light:"#fff0f0",sym:"🃏",border:"#ef5350"};
   // Explicit rarity on the live skill object (rare — only set if manually copied)
   if(sk.rarity&&_RARITY_MAP[sk.rarity.toLowerCase()]) return _RARITY_MAP[sk.rarity.toLowerCase()];
   // Explicit rarity on the seed — live skill objects don't copy rarity, so check the seed
   const _seed=typeof skSeedOf==="function"?skSeedOf(sk.name,sk.cat):null;
   if(_seed&&_seed.rarity&&_RARITY_MAP[_seed.rarity.toLowerCase()]) return _RARITY_MAP[_seed.rarity.toLowerCase()];
+  if(sk.auto && !(_seed&&_seed.setKey)) return {name:"Joker",col:"#c62828",light:"#fff0f0",sym:"🃏",border:"#ef5350"};
   // Level-count fallback — filter empty-string levels so padded ladders don't over-count
   const _lvls=sk.levels||[];
   const n=_lvls.filter(l=>typeof l==="object"?!!(l.ability):!!l).length||_lvls.length;
@@ -402,8 +413,8 @@ function computeSmartFocus(){
     const daysLeft=skDaysLeft(sk);
     let urgency=0;
     if(state==="at-risk" && daysLeft!=null){
-      const fd=sk.fadeDays||30, grace=fd*0.2;
-      urgency = grace>0 ? Math.max(0, Math.min(1, (grace-Math.max(0,daysLeft))/grace)) : 0;
+      const fd=sk.fadeDays||30, grace=fd*0.2; // fd always positive (fallback 30), so grace always > 0
+      urgency = Math.max(0, Math.min(1, (grace-Math.max(0,daysLeft))/grace));
     }
     const opportunity=Math.max(0, peak-eff);
     const raw=urgency+opportunity;
@@ -425,6 +436,7 @@ function computeSmartFocus(){
 }
 // generate the active quest for a skill: maintain current, reclaim decayed, or promote
 function skQuest(sk){
+  if(!sk.levels || !sk.levels.length) return null; // orphaned skill (see leafCard's guard, skills.js) — nothing to quest toward
   const eff=skEffectiveLevel(sk);
   if(eff<sk.currentLevel){ // decayed — must re-prove the level just lost
     const lvl=sk.levels[eff]; // the level to reclaim (0-indexed -> level eff+1)
@@ -437,7 +449,7 @@ function skQuest(sk){
   // at max — maintenance only
   const lvl=sk.levels[sk.currentLevel-1];
   const days=skDaysLeft(sk);
-  if(days!==null && days<=Math.ceil(sk.fadeDays*0.34)){
+  if(days!==null && days<=Math.ceil((sk.fadeDays||30)*0.34)){
     return {type:"maintain", level:sk.currentLevel, ability:lvl.ability, label:"Maintain"};
   }
   return null; // fresh & maxed — no quest needed right now
@@ -465,6 +477,7 @@ function skPass(skId){
   skUpdatePeak(sk);
   // maintain just refreshes the timer
   sk.lastQuestTs=Date.now();
+  if(!Array.isArray(sk.history)) sk.history=[]; // a save old enough to predate this field would otherwise throw here
   sk.history.push({ts:Date.now(),type:q.type,level:q.level});
   // Skill growth feeds its OWN Path's Grove idol — every Path's idol should
   // actually reflect the skills leveled within it, not just Academic.
@@ -477,6 +490,7 @@ function skPass(skId){
 function skReachLevel(skId, level, note){
   const sk=S.lifeSkills.find(x=>x.id===skId); if(!sk) return;
   if(sk.auto){ toast("This skill levels automatically from your measured results."); return; }
+  if(!sk.levels || !sk.levels.length){ toast("This skill's data is missing — it may have been removed from a newer version. Try resyncing skill trees in Profile."); return; }
   const max=sk.levels.length;
   level=Math.max(1, Math.min(max, level|0));
   const eff=skEffectiveLevel(sk);
@@ -488,6 +502,7 @@ function skReachLevel(skId, level, note){
   sk.lastQuestTs=Date.now();
   const entry={ts:Date.now(),type:prevType,level};
   if(note&&note.trim()) entry.note=note.trim();
+  if(!Array.isArray(sk.history)) sk.history=[];
   sk.history.push(entry);
   // Same as skPass() — feeds the skill's OWN Path idol, not always Academic.
   grantPathXP(sk.cat);
@@ -571,7 +586,11 @@ function skWorkGuidance(sk){
 function skLeafColor(eff, max, sk){
   if(eff<=0) return "#3a4030";                 // unproven — bare twig
   if(sk && typeof skFadeState==="function" && skFadeState(sk)==="at-risk") return "rgb(204,138,45)"; // amber — in grace period
-  const t=Math.max(0,Math.min(1,(eff-1)/(Math.max(1,max)-1)));
+  // A 1-level skill (only reachable via user-created custom skills — no seed
+  // has a ladder this short) has no gradient to interpolate; treat it as
+  // fully lit once started rather than dividing by zero into rgb(NaN,NaN,NaN).
+  const denom=Math.max(1,max)-1;
+  const t=denom<=0 ? 1 : Math.max(0,Math.min(1,(eff-1)/denom));
   // interpolate ember (low) -> gold (mid) -> jade (high)
   const lerp=(a,b,f)=>Math.round(a+(b-a)*f);
   let r,g,bl;

@@ -76,7 +76,8 @@ const _mobileDrawerBackdrop=document.getElementById("mobileDrawerBackdrop");
 if(_mobileDrawerBackdrop) _mobileDrawerBackdrop.onclick=closeMobileDrawer;
 applyNavMore();
 
-document.getElementById("qAdd").onclick=()=>{
+const _qAddBtn=document.getElementById("qAdd");
+if(_qAddBtn) _qAddBtn.onclick=()=>{
   const n=document.getElementById("qName").value.trim();if(!n)return;
   const path=document.getElementById("qPath").value||"tactical";
   const due=document.getElementById("qDue").value||null;
@@ -92,7 +93,8 @@ document.getElementById("qAdd").onclick=()=>{
 };
 // Old #dAdd Daily Order add-button removed v168 — superseded by dailies.js's unified
 // #dtAdd handler (Order/Habit kind toggle), which lives in dailies.html now.
-document.getElementById("bAdd").onclick=()=>{
+const _bAddBtn=document.getElementById("bAdd");
+if(_bAddBtn) _bAddBtn.onclick=()=>{
   const n=document.getElementById("bName").value.trim();if(!n)return;
   const checksRaw=(document.getElementById("bChecks")||{}).value||"";
   const checkpoints=checksRaw.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>({name:l,done:false}));
@@ -104,7 +106,8 @@ document.getElementById("bAdd").onclick=()=>{
   const bDueEl=document.getElementById("bDue"); if(bDueEl) bDueEl.value="";
   save();render();
 };
-document.getElementById("rAdd").onclick=()=>{
+const _rAddBtn=document.getElementById("rAdd");
+if(_rAddBtn) _rAddBtn.onclick=()=>{
   const n=document.getElementById("rName").value.trim();if(!n)return;
   const c=Math.max(1,parseInt(document.getElementById("rCost").value)||10);
   S.rewards.push({id:id(),name:n,cost:c});
@@ -262,7 +265,12 @@ document.body.addEventListener("click",e=>{
   if(t.dataset.skcopy){
     const sk=S.lifeSkills.find(x=>x.id===t.dataset.skcopy); if(!sk) return;
     const eff=typeof skEffectiveLevel==="function"?skEffectiveLevel(sk):sk.currentLevel;
-    const tierLabel=typeof getTierLabelForLevel==="function"?getTierLabelForLevel(sk,eff):"";
+    // getTierLabelForLevel(sk,0) returns the FIRST real tier's label (its loop
+    // matches on level<=t.upTo, and 0 satisfies the first tier same as level 1)
+    // — trophies.js's own render already guards this with peak>0?...:'Unproven',
+    // this copy-to-clipboard path didn't, so an unstarted skill's card text
+    // claimed a tier it hasn't earned.
+    const tierLabel=(eff>0 && typeof getTierLabelForLevel==="function")?getTierLabelForLevel(sk,eff):"Unproven";
     const days=typeof skDaysLeft==="function"?skDaysLeft(sk):null;
     const peak=sk.peakLevel||0;
     const txt=[
@@ -312,10 +320,12 @@ document.body.addEventListener("change",e=>{
   }
 });
 
-document.getElementById("renameBtn").onclick=()=>{
+const _renameBtn=document.getElementById("renameBtn");
+if(_renameBtn) _renameBtn.onclick=()=>{
   const n=prompt("Enter your name / callsign:",S.name);if(n&&n.trim()){S.name=n.trim().slice(0,30);save();render();}
 };
-document.getElementById("editRankBtn").onclick=()=>{
+const _editRankBtn=document.getElementById("editRankBtn");
+if(_editRankBtn) _editRankBtn.onclick=()=>{
   const r=prompt("Your current MS year / rank (e.g. 'MS2 Cadet'):",S.rank);
   if(r===null) return;
   const p=prompt("Your leadership position (e.g. 'S1', 'Squad Leader', 'No leadership role'):",S.position);
@@ -325,7 +335,7 @@ document.getElementById("editRankBtn").onclick=()=>{
 };
 
 // Enter-to-submit
-["qName","dtName"].forEach(idn=>document.getElementById(idn).addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById(idn==="qName"?"qAdd":"dtAdd").click();}));
+["qName","dtName"].forEach(idn=>{ const el=document.getElementById(idn); if(el) el.addEventListener("keydown",e=>{if(e.key==="Enter"){const btn=document.getElementById(idn==="qName"?"qAdd":"dtAdd"); if(btn) btn.click();}}); });
 
 // oath archive search — filter the completed oaths details on keystroke
 document.body.addEventListener("input",e=>{
@@ -350,7 +360,8 @@ function showLevelUp(path,lvl){
   document.getElementById("luSub").textContent=pm.idol+" grows stronger. "+pm.lore.split(".")[0]+". Drive on.";
   document.getElementById("levelup").classList.add("show");
 }
-document.getElementById("luClose").onclick=()=>document.getElementById("levelup").classList.remove("show");
+const _luCloseBtn=document.getElementById("luClose");
+if(_luCloseBtn) _luCloseBtn.onclick=()=>document.getElementById("levelup").classList.remove("show");
 
 /* ---------------- Weather toggle ---------------- */
 {
@@ -359,13 +370,15 @@ document.getElementById("luClose").onclick=()=>document.getElementById("levelup"
 }
 
 /* ---------------- Backup / reset ---------------- */
-document.getElementById("exportBtn").onclick=()=>{
+const _exportBtn=document.getElementById("exportBtn");
+if(_exportBtn) _exportBtn.onclick=()=>{
   const blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);
   a.download="questline-backup-"+today().replace(/ /g,"-")+".json";a.click();
 };
-document.getElementById("importBtn").onclick=()=>document.getElementById("importFile").click();
-document.getElementById("importFile").onchange=e=>{
+const _importBtn=document.getElementById("importBtn"), _importFileEl=document.getElementById("importFile");
+if(_importBtn && _importFileEl) _importBtn.onclick=()=>_importFileEl.click();
+if(_importFileEl) _importFileEl.onchange=e=>{
   const f=e.target.files[0];if(!f)return;const rd=new FileReader();
   rd.onload=()=>{
     try{
@@ -384,13 +397,30 @@ document.getElementById("importFile").onchange=e=>{
   };
   rd.readAsText(f);
 };
-document.getElementById("resetBtn").onclick=()=>{if(confirm("Erase all progress and start over? This cannot be undone.")){localStorage.removeItem(KEY);S=structuredClone(DEFAULT);save();render();}};
+const _resetBtn=document.getElementById("resetBtn");
+if(_resetBtn) _resetBtn.onclick=()=>{if(confirm("Erase all progress and start over? This cannot be undone.")){
+  localStorage.removeItem(KEY);
+  S=structuredClone(DEFAULT);
+  // Every OTHER path that replaces S wholesale (import, cloud/TOC restore)
+  // re-runs seedSkillsIfEmpty() right after — this one didn't, so "Reset"
+  // left Tree/Garden/Trophies/Skills showing "no skills yet" until the next
+  // full page reload instead of immediately re-seeding like a fresh install.
+  seedSkillsIfEmpty();
+  save();render();
+}};
 // Force-resync every skill's ladder/tiers/guidance from the current seed, preserving
 // your progress (levels, peaks, history). Use this if a restored older backup shows
 // outdated skill trees (e.g. a skill with the wrong number of levels).
-document.getElementById("resyncBtn").onclick=()=>{
+const _resyncBtn=document.getElementById("resyncBtn");
+if(_resyncBtn) _resyncBtn.onclick=()=>{
   if(!confirm("Resync all skill trees to the latest version?\n\nThis updates every skill's levels, tiers, and guidance to current — your progress (levels reached, peaks, history) is kept.")) return;
-  S._skillLadderVer=0;                 // mark stale so the merge force-resyncs every ladder
+  // _skillLadderVer is just a stamp now, not a gate — every skill's ladder/
+  // guidance text is always resolved live from SEED_SKILLS via skHydrate()'s
+  // getters regardless of its value, so mergeNewSeedSkills() below already
+  // does a full resync on every call. Left at 0 here anyway (harmless — it
+  // just forces migration.js's own stamp-update branch to run too) so a
+  // stale ladder version doesn't linger if this is ever re-gated later.
+  S._skillLadderVer=0;
   if(typeof mergeNewSeedSkills==="function") mergeNewSeedSkills();
   // re-derive auto skills from your logged performance afterward
   if(typeof syncSkillsFromActivity==="function") syncSkillsFromActivity();

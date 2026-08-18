@@ -188,7 +188,18 @@ function importSection(text){
   const sec=SECTIONS[payload._opsSection];
   if(!sec){ toast("Unknown section in file"); return; }
   if(!confirm(`Import "${sec.label.split(" (")[0]}"? This replaces your current ${payload._opsSection} data and leaves everything else untouched.`)) return;
-  sec.keys.forEach(k=>{ if(payload.data[k]!==undefined && payload.data[k]!==null) S[k]=payload.data[k]; });
+  let skippedAny=false;
+  sec.keys.forEach(k=>{
+    if(payload.data[k]===undefined || payload.data[k]===null) return;
+    // If DEFAULT declares this key as an array, the imported value must be
+    // one too — a malformed/hand-edited file assigning e.g. a string or
+    // object into S.awards used to crash the very next renderAwards() call
+    // (or CSV export, or any downstream .filter/.sort), breaking render()
+    // for every tab, not just this one section.
+    if(Array.isArray(DEFAULT[k]) && !Array.isArray(payload.data[k])){ skippedAny=true; return; }
+    S[k]=payload.data[k];
+  });
+  if(skippedAny) toast("⚠️ Part of that file didn't match the expected shape — skipped, nothing else was touched.");
   // re-run migrations so imported skills get peak/transparency backfill etc.
   if(payload._opsSection==="skills" && typeof mergeNewSeedSkills==="function"){ S.lifeSkills.forEach(s=>{ s.peakLevel=Math.max(s.peakLevel||0,s.currentLevel||0); }); mergeNewSeedSkills(); }
   save(); render();

@@ -87,15 +87,29 @@ function insightTrainingFreqVsAftTrend(){
 }
 
 // ---- Body weight movement vs deadlift movement, paired by nearest date ----
+// Directional-agreement claims need a real sample, not just a real bucket —
+// 4 independent same/different-direction comparisons hit 100% agreement by
+// chance ~12.5% of the time, well within reach of the pct>=65 threshold
+// below. Distinct from INSIGHT_MIN_TOTAL (a looser floor for showing the
+// plain fraction at all) — the stronger "a real pattern" wording needs more.
+const INSIGHT_MIN_TOTAL_STRONG=8;
 function insightWeightVsDeadlift(){
   const dl=(S.aft||[]).map(a=>({ts:insDayMs(a.date), val:a.raw&&a.raw.dl})).filter(d=>d.ts!=null&&d.val!=null).sort((a,b)=>a.ts-b.ts);
   const wt=(S.weightLog||[]).map(w=>({ts:insDayMs(w.date), val:w.lb})).filter(w=>w.ts!=null&&w.val!=null).sort((a,b)=>a.ts-b.ts);
   if(dl.length<3 || wt.length<3) return null;
   const pairs=[];
+  // Each AFT test previously found its nearest weight entry independently,
+  // with no de-duplication — several AFT tests taken close together could
+  // all pair to the SAME weight reading, so consecutive "pairs" compared a
+  // weight delta of 0 (silently skipped below) or, worse, deltas derived
+  // from effectively one shared measurement, overstating how many genuinely
+  // independent observations `total` represents. Track used weight entries
+  // so each one anchors at most one AFT test.
+  const usedWt=new Set();
   dl.forEach(d=>{
-    let best=null, bestDiff=Infinity;
-    wt.forEach(w=>{ const diff=Math.abs(w.ts-d.ts); if(diff<14*864e5 && diff<bestDiff){ best=w; bestDiff=diff; } });
-    if(best) pairs.push({dl:d.val, wt:best.val});
+    let best=null, bestDiff=Infinity, bestIdx=-1;
+    wt.forEach((w,i)=>{ if(usedWt.has(i)) return; const diff=Math.abs(w.ts-d.ts); if(diff<14*864e5 && diff<bestDiff){ best=w; bestDiff=diff; bestIdx=i; } });
+    if(best){ pairs.push({dl:d.val, wt:best.val}); usedWt.add(bestIdx); }
   });
   if(pairs.length<3) return null;
   let agree=0, total=0;
@@ -107,9 +121,11 @@ function insightWeightVsDeadlift(){
   }
   if(total<INSIGHT_MIN_TOTAL) return null;
   const pct=Math.round(agree/total*100);
+  const strongEnough=total>=INSIGHT_MIN_TOTAL_STRONG;
   return {
     line: `${agree} of ${total} times your logged body weight moved between AFT tests, your deadlift moved the same direction (${pct}%).`,
-    detail: pct>=65 ? "A real pattern in your logged data — for you, weight and deadlift strength tend to move together." : pct<=35 ? "Your deadlift and body weight tend to move in opposite directions in your logged data — could mean strength gains without added mass, or the reverse." : "No clear pattern either way yet in your logged data.",
+    detail: !strongEnough ? "Not quite enough independent comparisons yet to call this a real pattern — check back after a few more AFT tests."
+      : pct>=65 ? "A real pattern in your logged data — for you, weight and deadlift strength tend to move together." : pct<=35 ? "Your deadlift and body weight tend to move in opposite directions in your logged data — could mean strength gains without added mass, or the reverse." : "No clear pattern either way yet in your logged data.",
   };
 }
 

@@ -1,3 +1,28 @@
+// Shared "cancel edit" affordance for the app's ~7 add-or-edit forms (Awards,
+// Memberships, Events, Academic Honors, ROTC positions/competitions/camp
+// results) — none of them had any way back to "Add" mode except submitting
+// (which writes an edit you may not have wanted) or reloading the page.
+// Inserted once, right after the save button, and reused across renders
+// (not re-created) — onCancel should reset the module's own _xxEditId and
+// restore the button's default label/form-clear.
+function ensureEditCancelLink(saveBtn, onCancel){
+  if(!saveBtn) return null;
+  let link=saveBtn.nextElementSibling;
+  if(!link || !link.classList || !link.classList.contains("edit-cancel-link")){
+    link=document.createElement("a");
+    link.className="edit-cancel-link";
+    link.href="#";
+    saveBtn.insertAdjacentElement("afterend", link);
+  }
+  link.textContent="cancel edit";
+  link.style.display="inline-block";
+  link.onclick=(e)=>{ e.preventDefault(); onCancel(); link.style.display="none"; };
+  return link;
+}
+function hideEditCancelLink(saveBtn){
+  const link=saveBtn&&saveBtn.nextElementSibling;
+  if(link && link.classList && link.classList.contains("edit-cancel-link")) link.style.display="none";
+}
 // skills: capture level-ability typing as it's entered
 document.addEventListener("input",e=>{ const i=e.target.dataset.skl; if(i!=null){ _skLevels[+i]=e.target.value; } });
 const _skAddLevel=document.getElementById("skAddLevel"); if(_skAddLevel) _skAddLevel.onclick=()=>{ _skLevels.push(""); renderSkLevelInputs(); };
@@ -111,9 +136,13 @@ if(_awAdd) _awAdd.onclick=()=>{
   const org=document.getElementById("awOrg").value.trim();
   if(_awEditId){
     const a=S.awards.find(x=>x.id===_awEditId);
-    if(a){ a.kind=kind; a.title=title; a.note=note; a.year=year; a.org=org; }
-    _awEditId=null; _awAdd.textContent="Add to the Wall";
-    toast("✎ Award updated");
+    _awEditId=null; _awAdd.textContent="Add to the Wall"; hideEditCancelLink(_awAdd);
+    // `a` can be missing if this award was deleted (via its own ✕) while
+    // its edit form was still open — used to unconditionally toast "updated"
+    // regardless, discarding whatever was typed with no indication anything
+    // was wrong.
+    if(a){ a.kind=kind; a.title=title; a.note=note; a.year=year; a.org=org; toast("✎ Award updated"); }
+    else { toast("That award was deleted — nothing to save"); }
   } else {
     S.awards.push({id:id(),ts:Date.now(),date:new Date().toLocaleDateString(),kind,title,note,year,org});
     toast("🏆 Added to the wall");
@@ -130,6 +159,11 @@ function awEdit(awId){
   document.getElementById("awOrg").value=a.org||"";
   document.getElementById("awNote").value=a.note||"";
   _awEditId=awId; _awAdd.textContent="Save changes";
+  ensureEditCancelLink(_awAdd, ()=>{
+    _awEditId=null; _awAdd.textContent="Add to the Wall";
+    document.getElementById("awTitle").value=""; document.getElementById("awNote").value="";
+    document.getElementById("awYear").value=""; document.getElementById("awOrg").value="";
+  });
   document.getElementById("awTitle").scrollIntoView({behavior:"smooth",block:"center"});
   document.getElementById("awTitle").focus();
 }
@@ -165,8 +199,9 @@ const _mbSave=document.getElementById("mbSave"); if(_mbSave) _mbSave.onclick=()=
   const roles=_mbRoles.filter(r=>r.title.trim()).map(r=>({title:r.title.trim(),startYear:parseInt(r.startYear)||null,endYear:parseInt(r.endYear)||null}));
   if(_mbEditId){
     const m=S.memberships.find(x=>x.id===_mbEditId);
-    if(m){ m.org=org; m.startYear=startYear; m.endYear=endYear; m.memberType=memberType; m.note=note; m.roles=roles; }
-    _mbEditId=null; _mbSave.textContent="Add membership"; toast("✎ Membership updated");
+    _mbEditId=null; _mbSave.textContent="Add membership"; hideEditCancelLink(_mbSave);
+    if(m){ m.org=org; m.startYear=startYear; m.endYear=endYear; m.memberType=memberType; m.note=note; m.roles=roles; toast("✎ Membership updated"); }
+    else { toast("That membership was deleted — nothing to save"); }
   } else {
     S.memberships.push({id:id(),org,startYear,endYear,memberType,roles,note}); toast("🎟️ Membership added");
   }
@@ -184,6 +219,11 @@ function mbEdit(mbId){
   _mbRoles=(m.roles||[]).map(r=>({title:r.title||"",startYear:r.startYear||"",endYear:r.endYear||""}));
   renderMbRoleInputs();
   _mbEditId=mbId; _mbSave.textContent="Save changes";
+  ensureEditCancelLink(_mbSave, ()=>{
+    _mbEditId=null; _mbSave.textContent="Add membership";
+    _mbRoles=[]; renderMbRoleInputs();
+    ["mbOrg","mbStart","mbEnd","mbNote"].forEach(x=>document.getElementById(x).value="");
+  });
   document.getElementById("mbOrg").scrollIntoView({behavior:"smooth",block:"center"}); document.getElementById("mbOrg").focus();
 }
 
@@ -192,7 +232,7 @@ let _evEditId=null;
 const _evSave=document.getElementById("evSave"); if(_evSave) _evSave.onclick=()=>{
   const title=document.getElementById("evTitle").value.trim(); if(!title){toast("Name the event");return;}
   const data={title,year:parseInt(document.getElementById("evYear").value)||null,org:document.getElementById("evOrg").value.trim(),role:document.getElementById("evRole").value.trim(),note:document.getElementById("evNote").value.trim()};
-  if(_evEditId){ const ev=S.events.find(x=>x.id===_evEditId); if(ev) Object.assign(ev,data); _evEditId=null; _evSave.textContent="Add event"; toast("✎ Event updated"); }
+  if(_evEditId){ const ev=S.events.find(x=>x.id===_evEditId); _evEditId=null; _evSave.textContent="Add event"; hideEditCancelLink(_evSave); if(ev){ Object.assign(ev,data); toast("✎ Event updated"); } else { toast("That event was deleted — nothing to save"); } }
   else { S.events.push({id:id(),...data}); toast("📅 Event added"); }
   ["evTitle","evYear","evOrg","evRole","evNote"].forEach(x=>document.getElementById(x).value="");
   save();render();
@@ -205,6 +245,10 @@ function evEdit(evId){
   document.getElementById("evRole").value=ev.role||"";
   document.getElementById("evNote").value=ev.note||"";
   _evEditId=evId; _evSave.textContent="Save changes";
+  ensureEditCancelLink(_evSave, ()=>{
+    _evEditId=null; _evSave.textContent="Add event";
+    ["evTitle","evYear","evOrg","evRole","evNote"].forEach(x=>document.getElementById(x).value="");
+  });
   document.getElementById("evTitle").scrollIntoView({behavior:"smooth",block:"center"}); document.getElementById("evTitle").focus();
 }
 
@@ -342,7 +386,13 @@ async function cloudInit(){
         // `typeof x==="object"` alone also accepts an array — silently adopts
         // as a save whose every top-level key becomes a numeric index,
         // effectively a factory reset with no warning. Require a real object.
-        if(txt.trim()){ try{ const data=JSON.parse(txt); if(data&&typeof data==="object"&&!Array.isArray(data)){ localStorage.setItem(KEY,JSON.stringify(data)); S=load(); seedSkillsIfEmpty(); render(); } }catch(_){} }
+        // Only adopt if the file is at least as new as the current local
+        // state (S._lastModified, stamped on every save() — state.js) — an
+        // automatic, silent boot-time restore had no recency check at all
+        // before this: a cloud file that happened to be stale (synced from
+        // an old session, or simply not written since) could overwrite
+        // fresher local data with no way to know it just happened.
+        if(txt.trim()){ try{ const data=JSON.parse(txt); if(data&&typeof data==="object"&&!Array.isArray(data)&&(data._lastModified||0)>=(S._lastModified||0)){ localStorage.setItem(KEY,JSON.stringify(data)); S=load(); seedSkillsIfEmpty(); render(); } }catch(_){} }
       }
     }
   }catch(e){}
@@ -424,7 +474,12 @@ async function tocInit(){
       const r=await tocFetchData(timeoutMs);
       if(r.ok){
         const body=await r.json();
-        if(body.ok&&body.data&&typeof body.data==="object"&&!Array.isArray(body.data)){
+        // Same recency guard as cloudInit() (see its comment) — TOC is
+        // documented to have "the final say" over a cloud file when both are
+        // present, but that was never actually safe without checking which
+        // one is newer: a TOC save left over from a stale session on another
+        // machine could silently overwrite fresher data with no warning.
+        if(body.ok&&body.data&&typeof body.data==="object"&&!Array.isArray(body.data)&&(body.data._lastModified||0)>=(S._lastModified||0)){
           localStorage.setItem(KEY,JSON.stringify(body.data)); S=load(); seedSkillsIfEmpty(); render();
         }
         // A real, well-formed response either way (with or without data) is

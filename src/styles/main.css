@@ -293,6 +293,8 @@
   .btn-add{width:100%;background:linear-gradient(180deg,var(--gold),#b3801f);color:#1a1208;
     border:none;padding:12px;border-radius:8px;font-family:inherit;font-weight:700;font-size:14px;
     letter-spacing:.04em;cursor:pointer;margin-top:9px}
+  .edit-cancel-link{display:none;text-align:center;font-size:12px;color:var(--ink-faint);margin-top:6px;text-decoration:underline;cursor:pointer}
+  .edit-cancel-link:hover{color:var(--ink)}
   .btn-add:hover{filter:brightness(1.08)}
 
   /* Shared button system (GUI revamp foundation) — a composable vocabulary

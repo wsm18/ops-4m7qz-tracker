@@ -113,6 +113,10 @@ function ahEdit(ahId){
   document.getElementById("ahNote").value=a.note||"";
   _ahEditId=ahId;
   const btn=document.getElementById("ahAdd"); if(btn) btn.textContent="Save changes";
+  if(typeof ensureEditCancelLink==="function") ensureEditCancelLink(btn, ()=>{
+    _ahEditId=null; if(btn) btn.textContent="Add academic honor";
+    ["ahTitle","ahOrg","ahYear","ahNote"].forEach(x=>{const el=document.getElementById(x);if(el)el.value="";});
+  });
   document.getElementById("ahTitle").scrollIntoView({behavior:"smooth",block:"center"});
   document.getElementById("ahTitle").focus();
 }
@@ -126,9 +130,9 @@ function ahEdit(ahId){
     if(!S.academicHonors) S.academicHonors=[];
     if(_ahEditId){
       const a=S.academicHonors.find(x=>x.id===_ahEditId);
-      if(a){ a.title=title; a.org=org||undefined; a.year=yr; a.note=note||undefined; }
-      _ahEditId=null; ahSave.textContent="Add academic honor";
-      toast("✎ Academic honor updated");
+      _ahEditId=null; ahSave.textContent="Add academic honor"; if(typeof hideEditCancelLink==="function") hideEditCancelLink(ahSave);
+      if(a){ a.title=title; a.org=org||undefined; a.year=yr; a.note=note||undefined; toast("✎ Academic honor updated"); }
+      else { toast("That academic honor was deleted — nothing to save"); }
     } else {
       S.academicHonors.push({id:id(),ts:Date.now(),date:new Date().toLocaleDateString(),title,org:org||undefined,year:yr,note:note||undefined});
       toast("📚 Academic honor added");
@@ -155,6 +159,10 @@ function rpEdit(pId){
   document.getElementById("rpNote").value=p.note||"";
   _rpEditId=pId;
   const btn=document.getElementById("rpSave"); if(btn) btn.textContent="Save changes";
+  if(typeof ensureEditCancelLink==="function") ensureEditCancelLink(btn, ()=>{
+    _rpEditId=null; if(btn) btn.textContent="Add position";
+    ["rpTitle","rpStart","rpEnd","rpNote"].forEach(x=>{const el=document.getElementById(x);if(el)el.value="";});
+  });
   document.getElementById("rpTitle").scrollIntoView({behavior:"smooth",block:"center"});
   document.getElementById("rpTitle").focus();
 }
@@ -166,6 +174,10 @@ function rcEdit(cId){
   document.getElementById("rcNote").value=c.note||"";
   _rcEditId=cId;
   const btn=document.getElementById("rcSave"); if(btn) btn.textContent="Save changes";
+  if(typeof ensureEditCancelLink==="function") ensureEditCancelLink(btn, ()=>{
+    _rcEditId=null; if(btn) btn.textContent="Add competition";
+    ["rcName","rcYear","rcPlacement","rcNote"].forEach(x=>{const el=document.getElementById(x);if(el)el.value="";});
+  });
   document.getElementById("rcName").scrollIntoView({behavior:"smooth",block:"center"});
   document.getElementById("rcName").focus();
 }
@@ -177,6 +189,10 @@ function campEdit(cId){
   document.getElementById("campNote").value=c.note||"";
   _campEditId=cId;
   const btn=document.getElementById("campSave"); if(btn) btn.textContent="Save changes";
+  if(typeof ensureEditCancelLink==="function") ensureEditCancelLink(btn, ()=>{
+    _campEditId=null; if(btn) btn.textContent="Add camp result";
+    ["campName","campYear","campRating","campNote"].forEach(x=>{const el=document.getElementById(x);if(el)el.value="";});
+  });
   document.getElementById("campName").scrollIntoView({behavior:"smooth",block:"center"});
   document.getElementById("campName").focus();
 }
@@ -191,9 +207,9 @@ function campEdit(cId){
     if(!S.rotcRecord.positions) S.rotcRecord.positions=[];
     if(_rpEditId){
       const p=S.rotcRecord.positions.find(x=>x.id===_rpEditId);
-      if(p){ p.title=title; p.startSem=start||undefined; p.endSem=end||undefined; p.note=note||undefined; }
-      _rpEditId=null; rpSave.textContent="Add position";
-      toast("✎ Position updated");
+      _rpEditId=null; rpSave.textContent="Add position"; if(typeof hideEditCancelLink==="function") hideEditCancelLink(rpSave);
+      if(p){ p.title=title; p.startSem=start||undefined; p.endSem=end||undefined; p.note=note||undefined; toast("✎ Position updated"); }
+      else { toast("That position was deleted — nothing to save"); }
     } else {
       S.rotcRecord.positions.push({id:id(),title,startSem:start||undefined,endSem:end||undefined,note:note||undefined});
       toast("⭐ Position added");
@@ -211,9 +227,9 @@ function campEdit(cId){
     if(!S.rotcRecord.competitions) S.rotcRecord.competitions=[];
     if(_rcEditId){
       const c=S.rotcRecord.competitions.find(x=>x.id===_rcEditId);
-      if(c){ c.name=name; c.year=yr; c.placement=placement||undefined; c.note=note||undefined; }
-      _rcEditId=null; rcSave.textContent="Add competition";
-      toast("✎ Competition updated");
+      _rcEditId=null; rcSave.textContent="Add competition"; if(typeof hideEditCancelLink==="function") hideEditCancelLink(rcSave);
+      if(c){ c.name=name; c.year=yr; c.placement=placement||undefined; c.note=note||undefined; toast("✎ Competition updated"); }
+      else { toast("That competition was deleted — nothing to save"); }
     } else {
       S.rotcRecord.competitions.push({id:id(),name,year:yr,placement:placement||undefined,note:note||undefined});
       toast("⭐ Competition added");
@@ -231,9 +247,9 @@ function campEdit(cId){
     if(!S.rotcRecord.campResults) S.rotcRecord.campResults=[];
     if(_campEditId){
       const c=S.rotcRecord.campResults.find(x=>x.id===_campEditId);
-      if(c){ c.camp=camp; c.year=yr; c.rating=rating||undefined; c.note=note||undefined; }
-      _campEditId=null; campSave.textContent="Add camp result";
-      toast("✎ Camp result updated");
+      _campEditId=null; campSave.textContent="Add camp result"; if(typeof hideEditCancelLink==="function") hideEditCancelLink(campSave);
+      if(c){ c.camp=camp; c.year=yr; c.rating=rating||undefined; c.note=note||undefined; toast("✎ Camp result updated"); }
+      else { toast("That camp result was deleted — nothing to save"); }
     } else {
       S.rotcRecord.campResults.push({id:id(),camp,year:yr,rating:rating||undefined,note:note||undefined});
       toast("⭐ Camp result added");

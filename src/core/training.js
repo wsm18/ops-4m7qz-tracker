@@ -91,7 +91,23 @@ function sessionExForProfile(skey, tags, dateObj){
     if(!pool.length) return null;
     const overrideKey=dateKey+"|"+skey+"|"+i;
     const overrideIdx=(S.exChoice||{})[overrideKey];
-    const idx=(overrideIdx!=null && overrideIdx<pool.length) ? overrideIdx : suggestedPoolIndex(skey,i,pool.length,dt);
+    let idx;
+    if(overrideIdx!=null && overrideIdx<pool.length){
+      idx=overrideIdx;
+    } else {
+      // Prefer whichever pool candidate the user has actually logged sets
+      // for before, over the date-hash rotation — computeTarget()'s adaptive
+      // tier needs 2-3 CONSECUTIVE logs under the exact same exercise name to
+      // read a trend/stall. Rotating the suggested name day-to-day (even
+      // among equipment-eligible equivalents, e.g. hand-release vs. knee
+      // push-ups) fragmented that history across names that individually
+      // never accumulated enough logs — quietly locking a consistent user
+      // out of the adaptive tier for that slot indefinitely. Only kicks in
+      // once real history exists; a never-logged slot still rotates for
+      // discovery/variety.
+      const loggedIdx=typeof exerciseSeries==="function"?pool.findIndex(e=>exerciseSeries(e.n).length>0):-1;
+      idx=loggedIdx>=0?loggedIdx:suggestedPoolIndex(skey,i,pool.length,dt);
+    }
     let e=pool[idx];
     if(e.out && e.indoor && weatherBad()) e=Object.assign({}, e.indoor, {_swapped:true, _from:e.n});
     return Object.assign({}, e, {_pool:pool, _slotIdx:i, _suggestedIdx:idx});
@@ -122,9 +138,17 @@ function sessionEx(skey, forceGym){
 // Set/clear today's manual exercise-slot override (the "suggestion, but let
 // me choose if I disagree" layer). idx indexes into that slot's eligible pool
 // as last rendered — callers pass it straight from a pool member's position.
+// Both this map and S.gymAccessLive add one new key per day forever with no
+// cutoff — unlike S.missedTraining, which explicitly trims to a 28-day
+// window in this same file. Same trim, applied consistently now.
+function trimDateKeyedMap(map, days){
+  const cutoff=localYMD(new Date(Date.now()-days*864e5));
+  Object.keys(map).forEach(k=>{ if(k.split("|")[0]<cutoff) delete map[k]; });
+}
 function setExerciseChoice(skey, slotIdx, idx){
   if(!S.exChoice) S.exChoice={};
   S.exChoice[localYMD()+"|"+skey+"|"+slotIdx]=idx;
+  trimDateKeyedMap(S.exChoice, 28);
 }
 // Body areas / systems each FM session loads — used for PT recovery-aware adjustment.
 const SESSION_AREAS = {
@@ -206,6 +230,7 @@ function gymAccessForDate(dateObj){
 function setGymAccessToday(val){
   if(!S.gymAccessLive) S.gymAccessLive={};
   S.gymAccessLive[localYMD()]=!!val;
+  trimDateKeyedMap(S.gymAccessLive, 28);
 }
 // Declared unit-PT days — same cascade as gymAccessForDate() (no live-override
 // layer, since a same-day PT surprise is better handled by just logging PT and
@@ -494,7 +519,10 @@ function planForDay(dateObj){
   // right up to test day. Doesn't touch easy/rest days (nothing to taper).
   const testDate=S.aftTestDate;
   const daysToTest=testDate?dayDiff(localYMD(dateObj),testDate):null;
-  if(daysToTest!=null && daysToTest>=1 && daysToTest<=6 && plan.intensity==="hard"){
+  // >=0, not >=1 — test day itself (daysToTest===0) was excluded, so a hard
+  // session could still land on test day if that's where assignWeekSessions
+  // happened to slot it, directly contradicting the taper's own purpose.
+  if(daysToTest!=null && daysToTest>=0 && daysToTest<=6 && plan.intensity==="hard"){
     plan=Object.assign({}, plan, {intensity:"moderate", taper:true, label:plan.label+" — taper week, ease off"});
   }
   return plan;
@@ -527,7 +555,13 @@ function pickRunIndex(dateObj){
 // new tracking.
 function pickAftMode(){
   const lastAft=(S.aft||[])[S.aft.length-1];
-  const daysSinceTest=lastAft?Math.abs(dayDiff(lastAft.date,localYMD())):999;
+  // lastAft.date is a locale-formatted string (new Date().toLocaleDateString())
+  // — dayDiff() parses it against localYMD()'s ISO format, which silently
+  // produces Invalid Date (and therefore NaN, and therefore never>=45) for
+  // any non-US locale where toLocaleDateString() isn't M/D/YYYY. Newer AFT
+  // entries also carry a real ts (Date.now()); prefer that when present and
+  // only fall back to the locale-string parse for older entries.
+  const daysSinceTest=lastAft?(lastAft.ts!=null?Math.abs(Math.round((Date.now()-lastAft.ts)/864e5)):Math.abs(dayDiff(lastAft.date,localYMD()))):999;
   const testDate=S.aftTestDate;
   const daysToTest=testDate?dayDiff(localYMD(),testDate):null;
   const rec=typeof recoveryReadiness==="function"?recoveryReadiness():null;

@@ -95,7 +95,7 @@ const DEFAULT = {
   donations:[],           // blood donations: [{id, date, type}]
   weightLog:[],           // weight history for trend: [{date, lb}]
   vitals:[],              // health readings: [{id, date, pulse, bpSys, bpDia, hemoglobin, note}]
-  healthImport:{lastImport:null},  // Apple Health export import stub
+  healthImport:{lastImport:null, latest:null, fields:[], history:[]},  // Apple Health export import — profile.js writes {lastImport,latest,fields,history} wholesale on each import; declared here to match what's actually read (aft.js/profile.js) rather than the stale lastImport-only shape
   installPromptDismissed:false,    // true once user dismisses the "add to home screen" nudge
   notifEnabled:false,              // true once user grants notification permission
   habits:[],              // legacy pre-v168 array; merged into `dailies` on load, always empty after that (see load()'s migration)

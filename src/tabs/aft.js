@@ -41,7 +41,14 @@ function aftPrepCard(){
       {k:"plank",label:"Plank",s:last.scores.plank},
       {k:"run",label:"2-Mile Run",s:last.scores.run},
     ].filter(e=>e.s!=null).sort((a,b)=>a.s-b.s);
-    const minPer=c.standard==="combat"?70:60;
+    // The AFT's per-event floor is a flat 60 regardless of standard — only
+    // the TOTAL requirement varies by standard (300 general / 350 combat).
+    // This used to disagree with itself: this line said 70 for combat while
+    // renderAftStandardBar()/showAftResult() (below) both use a flat 60 for
+    // the exact same score — same event, same standard, two different
+    // claimed floors on two cards in the same tab. Aligned to the flat 60
+    // the other two sites already use.
+    const minPer=60;
     const focus=events.slice(0,2).map(e=>{
       const eg=Math.max(0,minPer-e.s);
       return eg>0?`${e.label} (+${eg} to floor)`:e.label;
@@ -383,7 +390,7 @@ function finishMockAft(){
   closeMockAft();
   if(!hasAny){ toast("No events recorded"); return; }
   const total=Object.values(scores).reduce((s,v)=>s+(v||0),0);
-  const entry={date:new Date().toLocaleDateString(), raw:{dl:r.dl,hrp:r.hrp,sdc:r.sdc,plank:r.plank,run:r.run}, scores, total, source:"mock"};
+  const entry={date:new Date().toLocaleDateString(), ts:Date.now(), raw:{dl:r.dl,hrp:r.hrp,sdc:r.sdc,plank:r.plank,run:r.run}, scores, total, source:"mock"};
   S.aft.push(entry);
   if(!S.pathXP) S.pathXP={};
   S.pathXP.physical=(S.pathXP.physical||0)+30;
@@ -447,7 +454,7 @@ document.getElementById("aftSave").onclick=()=>{
   if(dl==null&&hrp==null&&sdc==null&&plank==null&&run==null){toast("Enter at least one event score");return;}
   const scores={dl:score_dl(dl),hrp:score_hrp(hrp),sdc:score_sdc(sdc),plank:score_plank(plank),run:score_run(run)};
   const total=Object.values(scores).reduce((s,v)=>s+(v||0),0);
-  const entry={date:new Date().toLocaleDateString(),raw:{dl,hrp,sdc,plank,run},scores,total};
+  const entry={date:new Date().toLocaleDateString(),ts:Date.now(),raw:{dl,hrp,sdc,plank,run},scores,total};
   S.aft.push(entry);
   if(!S.pathXP) S.pathXP={};
   S.pathXP.physical=(S.pathXP.physical||0)+30;

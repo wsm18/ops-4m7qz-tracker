@@ -5,7 +5,13 @@ function renderPlanRec(){
   const testDate=S.aftTestDate;
   if(!lastAft||!testDate){el.innerHTML="";return;}
   const weeksLeft=Math.max(1,Math.round((new Date(testDate+"T12:00:00")-Date.now())/(7*864e5)));
-  const gap=380-lastAft.total;
+  // Was a hardcoded 380 regardless of S.aftStandard — every other AFT-standard-
+  // aware surface (aftPrepCard, renderAftStandardBar) computes 300/350 from
+  // aftCtx(). A user on the general (300) standard already meeting it could
+  // see this card recommend "5 sessions/week" (gap>60) right next to a
+  // neighboring card saying they're already passing.
+  const minTotal=(typeof aftCtx==="function"&&aftCtx().standard==="combat")?350:300;
+  const gap=minTotal-lastAft.total;
   const rec=gap>60?"5 sessions/week":gap>30?"4 sessions/week":gap>10?"3 sessions/week":"2–3 sessions/week (maintenance)";
   el.innerHTML=`<div class="plan-rec">🎯 ${weeksLeft} week${weeksLeft!==1?'s':''} to AFT · gap: ${gap>0?'+'+gap+' pts needed':'on target'} · Recommendation: <b>${rec}</b></div>`;
 }

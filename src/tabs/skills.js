@@ -266,7 +266,13 @@ const skEmblemSvg = (function(){
   // HEARTH — Hearthstone arch
   // Base: ember dot. Diverges in flame size, arch width, keystone rune.
   function _hearth(t,s){
-    const s0=s%3, s1=s>>2&2;
+    // s>>2&2 can only ever be 0 or 2, never 1 — the s1===1 branch below (the
+    // "diamond+crossbar" keystone-rune variant) was unreachable dead code,
+    // collapsing 3 intended visual variants into 2 for every Hearth-path
+    // skill. Same bug class already found and fixed once in _physical()
+    // (NaN circle cx from a 2-element array indexed by a 3-way hash) — not
+    // propagated to check this sibling function at the time.
+    const s0=s%3, s1=s>>2&3;
     let o=[];
     const er=_f(1.5+t*1.8);
     o.push(`<circle cx="24" cy="26.5" r="${er}" fill="currentColor" opacity="${_f(.55+t*.35)}"/>`);
@@ -572,8 +578,16 @@ function skProgressBlock(sk, eff){
   }
   // In-depth: how to hold the current level
   const curLvl=Math.max(1,eff||1);
-  if(sk.maintain && sk.maintain[curLvl-1]){
-    out+=`<p class="sk-maintain"><b>🔒 Hold L${curLvl} (maintain):</b> ${esc(sk.maintain[curLvl-1])}</p>`;
+  // 70 seed entries have a maintain[] array shorter than levels[] (the
+  // authoring just never caught up when a ladder grew) — the guard used to
+  // just make this whole block silently vanish, missing exactly at the peak
+  // level, the one level maintenance actually matters most. roadmap[] always
+  // matches levels[] length (unlike maintain/advance), so it's a reliable
+  // fallback: reference the skill's own real ability at this level rather
+  // than inventing new guidance text for 70 different skills.
+  if(curLvl>=1){
+    const maintainTxt=(sk.maintain&&sk.maintain[curLvl-1]) || (sk.roadmap&&sk.roadmap[curLvl-1]?`Keep demonstrating it: ${sk.roadmap[curLvl-1]}.`:null);
+    if(maintainTxt) out+=`<p class="sk-maintain"><b>🔒 Hold L${curLvl} (maintain):</b> ${esc(maintainTxt)}</p>`;
   }
   // In-depth: how to reach the next level
   const nextLvl=(eff||0)+1;
@@ -618,6 +632,13 @@ function skProgressBlock(sk, eff){
   };
 
   const leafCard=(sk,isSub,suit,rank)=>{
+    // An orphaned skill (its seed was renamed/removed from SEED_SKILLS with
+    // no matching RENAMES entry) has levels===undefined — skHydrate() has no
+    // seed to attach the getter to, so this dereferences into a TypeError
+    // that used to take down the ENTIRE Skills tab render, not just this one
+    // card, since it's built inline into one big innerHTML string. Skip the
+    // single broken card instead of crashing every other skill's render too.
+    if(!sk.levels || !sk.levels.length) return '';
     const suitInfo=suit||(SK_SUIT[sk.cat]||{sym:"★",col:"#555",light:"#ddd"});
     const cardRank=rank||"";
     const rar=typeof skRarity==="function"?skRarity(sk):{name:"",col:"#555",border:"#555"};
@@ -990,7 +1011,11 @@ function skProgressBlock(sk, eff){
     </div>`;
   });
   // Jokers deck — auto skills + user-tagged jokers from all paths
-  const _jokers=(S.lifeSkills||[]).filter(s=>!s.group&&(s.auto||s.joker)&&s.levels&&s.levels.length);
+  // An `auto` skill only belongs here if it has no real pyramid tier of its
+  // own (matches skRarity()'s same criterion) — otherwise it already
+  // renders under its real Path deck above, and including it here doubled
+  // it, once correctly tiered and once mislabeled as a Joker.
+  const _jokers=(S.lifeSkills||[]).filter(s=>!s.group&&s.levels&&s.levels.length&&(s.joker||(s.auto&&!(typeof skSeedOf==="function"&&skSeedOf(s.name,s.cat)&&skSeedOf(s.name,s.cat).setKey))));
   if(_jokers.length){
     const _jSuit={sym:"🃏",name:"Wildcards",col:"#7b1fa2",light:"#fce4ec"};
     _jokers.sort((a,b)=>{ const tA=(a.targets&&a.targets[_stage])||a.targetLevel||a.currentLevel||0; const tB=(b.targets&&b.targets[_stage])||b.targetLevel||b.currentLevel||0; return tB-tA; });

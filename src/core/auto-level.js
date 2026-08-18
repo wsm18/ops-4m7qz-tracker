@@ -2,7 +2,12 @@ function syncSkillsFromActivity(){
   if(!S.lifeSkills||!S.lifeSkills.length) return false;
   let changed=false;
   const now=Date.now();
-  const last=(S.aft||[])[S.aft.length-1];
+  // The old (S.aft||[])[S.aft.length-1] guarded the indexing but not the
+  // .length dereference itself — S.aft.length still throws if S.aft is ever
+  // undefined (a malformed/partial imported or cloud-restored save), before
+  // the ||[] fallback gets a chance to help.
+  const _aftArr=S.aft||[];
+  const last=_aftArr[_aftArr.length-1];
   // recent workout text (for timer refresh of practiced exercises)
   const recentWk=(S.workouts||[]).filter(w=>now-(w.ts||0)<7*864e5);
   const recentText=JSON.stringify(recentWk.map(w=>[w.session,w.exercises])).toLowerCase();

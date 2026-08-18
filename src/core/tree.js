@@ -234,7 +234,20 @@ function renderSkillTree(){
   if(!_treeView._init){
     const wrap=host.querySelector('.sk-tree-wrap');
     const r=wrap?wrap.getBoundingClientRect():{width:600,height:600};
-    const treeTop=crownTopY-70, treeBot=rootBotY+50, treeH=treeBot-treeTop, treeMidY=(treeTop+treeBot)/2;
+    // treeTop used to be the flat crownTopY-70 constant, tuned for the
+    // ARM-radius canopy worlds — but `physiological` is deliberately pushed
+    // further out (ARM+120, "crown apex, pushed highest & centred") with no
+    // corresponding adjustment here, so on wide/desktop aspect ratios (where
+    // kByH is the binding constraint) its topmost extent could render
+    // partially or fully above the initial viewport, not fixed by "Reset
+    // view" either since it re-runs this same fixed math. Compute the real
+    // topmost extent from the actual slot positions instead: the worst-case
+    // halo radius (max realmR 56 + the halo's own +16..+60 growth, see
+    // haloR's definition above) subtracted from whichever slot's ry is
+    // smallest (furthest toward the top of the canvas).
+    const maxHaloR=56+16+44;
+    const topmostSlotY=Math.min(...Object.values(SLOT_BY_CAT).map(s=>s.ry))-maxHaloR;
+    const treeTop=Math.min(crownTopY-70, topmostSlotY), treeBot=rootBotY+50, treeH=treeBot-treeTop, treeMidY=(treeTop+treeBot)/2;
     // fit to whichever dimension is the binding constraint so the full crown shows
     const fitH=(r.height? (treeH/(H)) : 1);
     const kByH=(H*0.98)/treeH;

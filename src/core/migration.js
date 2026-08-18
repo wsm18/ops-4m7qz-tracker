@@ -1,4 +1,4 @@
-const SKILL_LADDER_VER=120;
+const SKILL_LADDER_VER=121;
 const PYRAMID_RESET_VER=1;
 // Returns the user's current ROTC/Army career stage based on S.rank.
 function careerStage(){
@@ -38,6 +38,12 @@ function mergeNewSeedSkills(){
       // the new-named skill doesn't exist yet — just rename the old one in place
       oldSk.name=r.to; changed=true;
     }
+    // Daily habits link to a skill by NAME (S.dailies[].linkedSkill — quests
+    // link by id instead, so they're unaffected), and nothing else ever
+    // rewrote that field when a skill got renamed. A habit still pointing at
+    // the old name silently stopped feeding its linked skill's fade timer —
+    // no error, no visible sign, just quietly stale.
+    (S.dailies||[]).forEach(d=>{ if(d.linkedSkill===r.from){ d.linkedSkill=r.to; changed=true; } });
   });
   // retire the old combined skill (v37) now that it's split into two. Only remove it if
   // it was never leveled, so we never silently delete real progress.

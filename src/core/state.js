@@ -41,7 +41,7 @@ function load(){
     merged.weight=r.weight||structuredClone(DEFAULT.weight);
     if(!merged.weight.promises) merged.weight.promises=[];
     if(!merged.weight.memorial) merged.weight.memorial=[];
-    merged.weightAppUrl=r.weightAppUrl||"https://wsm-ai.github.io/tw-9f3kx-ledger/";
+    merged.weightAppUrl=r.weightAppUrl||DEFAULT.weightAppUrl;
     merged.lastMirrorUpdate=r.lastMirrorUpdate||null;
     merged.awards=r.awards||[];
     merged.academicHonors=r.academicHonors||[];
@@ -62,6 +62,10 @@ function load(){
     }
     // backfill peakLevel (all-time high) for any skill missing it
     merged.lifeSkills.forEach(s=>{ s.peakLevel=Math.max(s.peakLevel||0, s.currentLevel||0); });
+    // backfill history[] the same way — several level-up code paths (skills-core.js,
+    // auto-level.js) call sk.history.push(...) unguarded, which would throw on a
+    // save old enough to predate this field
+    merged.lifeSkills.forEach(s=>{ if(!Array.isArray(s.history)) s.history=[]; });
     // backfill auto flag on Reading speed — now tested in-app (v117)
     const _rdSkill=merged.lifeSkills.find(s=>s.name==="Reading speed");
     if(_rdSkill&&!_rdSkill.auto) _rdSkill.auto="test:reading";
@@ -78,7 +82,11 @@ function load(){
     merged.navLabels=r.navLabels!==undefined?r.navLabels:true;
     merged.navExpanded=r.navExpanded!==undefined?r.navExpanded:false;
     merged.missedTraining=r.missedTraining||[];
-    merged.profile=Object.assign({birthdate:null,heightIn:null,heightDate:null,weightLb:null,weightDate:null,sex:null,bloodType:null,units:"imperial",notes:"",commissionDate:null,gpa:null,weightGoal:null,languages:[],clearance:{level:null,grantedDate:null,notes:""}}, r.profile||{});
+    // Was a hand-written second copy of DEFAULT.profile's schema — already
+    // drifted once (missing gpaGoal, which DEFAULT.profile has). Deriving
+    // from DEFAULT.profile directly means a future field added there can't
+    // silently go missing here again.
+    merged.profile=Object.assign(structuredClone(DEFAULT.profile), r.profile||{});
     merged.profile.languages=r.profile?.languages||[];
     merged.profile.clearance=Object.assign({level:null,grantedDate:null,notes:""}, r.profile?.clearance||{});
     merged.lifts=Object.assign({deadliftLb:null,squatLb:null,benchLb:null,liftDate:null}, r.lifts||{});
@@ -95,9 +103,20 @@ function load(){
     // an old save that already has profiles keeps them (never overwritten), and
     // any custom profile the user already added/edited survives untouched.
     merged.equipProfiles=Object.assign({
-      "ROTC/Campus Gym":{tags:["barbell","dumbbells","kettlebell","machines","pullupbar","dipbars","bands","treadmill","rower","bike","pool","climbwall","aftkit","waterjugs","stretcher","ruck","sandbag","tires","agility","battlerope"]},
+      // "agility"/"battlerope" tags were removed from EQUIP_TAGS in the v192
+      // cleanup (no session ever referenced them) — a save seeded before that
+      // still carried both as permanent, invisible, untoggleable phantom
+      // entries in its default profile forever, since this seed literal was
+      // never updated to match.
+      "ROTC/Campus Gym":{tags:["barbell","dumbbells","kettlebell","machines","pullupbar","dipbars","bands","treadmill","rower","bike","pool","climbwall","aftkit","waterjugs","stretcher","ruck","sandbag","tires"]},
       "Dorm":{tags:[]},
     }, r.equipProfiles||{});
+    // Strip the two removed tags from any EXISTING profile too, not just the
+    // seed default above — since Object.assign replaces a matching key's
+    // whole tags array wholesale rather than merging it, a save that already
+    // had "ROTC/Campus Gym" (from before v192) kept agility/battlerope
+    // baked in forever regardless of what the current seed says.
+    Object.values(merged.equipProfiles).forEach(p=>{ if(Array.isArray(p.tags)) p.tags=p.tags.filter(t=>t!=="agility"&&t!=="battlerope"); });
     merged.activeEquipProfile = (r.activeEquipProfile && merged.equipProfiles[r.activeEquipProfile]) ? r.activeEquipProfile : Object.keys(merged.equipProfiles)[0];
     merged.exChoice=r.exChoice||{};
     merged.optionalSessions=r.optionalSessions||[];
@@ -151,6 +170,13 @@ function load(){
   }catch(e){return structuredClone(DEFAULT)}
 }
 function save(){
+  // Stamped on every save so cloud/TOC auto-restore (app-setup.js) can tell
+  // whether a remote copy is actually newer before silently adopting it —
+  // without this, TOC's documented "final say" (it's the most persistent
+  // source) had no safety net: a TOC save left over from a stale session on
+  // another machine could overwrite fresher local/cloud data on boot with no
+  // way to know it was stale.
+  S._lastModified=Date.now();
   try{ localStorage.setItem(KEY,JSON.stringify(S)); }
   catch(e){
     // Quota overflow (or any other storage failure): don't crash the app — the in-memory
