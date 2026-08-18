@@ -13,19 +13,6 @@
         <label>GPA (cumulative)<input id="pfGpa" type="number" min="0" max="4.0" step="0.01" placeholder="e.g. 3.42" title="OML factor — auto-updated from semester log"></label>
       </div>
 
-      <div class="sk-form-title" style="margin-top:14px">GPA Semester Log <span style="font-weight:400;text-transform:none;color:var(--ink-faint)">— updates cumulative GPA above</span></div>
-      <div id="pfGpaHistory"></div>
-      <div id="pfGpaProjection"></div>
-      <div class="row" style="gap:7px;margin-top:8px;flex-wrap:wrap">
-        <input id="gpaTermIn" placeholder="Term — e.g. SP2026" maxlength="10" style="flex:0 0 22%">
-        <input id="gpaGpaIn" type="number" min="0" max="4.0" step="0.001" placeholder="GPA" style="flex:0 0 18%">
-        <input id="gpaHrsIn" type="number" min="0" max="30" step="0.5" placeholder="Hrs" style="flex:0 0 14%">
-        <input id="gpaStandingIn" placeholder="Standing (e.g. Dean's List)" maxlength="40" style="flex:1">
-      </div>
-      <input id="gpaNoteIn" placeholder="Note (optional)" maxlength="100" style="margin-top:7px">
-      <button class="btn-add" id="gpaHistAdd" style="margin-top:8px">Log semester GPA</button>
-      <label class="lg-label" style="margin-top:10px">Graduation GPA goal</label>
-      <input id="pfGpaGoal" type="number" min="0" max="4.0" step="0.01" placeholder="e.g. 3.5" style="margin-top:4px;width:120px">
       <div class="bl-grid" style="margin-top:9px">
         <label>Birthdate<input id="pfDob" type="date"></label>
         <label>Age<input id="pfAgeOut" type="text" disabled placeholder="—"></label>
@@ -33,68 +20,94 @@
         <label>Blood type<select id="pfBlood"><option value="">—</option><option>O+</option><option>O−</option><option>A+</option><option>A−</option><option>B+</option><option>B−</option><option>AB+</option><option>AB−</option></select></label>
       </div>
 
-      <div class="sk-form-title" style="margin-top:16px">Measurements</div>
-      <div class="bl-grid">
-        <label>Height (in)<input id="pfHt" type="number" min="0" step="0.5" placeholder="e.g. 70"></label>
-        <label>Height measured<input id="pfHtDate" type="date"></label>
-        <label>Weight (lb)<input id="pfWt" type="number" min="0" step="0.5" placeholder="e.g. 175"></label>
-        <label>Weight measured<input id="pfWtDate" type="date"></label>
-      </div>
+      <details class="pf-section">
+        <summary class="sk-form-title">GPA Semester Log <span style="font-weight:400;text-transform:none;color:var(--ink-faint)">— updates cumulative GPA above</span></summary>
+        <div id="pfGpaHistory"></div>
+        <div id="pfGpaProjection"></div>
+        <div class="row" style="gap:7px;margin-top:8px;flex-wrap:wrap">
+          <input id="gpaTermIn" placeholder="Term — e.g. SP2026" maxlength="10" style="flex:0 0 22%">
+          <input id="gpaGpaIn" type="number" min="0" max="4.0" step="0.001" placeholder="GPA" style="flex:0 0 18%">
+          <input id="gpaHrsIn" type="number" min="0" max="30" step="0.5" placeholder="Hrs" style="flex:0 0 14%">
+          <input id="gpaStandingIn" placeholder="Standing (e.g. Dean's List)" maxlength="40" style="flex:1">
+        </div>
+        <input id="gpaNoteIn" placeholder="Note (optional)" maxlength="100" style="margin-top:7px">
+        <button class="btn-add" id="gpaHistAdd" style="margin-top:8px">Log semester GPA</button>
+        <label class="lg-label" style="margin-top:10px">Graduation GPA goal</label>
+        <input id="pfGpaGoal" type="number" min="0" max="4.0" step="0.01" placeholder="e.g. 3.5" style="margin-top:4px;width:120px">
+      </details>
 
-      <div class="sk-form-title" style="margin-top:16px">Best lifts <span style="font-weight:400;text-transform:none;color:var(--ink-faint)">— one solid rep, good form</span></div>
-      <div class="bl-grid">
-        <label>Deadlift (lb)<input id="pfDl" type="number" min="0" step="5" placeholder="e.g. 315"></label>
-        <label>Back squat (lb)<input id="pfSq" type="number" min="0" step="5" placeholder="e.g. 275"></label>
-        <label>Bench (lb)<input id="pfBn" type="number" min="0" step="5" placeholder="optional"></label>
-        <label>Lifts measured<input id="pfLiftDate" type="date"></label>
-      </div>
+      <details class="pf-section">
+        <summary class="sk-form-title">Measurements</summary>
+        <div class="bl-grid">
+          <label>Height (in)<input id="pfHt" type="number" min="0" step="0.5" placeholder="e.g. 70"></label>
+          <label>Height measured<input id="pfHtDate" type="date"></label>
+          <label>Weight (lb)<input id="pfWt" type="number" min="0" step="0.5" placeholder="e.g. 175"></label>
+          <label>Weight measured<input id="pfWtDate" type="date"></label>
+        </div>
+      </details>
 
-      <div class="sk-form-title" style="margin-top:16px">Language proficiency</div>
-      <div id="pfLangs"></div>
-      <div class="row" style="gap:9px;margin-top:8px">
-        <input id="pfLangName" placeholder="Language" maxlength="40" style="flex:1">
-        <select id="pfLangIlr" style="flex:0 0 36%">
-          <option value="">ILR level</option>
-          <option value="0+">0+ (memorized phrases)</option>
-          <option value="1">1 (elementary)</option>
-          <option value="1+">1+ (limited working)</option>
-          <option value="2">2 (limited professional)</option>
-          <option value="2+">2+ (working)</option>
-          <option value="3">3 (professional)</option>
-          <option value="3+">3+ (advanced professional)</option>
-          <option value="4">4 (distinguished)</option>
-          <option value="5">5 (native)</option>
-        </select>
-      </div>
-      <input id="pfLangNotes" placeholder="Notes — e.g. 3 semesters college (optional)" maxlength="100" style="margin-top:8px">
-      <button class="btn-add" id="pfLangAdd" style="margin-top:8px">Add language</button>
+      <details class="pf-section">
+        <summary class="sk-form-title">Best lifts <span style="font-weight:400;text-transform:none;color:var(--ink-faint)">— one solid rep, good form</span></summary>
+        <div class="bl-grid">
+          <label>Deadlift (lb)<input id="pfDl" type="number" min="0" step="5" placeholder="e.g. 315"></label>
+          <label>Back squat (lb)<input id="pfSq" type="number" min="0" step="5" placeholder="e.g. 275"></label>
+          <label>Bench (lb)<input id="pfBn" type="number" min="0" step="5" placeholder="optional"></label>
+          <label>Lifts measured<input id="pfLiftDate" type="date"></label>
+        </div>
+      </details>
 
-      <div class="sk-form-title" style="margin-top:16px">Clearance</div>
-      <div class="row" style="gap:9px">
-        <select id="pfClrLevel" style="flex:0 0 44%">
-          <option value="">— none on record —</option>
-          <option value="Pending">Pending</option>
-          <option value="Secret">Secret</option>
-          <option value="TS">Top Secret (TS)</option>
-          <option value="TS/SCI">TS/SCI</option>
-        </select>
-        <input id="pfClrDate" type="date" placeholder="Date granted" style="flex:1">
-      </div>
-      <input id="pfClrNotes" placeholder="Notes (optional)" maxlength="100" style="margin-top:8px">
-      <button class="btn-add" id="pfClrSave" style="margin-top:8px">Save clearance</button>
+      <details class="pf-section">
+        <summary class="sk-form-title">Language proficiency</summary>
+        <div id="pfLangs"></div>
+        <div class="row" style="gap:9px;margin-top:8px">
+          <input id="pfLangName" placeholder="Language" maxlength="40" style="flex:1">
+          <select id="pfLangIlr" style="flex:0 0 36%">
+            <option value="">ILR level</option>
+            <option value="0+">0+ (memorized phrases)</option>
+            <option value="1">1 (elementary)</option>
+            <option value="1+">1+ (limited working)</option>
+            <option value="2">2 (limited professional)</option>
+            <option value="2+">2+ (working)</option>
+            <option value="3">3 (professional)</option>
+            <option value="3+">3+ (advanced professional)</option>
+            <option value="4">4 (distinguished)</option>
+            <option value="5">5 (native)</option>
+          </select>
+        </div>
+        <input id="pfLangNotes" placeholder="Notes — e.g. 3 semesters college (optional)" maxlength="100" style="margin-top:8px">
+        <button class="btn-add" id="pfLangAdd" style="margin-top:8px">Add language</button>
+      </details>
+
+      <details class="pf-section">
+        <summary class="sk-form-title">Clearance</summary>
+        <div class="row" style="gap:9px">
+          <select id="pfClrLevel" style="flex:0 0 44%">
+            <option value="">— none on record —</option>
+            <option value="Pending">Pending</option>
+            <option value="Secret">Secret</option>
+            <option value="TS">Top Secret (TS)</option>
+            <option value="TS/SCI">TS/SCI</option>
+          </select>
+          <input id="pfClrDate" type="date" placeholder="Date granted" style="flex:1">
+        </div>
+        <input id="pfClrNotes" placeholder="Notes (optional)" maxlength="100" style="margin-top:8px">
+        <button class="btn-add" id="pfClrSave" style="margin-top:8px">Save clearance</button>
+      </details>
 
       <label class="lg-label" style="margin-top:12px;display:block">Notes (allergies, medical, anything to remember)</label>
       <textarea id="pfNotes" rows="2" maxlength="300" style="width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:10px;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical"></textarea>
 
       <button class="btn-add" id="pfSave" style="margin-top:12px">Save profile</button>
 
-      <div class="sk-form-title" style="margin-top:18px">Milestones <span style="font-weight:400;text-transform:none;color:var(--ink-faint)">— key dates shown on Dawn</span></div>
-      <div id="pfMilestones"></div>
-      <div class="row" style="gap:7px;margin-top:8px">
-        <input id="pfMsLabel" placeholder="Label — e.g. LDAC App Opens" maxlength="50" style="flex:1">
-        <input id="pfMsDate" type="date" style="flex:0 0 auto">
-      </div>
-      <button class="btn-add" id="pfMsAdd" style="margin-top:7px">Add milestone</button>
+      <details class="pf-section">
+        <summary class="sk-form-title">Milestones <span style="font-weight:400;text-transform:none;color:var(--ink-faint)">— key dates shown on Dawn</span></summary>
+        <div id="pfMilestones"></div>
+        <div class="row" style="gap:7px;margin-top:8px">
+          <input id="pfMsLabel" placeholder="Label — e.g. LDAC App Opens" maxlength="50" style="flex:1">
+          <input id="pfMsDate" type="date" style="flex:0 0 auto">
+        </div>
+        <button class="btn-add" id="pfMsAdd" style="margin-top:7px">Add milestone</button>
+      </details>
     </div>
     <div class="sec-h" style="margin-top:18px"><h2>Readout</h2><span class="hint">computed</span></div>
     <div id="pfReadout" class="bl-readout"></div>

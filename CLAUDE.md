@@ -10,7 +10,7 @@ You are continuing work on **Operations**, a gamified ROTC + life-tracker PWA. R
 - **`index.html` is generated output** — never edit it directly. Edit the source files in `src/`, then run `python scripts/build.py` to assemble.
 - Fully **offline**, no framework, no runtime dependencies. Data in `localStorage` (key `operations_v2`), optional cloud-JSON backup.
 - Everything measurable is a **skill** with a measurable level ladder, decay, peak, and progression, themed as a **Yggdrasil world-tree**.
-- Current version: **v91** (see `sw.js`).
+- Current version: **v214** (see `sw.js`).
 
 The user is an Army ROTC cadet building this for himself. He values **honesty, measurability, privacy, preserved progress, and symbolism** above all.
 
@@ -43,7 +43,7 @@ src/
     events.js              nav/body event delegation, add-buttons, backup, toast, showLevelUp
     aft-scoring.js         AFT_TABLES, aftLookup(), clampScore(), score_* helpers
     app-setup.js           skills-UI wiring, award/event editors, cloud file system
-    skills-data.js         SK_CAT, SK_CAT_ORDER, SEED_SKILLS (~1,800 lines), seedSkillsIfEmpty()
+    skills-data.js         SK_CAT, SK_CAT_ORDER, SEED_SKILLS (~102,800 lines, ~12,525 skills), seedSkillsIfEmpty()
     migration.js           SKILL_LADDER_VER, RENAMES map, mergeNewSeedSkills()
     auto-level.js          syncSkillsFromActivity(), integrityLevel(), rhrToLevel()
     skills-core.js         skSubsOf, skRolledLevel, skEffectiveLevel, skReachLevel, skLeafColor, etc.
@@ -63,6 +63,7 @@ src/
     log.html / log.js             Workout log, PT, baseline testing
     skills.html / skills.js       Skills tab list view (renderSkillsTab)
     plan.html / plan.js           FM training plan: session lists, coach-today, baseline
+    cardgame.js                   FM-3: card-game workout mode (cgOpen, draw/log loop)
     awards.html / awards.js       The Wall: awards, memberships, events, volunteer hours
     records.html / records.js     History/trends, counseling log, checklists, section export
     weight.html / weight.js       Promise ledger (read-only mirror of Weight app)
@@ -91,7 +92,8 @@ python scripts/build.py
 # 4. Verify (requires Node.js)
 npm run check        # syntax-check the assembled script (fast, no browser)
 npm run regress      # headless: load app, click all 18 tabs, assert ZERO pageerror
-#   (npm run verify runs build + check + regress)
+npm run unit         # headless: call specific functions with known fixtures, assert known output
+#   (npm run verify runs build + check + regress + unit)
 #   add a tree screenshot when you change the tree:
 npm run regress -- --shot   # writes dist/tree.png
 
@@ -104,6 +106,8 @@ npm run package      # runs build, regenerates icons, builds dist/operations.zip
 **Definition of done:** `npm run verify` passes with **0 `pageerror`**, the SW cache version is bumped, `SKILL_LADDER_VER` is bumped if any ladder changed, and `npm run package` has been run. Then tell the user to **hard-refresh / reopen the app** so the new service worker and any migration take effect.
 
 > Benign console 404/403s from the headless test server (a font or icon fetch) are NOT `pageerror`s and don't fail the regression. Only uncaught JS errors do.
+
+> When you verify a fix with a throwaway Playwright script, consider adding a permanent assertion to `scripts/unit-checks.js` instead (or in addition) — `regress.js` only catches thrown errors, not a function silently returning the wrong answer, so a fix verified only by a script you then delete has zero protection against being silently reintroduced later.
 
 ---
 
@@ -131,6 +135,7 @@ Every substantive work session (a feature build, a Commons tree, a phase from an
 | Skill level/decay/peak calculations | `src/core/skills-core.js` |
 | Yggdrasil tree SVG renderer | `src/core/tree.js` |
 | Cloud file sync, event wiring | `src/core/app-setup.js` |
+| Card-game (FM-3) workout mode | `src/tabs/cardgame.js` |
 | Any tab's HTML structure | `src/tabs/<tab>.html` |
 | Any tab's render logic | `src/tabs/<tab>.js` |
 | All CSS / theming | `src/styles/main.css` |

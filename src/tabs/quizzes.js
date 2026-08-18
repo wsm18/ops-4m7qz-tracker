@@ -6,8 +6,8 @@
 // was still genuinely missed — this surfaces those tracked weak spots
 // directly from the v206 SRS auto-feed's miss decks (feedQuizMissToSrs(),
 // answerQuiz()) instead of building a second, parallel weak-area tracker.
-function renderBoardReadiness(){
-  const el=document.getElementById("boardReadiness"); if(!el) return;
+function renderBoardReadiness(targetId){
+  const el=document.getElementById(targetId||"boardReadiness"); if(!el) return;
   const bank=window.QUIZ_BANK||{};
   const keys=Object.keys(bank);
   if(!keys.length){ el.innerHTML=""; return; }
@@ -215,10 +215,26 @@ function finishQuiz(){
   if(firstPass){
     S.gold+=20;
     if(!S.pathXP) S.pathXP={}; S.pathXP.academic=(S.pathXP.academic||0)+50;
-    // add daily review order if not present
+    // Add a daily review order if not present — capped, so a diligent user
+    // passing every category (the bank is now 21+ and self-grows) doesn't
+    // accumulate a permanent, unspaced daily order per category forever.
+    // When at the cap, free a slot from whichever active review order has
+    // zero tracked SRS misses left (genuinely mastered, no longer pulling
+    // weight) rather than ever dropping one with real tracked gaps.
     const reviewName="🧠 Review: "+t.name+" (retake quiz)";
     if(!S.dailies.some(d=>d.review===QZ.key)){
-      S.dailies.push({id:id(),name:reviewName,kind:"order",diff:"easy",track:"knowledge",done:false,best:0,streak:0,lastDone:null,graceUsed:false,history:[],review:QZ.key});
+      const REVIEW_CAP=5;
+      const activeReviews=S.dailies.filter(d=>d.review);
+      if(activeReviews.length>=REVIEW_CAP){
+        const scored=activeReviews.map(d=>{
+          const md=(S.srsDecks||[]).find(deck=>deck.quizMissDeck===d.review);
+          return {d, weak:md?md.cards.length:0};
+        }).sort((a,b)=>a.weak-b.weak);
+        if(scored.length && scored[0].weak===0) S.dailies=S.dailies.filter(x=>x!==scored[0].d);
+      }
+      if(S.dailies.filter(d=>d.review).length<REVIEW_CAP){
+        S.dailies.push({id:id(),name:reviewName,kind:"order",diff:"easy",track:"knowledge",done:false,best:0,streak:0,lastDone:null,graceUsed:false,history:[],review:QZ.key});
+      }
     }
     // advance the "pass every quiz" objective — only toast if this specific
     // completion is what pushed it to 0 (not if it was already complete)

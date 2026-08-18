@@ -103,12 +103,9 @@ function renderWeight(){
     }
   }
 }
-let _wToastT;
-function weightToast(msg){const el=document.getElementById("toast");el.innerHTML=`<span style="color:#d8b06a">${esc(msg)}</span>`;el.classList.add("show");clearTimeout(_wToastT);_wToastT=setTimeout(()=>el.classList.remove("show"),2800);}
-
 // Import a Weight-app export (raw `state` JSON: {nextDisc, promises[], memorial[]})
 function importWeightLedger(obj){
-  if(!obj || !Array.isArray(obj.promises)){ weightToast("That file isn't a Weight ledger export."); return; }
+  if(!obj || !Array.isArray(obj.promises)){ toast(esc("That file isn't a Weight ledger export."),{color:"#d8b06a",duration:2800}); return; }
   S.weight = {
     nextDisc: obj.nextDisc||1,
     promises: obj.promises.map(p=>({
@@ -122,7 +119,7 @@ function importWeightLedger(obj){
   S.lastMirrorUpdate = new Date().toDateString();
   save(); render();
   const n=S.weight.promises.length, mem=S.weight.memorial.length;
-  weightToast(`Mirror updated — ${n} promise${n!==1?'s':''}${mem?`, ${mem} remembered`:''}.`);
+  toast(esc(`Mirror updated — ${n} promise${n!==1?'s':''}${mem?`, ${mem} remembered`:''}.`),{color:"#d8b06a",duration:2800});
 }
 
 /* ================= AWARDS — the "I Love Me" wall ================= */

@@ -40,7 +40,7 @@ const TRACK_TO_PATH = {fitness:"physical", tactics:"tactical", knowledge:"academ
 /* ---------------- State ---------------- */
 const DEFAULT = {
   name:"Cadet", rank:"MS2 Cadet", position:"No leadership role",
-  gold:0, streak:0, lastDaily:null, totalDone:0,
+  gold:0, streak:0, lastDaily:null, totalDone:0, lastOpenedTs:null,
   bestStreak:0, perfectDays:0, lastPerfect:null, missedYesterday:false,
   pathXP:{tactical:0,physical:0,cognitive:0,physiological:0,technical:0,leadership:0,academic:0,personal:0,hearth:0,roots:0},
   aft:[],

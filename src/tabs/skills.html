@@ -38,14 +38,15 @@
     <div id="skFocusStrip" class="sk-focus-strip"></div>
 
     <div id="skSummaryBar" class="sk-summary-bar"></div>
+    <div id="skStartHere"></div>
     <div class="sk-toolbar-row">
       <input id="skSearch" class="sk-search-input" placeholder="Find a skill…" autocomplete="off" spellcheck="false">
-      <button id="skWeeklyToggle" class="sk-hm-toggle" title="This week: skills due to fade within 7 days">🗓️</button>
-      <button id="skAssessToggle" class="sk-hm-toggle" title="Assessment view: skill levels vs. career-stage targets">📊</button>
-      <button id="skGapMapToggle" class="sk-hm-toggle" title="Gap map: which paths are behind by career stage">🗺️</button>
-      <button id="skHeatmapToggle" class="sk-hm-toggle" title="Toggle 90-day practice calendar">📅</button>
-      <button class="sk-copy-summary-btn" data-copyskillssummary="1" title="Copy plain-text skills summary to clipboard">📋</button>
-      <button class="sk-hm-toggle" data-updateskilltgts="1" id="skSyncTargets" title="Update all skill targets to your current career stage">↑ sync</button>
+      <button id="skWeeklyToggle" class="sk-hm-toggle" title="This week: skills due to fade within 7 days">🗓️ Weekly</button>
+      <button id="skAssessToggle" class="sk-hm-toggle" title="Assessment view: skill levels vs. career-stage targets">📊 Assess</button>
+      <button id="skGapMapToggle" class="sk-hm-toggle" title="Gap map: which paths are behind by career stage">🗺️ Gaps</button>
+      <button id="skHeatmapToggle" class="sk-hm-toggle" title="Toggle 90-day practice calendar">📅 History</button>
+      <button class="sk-hm-toggle" data-copyskillssummary="1" title="Copy plain-text skills summary to clipboard">📋 Copy</button>
+      <button class="sk-hm-toggle" data-updateskilltgts="1" id="skSyncTargets" title="Update all skill targets to your current career stage">↑ Sync</button>
     </div>
     <div id="skWeeklyQueue" class="sk-weekly-queue" style="display:none"></div>
     <div id="skAssessWrap" style="display:none"></div>
@@ -58,6 +59,7 @@
         <p>Most skills belong to a five-tier pyramid, thinnest at the top: <b>5 Common</b> skills master into <b>1 Uncommon</b>, <b>5 Uncommons</b> into <b>1 Rare</b>, <b>5 Rares</b> into <b>1 Legendary</b>, and all of a Path's Legendaries into its single <b>Mythic</b> — the deepest expression of that Path.</p>
         <p>Master every member of a set (reach its top level) and a <b>⚡ Combine</b> button appears on the card above it — tap it to unlock that skill at level 1. A locked skill shows a progress bar (e.g. "3/5 mastered") so you can see how close its set is.</p>
         <p>Skills that aren't part of a pyramid — the ones you plant yourself — level up on their own, no combining required.</p>
+        <p>Each card also shows a <b>suit</b> (which Path it belongs to) and a <b>rank</b> (Ace–King, from its place in that Path's target ordering) in its corners — purely a card-game flourish on top of the pyramid above, not a separate progress system.</p>
       </div>
     </details>
 

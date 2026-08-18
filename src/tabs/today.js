@@ -123,6 +123,7 @@ function renderUpcomingTimeline(){
   (S.counseling||[]).forEach(c=>{
     if(c.followUp&&/^\d{4}-\d{2}-\d{2}$/.test(c.followUp)) items.push({date:c.followUp, icon:"📋", label:`Follow-up: ${(c.summary||"").slice(0,40)}`, tab:"records"});
   });
+  (S.boardTasks||[]).forEach(t=>{ if(!t.done&&t.due) items.push({date:t.due, icon:"🎖️", label:t.name, tab:"board"}); });
 
   const upcoming=items.filter(x=>x.date>=today).sort((a,b)=>a.date<b.date?-1:(a.date>b.date?1:0));
   if(!upcoming.length) return "";
@@ -284,6 +285,7 @@ function renderQuickLog(){
       </select>
       <input class="ql-dur" id="qlDur" type="number" min="1" max="360" placeholder="min" style="width:56px">
       <input class="ql-note" id="qlNote" placeholder="Notes / details" style="flex:1">
+      <input class="ql-dur" id="qlEffort" type="number" min="1" max="10" placeholder="effort 1-10" style="width:78px" title="Optional — how hard did it feel? Feeds the overtraining/deload check the same way a full session log does.">
       <button class="ql-save" id="qlSave">+ Log</button>
     </div>
   </div>`;
@@ -593,23 +595,39 @@ function renderToday(){
     }
   }
 
-  // ── Getting started — shown only when the user has no data at all yet
+  // ── Getting started — each step tracked independently (not one all-or-
+  // nothing gate) so doing step 2 before step 1 doesn't permanently hide the
+  // guidance for steps 3-4 the moment step 2's own condition trips true.
   let startHtml="";
-  const isNew = S.name==="Cadet" && !S.aft.length && !S.totalDone && !S.profile.commissionDate;
-  if(isNew){
+  const startSteps=[
+    {done:S.name!=="Cadet", label:"Set your name, rank, and commission date", tab:"profile", go:"Profile →"},
+    {done:S.aft.length>0, label:"Log your first AFT score to set your baseline", tab:"aft", go:"AFT →"},
+    {done:S.dailies.some(d=>d.doneTs), label:"Complete at least one daily order", tab:"dailies", go:"Orders →"},
+    {done:(S.workouts||[]).length>0, label:"Open the FM Plan and log today's training session", tab:"plan", go:"FM Plan →"}
+  ];
+  const startRemaining=startSteps.filter(s=>!s.done);
+  const isNew = startRemaining.length===startSteps.length; // nothing done yet — the very first open
+  if(startRemaining.length){
     startHtml=`<div class="start-card">
       <div class="start-h">🌱 Getting Started</div>
-      <p class="start-intro">The tree grows one ring at a time. Work through these in order — each one unlocks the next thing this app can do for you.</p>
-      <div class="start-step"><span class="start-num">1</span><span>Set your name, rank, and commission date</span><button class="td-go-sm" data-gototab="profile">Profile →</button></div>
-      <div class="start-step"><span class="start-num">2</span><span>Log your first AFT score to set your baseline</span><button class="td-go-sm" data-gototab="aft">AFT →</button></div>
-      <div class="start-step"><span class="start-num">3</span><span>Add at least one daily order you'll complete every day</span><button class="td-go-sm" data-gototab="dailies">Orders →</button></div>
-      <div class="start-step"><span class="start-num">4</span><span>Open the FM Plan and log today's training session</span><button class="td-go-sm" data-gototab="plan">FM Plan →</button></div>
+      <p class="start-intro">The tree grows one ring at a time. ${isNew?"Work through these — each one unlocks the next thing this app can do for you.":"A few things left to set up:"}</p>
+      ${startRemaining.map(s=>`<div class="start-step"><span>${esc(s.label)}</span><button class="td-go-sm" data-gototab="${s.tab}">${s.go}</button></div>`).join("")}
     </div>`;
   }
 
-  // ── PWA install nudge — shown once (mobile only, before the user installs)
+  // ── Re-orientation banner — a returning-after-a-break signal, distinct from
+  // the brand-new-user Getting Started card above. Shown once per load.
+  let welcomeBackHtml="";
+  if(typeof window._daysSinceLastOpen==="number" && window._daysSinceLastOpen>=14){
+    welcomeBackHtml=`<div class="welcome-back-card">👋 Welcome back — it's been <b>${window._daysSinceLastOpen} days</b>. Pick up where you left off below.</div>`;
+  }
+
+  // ── PWA install nudge — shown once (mobile only, before the user installs).
+  // Deferred while Getting Started is still showing so a brand-new session
+  // isn't asked to set up a profile, install the app, AND enable
+  // notifications all in the same first-open stack.
   let installHtml="";
-  if(!window.matchMedia("(display-mode:standalone)").matches && !S.installPromptDismissed){
+  if(!startHtml && !window.matchMedia("(display-mode:standalone)").matches && !S.installPromptDismissed){
     const canOneTab=typeof _deferredInstallPrompt!=="undefined"&&_deferredInstallPrompt;
     installHtml=`<div class="install-card">
       <div class="install-body">
@@ -622,7 +640,7 @@ function renderToday(){
 
   // ── Notification prompt — shown only when streak is active and permission not yet granted
   let notifPromptHtml="";
-  if(typeof Notification!=="undefined"&&Notification.permission==="default"&&S.streak>0&&!S.notifEnabled){
+  if(!startHtml&&typeof Notification!=="undefined"&&Notification.permission==="default"&&S.streak>0&&!S.notifEnabled){
     notifPromptHtml=`<div class="notif-prompt-card">🔔 Enable streak alerts to get a reminder at 7 pm when orders are still open.<button class="notif-prompt-btn" data-notif-prompt="1">Enable →</button></div>`;
   }
 
@@ -679,7 +697,18 @@ function renderToday(){
   // ── Contextual AAR prompt (broken streak / below-standard AFT)
   const aarNudgeHtmlVal=aarNudgeHtml();
   // ── Assemble — creed always first, then guided flow
-  const flow=[startHtml, todaysHandHtml, sessHtml, weekCardHtml, ordersHtml, recoveryHtml, aarNudgeHtmlVal, discHtml, bossHtml, streakHtml, commissionHtml, pathSummaryHtml, focusHtml, adaptHtml, upcomingHtml, neglectHtml, pathPips, notesHtml, academicHtml, omlHtml, cnAlertHtml, qualAlertHtml, fmHtml, quickLogHtml, briefBtnHtml, installHtml, notifPromptHtml].filter(Boolean).join("");
+  // Ordered so the things that are actually urgent today (welcome-back,
+  // onboarding, streak/recovery, the day's one Focus pick, alerts) lead the
+  // scroll, and ambient/informational cards (path summary, academic snapshot,
+  // OML inputs, etc.) — equal-weight but lower-stakes — sit below them rather
+  // than competing visually with what needs action right now.
+  const flow=[
+    welcomeBackHtml, startHtml,
+    recoveryHtml, streakHtml, focusHtml, cnAlertHtml, qualAlertHtml,
+    todaysHandHtml, sessHtml, weekCardHtml, ordersHtml, bossHtml, aarNudgeHtmlVal, discHtml,
+    adaptHtml, upcomingHtml, neglectHtml, commissionHtml, pathSummaryHtml, pathPips, notesHtml, academicHtml, omlHtml, fmHtml, quickLogHtml, briefBtnHtml,
+    installHtml, notifPromptHtml
+  ].filter(Boolean).join("");
 
   el.innerHTML=`<div class="td-creed">🌲 <span>${creed}</span></div>`+(
     flow
@@ -722,13 +751,20 @@ function renderDayLog(){
       const type=(document.getElementById("qlType")||{}).value||"";
       const dur=parseInt((document.getElementById("qlDur")||{}).value)||0;
       const note=((document.getElementById("qlNote")||{}).value||"").trim();
+      const effortRaw=parseInt((document.getElementById("qlEffort")||{}).value);
+      const rpe=(effortRaw>=1&&effortRaw<=10)?effortRaw:null;
       if(!type&&!dur&&!note){ toast("Add at least a type or duration"); return; }
       if(!S.workouts) S.workouts=[];
-      S.workouts.push({id:id(), date:today, session:type||"PT", durationMin:dur||null, notes:note, ts:Date.now()});
+      // rpe uses the same field name detectOvertrainingTrend()'s wStruggled()
+      // already checks on a full session log — without it, a Quick Log entry
+      // satisfied "logged today" but was silently invisible to the
+      // overtraining/deload signal (found in the improvement audit).
+      S.workouts.push({id:id(), date:today, session:type||"PT", durationMin:dur||null, notes:note, rpe, ts:Date.now()});
       save();
       const qlType=document.getElementById("qlType"); if(qlType) qlType.value="";
       const qlDur=document.getElementById("qlDur"); if(qlDur) qlDur.value="";
       const qlNote=document.getElementById("qlNote"); if(qlNote) qlNote.value="";
+      const qlEffort=document.getElementById("qlEffort"); if(qlEffort) qlEffort.value="";
       toast(`Logged: ${type||"PT"}${dur?" "+dur+"min":""}`);
     };
   }

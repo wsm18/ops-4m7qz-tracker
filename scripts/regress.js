@@ -51,7 +51,14 @@ const TABS = [...PRIMARY_TABS, ...SECONDARY_TABS];
     await page.waitForTimeout(120);
   }
 
-  // basic skill audit: ladders consistent, no progress beyond ladder length
+  // Skill audit: ladders consistent, no progress beyond ladder length, plus a
+  // content-shape defect a real full-project audit had to find by hand twice
+  // (v212/v213 sessions) — advance/maintain/roadmap arrays shorter than
+  // levels (guidance silently vanishing right at peak level). Checking this
+  // here means a future edit can't silently reintroduce it. (A "setKey with
+  // no explicit rarity" check was tried and dropped — skRarity()'s
+  // level-count fallback already resolves those correctly in practice, so it
+  // was flagging working skills, not real bugs.)
   const audit = await page.evaluate(() => {
     const all = (window.S && S.lifeSkills) || [];
     let bad = [];
@@ -59,6 +66,9 @@ const TABS = [...PRIMARY_TABS, ...SECONDARY_TABS];
       if (s.tiers && Math.max(...s.tiers.map((t) => t.upTo)) !== L) bad.push(s.name + " tiers");
       if (s.peakLevel > L) bad.push(s.name + " peak>" + L);
       if (s.currentLevel > L) bad.push(s.name + " cur>" + L);
+      if (L && Array.isArray(s.advance) && s.advance.length && s.advance.length !== L) bad.push(s.name + " advance.length!=" + L);
+      if (L && Array.isArray(s.maintain) && s.maintain.length && s.maintain.length !== L) bad.push(s.name + " maintain.length!=" + L);
+      if (L && Array.isArray(s.roadmap) && s.roadmap.length && s.roadmap.length !== L) bad.push(s.name + " roadmap.length!=" + L);
     });
     return { total: all.length, badCount: bad.length, bad: bad.slice(0, 12) };
   });

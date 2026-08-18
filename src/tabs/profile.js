@@ -146,8 +146,8 @@ function renderMilestones(){
     return `<div class="milestone-row"><span class="milestone-date">${m.date}</span><span class="milestone-label">${esc(m.label)}</span><span class="milestone-when" style="color:${past?"var(--ink-faint)":"var(--jade)"}">${when}</span><button class="milestone-del" data-msdel="${m.id}">✕</button></div>`;
   }).join("");
 }
-function renderCommReadiness(){
-  const el=document.getElementById("commReadyWrap"); if(!el) return;
+function renderCommReadiness(targetId){
+  const el=document.getElementById(targetId||"commReadyWrap"); if(!el) return;
   const items=[];
   // Both AFT and GPA "most recent" lookups below used to trust raw array
   // push order (found by the v208-session second-pass audit) — real for AFT

@@ -21,6 +21,16 @@ const HABIT_STARTERS=[
 ];
 // local YYYY-MM-DD (NOT UTC — toISOString shifts the day for users behind UTC, which
 // corrupted habit streaks and study dates in the evening for e.g. Eastern-time users)
+// LOAD-ORDER WARNING: this file is #16 of ~27 in build.py's JS_FILES, but
+// training.js (#2) and other early-loading files call localYMD/dayDiff from
+// their own top-level code. That only works because these are hoisted
+// `function` declarations — the whole app is one concatenated <script>, so
+// hoisting reaches across every file regardless of order. If these are ever
+// rewritten as `const x = (...) => ...`, every earlier-loading caller breaks
+// with a TDZ ReferenceError at runtime — `npm run check` (parse-only) would
+// NOT catch it, only `npm run regress`'s real page load would, and only
+// incidentally. Keep these as function declarations, or move them to an
+// earlier-loading file (state.js/constants.js) if converting.
 function localYMD(d){ d=d||new Date(); const z=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate()); }
 function todayStr(){ return localYMD(); }
 function dayDiff(aStr,bStr){ return Math.round((new Date(bStr)-new Date(aStr))/864e5); }
@@ -39,7 +49,7 @@ function dailyTaskMarkDone(d){
   d.history=d.history||[]; d.history.push(today); if(d.history.length>400) d.history=d.history.slice(-400);
 }
 // effective streak display: if more than 1 day missed and not done today, streak is stale → show at risk
-function habitStreakState(h){
+function dailyTaskStreakState(h){
   if(!h.lastDone) return {streak:0, state:"new"};
   const gap=dayDiff(h.lastDone, todayStr());
   if(gap===0) return {streak:h.streak, state:"done"};
@@ -47,7 +57,7 @@ function habitStreakState(h){
   if(gap===2 && !h.graceUsed) return {streak:h.streak, state:"grace"}; // grace available
   return {streak:h.streak, state:"broken"};                // will reset
 }
-function habitHeatMap(h){
+function dailyTaskHeatMap(h){
   if(!(h.history||[]).length) return "";
   const doneSet=new Set(h.history||[]);
   const squares=[];
@@ -60,7 +70,7 @@ function habitHeatMap(h){
 }
 // per-task UI view: "strip" (60-day heat map) or "month" (current month grid)
 const _hbView={};
-function habitMonthGrid(h){
+function dailyTaskMonthGrid(h){
   const doneSet=new Set(h.history||[]);
   const now=new Date();
   const year=now.getFullYear(), month=now.getMonth();
@@ -98,7 +108,7 @@ function renderDailyTasks(){
   };
   el.innerHTML=S.dailies.map((d,i)=>{
     const isHabit=d.kind==="habit";
-    const st=habitStreakState(d);
+    const st=dailyTaskStreakState(d);
     const doneToday=isHabit?(d.lastDone===todayStr()):!!d.done;
     const graceIcon=(st.state==="grace"&&!d.graceUsed)?' ⏰':(d.graceUsed&&st.state!=="done"?' ⚠️':'');
     const streakBadge = st.streak>0 ? `<span class="hb-streak ${st.state}">🔥 ${st.streak}${graceIcon}</span>` : "";
@@ -111,7 +121,7 @@ function renderDailyTasks(){
     const atPeak=cur>=best&&cur>0&&best>0;
     const bestHtml=best>0?`<div class="hb-best${atPeak?' at-peak':''}">Best: ${best} day${best!==1?'s':''} ${atPeak?' ⭐':''}</div>`:'';
     const view=_hbView[d.id]||'strip';
-    const calView=(d.history&&d.history.length)?(view==='month'?habitMonthGrid(d):habitHeatMap(d)):'';
+    const calView=(d.history&&d.history.length)?(view==='month'?dailyTaskMonthGrid(d):dailyTaskHeatMap(d)):'';
     const toggleBtn=(d.history&&d.history.length)?`<button class="hb-view-toggle ${view==='month'?'on':''}" data-hbview="${d.id}">${view==='month'?'60d':'Cal'}</button>`:'';
     const kindTag=isHabit?`<span class="tag habitt">Habit</span>`:diffTag('daily',d.diff);
     const meta=isHabit?kindTag:`${kindTag}${pathTag(d.path)}`;

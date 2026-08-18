@@ -244,10 +244,10 @@ document.body.addEventListener("click",e=>{
     return;
   }
   // deletes
-  if(t.dataset.dq){S.quests=S.quests.filter(x=>x.id!==t.dataset.dq);save();render();return}
+  if(t.dataset.dq){if(confirm("Delete this oath?")){S.quests=S.quests.filter(x=>x.id!==t.dataset.dq);save();render();}return}
   // (old data-dd Daily Order delete removed v168 — superseded by data-dtdel above)
-  if(t.dataset.db){S.bosses=S.bosses.filter(x=>x.id!==t.dataset.db);save();render();return}
-  if(t.dataset.dr){S.rewards=S.rewards.filter(x=>x.id!==t.dataset.dr);save();render();return}
+  if(t.dataset.db){if(confirm("Delete this trial? Its checkpoint progress will be lost.")){S.bosses=S.bosses.filter(x=>x.id!==t.dataset.db);save();render();}return}
+  if(t.dataset.dr){if(confirm("Delete this reward?")){S.rewards=S.rewards.filter(x=>x.id!==t.dataset.dr);save();render();}return}
   // install prompt dismiss / one-tap install
   if(t.dataset.installDismiss){S.installPromptDismissed=true;save();if(typeof renderToday==="function")renderToday();return;}
   if(t.dataset.installNow&&_deferredInstallPrompt){_deferredInstallPrompt.prompt();_deferredInstallPrompt.userChoice.then(()=>{S.installPromptDismissed=true;save();if(typeof renderToday==="function")renderToday();});return;}
@@ -255,7 +255,7 @@ document.body.addEventListener("click",e=>{
   if(t.dataset.notifPrompt){
     if(typeof Notification!=="undefined"){
       Notification.requestPermission().then(perm=>{
-        if(perm==="granted"){S.notifEnabled=true;save();scheduleStreakNotif();}
+        if(perm==="granted"){S.notifEnabled=true;save();scheduleStreakNotif();if(typeof scheduleDecayNotif==="function")scheduleDecayNotif();}
         if(typeof renderToday==="function")renderToday();
       });
     }
@@ -353,7 +353,17 @@ document.body.addEventListener("input",e=>{
 
 /* ---------------- Toast & skill-up ---------------- */
 let toastT;
-function toast(html){const el=document.getElementById("toast");el.innerHTML=html;el.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove("show"),2200);}
+// opts is optional: {color, duration} — added so weight.js's near-identical
+// weightToast() (same element, same show/hide choreography, just its own
+// color+duration) could be absorbed instead of staying a hand-copied twin.
+function toast(html,opts){
+  const o=opts||{};
+  const el=document.getElementById("toast");
+  el.innerHTML=o.color?`<span style="color:${o.color}">${html}</span>`:html;
+  el.classList.add("show");
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>el.classList.remove("show"),o.duration||2200);
+}
 function showLevelUp(path,lvl){
   const pm=PATH_META[path]||{icon:"⭐",name:path,idol:path};
   document.getElementById("luTitle").textContent=pm.icon+" "+pm.name+" — Level "+lvl;

@@ -1,92 +1,120 @@
   <section class="view" id="view-records">
-    <div class="sec-h"><h2>Skill Notes</h2><span class="hint">search across all practice notes</span></div>
-    <div class="cn-filter-wrap">
-      <input id="skNoteSearch" class="cn-search-input" placeholder="Search by skill or note…" autocomplete="off">
+    <div class="sec-h"><h2>Records</h2><span class="hint">reflection, history &amp; export</span></div>
+    <div class="wall-subnav">
+      <button class="rsub on" data-rsub="notes">📝 Notes</button>
+      <button class="rsub" data-rsub="saga">📜 Saga</button>
+      <button class="rsub" data-rsub="counsel">📋 Counseling</button>
+      <button class="rsub" data-rsub="aar">🔍 AAR</button>
+      <button class="rsub" data-rsub="checklists">✅ Checklists</button>
+      <button class="rsub" data-rsub="export">📤 Export</button>
     </div>
-    <div id="skNotesArea"></div>
 
-    <div class="sec-h" style="margin-top:20px"><h2>Your Saga</h2><span class="hint">the long arc — where you have been</span></div>
-    <button class="rpt-btn" id="battleBuddyBtn">📋 Generate Battle Buddy Report</button>
-    <button class="rpt-btn" id="skHistExport">📋 Copy skill history</button>
-    <div id="historyArea"></div>
-
-    <div class="sec-h" style="margin-top:20px"><h2>Counseling Log</h2><span class="hint">leadership events (4856-style)</span></div>
-    <div class="plan-intro">A private running record of counselings received and given — real fuel for OML/branch boards and self-reflection. Stays on your device.</div>
-    <div class="cn-filter-wrap">
-      <div class="mb-filter-bar" id="cnFilterBar">
-        <button class="mb-filter on" data-cnfilter="all">All</button>
-        <button class="mb-filter" data-cnfilter="event">Event</button>
-        <button class="mb-filter" data-cnfilter="monthly">Monthly</button>
-        <button class="mb-filter" data-cnfilter="developmental">Developmental</button>
-        <button class="mb-filter" data-cnfilter="received">Received</button>
-        <button class="mb-filter" data-cnfilter="given">Given</button>
+    <!-- NOTES sub-section -->
+    <div class="rec-sec on" id="rsec-notes">
+      <div class="sec-h" style="margin-top:0"><h2>Skill Notes</h2><span class="hint">search across all practice notes</span></div>
+      <div class="cn-filter-wrap">
+        <input id="skNoteSearch" class="cn-search-input" placeholder="Search by skill or note…" autocomplete="off">
       </div>
-      <input id="cnSearch" class="cn-search-input" placeholder="Search by summary or people…" autocomplete="off">
+      <div id="skNotesArea"></div>
     </div>
-    <div id="counselArea"></div>
-    <button class="wall-bulk-toggle" data-bulktoggle="cnBulk">Bulk add counselings…</button>
-    <div class="wall-bulk-panel-wrap" id="cnBulk" style="display:none">
-      <textarea class="wall-bulk-panel" id="cnBulkText" placeholder="One per line: Date | Type | Summary | Plan | FollowUp&#10;Example: 2025-11-15 | Initial | Reviewed semester plan | Focus on GPA |"></textarea>
-      <div class="wall-bulk-preview" id="cnBulkPreview"></div>
-      <div class="row" style="gap:8px;margin-top:8px"><button class="wall-bulk-preview-btn" id="cnBulkPreviewBtn">Preview</button><button class="wall-bulk-commit" id="cnBulkCommit" style="display:none">Commit</button></div>
+
+    <!-- SAGA sub-section -->
+    <div class="rec-sec" id="rsec-saga">
+      <div class="sec-h" style="margin-top:0"><h2>Your Saga</h2><span class="hint">the long arc — where you have been</span></div>
+      <button class="rpt-btn" id="battleBuddyBtn">📋 Generate Battle Buddy Report</button>
+      <button class="rpt-btn" id="skHistExport">📋 Copy skill history</button>
+      <div id="historyArea"></div>
     </div>
-    <details class="habit-add-wrap"><summary>+ Log a counseling/event</summary>
-      <div class="adder" style="margin-top:10px">
-        <input id="cnDate" type="date">
-        <select id="cnType" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit"><option value="event">Event</option><option value="monthly">Monthly counseling</option><option value="developmental">Developmental</option><option value="received">Counseling received</option><option value="given">Counseling given</option></select>
-        <input id="cnPeople" placeholder="People involved" maxlength="60" style="margin-top:7px">
-        <textarea id="cnSummary" placeholder="What happened (summary)" rows="2" maxlength="400" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
-        <textarea id="cnPlan" placeholder="Plan of action / follow-up" rows="2" maxlength="300" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
-        <button class="btn-add" id="cnAdd" style="margin-top:9px">Save entry</button>
-      </div>
-    </details>
 
-    <div class="sec-h" style="margin-top:20px"><h2>After-Action Review</h2><span class="hint">what was planned vs. what happened</span></div>
-    <div class="plan-intro">A real AAR, not another free-text note: what was supposed to happen, what actually happened, why, and what to sustain or improve. Worth writing after a bad test, a broken streak, or a rough week — the app will nudge you on the Dawn tab when one of those happens and it's been a few days since your last one.</div>
-    <div id="aarArea"></div>
-    <details class="habit-add-wrap"><summary>+ Write an AAR</summary>
-      <div class="adder" style="margin-top:10px">
-        <input id="aarDate" type="date">
-        <input id="aarTitle" placeholder="Title — e.g. AFT test, FTX, this week" maxlength="60" style="margin-top:7px">
-        <textarea id="aarPlanned" placeholder="What was supposed to happen" rows="2" maxlength="400" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
-        <textarea id="aarActual" placeholder="What actually happened" rows="2" maxlength="400" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
-        <textarea id="aarWhy" placeholder="Why the difference" rows="2" maxlength="400" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
-        <textarea id="aarSustain" placeholder="Sustain — what to keep doing" rows="2" maxlength="300" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
-        <textarea id="aarImprove" placeholder="Improve — what to change" rows="2" maxlength="300" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
-        <button class="btn-add" id="aarAdd" style="margin-top:9px">Save AAR</button>
-      </div>
-    </details>
-
-    <div class="sec-h" style="margin-top:20px"><h2>Packing &amp; Gear Checklists</h2><span class="hint">reusable templates</span></div>
-    <div id="checklistArea"></div>
-    <details class="habit-add-wrap"><summary>+ New checklist</summary>
-      <div class="adder" style="margin-top:10px">
-        <input id="clName" placeholder="Checklist name — e.g. Ruck march, FTX, Lab" maxlength="40">
-        <button class="btn-add" id="clAdd" style="margin-top:9px">Create checklist</button>
-        <div class="habit-starter"><div class="habit-starter-label">Or start from a template:</div>
-          <div>${''}<button class="hb-starter-btn" data-cltemplate="ruck">Ruck march</button><button class="hb-starter-btn" data-cltemplate="ftx">FTX</button><button class="hb-starter-btn" data-cltemplate="lab">Lab day</button></div>
+    <!-- COUNSELING sub-section -->
+    <div class="rec-sec" id="rsec-counsel">
+      <div class="sec-h" style="margin-top:0"><h2>Counseling Log</h2><span class="hint">leadership events (4856-style)</span></div>
+      <div class="plan-intro">A private running record of counselings received and given — real fuel for OML/branch boards and self-reflection. Stays on your device.</div>
+      <div class="cn-filter-wrap">
+        <div class="mb-filter-bar" id="cnFilterBar">
+          <button class="mb-filter on" data-cnfilter="all">All</button>
+          <button class="mb-filter" data-cnfilter="event">Event</button>
+          <button class="mb-filter" data-cnfilter="monthly">Monthly</button>
+          <button class="mb-filter" data-cnfilter="developmental">Developmental</button>
+          <button class="mb-filter" data-cnfilter="received">Received</button>
+          <button class="mb-filter" data-cnfilter="given">Given</button>
         </div>
+        <input id="cnSearch" class="cn-search-input" placeholder="Search by summary or people…" autocomplete="off">
       </div>
-    </details>
-
-    <div class="sec-h" style="margin-top:20px"><h2>Export Data</h2><span class="hint">CSV / printable</span></div>
-    <div class="plan-intro">Export your records as CSV for cadre, an official file, or your own backup (this is in addition to the full JSON backup at the bottom of the app).</div>
-    <div class="row" style="gap:8px;flex-wrap:wrap">
-      <button class="hb-starter-btn" data-export="aft">AFT history</button>
-      <button class="hb-starter-btn" data-export="awards">Awards</button>
-      <button class="hb-starter-btn" data-export="volunteer">Volunteer hours</button>
-      <button class="hb-starter-btn" data-export="counseling">Counseling log</button>
-      <button class="hb-starter-btn" data-export="aar">AAR log</button>
+      <div id="counselArea"></div>
+      <button class="wall-bulk-toggle" data-bulktoggle="cnBulk">Bulk add counselings…</button>
+      <div class="wall-bulk-panel-wrap" id="cnBulk" style="display:none">
+        <textarea class="wall-bulk-panel" id="cnBulkText" placeholder="One per line: Date | Type | Summary | Plan | FollowUp&#10;Example: 2025-11-15 | Initial | Reviewed semester plan | Focus on GPA |"></textarea>
+        <div class="wall-bulk-preview" id="cnBulkPreview"></div>
+        <div class="row" style="gap:8px;margin-top:8px"><button class="wall-bulk-preview-btn" id="cnBulkPreviewBtn">Preview</button><button class="wall-bulk-commit" id="cnBulkCommit" style="display:none">Commit</button></div>
+      </div>
+      <details class="habit-add-wrap"><summary>+ Log a counseling/event</summary>
+        <div class="adder" style="margin-top:10px">
+          <input id="cnDate" type="date">
+          <select id="cnType" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit"><option value="event">Event</option><option value="monthly">Monthly counseling</option><option value="developmental">Developmental</option><option value="received">Counseling received</option><option value="given">Counseling given</option></select>
+          <input id="cnPeople" placeholder="People involved" maxlength="60" style="margin-top:7px">
+          <textarea id="cnSummary" placeholder="What happened (summary)" rows="2" maxlength="400" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
+          <textarea id="cnPlan" placeholder="Plan of action / follow-up" rows="2" maxlength="300" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
+          <button class="btn-add" id="cnAdd" style="margin-top:9px">Save entry</button>
+        </div>
+      </details>
     </div>
 
-    <div class="sec-h" style="margin-top:20px"><h2>Export / Import a Section</h2><span class="hint">just one part</span></div>
-    <div class="plan-intro">Export a single section as its own JSON file — e.g. just The Wall — to share or move to another device without your whole dataset. Importing a section file <b>replaces only that section</b>; everything else is left alone.</div>
-    <div class="adder">
-      <select id="sectionPick" style="width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:10px;border-radius:8px;font-family:inherit;font-size:14px"></select>
-      <div class="row" style="gap:8px;margin-top:9px">
-        <button class="btn-add" id="sectionExport" style="flex:1;margin:0">Export section</button>
-        <button class="btn-add" id="sectionImportBtn" style="flex:1;margin:0;background:transparent;border:1px solid var(--line);color:var(--ink-dim)">Import section</button>
+    <!-- AAR sub-section -->
+    <div class="rec-sec" id="rsec-aar">
+      <div class="sec-h" style="margin-top:0"><h2>After-Action Review</h2><span class="hint">what was planned vs. what happened</span></div>
+      <div class="plan-intro">A real AAR, not another free-text note: what was supposed to happen, what actually happened, why, and what to sustain or improve. Worth writing after a bad test, a broken streak, or a rough week — the app will nudge you on the Dawn tab when one of those happens and it's been a few days since your last one.</div>
+      <div id="aarArea"></div>
+      <details class="habit-add-wrap"><summary>+ Write an AAR</summary>
+        <div class="adder" style="margin-top:10px">
+          <input id="aarDate" type="date">
+          <input id="aarTitle" placeholder="Title — e.g. AFT test, FTX, this week" maxlength="60" style="margin-top:7px">
+          <textarea id="aarPlanned" placeholder="What was supposed to happen" rows="2" maxlength="400" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
+          <textarea id="aarActual" placeholder="What actually happened" rows="2" maxlength="400" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
+          <textarea id="aarWhy" placeholder="Why the difference" rows="2" maxlength="400" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
+          <textarea id="aarSustain" placeholder="Sustain — what to keep doing" rows="2" maxlength="300" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
+          <textarea id="aarImprove" placeholder="Improve — what to change" rows="2" maxlength="300" style="margin-top:7px;width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:9px;border-radius:8px;font-family:inherit;font-size:13px"></textarea>
+          <button class="btn-add" id="aarAdd" style="margin-top:9px">Save AAR</button>
+        </div>
+      </details>
+    </div>
+
+    <!-- CHECKLISTS sub-section -->
+    <div class="rec-sec" id="rsec-checklists">
+      <div class="sec-h" style="margin-top:0"><h2>Packing &amp; Gear Checklists</h2><span class="hint">reusable templates</span></div>
+      <div id="checklistArea"></div>
+      <details class="habit-add-wrap"><summary>+ New checklist</summary>
+        <div class="adder" style="margin-top:10px">
+          <input id="clName" placeholder="Checklist name — e.g. Ruck march, FTX, Lab" maxlength="40">
+          <button class="btn-add" id="clAdd" style="margin-top:9px">Create checklist</button>
+          <div class="habit-starter"><div class="habit-starter-label">Or start from a template:</div>
+            <div>${''}<button class="hb-starter-btn" data-cltemplate="ruck">Ruck march</button><button class="hb-starter-btn" data-cltemplate="ftx">FTX</button><button class="hb-starter-btn" data-cltemplate="lab">Lab day</button></div>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- EXPORT sub-section -->
+    <div class="rec-sec" id="rsec-export">
+      <div class="sec-h" style="margin-top:0"><h2>Export Data</h2><span class="hint">CSV / printable</span></div>
+      <div class="plan-intro">Export your records as CSV for cadre, an official file, or your own backup (this is in addition to the full JSON backup at the bottom of the app).</div>
+      <div class="row" style="gap:8px;flex-wrap:wrap">
+        <button class="hb-starter-btn" data-export="aft">AFT history</button>
+        <button class="hb-starter-btn" data-export="awards">Awards</button>
+        <button class="hb-starter-btn" data-export="volunteer">Volunteer hours</button>
+        <button class="hb-starter-btn" data-export="counseling">Counseling log</button>
+        <button class="hb-starter-btn" data-export="aar">AAR log</button>
       </div>
-      <input type="file" id="sectionImportFile" accept="application/json" style="display:none">
+
+      <div class="sec-h" style="margin-top:20px"><h2>Export / Import a Section</h2><span class="hint">just one part</span></div>
+      <div class="plan-intro">Export a single section as its own JSON file — e.g. just The Wall — to share or move to another device without your whole dataset. Importing a section file <b>replaces only that section</b>; everything else is left alone.</div>
+      <div class="adder">
+        <select id="sectionPick" style="width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:10px;border-radius:8px;font-family:inherit;font-size:14px"></select>
+        <div class="row" style="gap:8px;margin-top:9px">
+          <button class="btn-add" id="sectionExport" style="flex:1;margin:0">Export section</button>
+          <button class="btn-add" id="sectionImportBtn" style="flex:1;margin:0;background:transparent;border:1px solid var(--line);color:var(--ink-dim)">Import section</button>
+        </div>
+        <input type="file" id="sectionImportFile" accept="application/json" style="display:none">
+      </div>
     </div>
   </section>

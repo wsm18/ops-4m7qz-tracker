@@ -229,12 +229,16 @@ function recoveryReadiness(){
 function vo2Benchmark(){
   const hi=S.healthImport||{}; const v=hi.latest&&hi.latest.vo2max?hi.latest.vo2max.value:null;
   if(v==null) return null;
-  const age=aftCtx&&aftCtx().age?aftCtx().age:20; const male=(S.profile.sex||"m")!=="f";
+  const realAge=aftCtx&&aftCtx().age; const age=realAge||20; const male=(S.profile.sex||"m")!=="f";
   // rough male/female under-30 bands; coarse but honest as a directional category
   let band;
   const m=male?[(30),(38),(45),(52)]:[(26),(33),(40),(46)];
   if(v<m[0]) band="below average"; else if(v<m[1]) band="average"; else if(v<m[2]) band="above average"; else if(v<m[3]) band="excellent"; else band="superior";
-  return {v, band, line:`VO₂ max ${v} — ${band} aerobic fitness for your age. This is the engine behind your 2-mile run; steady zone-2 work plus intervals raises it over weeks.`};
+  // Without a real birthdate this silently assumed age 20 — a plausible-looking
+  // but potentially wrong band with no visible sign, unlike the AFT event
+  // display (which shows an explicit "set birthdate in Profile" warning).
+  const ageNote=realAge?"":" (assuming age 20 — set your birthdate in Profile for an accurate band)";
+  return {v, band, line:`VO₂ max ${v} — ${band} aerobic fitness for your age${ageNote}. This is the engine behind your 2-mile run; steady zone-2 work plus intervals raises it over weeks.`};
 }
 function showAftResult(a){
   const el=document.getElementById("aftResult");

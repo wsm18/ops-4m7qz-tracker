@@ -546,6 +546,21 @@ function renderSkillsTab(){
         ${decayed.length?`<span class="sk-summary-stat decayed">🍂 ${decayed.length} decayed</span>`:''}
       </div>`;
     } else { sbEl.innerHTML=""; }
+    // A user who hasn't started ANY skill lands in the same fully-expanded
+    // 12,500-skill browser as a veteran, with zero signal on where to begin.
+    // Surface a handful of genuinely easy (Common-tier, no sub-skills) real
+    // skills from a spread of Paths — not invented content, just a curated
+    // pointer into what already exists.
+    const startEl=document.getElementById("skStartHere");
+    if(startEl){
+      if(started.length===0 && typeof skRarity==="function"){
+        const seenCat={};
+        const picks=allLeaves.filter(s=>!s.auto && !s.parent && skRarity(s).name==="Common").filter(s=>{
+          if(seenCat[s.cat]) return false; seenCat[s.cat]=true; return true;
+        }).slice(0,5);
+        startEl.innerHTML=picks.length?`<div class="sk-start-here">🌱 <b>New here?</b> Try one of these to start: ${picks.map(s=>esc(s.name)).join(" · ")}</div>`:"";
+      } else { startEl.innerHTML=""; }
+    }
   }
   renderFocusStrip();
   // skill list — category → top-level skill (group shows subs) → leaf

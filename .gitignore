@@ -1,3 +1,7 @@
 node_modules/
 dist/
 personal/
+# Throwaway scratch files from a work session (CLAUDE.md's own convention —
+# never src/_shell.html, which lives under src/ and isn't matched by these).
+/_*
+scripts/_*

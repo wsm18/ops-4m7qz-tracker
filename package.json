@@ -1,13 +1,14 @@
 {
   "name": "operations-pwa",
-  "version": "88.0.0",
+  "version": "214.0.0",
   "private": true,
   "description": "Operations — a gamified ROTC + life-tracker Progressive Web App (single-file, offline).",
   "scripts": {
     "build": "python scripts/build.py",
     "check": "node scripts/check_syntax.js",
     "regress": "node scripts/regress.js",
-    "verify": "npm run build && npm run check && npm run regress",
+    "unit": "node scripts/unit-checks.js",
+    "verify": "npm run build && npm run check && npm run regress && npm run unit",
     "package": "npm run build && node scripts/package.js",
     "icons": "python3 scripts/make_icons.py",
     "preview": "python3 scripts/build_preview.py"

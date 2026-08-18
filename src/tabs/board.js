@@ -28,24 +28,33 @@ function renderBoard(){
   const list=document.getElementById("boardList");
   if(!list) return;
   renderBoardBranchCard();
+  // Board/branch readiness used to be 3 disconnected screens sharing a
+  // database (this checklist, Quiz's per-category readiness, Profile's
+  // commissioning scorecard) — wiring the existing functions in here (not
+  // reimplementing them) so board-prep season has one real readiness view.
+  if(typeof renderBoardReadiness==="function") renderBoardReadiness("boardQuizReadiness");
+  if(typeof renderCommReadiness==="function") renderCommReadiness("boardCommReadiness");
   document.getElementById("branchGoalHint").textContent="goal: "+(S.branchGoal||"Cyber");
   const done=S.boardTasks.filter(t=>t.done).length;
   document.getElementById("boardProg").textContent=done+"/"+S.boardTasks.length+" complete";
   list.innerHTML=S.boardTasks.map(t=>`<li class="card board-item ${t.done?'done':''}">
     <div class="check" data-bt="${t.id}">${t.done?'✓':''}</div>
-    <div class="c-body"><div class="c-name">${esc(t.name)}</div>${t.done?'':`<span class="tag xp">+${VALUES.board.xp} XP · ${VALUES.board.g} pts</span>`}</div>
+    <div class="c-body"><div class="c-name">${esc(t.name)}</div>${t.due?`<span class="tag" style="color:var(--ink-faint)">due ${esc(t.due)}</span>`:''}${t.done?'':`<span class="tag xp">+${VALUES.board.xp} XP · ${VALUES.board.g} pts</span>`}</div>
     <button class="del" data-dbt="${t.id}">✕</button>
   </li>`).join("");
 }
 document.body.addEventListener("click",e=>{
   const t=e.target;
   if(t.dataset.bt){const task=S.boardTasks.find(x=>x.id===t.dataset.bt);if(task){const was=task.done;task.done=!task.done;if(!was&&task.done){grant(VALUES.board.xp,VALUES.board.g,"Board prep task done","academic");}else{save();render();}}return;}
-  if(t.dataset.dbt){S.boardTasks=S.boardTasks.filter(x=>x.id!==t.dataset.dbt);save();render();return;}
+  if(t.dataset.dbt){if(confirm("Delete this board task?")){S.boardTasks=S.boardTasks.filter(x=>x.id!==t.dataset.dbt);save();render();}return;}
 });
 const _btAdd=document.getElementById("btAdd");
 if(_btAdd) _btAdd.onclick=()=>{
   const n=document.getElementById("btName").value.trim();if(!n)return;
-  S.boardTasks.push({id:id(),name:n,done:false});
-  document.getElementById("btName").value="";save();render();
+  const due=(document.getElementById("btDue")||{}).value||null;
+  S.boardTasks.push({id:id(),name:n,done:false,due});
+  document.getElementById("btName").value="";
+  const btDue=document.getElementById("btDue"); if(btDue) btDue.value="";
+  save();render();
 };
 

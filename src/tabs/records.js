@@ -227,6 +227,35 @@ function exportBattleBuddyReport(){
   const awardRows=(S.awards||[]).map(a=>`<li>${esc(a.title)}</li>`).join("");
   const volHours=(S.volunteer||[]).reduce((s,v)=>s+(parseFloat(v.hours)||0),0);
   const counselRows=(S.counseling||[]).slice(-5).reverse().map(c=>`<li><b>${esc(c.date)}</b> [${esc(c.type)}]${c.people?" · "+esc(c.people):""} — ${esc(c.summary||"")}</li>`).join("");
+  // The rest of these sections used to live only in Wall → Résumé (a
+  // plaintext clipboard export), leaving a cadet with two partial exports and
+  // no single "everything" document for a commissioning/OER-support moment —
+  // reading the same underlying fields Wall's copyWallResume() reads, not
+  // duplicating its logic.
+  const ahRows=(S.academicHonors||[]).slice().sort((a,b)=>(b.year||0)-(a.year||0)).map(a=>`<li>${esc(a.title)}${a.org?" — "+esc(a.org):""}${a.year?" ("+esc(a.year)+")":""}</li>`).join("");
+  const rr=S.rotcRecord||{};
+  const rrRows=[
+    ...(rr.positions||[]).map(p=>`<li>${esc(p.title)}${p.startSem?" ("+esc(p.startSem)+(p.endSem?"–"+esc(p.endSem):"")+")":""}</li>`),
+    ...(rr.competitions||[]).map(c=>`<li>${esc(c.name)}${c.year?" ("+esc(c.year)+")":""}${c.placement?" — "+esc(c.placement):""}</li>`),
+    ...(rr.campResults||[]).map(c=>`<li>${esc(c.camp)}${c.year?" ("+esc(c.year)+")":""}${c.rating?" — "+esc(c.rating):""}</li>`)
+  ].join("");
+  const mbRows=(S.memberships||[]).slice().sort((a,b)=>(b.startYear||0)-(a.startYear||0)).map(m=>{
+    const yrs=m.endYear?`${m.startYear}–${m.endYear}`:m.startYear?`${m.startYear}–present`:"";
+    const roles=(m.roles||[]).map(r=>esc(r.title)).join(", ");
+    return `<li>${esc(m.org)}${yrs?" ("+yrs+")":""}${roles?" · "+roles:""}</li>`;
+  }).join("");
+  const qualRows=(S.qualifications||[]).map(q=>{
+    const cat=typeof QUAL_CATALOG!=="undefined"&&QUAL_CATALOG[q.key]?QUAL_CATALOG[q.key]:null;
+    const qname=q.key==="custom"?(q.label||q.key):(cat?cat.fullName:q.key);
+    return `<li>${esc(qname)}${q.date?" ("+esc(q.date)+")":""}</li>`;
+  }).join("");
+  const langs=S.profile?.languages||[]; const clr=S.profile?.clearance;
+  const langRows=langs.map(l=>`<li>${esc(l.lang)}${l.ilr?" — ILR "+esc(l.ilr):""}</li>`).join("")+((clr&&clr.level&&clr.level!=="None")?`<li>Clearance: ${esc(clr.level)}</li>`:"");
+  const gpas=(S.gpaHistory||[]).slice().sort((a,b)=>termSortKey(b.term)-termSortKey(a.term));
+  const curGpa=gpas.length?gpas[0].gpa:null;
+  const quizBank=window.QUIZ_BANK||{}; const quizKeys=Object.keys(quizBank);
+  const quizPassed=quizKeys.filter(k=>S.quizzes[k]&&S.quizzes[k].passed).length;
+  const readinessLine=quizKeys.length?`Board/quiz readiness: ${Math.round(quizPassed/quizKeys.length*100)}% (${quizPassed}/${quizKeys.length} categories passed)`:null;
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Battle Buddy Report — ${esc(name)}</title>
 <style>body{font-family:Arial,sans-serif;color:#111;max-width:720px;margin:20px auto;padding:0 20px}h1{font-size:22px;border-bottom:3px solid #333;padding-bottom:8px;margin-bottom:4px}h2{font-size:15px;margin-top:20px;border-bottom:1px solid #ccc;padding-bottom:4px}table{border-collapse:collapse;width:100%;font-size:13px;margin-top:8px}th,td{border:1px solid #ccc;padding:5px 8px;text-align:left}th{background:#f5f5f5}ul{margin:6px 0;padding-left:20px;font-size:13px}li{margin-bottom:3px}.meta{font-size:12px;color:#777;margin-bottom:16px}p{font-size:13px}@media print{body{margin:0;padding:12px}}</style>
 </head><body>
@@ -235,14 +264,20 @@ function exportBattleBuddyReport(){
 <h2>Identity</h2>
 <p><b>Name:</b> ${esc(name)} &nbsp;|&nbsp; <b>Rank/MS:</b> ${esc(S.rank||"—")} &nbsp;|&nbsp; <b>Position:</b> ${esc(S.position||"—")}</p>
 ${p.commissionDate?`<p><b>Commission date:</b> ${esc(p.commissionDate)}</p>`:""}
-${p.gpa?`<p><b>GPA:</b> ${esc(p.gpa)}</p>`:""}
+${curGpa!=null?`<p><b>GPA:</b> ${esc(curGpa.toFixed(2))}</p>`:(p.gpa?`<p><b>GPA:</b> ${esc(p.gpa)}</p>`:"")}
 ${S.branchGoal?`<p><b>Branch goal:</b> ${esc(S.branchGoal)}</p>`:""}
+${readinessLine?`<p><b>${esc(readinessLine)}</b></p>`:""}
 <h2>AFT History (last 5)</h2>
 ${aftRows?`<table><thead><tr><th>Date</th><th>Total</th><th>DL</th><th>HRP</th><th>SDC</th><th>Plank</th><th>Run</th></tr></thead><tbody>${aftRows}</tbody></table>`:"<p>No AFT scores recorded.</p>"}
 <h2>Top Skills</h2>
 ${skillRows?`<ul>${skillRows}</ul>`:"<p>No skills leveled yet.</p>"}
+${ahRows?`<h2>Academic Honors</h2><ul>${ahRows}</ul>`:""}
 <h2>Awards &amp; Recognitions</h2>
 ${awardRows?`<ul>${awardRows}</ul>`:"<p>None recorded.</p>"}
+${rrRows?`<h2>ROTC Record</h2><ul>${rrRows}</ul>`:""}
+${mbRows?`<h2>Memberships &amp; Leadership</h2><ul>${mbRows}</ul>`:""}
+${qualRows?`<h2>Qualifications</h2><ul>${qualRows}</ul>`:""}
+${langRows?`<h2>Languages &amp; Clearance</h2><ul>${langRows}</ul>`:""}
 <p>Volunteer hours logged: ${esc(volHours)}</p>
 ${counselRows?`<h2>Counseling Log (last 5)</h2><ul>${counselRows}</ul>`:""}
 <p style="margin-top:28px;font-size:11px;color:#999;">Operations · offline cadet tool · no data transmitted</p>

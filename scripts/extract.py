@@ -34,7 +34,7 @@ def write(rel, content):
     print(f"  wrote  src/{rel:<38} ({n:>4} lines)")
 
 # ── SHELL HTML ────────────────────────────────────────────────────────────────
-# Assembled from non-content fragments; build.js injects CSS, tab HTML, and JS.
+# Assembled from non-content fragments; build.py injects CSS, tab HTML, and JS.
 head           = ex(1,    15)    # DOCTYPE + <head> meta/links (before <style>)
 body_nav       = ex(939,  994)   # </head><body>…nav…<div class="content-col">
 footer_scripts = ex(1731, 1761)  # close divs, footer, toast, levelup, quizModal,
@@ -120,4 +120,4 @@ n_core = len(core_js)
 n_tabs_html = len(tabs_html)
 n_tabs_js = len(tabs_js)
 print(f"\nDone — {n_tabs_html} tab HTML + {n_core} core JS + {n_tabs_js} tab JS files created in src/")
-print("Next: node scripts/build.js  (or: npm run build)")
+print("Next: npm run build  (or: python scripts/build.py)")

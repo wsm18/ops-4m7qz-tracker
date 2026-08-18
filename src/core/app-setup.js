@@ -106,7 +106,7 @@ if(_wmOpen) _wmOpen.onclick=()=>{
 const _wmLinkEdit=document.getElementById("wmLinkEdit");
 if(_wmLinkEdit) _wmLinkEdit.onclick=()=>{
   const url=(prompt("Weight app link:",S.weightAppUrl||"https://")||"").trim();
-  if(url&&url!=="https://"){ S.weightAppUrl=url; save(); weightToast("Link saved."); updateWmStatus(); }
+  if(url&&url!=="https://"){ S.weightAppUrl=url; save(); toast("Link saved.",{color:"#d8b06a",duration:2800}); updateWmStatus(); }
 };
 // Update mirror — import a Weight ledger .json export
 const _wmImport=document.getElementById("wmImport"), _wmFile=document.getElementById("wmFile");
@@ -115,7 +115,7 @@ if(_wmImport&&_wmFile){
   _wmFile.onchange=ev=>{
     const f=ev.target.files[0]; if(!f)return;
     const r=new FileReader();
-    r.onload=()=>{ try{ importWeightLedger(JSON.parse(r.result)); }catch(err){ weightToast("Couldn't read that file."); } _wmFile.value=""; };
+    r.onload=()=>{ try{ importWeightLedger(JSON.parse(r.result)); }catch(err){ toast("Couldn't read that file.",{color:"#d8b06a",duration:2800}); } _wmFile.value=""; };
     r.readAsText(f);
   };
 }
@@ -174,6 +174,15 @@ document.querySelectorAll(".wsub").forEach(btn=>btn.onclick=()=>{
   document.querySelectorAll(".wall-sec").forEach(x=>x.classList.remove("on"));
   btn.classList.add("on");
   document.getElementById("wsec-"+btn.dataset.wsub).classList.add("on");
+});
+
+/* ---- Records sub-navigation (separate classes from Wall's — see .rec-sec's
+   CSS comment for why they can't share .wsub/.wall-sec) ---- */
+document.querySelectorAll(".rsub").forEach(btn=>btn.onclick=()=>{
+  document.querySelectorAll(".rsub").forEach(x=>x.classList.remove("on"));
+  document.querySelectorAll(".rec-sec").forEach(x=>x.classList.remove("on"));
+  btn.classList.add("on");
+  document.getElementById("rsec-"+btn.dataset.rsub).classList.add("on");
 });
 
 /* ---- Memberships ---- */

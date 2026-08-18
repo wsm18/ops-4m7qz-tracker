@@ -233,7 +233,7 @@
   .tag.diff-med{color:var(--gold);border-color:#5e4715}
   .tag.diff-hard{color:var(--ember);border-color:#5e2f1c}
   .tag.habitt{color:var(--jade);border-color:#3c5230;background:rgba(var(--jade-rgb),.08)}
-  .del{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:18px;padding:4px 6px;flex:none}
+  .del{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:19px;padding:7px 9px;flex:none}
   .del:hover{color:var(--blood)}
 
   /* ---- Boss ---- */
@@ -583,6 +583,12 @@
 
   /* ---- Skills ---- */
   .sk-form-title{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:10px}
+  /* Collapsed-by-default sub-sections inside a long .adder form (Profile) —
+     same problem Plan's "⚙️ Setup" details/summary solved for its own form;
+     the whole card was one continuous scroll of every field group at once. */
+  details.pf-section{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  details.pf-section summary{cursor:pointer;margin-bottom:0}
+  details.pf-section[open] summary{margin-bottom:10px}
   #skName{width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:11px;border-radius:8px;font-family:inherit;font-size:15px}
   #skName:focus{outline:none;border-color:var(--violet)}
   .sk-levels-help{font-size:11.5px;color:var(--ink-faint);margin:11px 0 7px}
@@ -807,14 +813,14 @@
   .hb-streak{flex:none;font-size:12.5px;font-weight:700;color:var(--ember);background:rgba(var(--ember-rgb),.12);border:1px solid #7a5e2a;padding:3px 9px;border-radius:20px}
   .hb-streak.done{color:var(--jade);border-color:#3c5230;background:rgba(var(--jade-rgb),.12)}
   .hb-streak.broken{color:var(--ink-faint);border-color:var(--line);background:transparent}
-  .hb-del{flex:none;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px}
+  .hb-del{flex:none;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:15px;padding:5px 6px}
   .hb-del:hover{color:var(--blood)}
   .order-stale{font-size:10px;color:var(--ember);opacity:.7;margin-left:auto;align-self:center}
   li.card.paused{opacity:.45}
   .order-paused{font-size:10px;color:var(--ink-faint);margin-left:auto;align-self:center}
   .order-pause-btn{background:none;border:1px solid var(--line);color:var(--ink-faint);border-radius:5px;padding:2px 7px;font-size:10px;cursor:pointer;font-family:inherit;margin-left:4px}
   .daily-move-col{display:flex;flex-direction:column;gap:1px;margin-right:4px;flex-shrink:0}
-  .daily-move-btn{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:9px;padding:1px 4px;line-height:1;border-radius:3px}
+  .daily-move-btn{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:10px;padding:4px 6px;line-height:1;border-radius:3px}
   .daily-move-btn:hover{color:var(--ink);background:rgba(255,255,255,.05)}
   /* Test tab */
   .test-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-lg);padding:var(--space-7);margin-bottom:var(--space-6)}
@@ -969,8 +975,7 @@
   .start-intro{font-size:12.5px;color:var(--ink-dim);margin-bottom:12px;line-height:1.55}
   .start-step{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;color:var(--ink-dim)}
   .start-step:last-child{border-bottom:none;padding-bottom:0}
-  .start-num{width:22px;height:22px;flex:none;border-radius:50%;background:var(--jade);color:#0e1409;font-size:12px;font-weight:700;display:grid;place-items:center}
-  .start-step span:nth-child(2){flex:1}
+  .start-step span:first-child{flex:1}
   /* ---- Dawn tab — linear guided flow ---- */
   .td-flow{display:flex;flex-direction:column;gap:11px}
   /* The single warrior's focus — what to do right now */
@@ -1099,6 +1104,8 @@
   .sk-attn.warn{background:rgba(var(--ember-rgb),.09);border-left-color:var(--ember)}
   .sk-attn b{color:var(--ink)}
   .sk-attn-names{display:block;margin-top:3px;color:var(--ink-faint);font-size:11.5px}
+  .sk-start-here{font-size:12.5px;color:var(--ink-dim);line-height:1.5;margin:4px 0 12px;padding:9px 12px;background:rgba(var(--gold-rgb),.08);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px}
+  .sk-start-here b{color:var(--ink)}
   .sk-roadmap{margin:9px 0;font-size:12px}
   .sk-roadmap-list{margin:5px 0 0;padding-left:20px;color:var(--ink-faint)}
   .sk-roadmap-list li{margin-bottom:3px;line-height:1.4}
@@ -1156,6 +1163,15 @@
   .wall-subnav .wsub.on{background:rgba(var(--gold-rgb),.16);border-color:var(--gold);color:var(--gold-bright)}
   .wall-sec{display:none}
   .wall-sec.on{display:block}
+  /* Records tab reuses .wall-subnav's flex/gap layout but needs its OWN
+     button/section classes (.rsub/.rec-sec, not .wsub/.wall-sec) — the Wall's
+     switcher wiring does a document-wide querySelectorAll(".wsub"/".wall-sec"),
+     so sharing those classes would make a Records subnav click also blank out
+     whichever Wall sub-section was open, and vice versa. */
+  .wall-subnav .rsub{background:var(--panel);border:1px solid var(--line);color:var(--ink-dim);padding:8px 12px;border-radius:20px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+  .wall-subnav .rsub.on{background:rgba(var(--gold-rgb),.16);border-color:var(--gold);color:var(--gold-bright)}
+  .rec-sec{display:none}
+  .rec-sec.on{display:block}
   /* year grouping headers on the awards grid */
   .wall-year-hd{font-size:13px;font-weight:700;color:var(--gold);letter-spacing:.06em;margin:16px 2px 9px;padding-bottom:5px;border-bottom:1px solid var(--line)}
   .wall-org-hd{font-size:11.5px;color:var(--ink-faint);letter-spacing:.05em;text-transform:uppercase;margin:8px 2px 6px}
@@ -1182,8 +1198,8 @@
   .mb-roles{margin-top:9px;display:flex;flex-direction:column;gap:4px}
   .mb-role{font-size:12.5px;color:var(--ink-dim);padding-left:14px;position:relative}
   .mb-role::before{content:"▸";position:absolute;left:0;color:var(--gold)}
-  .mb-del{position:absolute;top:11px;right:13px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px}
-  .mb-edit{position:absolute;top:11px;right:34px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:13px}
+  .mb-del{position:absolute;top:9px;right:11px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:15px;padding:5px 6px}
+  .mb-edit{position:absolute;top:9px;right:38px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;padding:5px 6px}
   .mb-edit:hover{color:var(--gold)}
   .mb-del:hover{color:var(--blood)}
   /* events */
@@ -1191,8 +1207,8 @@
   .ev-title{font-size:14px;font-weight:700}
   .ev-meta{font-size:12px;color:var(--gold);margin-top:3px}
   .ev-role{font-size:12.5px;color:var(--ink-dim);margin-top:3px}
-  .ev-del{position:absolute;top:11px;right:13px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px}
-  .ev-edit{position:absolute;top:11px;right:34px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:13px}
+  .ev-del{position:absolute;top:9px;right:11px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:15px;padding:5px 6px}
+  .ev-edit{position:absolute;top:9px;right:38px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;padding:5px 6px}
   .ev-edit:hover{color:var(--gold)}
   .ev-del:hover{color:var(--blood)}
   /* volunteer jars */
@@ -1206,8 +1222,8 @@
   .vol-log-row .del{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px}
   .vol-log-row .del:hover{color:var(--blood)}
   .aw-date{font-size:10.5px;color:var(--ink-faint);letter-spacing:.06em;text-transform:uppercase;margin-top:7px}
-  .aw-del{position:absolute;top:8px;right:9px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:15px;z-index:2}
-  .aw-edit{position:absolute;top:8px;right:30px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:13px;z-index:2}
+  .aw-del{position:absolute;top:6px;right:7px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:16px;padding:5px 6px;z-index:2}
+  .aw-edit{position:absolute;top:6px;right:34px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;padding:5px 6px;z-index:2}
   .aw-edit:hover{color:var(--gold)}
   .aw-del:hover{color:var(--blood)}
   .aw-empty{grid-column:1/-1;text-align:center;padding:34px 20px;color:var(--ink-faint);border:1px dashed var(--line);border-radius:12px;font-size:14px}
@@ -1495,6 +1511,9 @@
   .qa-inner input:focus,.qa-inner select:focus{outline:none;border-color:var(--gold)}
 
   /* ── v95: Battle buddy report button ── */
+  /* Uses the Weight tab's tan palette (#c9a06a/#d8b06a) deliberately — same
+     intentional cross-tab leak documented at #view-weight below, not
+     undocumented drift. Don't "fix" this to the gold theme tokens. */
   .rpt-btn{background:rgba(201,162,75,.12);border:1px solid #c9a06a;color:#d8b06a;padding:var(--space-5) var(--space-8);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:var(--space-6);letter-spacing:.04em}
   .rpt-btn:hover{background:rgba(201,162,75,.22)}
 
@@ -1547,6 +1566,9 @@
   .install-btn{background:var(--jade);color:#0e1009;border:none;padding:8px 16px;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
   .install-dismiss{background:transparent;border:1px solid var(--line);color:var(--ink-faint);padding:8px 14px;border-radius:7px;font-family:inherit;font-size:13px;cursor:pointer}
   .install-dismiss:hover{border-color:var(--ink-faint);color:var(--ink)}
+
+  .welcome-back-card{background:rgba(var(--gold-rgb),.08);border:1px solid rgba(var(--gold-rgb),.28);border-radius:var(--radius-sm);padding:var(--space-5) var(--space-6);font-size:13px;color:var(--ink-dim);line-height:1.4}
+  .welcome-back-card b{color:var(--ink)}
 
   /* ── v96: Notification prompt ── */
   .notif-prompt-card{background:rgba(110,116,89,.08);border:1px solid rgba(110,116,89,.28);border-radius:var(--radius-sm);padding:var(--space-5) var(--space-6);font-size:13px;color:var(--ink-dim);display:flex;align-items:center;gap:var(--space-5);flex-wrap:wrap;line-height:1.4}
@@ -2385,9 +2407,9 @@
 .sk-log-entry-ts{color:var(--ink-faint);font-size:10.5px;white-space:nowrap;flex-shrink:0}
 
 /* ── v117: Skill heat-map (skills tab) ── */
-.sk-toolbar-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.sk-toolbar-row .sk-search-input{margin-bottom:0;flex:1}
-.sk-hm-toggle{background:var(--panel);border:1px solid var(--line);color:var(--ink-dim);padding:7px 10px;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit;line-height:1;flex-shrink:0;transition:background .15s,border-color .15s}
+.sk-toolbar-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.sk-toolbar-row .sk-search-input{margin-bottom:0;flex:1 1 100%}
+.sk-hm-toggle{background:var(--panel);border:1px solid var(--line);color:var(--ink-dim);padding:7px 10px;border-radius:8px;cursor:pointer;font-size:12.5px;font-family:inherit;line-height:1;flex-shrink:0;display:inline-flex;align-items:center;gap:4px;transition:background .15s,border-color .15s}
 .sk-hm-toggle.active{background:rgba(var(--jade-rgb),.15);border-color:var(--jade);color:var(--jade)}
 /* ── v118: Skill mastery summary bar ── */
 .sk-summary-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
@@ -2706,3 +2728,14 @@
 .ct-node.cur{opacity:1;transform:scale(1.3)}
 .ct-node.slip{animation:ctSlip .4s}
 @keyframes ctSlip{0%,100%{transform:scale(1.3) translateY(0)}50%{transform:scale(1.3) translateY(4px)}}
+
+/* iOS Safari zooms the whole viewport on focus of any text input styled under
+   16px — this app is a phone-first PWA, so nearly every form field below that
+   threshold (search boxes, numeric set/rep inputs, etc.) triggered it, forcing
+   a manual zoom-out after every field tap. !important is deliberate here: this
+   is a floor meant to beat every current AND future sub-16px input/select/
+   textarea rule regardless of its own specificity, scoped narrowly to mobile
+   widths and to font-size only. */
+@media (max-width:560px){
+  input,select,textarea{font-size:16px!important}
+}

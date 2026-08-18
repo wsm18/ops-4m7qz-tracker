@@ -3,6 +3,10 @@
 
     <div id="boardBranchCard"></div>
 
+    <div class="sec-h" style="margin-top:6px"><h2>Readiness</h2><span class="hint">quiz mastery &amp; commissioning scorecard</span></div>
+    <div id="boardQuizReadiness"></div>
+    <div id="boardCommReadiness"></div>
+
     <div class="plan-intro" style="border-color:var(--gold)">
       <b>The path runs through the Order of Merit List (OML).</b> Talent-Based Branching mostly happens in your MS3 year: you build an accessions file, interview with branches, and rank preferences for the branching board. Branches rate cadets Most&nbsp;Preferred / Preferred / Least&nbsp;Preferred. Your OML — driven by GPA, AFT, and leadership evaluations — is the biggest lever you control. Knock these out:
     </div>
@@ -11,6 +15,8 @@
     <ul class="list" id="boardList"></ul>
     <div class="adder" style="margin-top:10px">
       <input id="btName" placeholder="Add your own board-prep task" maxlength="90">
+      <label class="lg-label">Due date (optional) — shows on Today's Upcoming timeline</label>
+      <input id="btDue" type="date">
       <button class="btn-add" id="btAdd">Add Task</button>
     </div>
     <div class="plan-intro" style="margin-top:12px;font-size:12.5px;color:var(--ink-faint)">
