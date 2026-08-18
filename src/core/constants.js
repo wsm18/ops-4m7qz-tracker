@@ -66,7 +66,7 @@ const DEFAULT = {
   missedTraining:[], // [{date:"YYYY-MM-DD", session:"s1"}] — auto-tracked missed sessions, last 28 days
   milestones:[],   // [{id, label, date:"YYYY-MM-DD"}] — user-defined ROTC/life milestones shown on Dawn
   gpaHistory:[],   // [{id, term, gpa, hours, standing, note}] — semester-by-semester record
-  profile:{ birthdate:null, heightIn:null, heightDate:null, weightLb:null, weightDate:null, sex:null, bloodType:null, units:"imperial", notes:"", commissionDate:null, gpa:null, weightGoal:null, gpaGoal:null, languages:[], clearance:{level:null,grantedDate:null,notes:""} },
+  profile:{ birthdate:null, heightIn:null, heightDate:null, weightLb:null, weightDate:null, sex:null, bloodType:null, units:"imperial", notes:"", commissionDate:null, ldacDate:null, gpa:null, weightGoal:null, gpaGoal:null, languages:[], clearance:{level:null,grantedDate:null,notes:""} },
   lifts:{ deadliftLb:null, squatLb:null, benchLb:null, liftDate:null },  // best lifts for bodyweight-relative skills
   aftEventTargets:{hrp:null,sdc:null,run:null,dl:null,plank:null},
   aftStandard:"general",  // "general" (sex+age normed, 300 min) or "combat" (sex-neutral, 350 min)
@@ -212,6 +212,20 @@ const BOARD_TASK_SEEDS = [
   {key:"o1_train_transition", stage:"O1", name:"Shift training focus toward BOLC and your branch's officer fundamentals", why:null},
   {key:"o1_outprocess", stage:"O1", name:"Out-process from ROTC/Cadet Command records and complete final cadet administrative requirements", why:null},
 ];
+// Career-stage vocabulary and per-stage framing — same 6 values careerStage()
+// (migration.js) resolves to, and the same ones BOARD_TASK_SEEDS above tags
+// its content with. Originally board.js-local; moved here once Dawn's
+// stage-context card (today.js) became a second consumer, so both read one
+// copy instead of duplicating the label/blurb content a second time.
+const STAGE_ORDER=["MS1","MS2","MS3","LDAC","MS4","O1"];
+const STAGE_INFO={
+  MS1:{label:"MS1 — Early Groundwork", blurb:"No real Talent-Based Branching engagement yet. This stage is about building the baseline — PT, GPA, leadership record — that becomes your OML later, and getting an honest early picture of what branches actually do."},
+  MS2:{label:"MS2 — Building Your Case", blurb:"Still no TBB file yet, but OML-input discipline and real branch research here pay off once MS3's board season hits."},
+  MS3:{label:"MS3 — Board Season", blurb:"The path runs through the Order of Merit List (OML). Talent-Based Branching mostly happens here: you build an accessions file, interview with branches, and rank preferences for the branching board. Your OML — driven by GPA, AFT, and leadership evaluations — is the biggest lever you control."},
+  LDAC:{label:"LDAC — Cadet Summer Training", blurb:"LDAC isn't a board-prep activity itself, but your Camp OML score is a direct, real input into your final national OML — perform here, and square away the admin basics before you go."},
+  MS4:{label:"MS4 — Post-Board", blurb:"TBB is mostly behind you. This stage is about finalizing your branch result and getting square for commissioning and BOLC."},
+  O1:{label:"O1 — Commissioned", blurb:"You're commissioned. The checklist shifts from ROTC/branching to transitioning into your gaining unit and BOLC."},
+};
 // ── Equipment taxonomy (FM-2) ────────────────────────────────────────────
 // A deliberately coarse tag set (machines is one umbrella tag, not per-machine)
 // so a profile is a short, honest checklist, not an unmaintainable catalog.

@@ -199,7 +199,7 @@ function renderProfile(){
   const p=S.profile||{}, l=S.lifts||{};
   const setv=(id,v)=>{const el=document.getElementById(id); if(el&&document.activeElement!==el) el.value=(v??"");};
   setv("pfName",S.name); setv("pfRank",S.rank); setv("pfPos",S.position); setv("pfBranch",S.branchGoal);
-  setv("pfCommission",p.commissionDate||""); setv("pfGpa",p.gpa||""); setv("pfGpaGoal",p.gpaGoal||"");
+  setv("pfCommission",p.commissionDate||""); setv("pfLdac",p.ldacDate||""); setv("pfGpa",p.gpa||""); setv("pfGpaGoal",p.gpaGoal||"");
   setv("pfDob",p.birthdate||""); setv("pfSex",p.sex||""); setv("pfBlood",p.bloodType||"");
   setv("pfHt",p.heightIn); setv("pfHtDate",p.heightDate||""); setv("pfWt",p.weightLb); setv("pfWtDate",p.weightDate||"");
   setv("pfDl",l.deadliftLb); setv("pfSq",l.squatLb); setv("pfBn",l.benchLb); setv("pfLiftDate",l.liftDate||"");
@@ -299,6 +299,7 @@ if(_pfSave) _pfSave.onclick=()=>{
   S.position=str("pfPos")||"No leadership role";
   const br=str("pfBranch"); if(br) S.branchGoal=br;
   S.profile.commissionDate=document.getElementById("pfCommission").value||null;
+  S.profile.ldacDate=document.getElementById("pfLdac").value||null;
   const gpaRaw=parseFloat(document.getElementById("pfGpa").value); S.profile.gpa=isNaN(gpaRaw)?null:Math.round(gpaRaw*100)/100;
   const gpaGoalRaw=parseFloat(document.getElementById("pfGpaGoal")?document.getElementById("pfGpaGoal").value:""); S.profile.gpaGoal=isNaN(gpaGoalRaw)?null:Math.round(gpaGoalRaw*100)/100;
   // dimensions

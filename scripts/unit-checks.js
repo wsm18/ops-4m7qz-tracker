@@ -175,6 +175,71 @@ function ok(fails, label, cond) {
   ok(fails, "DEFAULT.boardTasks: all pre-tagged MS3 with a seedKey", boardFreshResult.allMs3Tagged);
   ok(fails, "DEFAULT.boardDismissedSeeds: starts empty", boardFreshResult.dismissedEmpty);
 
+  // ---- planForDay(): the taper generalized from AFT-only to the nearest
+  // upcoming of {AFT test date, LDAC report date}. Finds a real hard day via
+  // the actual scheduler first (mirroring the v213-session technique for
+  // testing taper-boundary behavior) rather than assuming a fixed weekday.
+  const taperResult = await page.evaluate(() => {
+    function findHardDate(){
+      for(let i=1;i<=21;i++){ const d=new Date(); d.setDate(d.getDate()+i); const p=planForDay(d); if(p&&p.intensity==="hard") return d; }
+      return null;
+    }
+    function offsetYmd(base,days){ const d=new Date(base); d.setDate(d.getDate()+days); return localYMD(d); }
+    const hardDate=findHardDate();
+    if(!hardDate) return { skipped:true };
+    S.profile=S.profile||{};
+
+    S.aftTestDate=offsetYmd(hardDate,10); S.profile.ldacDate=offsetYmd(hardDate,3);
+    const ldacCloser=planForDay(hardDate);
+
+    S.aftTestDate=offsetYmd(hardDate,3); S.profile.ldacDate=offsetYmd(hardDate,10);
+    const aftCloser=planForDay(hardDate);
+
+    S.aftTestDate=null; S.profile.ldacDate=offsetYmd(hardDate,-5); // past — must not taper
+    const pastLdacOnly=planForDay(hardDate);
+
+    S.aftTestDate=offsetYmd(hardDate,-5); S.profile.ldacDate=null; // past — must not taper
+    const pastAftOnly=planForDay(hardDate);
+
+    S.aftTestDate=null; S.profile.ldacDate=null;
+    const neitherSet=planForDay(hardDate);
+
+    return { skipped:false, ldacCloser, aftCloser, pastLdacOnly, pastAftOnly, neitherSet };
+  });
+  if(!taperResult.skipped){
+    eq(fails, "planForDay: nearer LDAC wins the taper over a farther AFT date", taperResult.ldacCloser.taperFor, "LDAC");
+    ok(fails, "planForDay: nearer-LDAC case actually downgrades to moderate", taperResult.ldacCloser.intensity==="moderate");
+    eq(fails, "planForDay: nearer AFT wins the taper over a farther LDAC date", taperResult.aftCloser.taperFor, "AFT");
+    ok(fails, "planForDay: a past-only LDAC date never triggers a taper", !taperResult.pastLdacOnly.taper);
+    ok(fails, "planForDay: a past-only AFT date never triggers a taper", !taperResult.pastAftOnly.taper);
+    ok(fails, "planForDay: neither date set never triggers a taper", !taperResult.neitherSet.taper);
+  }
+
+  // ---- ldacCountdownHtml(): pure day-math + careerStage()-gated past branch.
+  const ldacBannerResult = await page.evaluate(() => {
+    const future=ldacCountdownHtml(localYMD(new Date(Date.now()+10*864e5)), "Cadet", "MS2");
+    const todayStr2=ldacCountdownHtml(localYMD(new Date()), "Cadet", "MS2");
+    const pastStillLdac=ldacCountdownHtml(localYMD(new Date(Date.now()-5*864e5)), "Cadet", "LDAC");
+    const pastMovedOn=ldacCountdownHtml(localYMD(new Date(Date.now()-5*864e5)), "Cadet", "MS4");
+    const unset=ldacCountdownHtml(null, "Cadet", "MS2");
+    return { future, todayStr2, pastStillLdac, pastMovedOn, unset };
+  });
+  ok(fails, "ldacCountdownHtml: future date mentions 'days to LDAC'", ldacBannerResult.future.includes("days to LDAC"));
+  ok(fails, "ldacCountdownHtml: today mentions 'starts today'", ldacBannerResult.todayStr2.includes("starts today"));
+  ok(fails, "ldacCountdownHtml: past date + stage still LDAC mentions 'began'", ldacBannerResult.pastStillLdac.includes("began"));
+  eq(fails, "ldacCountdownHtml: past date + stage moved on renders nothing", ldacBannerResult.pastMovedOn, "");
+  eq(fails, "ldacCountdownHtml: no date set renders nothing", ldacBannerResult.unset, "");
+
+  // ---- STAGE_INFO relocation (board.js -> constants.js): renderBoard()
+  // must still resolve it correctly from its new home.
+  const stageRelocResult = await page.evaluate(() => {
+    S.rank="LDAC Cadet";
+    if(typeof renderBoard==="function") renderBoard();
+    const el=document.getElementById("boardList");
+    return el ? el.innerHTML : "";
+  });
+  ok(fails, "STAGE_INFO relocation: renderBoard() still renders the real LDAC blurb", stageRelocResult.includes("Camp OML score is a direct"));
+
   console.log("UNIT CHECKS", fails.length === 0 ? "PASS" : "FAIL");
   fails.forEach((f) => console.log("  FAIL: " + f));
   if (pageErrors.length) { console.log("PAGEERRORS DURING SETUP", pageErrors.length); pageErrors.forEach((e) => console.log("  " + e)); }

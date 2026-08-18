@@ -517,13 +517,23 @@ function planForDay(dateObj){
   // final 6 days before a real test, downgrade hard sessions to moderate so
   // the user arrives fresh instead of fatigued from a full-intensity week
   // right up to test day. Doesn't touch easy/rest days (nothing to taper).
-  const testDate=S.aftTestDate;
-  const daysToTest=testDate?dayDiff(localYMD(dateObj),testDate):null;
-  // >=0, not >=1 — test day itself (daysToTest===0) was excluded, so a hard
-  // session could still land on test day if that's where assignWeekSessions
-  // happened to slot it, directly contradicting the taper's own purpose.
-  if(daysToTest!=null && daysToTest>=0 && daysToTest<=6 && plan.intensity==="hard"){
-    plan=Object.assign({}, plan, {intensity:"moderate", taper:true, label:plan.label+" — taper week, ease off"});
+  // v216-session career-arc layer: generalized from AFT-only to the NEAREST
+  // upcoming of the user's declared "big day" dates (AFT test or LDAC report
+  // date, S.profile.ldacDate) — not AFT alone. A date that's unset or
+  // already past is excluded from "nearest upcoming" via the same >=0 guard
+  // the original single-date version used (test day itself, daysAway===0,
+  // stays included — a hard session landing ON test/report day is exactly
+  // what this taper exists to prevent).
+  const upcomingEvents=[
+    {key:"AFT", date:S.aftTestDate},
+    {key:"LDAC", date:S.profile&&S.profile.ldacDate},
+  ]
+    .filter(e=>e.date)
+    .map(e=>({key:e.key, daysAway:dayDiff(localYMD(dateObj),e.date)}))
+    .filter(e=>e.daysAway>=0);
+  const nearestEvent=upcomingEvents.length ? upcomingEvents.reduce((a,b)=>a.daysAway<=b.daysAway?a:b) : null;
+  if(nearestEvent && nearestEvent.daysAway<=6 && plan.intensity==="hard"){
+    plan=Object.assign({}, plan, {intensity:"moderate", taper:true, taperFor:nearestEvent.key, label:plan.label+` — taper week, ease off (${nearestEvent.key})`});
   }
   return plan;
 }

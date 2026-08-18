@@ -290,6 +290,39 @@ function renderQuickLog(){
     </div>
   </div>`;
 }
+// Pure/testable: LDAC countdown banner. See the "not a copy of commissionHtml"
+// comment at its call site in renderToday() for why the past-date branch
+// differs from the commissioning banner it otherwise mirrors.
+function ldacCountdownHtml(ld, firstNameEsc, stage){
+  if(!ld) return "";
+  const daysLeft=Math.ceil((new Date(ld+`T12:00:00`)-Date.now())/864e5);
+  if(daysLeft>0){
+    const weeks=Math.floor(daysLeft/7);
+    const sub=weeks>0?`${weeks} week${weeks!==1?"s":""} and ${daysLeft%7} day${daysLeft%7!==1?"s":""}`:
+      `${daysLeft} day${daysLeft!==1?"s":""}`;
+    return `<div class="commission-bar">🎖️ <b>${daysLeft}</b> days to LDAC <span class="commission-sub">· ${sub} remaining · square away the admin basics before you go, ${firstNameEsc}.</span></div>`;
+  }
+  if(daysLeft===0){
+    return `<div class="commission-bar radiant">🎖️ ${firstNameEsc} — LDAC starts today. Do your best; your Camp OML feeds your final national OML.</div>`;
+  }
+  if(stage==="LDAC"){
+    const daysSince=Math.abs(daysLeft);
+    return `<div class="commission-bar radiant">🎖️ LDAC began ${ld} · ${daysSince} day${daysSince!==1?'s':''} ago — your Camp OML score is a direct input into your final national OML.</div>`;
+  }
+  return ""; // date has passed and rank has since moved on — nothing to show
+}
+// Milestone framing: surfaces the same STAGE_INFO content Board already
+// shows for the current stage, as ambient Dawn context — not a second
+// authored copy of it.
+function stageContextHtml(){
+  const stage=typeof careerStage==="function"?careerStage():null;
+  const info=(stage&&typeof STAGE_INFO!=="undefined")?STAGE_INFO[stage]:null;
+  if(!info) return "";
+  return `<div class="td-card fn-card">
+    <div class="td-h fn-h">Career Stage</div>
+    <div class="fn-row"><span class="fn-dot">🧭</span><span><b>${esc(info.label)}</b> — ${esc(info.blurb)}</span><button class="td-go-sm" data-gototab="board">Board →</button></div>
+  </div>`;
+}
 
 function renderToday(){
   const el=document.getElementById("todayDash"); if(!el) return;
@@ -357,6 +390,14 @@ function renderToday(){
         :`<div class="commission-bar radiant">⭐ Commissioned ${cd} · ${daysSince} day${daysSince!==1?'s':''} of commissioned service. Well done, ${firstName}.</div>`;
     }
   }
+
+  // ── LDAC countdown — deliberately NOT a copy of the commissioning banner's
+  // "past" branch. Commissioning is an instant worth restating forever after;
+  // LDAC is a bounded, weeks-long event with only a start date captured here,
+  // so "LDAC was 400 days ago" forever would be neither useful nor honest.
+  // careerStage() (the same rank-text signal board.js already trusts) is the
+  // real cutoff: once the rank field has moved past LDAC, this goes silent.
+  const ldacHtml=ldacCountdownHtml(S.profile&&S.profile.ldacDate, firstName, typeof careerStage==="function"?careerStage():null);
 
   // ── Orders counts (used by both the inline card and streak protection) — kind:"order"
   // only, since habit-kind items never set .done (their "done today" signal is
@@ -706,7 +747,7 @@ function renderToday(){
     welcomeBackHtml, startHtml,
     recoveryHtml, streakHtml, focusHtml, cnAlertHtml, qualAlertHtml,
     todaysHandHtml, sessHtml, weekCardHtml, ordersHtml, bossHtml, aarNudgeHtmlVal, discHtml,
-    adaptHtml, upcomingHtml, neglectHtml, commissionHtml, pathSummaryHtml, pathPips, notesHtml, academicHtml, omlHtml, fmHtml, quickLogHtml, briefBtnHtml,
+    adaptHtml, upcomingHtml, neglectHtml, commissionHtml, ldacHtml, stageContextHtml(), pathSummaryHtml, pathPips, notesHtml, academicHtml, omlHtml, fmHtml, quickLogHtml, briefBtnHtml,
     installHtml, notifPromptHtml
   ].filter(Boolean).join("");
 

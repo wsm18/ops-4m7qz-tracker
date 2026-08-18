@@ -24,18 +24,6 @@ function renderBoardBranchCard(){
     </div>`;
   }
 }
-// Career-stage vocabulary and per-stage framing — same 6 values careerStage()
-// (migration.js) resolves to, and the same ones BOARD_TASK_SEEDS (constants.js)
-// tags its content with.
-const STAGE_ORDER=["MS1","MS2","MS3","LDAC","MS4","O1"];
-const STAGE_INFO={
-  MS1:{label:"MS1 — Early Groundwork", blurb:"No real Talent-Based Branching engagement yet. This stage is about building the baseline — PT, GPA, leadership record — that becomes your OML later, and getting an honest early picture of what branches actually do."},
-  MS2:{label:"MS2 — Building Your Case", blurb:"Still no TBB file yet, but OML-input discipline and real branch research here pay off once MS3's board season hits."},
-  MS3:{label:"MS3 — Board Season", blurb:"The path runs through the Order of Merit List (OML). Talent-Based Branching mostly happens here: you build an accessions file, interview with branches, and rank preferences for the branching board. Your OML — driven by GPA, AFT, and leadership evaluations — is the biggest lever you control."},
-  LDAC:{label:"LDAC — Cadet Summer Training", blurb:"LDAC isn't a board-prep activity itself, but your Camp OML score is a direct, real input into your final national OML — perform here, and square away the admin basics before you go."},
-  MS4:{label:"MS4 — Post-Board", blurb:"TBB is mostly behind you. This stage is about finalizing your branch result and getting square for commissioning and BOLC."},
-  O1:{label:"O1 — Commissioned", blurb:"You're commissioned. The checklist shifts from ROTC/branching to transitioning into your gaining unit and BOLC."},
-};
 function boardTaskLi(t){
   const seed=t.seedKey?BOARD_TASK_SEEDS.find(s=>s.key===t.seedKey):null;
   const why=seed&&seed.why?`<div class="c-note">${esc(seed.why)}</div>`:'';
