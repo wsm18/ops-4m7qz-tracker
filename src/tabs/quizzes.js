@@ -106,10 +106,18 @@ function showQuizQ(){
   if(QZ.idx>=total){ return finishQuiz(); }
   const q=t.questions[QZ.order[QZ.idx]];
   const body=document.getElementById("qmBody");
+  // Shuffle DISPLAY order only — data-opt still carries the real original
+  // index into q.a/q.c, so answerQuiz()'s scoring logic needs no changes.
+  // Found by the v208-session second-pass quiz audit: answer position was
+  // never shuffled (only question order was), so retrying/retaking the same
+  // quiz risked a cadet learning "it's the 2nd button" instead of the
+  // content — the opposite of the "board readiness" this tool is meant to
+  // build.
+  const optOrder=q.a.map((opt,i)=>i).sort(()=>Math.random()-0.5);
   body.innerHTML=`${ctPathHtml(total,QZ.idx)}
     <div class="qm-qnum">${QZ.retried?"Same junction — try again":`Junction ${QZ.idx+1} of ${total}`}</div>
     <div class="qm-q">${esc(q.q)}</div>
-    <div id="qmOpts">${q.a.map((opt,i)=>`<button class="qm-opt" data-opt="${i}">${esc(opt)}</button>`).join("")}</div>`;
+    <div id="qmOpts">${optOrder.map(i=>`<button class="qm-opt" data-opt="${i}">${esc(q.a[i])}</button>`).join("")}</div>`;
   body.scrollTop=0;
 }
 function answerQuiz(choice){
@@ -117,7 +125,10 @@ function answerQuiz(choice){
   const qIndex=QZ.order[QZ.idx];
   const q=t.questions[qIndex];
   const opts=document.querySelectorAll("#qmOpts .qm-opt");
-  opts.forEach((o,i)=>{o.disabled=true;if(i===q.c)o.classList.add("correct");if(i===choice&&choice!==q.c)o.classList.add("wrong");});
+  // Read the real original index off data-opt, not DOM position — DOM
+  // position no longer matches q.a's index now that display order is
+  // shuffled (see showQuizQ()).
+  opts.forEach(o=>{const oi=parseInt(o.dataset.opt); o.disabled=true; if(oi===q.c)o.classList.add("correct"); if(oi===choice&&choice!==q.c)o.classList.add("wrong");});
   const correct=choice===q.c;
   // Missed on the first real attempt (not a retry) -> auto-feed the SRS
   // system instead of leaving it dead until the whole quiz is retaken.
@@ -164,9 +175,20 @@ function finishQuiz(){
     if(!S.dailies.some(d=>d.review===QZ.key)){
       S.dailies.push({id:id(),name:reviewName,kind:"order",diff:"easy",track:"knowledge",done:false,best:0,streak:0,lastDone:null,graceUsed:false,history:[],review:QZ.key});
     }
-    // advance the "pass every quiz" objective
+    // advance the "pass every quiz" objective — self-heals maxhp/name to the
+    // live bank size on every completion, since the seeded value goes stale
+    // the moment quizbank.js grows (found by the v208-session second-pass
+    // audit: this was still hardcoded to the old "16" even after the bank
+    // reached 20 categories, so it falsely declared "all quizzes passed"
+    // 4 categories early — same staleness class as the records.js tally fix).
     const obj=S.bosses.find(b=>b.auto==="quizzes");
-    if(obj){const passedCount=Object.values(S.quizzes).filter(x=>x.passed).length; obj.hp=Math.max(0,obj.maxhp-passedCount); if(obj.hp<=0){toast("⭐ All quizzes passed — Knowledge objective secured!");}}
+    if(obj){
+      const liveTotal=Object.keys(window.QUIZ_BANK||{}).length||obj.maxhp;
+      if(obj.maxhp!==liveTotal){ obj.maxhp=liveTotal; obj.name="Pass all "+liveTotal+" officer-knowledge quizzes"; }
+      const passedCount=Object.values(S.quizzes).filter(x=>x.passed).length;
+      obj.hp=Math.max(0,obj.maxhp-passedCount);
+      if(obj.hp<=0){toast("⭐ All quizzes passed — Knowledge objective secured!");}
+    }
   }
   save();
   const body=document.getElementById("qmBody");

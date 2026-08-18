@@ -76,6 +76,13 @@ function mergeNewSeedSkills(){
       // target level the user never set.
       const ex=S.lifeSkills.find(x=>x.name===s.name);
       if(ex){
+        // Backfill the seeded flag on a skill that predates it — skHydrate()
+        // (skills-core.js) only ever hydrates live guidance/ladder text for
+        // skills with seeded===true, so a skill from a save old enough to
+        // predate that flag would silently never hydrate, freezing it on
+        // whatever ladder/guidance text it had at save time forever. Found
+        // by the v208-session cross-cutting audit.
+        if(!ex.seeded) ex.seeded=true;
         if(s.levels){
           const max=s.levels.length;
           // RECOVER lost progress: an earlier version could have shrunk this ladder and

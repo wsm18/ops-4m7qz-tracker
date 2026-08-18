@@ -77,6 +77,16 @@ function renderTrophies(){
     const catTotal=catLeaves.reduce((n,s)=>n+s.levels.length,0);
     const catPct=catTotal>0?Math.round(catEarned/catTotal*100):0;
     const anyEarned=catEarned>0;
+    // Only build a full ring-card (sigil + one chip per level) for skills
+    // that have actually earned at least one ring — an unstarted skill has
+    // literally nothing to show on a "permanent record of every level ever
+    // reached" tab. Found by the v208-session cross-cutting audit as a real,
+    // verified render-cost source: this used to build a full card (with a
+    // per-LEVEL chip loop) for all ~12,500 leaf skills on every render()
+    // cycle, the one place in the app that skipped the same eager-render
+    // cap already applied to the Skills tab's Side Deck.
+    const startedLeaves=catLeaves.filter(s=>(s.peakLevel||0)>0);
+    const unstartedCount=catLeaves.length-startedLeaves.length;
 
     html+=`<details class="trophy-path ${anyEarned?'has-rings':''}" ${anyEarned?'open':''}>
       <summary class="trophy-path-hdr" style="--tpc:${pm.color}">
@@ -86,7 +96,8 @@ function renderTrophies(){
         <span class="trophy-path-bar-wrap"><span class="trophy-path-bar-fill" style="width:${catPct}%"></span></span>
       </summary>
       <div class="trophy-path-body">
-        ${catLeaves.map(sk=>renderSkillRings(sk,pm)).join('')}
+        ${startedLeaves.map(sk=>renderSkillRings(sk,pm)).join('')}
+        ${unstartedCount?`<div class="trophy-unstarted-note">+${unstartedCount} unstarted skill${unstartedCount!==1?'s':''} in this Path — carve a ring to see it here.</div>`:''}
       </div>
     </details>`;
   }

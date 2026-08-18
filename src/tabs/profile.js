@@ -1,14 +1,32 @@
 const _ptSave=document.getElementById("ptSave"); if(_ptSave) _ptSave.onclick=savePT;
+// Chronological sort key for a term string like "SP2026"/"FA2025"/"SU2025" —
+// found by the v208-session second-pass audit: every GPA-history sort in
+// this file compared term strings directly (b.term>a.term), which is
+// alphabetical, not chronological ("SP2025" > "FA2025" as a string even
+// though Fall comes first) — real, silent wrong-order bugs whenever a
+// semester got backfilled after a later one was already logged. Unparseable
+// terms sort last rather than crashing or silently corrupting order.
+function termSortKey(term){
+  const m=/^([A-Za-z]{2})\s*(\d{4})$/.exec(String(term||"").trim());
+  if(!m) return -1;
+  const season={SP:0,SU:1,FA:2,WI:3}[m[1].toUpperCase()];
+  return parseInt(m[2],10)*10+(season!=null?season:1.5);
+}
 /* ---------------- GPA Semester History ---------------- */
 function renderGpaHistory(){
   const el=document.getElementById("pfGpaHistory"); if(!el) return;
-  const gh=(S.gpaHistory||[]).slice().sort((a,b)=>b.term>a.term?1:-1);
+  const gh=(S.gpaHistory||[]).slice().sort((a,b)=>termSortKey(b.term)-termSortKey(a.term));
   if(!gh.length){
     el.innerHTML=`<div style="color:var(--ink-faint);font-size:12px;padding:4px 0">No semesters logged yet.</div>`;
   } else {
     const vals=gh.map(g=>g.gpa);
     const sparkHtml=vals.length>=2?`<div class="wl-spark" style="margin-bottom:6px">${miniSparkline(vals.slice().reverse(),220,36)}</div>`:"";
-    el.innerHTML=sparkHtml+gh.map((g,i)=>`<div class="gpa-history-row"><span class="gpa-term">${esc(g.term||"?")}</span><b style="min-width:36px">${g.gpa}</b>${g.hours?`<span style="color:var(--ink-faint);font-size:11.5px">${g.hours} hrs</span>`:""}${g.standing?`<span class="gpa-standing">${esc(g.standing)}</span>`:""}${g.note?`<span style="flex:1;color:var(--ink-faint);font-size:11px;overflow:hidden;text-overflow:ellipsis">${esc(g.note)}</span>`:"<span style='flex:1'></span>"}<button class="del" data-gpadel="${i}">✕</button></div>`).join("");
+    // data-gpadel keys on the entry's real id, not its position in this
+    // sorted list — found alongside the term-sort fix: the delete handler
+    // spliced S.gpaHistory (raw push order) at this same index, which only
+    // matched the sorted display order by coincidence. Deleting a displayed
+    // row could silently delete a DIFFERENT semester's real entry.
+    el.innerHTML=sparkHtml+gh.map(g=>`<div class="gpa-history-row"><span class="gpa-term">${esc(g.term||"?")}</span><b style="min-width:36px">${g.gpa}</b>${g.hours?`<span style="color:var(--ink-faint);font-size:11.5px">${g.hours} hrs</span>`:""}${g.standing?`<span class="gpa-standing">${esc(g.standing)}</span>`:""}${g.note?`<span style="flex:1;color:var(--ink-faint);font-size:11px;overflow:hidden;text-overflow:ellipsis">${esc(g.note)}</span>`:"<span style='flex:1'></span>"}<button class="del" data-gpadel="${esc(g.id)}">✕</button></div>`).join("");
   }
   // sync pfGpa to most-recent entry
   const gpaEl=document.getElementById("pfGpa");
@@ -17,7 +35,7 @@ function renderGpaHistory(){
 }
 function renderGpaProjection(){
   const el=document.getElementById("pfGpaProjection"); if(!el) return;
-  const gh=(S.gpaHistory||[]).slice().sort((a,b)=>a.term<b.term?-1:1); // oldest first
+  const gh=(S.gpaHistory||[]).slice().sort((a,b)=>termSortKey(a.term)-termSortKey(b.term)); // oldest first
   if(gh.length<2){ el.innerHTML=""; return; }
   // linear regression on semester index vs GPA
   const n=gh.length, xs=gh.map((_,i)=>i), ys=gh.map(g=>g.gpa);
@@ -49,15 +67,15 @@ function renderGpaProjection(){
     if(!S.gpaHistory) S.gpaHistory=[];
     S.gpaHistory.push({id:id(),term,gpa:Math.round(gpa*1000)/1000,hours:hrs,standing:standing||undefined,note:note||undefined});
     // auto-update cumulative GPA to the most recent entry
-    const sorted=S.gpaHistory.slice().sort((a,b)=>b.term>a.term?1:-1);
+    const sorted=S.gpaHistory.slice().sort((a,b)=>termSortKey(b.term)-termSortKey(a.term));
     S.profile.gpa=sorted[0].gpa;
     ["gpaTermIn","gpaGpaIn","gpaHrsIn","gpaStandingIn","gpaNoteIn"].forEach(x=>{const el=document.getElementById(x);if(el)el.value="";});
     save(); renderGpaHistory(); toast("📊 Semester GPA logged");
   };
   document.body.addEventListener("click",e=>{
     const gd=e.target.closest("[data-gpadel]");
-    if(gd){ const i=parseInt(gd.dataset.gpadel); if(!S.gpaHistory) return; S.gpaHistory.splice(i,1);
-      if(S.gpaHistory.length){ const sorted=S.gpaHistory.slice().sort((a,b)=>b.term>a.term?1:-1); S.profile.gpa=sorted[0].gpa; }
+    if(gd){ if(!S.gpaHistory) return; const delId=gd.dataset.gpadel; S.gpaHistory=S.gpaHistory.filter(g=>g.id!==delId);
+      if(S.gpaHistory.length){ const sorted=S.gpaHistory.slice().sort((a,b)=>termSortKey(b.term)-termSortKey(a.term)); S.profile.gpa=sorted[0].gpa; }
       save(); renderGpaHistory(); return; }
   });
 }
@@ -131,12 +149,17 @@ function renderMilestones(){
 function renderCommReadiness(){
   const el=document.getElementById("commReadyWrap"); if(!el) return;
   const items=[];
-  const lastAft=(S.aft||[]).slice(-1)[0];
+  // Both AFT and GPA "most recent" lookups below used to trust raw array
+  // push order (found by the v208-session second-pass audit) — real for AFT
+  // (always appended, no out-of-order entry path), but a genuine bug for GPA
+  // since backfilling an earlier semester after a later one is a real,
+  // plausible workflow. Sort both explicitly rather than relying on order.
+  const lastAft=(S.aft||[]).slice().sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(-1)[0];
   const aftTotal=lastAft?(lastAft.total||0):0;
   const aftOk=aftTotal>=270;
   items.push({label:"AFT total",value:lastAft?aftTotal+"pts":"no record",ok:aftOk,hint:"target ≥270 total"});
-  const gpas=S.gpaHistory||[];
-  const curGpa=gpas.length?gpas[gpas.length-1].gpa:null;
+  const gpas=(S.gpaHistory||[]).slice().sort((a,b)=>termSortKey(b.term)-termSortKey(a.term));
+  const curGpa=gpas.length?gpas[0].gpa:null;
   const gpaOk=curGpa!=null&&curGpa>=2.0;
   items.push({label:"GPA",value:curGpa!=null?curGpa.toFixed(2):"no record",ok:gpaOk,hint:"min 2.0 to commission"});
   const withTgt=(S.lifeSkills||[]).filter(s=>!s.group&&(s.currentLevel||0)>0&&s.targetLevel!=null);
@@ -144,7 +167,11 @@ function renderCommReadiness(){
   const skillOk=withTgt.length>0&&atTgt>=withTgt.length*0.7;
   items.push({label:"Skills at target",value:withTgt.length?atTgt+"/"+withTgt.length:"no targets set",ok:skillOk,hint:"advance lagging skills"});
   const quals=S.qualifications||[];
-  const expired=quals.filter(q=>q.expDate&&new Date(q.expDate).getTime()<Date.now()).length;
+  // was q.expDate — the real field (set at save, read everywhere else: see
+  // awards.js qualSave, today.js's expiry nudges) is q.expires. This
+  // silently disabled the expiry check entirely (found by the v208-session
+  // second-pass audit).
+  const expired=quals.filter(q=>q.expires&&new Date(q.expires).getTime()<Date.now()).length;
   const qualOk=expired===0&&quals.length>0;
   items.push({label:"Qualifications",value:quals.length?quals.length+" held"+(expired?" · "+expired+" expired":""):"none logged",ok:qualOk,hint:"renew expired quals"});
   const rr=S.rotcRecord;
@@ -335,13 +362,17 @@ function renderEmergencyAndBlood(){
   const eg=document.getElementById("pfEmergency");
   if(eg){
     const age=ageFromDob(p.birthdate);
+    // r[1] values are escaped once, uniformly, at the render step below —
+    // found unescaped here by the v208-session cross-cutting audit (S.name
+    // in particular is free text with only a client-side maxlength, easily
+    // bypassed via an imported save).
     const rows=[
       ["Name", S.name||"—"],
       ["Blood type", p.bloodType||"— (set above)"],
       ["Age", age!=null?age:"—"],
-      ["Allergies / medical", (p.notes&&p.notes.trim())?esc(p.notes):"none recorded"],
+      ["Allergies / medical", (p.notes&&p.notes.trim())?p.notes:"none recorded"],
     ];
-    eg.innerHTML=`<div class="emerg-card"><div class="emerg-h">⚕️ EMERGENCY INFO</div>${rows.map(r=>`<div class="emerg-row"><span>${r[0]}</span><b>${r[1]}</b></div>`).join("")}<div class="emerg-foot">Hold to screenshot · keep current</div></div>`;
+    eg.innerHTML=`<div class="emerg-card"><div class="emerg-h">⚕️ EMERGENCY INFO</div>${rows.map(r=>`<div class="emerg-row"><span>${esc(r[0])}</span><b>${esc(r[1])}</b></div>`).join("")}<div class="emerg-foot">Hold to screenshot · keep current</div></div>`;
   }
   // Blood donation
   const bd=document.getElementById("pfBloodCard"); if(!bd) return;
@@ -367,7 +398,7 @@ function renderEmergencyAndBlood(){
     </div>
     ${f.note?`<div class="blood-note">${f.note}</div>`:""}
     ${elig}
-    ${count?`<div class="blood-count">🩸 ${count} donation${count!==1?'s':''} logged${count>=1?` · ~${count*0.5} lives potentially helped`:''}</div>`:""}
+    ${count?`<div class="blood-count">🩸 ${count} donation${count!==1?'s':''} logged</div>`:""}
   </div>`;
 }
 const _donAdd=document.getElementById("donAdd");

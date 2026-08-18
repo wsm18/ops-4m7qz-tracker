@@ -1689,6 +1689,7 @@
   .trophy-ring-card{background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius-lg);padding:var(--space-5) var(--space-4) var(--space-4);display:flex;flex-direction:column;align-items:center;gap:var(--space-2);text-align:center;transition:border-color .2s}
   .trophy-ring-card.started{border-color:rgba(255,255,255,.1)}
   .trophy-ring-card.unstarted{opacity:.28;filter:grayscale(.7)}
+  .trophy-unstarted-note{grid-column:1/-1;font-size:12px;color:var(--ink-faint);font-style:italic;padding:6px 2px}
   .trophy-ring-sigil{width:62px;height:62px;display:flex;align-items:center;justify-content:center;border-radius:50%;cursor:default;flex:none}
   .trophy-ring-sigil[data-trophychip]{cursor:pointer}
   .trophy-ring-sigil[data-trophychip]:hover{filter:brightness(1.3)}

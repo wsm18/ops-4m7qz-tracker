@@ -198,29 +198,35 @@ function exportBattleBuddyReport(){
   const name=S.name||"Cadet";
   const now=new Date().toLocaleDateString();
   const aftArr=S.aft||[];
-  const aftRows=aftArr.slice(-5).reverse().map(a=>`<tr><td>${a.date}</td><td>${a.total}</td><td>${a.scores.dl||"—"}</td><td>${a.scores.hrp||"—"}</td><td>${a.scores.sdc||"—"}</td><td>${a.scores.plank||"—"}</td><td>${a.scores.run||"—"}</td></tr>`).join("");
+  // esc() every field below that can hold free-typed text — this builds a
+  // real HTML document via document.write() (found by the v208-session
+  // cross-cutting audit as a genuine stored-injection path: award titles,
+  // counseling summaries, and name/rank/position are all free text with no
+  // server-side sanitization, and this is the one export explicitly meant
+  // to be printed/shared with a battle buddy or cadre).
+  const aftRows=aftArr.slice(-5).reverse().map(a=>`<tr><td>${esc(a.date)}</td><td>${esc(a.total)}</td><td>${esc(a.scores.dl||"—")}</td><td>${esc(a.scores.hrp||"—")}</td><td>${esc(a.scores.sdc||"—")}</td><td>${esc(a.scores.plank||"—")}</td><td>${esc(a.scores.run||"—")}</td></tr>`).join("");
   const topSkills=(S.lifeSkills||[]).filter(s=>!s.group&&skEffectiveLevel(s)>0).sort((a,b)=>skEffectiveLevel(b)-skEffectiveLevel(a)).slice(0,12);
-  const skillRows=topSkills.map(s=>`<li>${s.name} — Level ${skEffectiveLevel(s)} / ${s.levels&&s.levels.length}</li>`).join("");
-  const awardRows=(S.awards||[]).map(a=>`<li>${a.title}</li>`).join("");
+  const skillRows=topSkills.map(s=>`<li>${esc(s.name)} — Level ${skEffectiveLevel(s)} / ${s.levels&&s.levels.length}</li>`).join("");
+  const awardRows=(S.awards||[]).map(a=>`<li>${esc(a.title)}</li>`).join("");
   const volHours=(S.volunteer||[]).reduce((s,v)=>s+(parseFloat(v.hours)||0),0);
-  const counselRows=(S.counseling||[]).slice(-5).reverse().map(c=>`<li><b>${c.date}</b> [${c.type}]${c.people?" · "+c.people:""} — ${c.summary||""}</li>`).join("");
-  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Battle Buddy Report — ${name}</title>
+  const counselRows=(S.counseling||[]).slice(-5).reverse().map(c=>`<li><b>${esc(c.date)}</b> [${esc(c.type)}]${c.people?" · "+esc(c.people):""} — ${esc(c.summary||"")}</li>`).join("");
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Battle Buddy Report — ${esc(name)}</title>
 <style>body{font-family:Arial,sans-serif;color:#111;max-width:720px;margin:20px auto;padding:0 20px}h1{font-size:22px;border-bottom:3px solid #333;padding-bottom:8px;margin-bottom:4px}h2{font-size:15px;margin-top:20px;border-bottom:1px solid #ccc;padding-bottom:4px}table{border-collapse:collapse;width:100%;font-size:13px;margin-top:8px}th,td{border:1px solid #ccc;padding:5px 8px;text-align:left}th{background:#f5f5f5}ul{margin:6px 0;padding-left:20px;font-size:13px}li{margin-bottom:3px}.meta{font-size:12px;color:#777;margin-bottom:16px}p{font-size:13px}@media print{body{margin:0;padding:12px}}</style>
 </head><body>
 <h1>Battle Buddy Report</h1>
-<div class="meta">Generated: ${now} · All data from your device only — nothing was transmitted.</div>
+<div class="meta">Generated: ${esc(now)} · All data from your device only — nothing was transmitted.</div>
 <h2>Identity</h2>
-<p><b>Name:</b> ${name} &nbsp;|&nbsp; <b>Rank/MS:</b> ${S.rank||"—"} &nbsp;|&nbsp; <b>Position:</b> ${S.position||"—"}</p>
-${p.commissionDate?`<p><b>Commission date:</b> ${p.commissionDate}</p>`:""}
-${p.gpa?`<p><b>GPA:</b> ${p.gpa}</p>`:""}
-${S.branchGoal?`<p><b>Branch goal:</b> ${S.branchGoal}</p>`:""}
+<p><b>Name:</b> ${esc(name)} &nbsp;|&nbsp; <b>Rank/MS:</b> ${esc(S.rank||"—")} &nbsp;|&nbsp; <b>Position:</b> ${esc(S.position||"—")}</p>
+${p.commissionDate?`<p><b>Commission date:</b> ${esc(p.commissionDate)}</p>`:""}
+${p.gpa?`<p><b>GPA:</b> ${esc(p.gpa)}</p>`:""}
+${S.branchGoal?`<p><b>Branch goal:</b> ${esc(S.branchGoal)}</p>`:""}
 <h2>AFT History (last 5)</h2>
 ${aftRows?`<table><thead><tr><th>Date</th><th>Total</th><th>DL</th><th>HRP</th><th>SDC</th><th>Plank</th><th>Run</th></tr></thead><tbody>${aftRows}</tbody></table>`:"<p>No AFT scores recorded.</p>"}
 <h2>Top Skills</h2>
 ${skillRows?`<ul>${skillRows}</ul>`:"<p>No skills leveled yet.</p>"}
 <h2>Awards &amp; Recognitions</h2>
 ${awardRows?`<ul>${awardRows}</ul>`:"<p>None recorded.</p>"}
-<p>Volunteer hours logged: ${volHours}</p>
+<p>Volunteer hours logged: ${esc(volHours)}</p>
 ${counselRows?`<h2>Counseling Log (last 5)</h2><ul>${counselRows}</ul>`:""}
 <p style="margin-top:28px;font-size:11px;color:#999;">Operations · offline cadet tool · no data transmitted</p>
 </body></html>`;

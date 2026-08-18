@@ -138,7 +138,7 @@ const DEFAULT = {
   ],
   bosses:[
     {id:id(), name:"Hit 450+ AFT (raise DL & SDC)", hp:20, maxhp:20, path:"physical", checkpoints:[]},
-    {id:id(), name:"Pass all 16 officer-knowledge quizzes", hp:16, maxhp:16, path:"academic", auto:"quizzes", checkpoints:[]},
+    {id:id(), name:"Pass all 20 officer-knowledge quizzes", hp:20, maxhp:20, path:"academic", auto:"quizzes", checkpoints:[]},
   ],
   rewards:[
     {id:id(), name:"Read 1 chapter of your book", cost:15},
