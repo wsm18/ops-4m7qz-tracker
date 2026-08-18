@@ -63,7 +63,11 @@ function renderHistory(){
   // donations + quizzes passed
   const don=(S.donations||[]).length;
   const quizzes=Object.values(S.quizzes||{}).filter(x=>x.passed).length;
-  blocks.push(`<div class="hist-block"><div class="hist-h">Milestones</div><div class="hist-meta">🩸 ${don} donation${don!==1?'s':''} · 📚 ${quizzes}/16 quiz banks passed · 🧪 ${(S.tests||[]).length} cognitive tests taken</div></div>`);
+  // was hardcoded "16" — went stale the moment quizbank.js grew past that
+  // count (found while adding the v207 quiz categories); read the bank's
+  // real size instead so this never silently drifts again.
+  const quizTotal=Object.keys(window.QUIZ_BANK||{}).length;
+  blocks.push(`<div class="hist-block"><div class="hist-h">Milestones</div><div class="hist-meta">🩸 ${don} donation${don!==1?'s':''} · 📚 ${quizzes}/${quizTotal} quiz banks passed · 🧪 ${(S.tests||[]).length} cognitive tests taken</div></div>`);
   el.innerHTML=`<div class="hist-grid">${blocks.join("")}</div>`;
 }
 // ===== Counseling log =====

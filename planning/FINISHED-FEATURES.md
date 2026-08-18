@@ -1699,3 +1699,21 @@ Closes the 2 remaining FM items from the v204-session audit that were explicitly
 Verified behaviorally: confirmed `sessionSlotPool('s3',6)` now leads with the loaded-carry exercise and all alternates remain reachable via swap; confirmed `computeTarget()` resolves a real starter number for it; confirmed the AR 600-9 note renders correctly alongside a real BMI calculation and stays absent when height/weight aren't both logged (same gate as BMI itself).
 
 Full ship checklist: `npm run build` → OK, `npm run check` → SYNTAX OK, `npm run regress` → `PAGEERRORS 0`, `badCount:0`, `total:12524`. No `SEED_SKILLS`/ladder content touched, `SKILL_LADDER_VER` stayed at 118. SW bumped to `operations-v207`. `npm run package` → produced `dist/operations.zip`.
+
+### v208 — Quiz backlog cleared: thin categories expanded, Weapons fixed, real board-readiness view
+
+**Files changed:** `quizbank.js`, `src/tabs/quizzes.js`, `src/tabs/quizzes.html`, `src/tabs/records.js`, `src/styles/main.css`.
+
+Closes the remaining quiz items from the v204-session audit.
+
+**Expanded thin categories:** `leadership` (6→12 questions — added the 3 leadership levels, the Presence attribute, the Develops/Achieves competency categories, toxic leadership, developmental counseling types), `profession` (5→10 — added the definition of a profession, stewardship, honorable service, military expertise, the Army Ethic), `history` (4→13 — was Revolutionary War only; added WWI, WWII/D-Day, Korea, Vietnam, 9/11, OEF, OIF). All new questions use well-established, verifiable Army doctrine (ADP 6-22, ADP 1) and dates, matching the existing sourced-explanation convention.
+
+**Fixed the Weapons category mismatch:** the audit found "Weapons (M4 / M9-M17 / M249)" had zero pistol questions despite the name promising them. Added 6 real M17/M9/M18 questions (manufacturer, caliber, the modular-grip difference from the M9, magazine capacity) and renamed to "Weapons (M4 / M17 / M249)" now that the name matches the actual content.
+
+**Weak-area tracking + a real board-readiness view**, built as one piece since they're the same problem: rather than building a second, parallel per-question tracker, `renderBoardReadiness()` (`quizzes.js`) reads directly from the v206 SRS auto-feed's miss decks (`feedQuizMissToSrs()`) — a category that shows "passed" can still carry tracked weak spots (questions missed on first attempt, sitting in a "Quiz misses: <category>" SRS deck), and this new card surfaces exactly that per category, plus an overall readiness %, instead of the old view's flat "X/N banks passed" milestone tally. New mount point above the category list on the Quizzes tab.
+
+**Found and fixed one real bug while building this:** `records.js`'s history tally hardcoded "X/16 quiz banks passed" — already stale the moment `quizbank.js` grew past 16 categories in v206, silently wrong ever since. Now reads `Object.keys(window.QUIZ_BANK).length` live.
+
+Verified behaviorally: seeded a mix of passed/unpassed categories and SRS miss-deck cards (one due, one not-yet-due) and confirmed the readiness card's math, icons, and per-category notes are all correct (a passed-with-weak-spots category correctly shows ⚠️, a clean pass shows ✅, an unpassed category shows ❌ with its real best score); confirmed the records tally now reads the live category count instead of the stale hardcoded one.
+
+Full ship checklist: `npm run build` → OK, `npm run check` → SYNTAX OK, `npm run regress` → `PAGEERRORS 0`, `badCount:0`, `total:12524`. No `SEED_SKILLS`/ladder content touched, `SKILL_LADDER_VER` stayed at 118. SW bumped to `operations-v208`. `npm run package` → produced `dist/operations.zip`.

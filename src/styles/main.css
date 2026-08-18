@@ -395,6 +395,16 @@
   .quiz-badge.pass{color:var(--jade);border-color:#3c5230;background:rgba(var(--jade-rgb),.1)}
   .quiz-badge.todo{color:var(--ink-faint);border-color:var(--line)}
   .quiz-btn{margin-top:11px;width:100%;background:var(--panel-2);border:1px solid var(--gold);color:var(--gold);padding:10px;border-radius:8px;font-family:inherit;font-weight:600;font-size:13.5px;cursor:pointer}
+  /* Board Readiness — real per-domain view, not just a milestone tally */
+  .br-card{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--gold);border-radius:var(--radius-lg);padding:var(--space-7);margin-bottom:var(--space-6)}
+  .br-h{font-size:14.5px;font-weight:700;color:var(--gold-bright);margin-bottom:9px}
+  .br-h-sub{font-size:12px;font-weight:400;color:var(--ink-faint)}
+  .br-row{display:flex;align-items:baseline;gap:8px;padding:4px 0;font-size:12.5px;border-bottom:1px solid rgba(255,255,255,.04)}
+  .br-row:last-child{border-bottom:none}
+  .br-ic{flex:none}
+  .br-name{flex:none;color:var(--ink);font-weight:600;min-width:150px}
+  .br-note{color:var(--ink-dim)}
+  .br-foot{margin-top:9px;font-size:11.5px;color:var(--ink-faint);font-style:italic;line-height:1.5}
   .quiz-btn:hover{background:var(--gold);color:#14160f}
   /* quiz runner */
   #quizModal{position:fixed;inset:0;background:rgba(10,11,7,.94);z-index:70;display:none;flex-direction:column;padding:env(safe-area-inset-top) 0 0}

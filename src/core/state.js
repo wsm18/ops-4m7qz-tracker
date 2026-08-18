@@ -271,6 +271,7 @@ function render(){
     warn.className="rd-warn"; warn.innerHTML="";
   }
   renderQuests(); if(typeof renderDailyTasks==="function") renderDailyTasks(); renderBosses(); renderShop();
+  if(typeof renderBoardReadiness==="function") renderBoardReadiness();
   if(typeof renderQuizzes==="function") renderQuizzes();
   if(typeof renderAft==="function") renderAft();
   if(typeof renderLog==="function") renderLog();

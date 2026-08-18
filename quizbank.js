@@ -65,6 +65,12 @@ window.QUIZ_BANK = {
       {q:"A leader's character is their true nature guided by their:", a:["Rank","Conscience","Training","Orders"], c:1, e:"True nature guided by conscience, shaping moral attitudes and actions. (ADP 6-22, Ch.2)"},
       {q:"A leader's personal reputation is:", a:["What others view as their character","Their official record","Their rank and awards","Set by their commander"], c:0, e:"Reputation is what others view as character. (ADP 6-22)"},
       {q:"Officers primarily focus on (vs. NCOs):", a:["Individual drill","The mission, planning, and the 'what/why'","Equipment maintenance","Barracks inspections"], c:1, e:"Officers command, plan, and decide; NCOs execute and train. (AS – Army Leadership)"},
+      {q:"The three levels of Army leadership are:", a:["Direct, Organizational, Strategic","Tactical, Operational, Strategic","Squad, Platoon, Company","Junior, Senior, Executive"], c:0, e:"Direct (face-to-face), Organizational (larger units, through subordinates), Strategic (Army-wide/national level). (ADP 6-22)"},
+      {q:"A leader's 'presence' attribute includes military/professional bearing, fitness, confidence, and:", a:["Resilience","Charisma","Popularity","Seniority"], c:0, e:"Presence = military bearing, physical fitness, confidence, resilience. (ADP 6-22)"},
+      {q:"Which competency category includes 'Creates a Positive Environment' and 'Prepares Self'?", a:["Leads","Develops","Achieves","Builds"], c:1, e:"Develops: creates a positive environment, fosters esprit de corps, prepares self, develops others, stewards the profession. (ADP 6-22)"},
+      {q:"The 'Achieves' leader competency category is primarily about:", a:["Getting results","Building trust","Fostering teamwork","Setting policy"], c:0, e:"Achieves = gets results, the third of the three competency categories alongside Leads and Develops. (ADP 6-22)"},
+      {q:"Toxic leadership is best described as:", a:["Self-centered behavior that damages morale, cohesion, and mission accomplishment","Strict but fair discipline","Enforcing high standards","Delegating authority to subordinates"], c:0, e:"A combination of self-centered attitudes/behaviors that harm the organization and its people over time. (ADP 6-22)"},
+      {q:"The three types of Army developmental counseling are event-driven, performance/periodic, and:", a:["Professional growth","Disciplinary","Emergency","Command-directed"], c:0, e:"Event-oriented, performance/periodic, and professional growth counseling. (ADP 6-22 / AS – Counseling)"},
     ]
   },
   profession: {
@@ -77,6 +83,11 @@ window.QUIZ_BANK = {
       {q:"The two communities of the Army Profession are:", a:["The profession of arms and the Army Civilian Corps","Active and Reserve","Officers and NCOs","CONUS and OCONUS"], c:0, e:"The profession of arms and the Army Civilian Corps. (ADP 1)"},
       {q:"The essential characteristics of the Army Profession include military expertise, honorable service, stewardship, and:", a:["Esprit de corps","Discipline","Loyalty","Tradition"], c:0, e:"Military expertise, honorable service, stewardship, esprit de corps. (ADP 1)"},
       {q:"Esprit de Corps refers to:", a:["The winning spirit and common morale of the Army","A formation","An award","A regulation"], c:0, e:"The winning spirit / common spirit of the profession. (ADP 1)"},
+      {q:"The Army's definition of a profession requires expert knowledge developed through:", a:["Extensive education and experience","Basic training only","On-the-job training alone","A certification exam"], c:0, e:"A profession requires expert work developed and applied through sustained, lifelong learning. (ADP 1)"},
+      {q:"Stewardship of the profession means:", a:["Ensuring the long-term health of the institution","Managing supply property","Commanding a unit","Writing evaluations"], c:0, e:"Every member is responsible for the Army's readiness and reputation now and for the future. (ADP 1)"},
+      {q:"Honorable service, an essential characteristic of the Army Profession, means:", a:["Adherence to the Army Ethic on and off duty","Serving only the minimum contract","Following orders without question","Winning individual awards"], c:0, e:"Service honorably in accordance with the Army Ethic, both on and off duty. (ADP 1)"},
+      {q:"Military expertise, as an essential characteristic of the profession, means:", a:["The design, generation, support, and ethical application of land power","Weapons qualification only","Physical fitness alone","Rank progression"], c:0, e:"The uniquely military body of knowledge applied ethically on behalf of the nation. (ADP 1)"},
+      {q:"The Army Ethic is best described as:", a:["The evolving set of laws, values, and beliefs that guide what's right for the profession","A regulation covering uniform wear","A single document signed at commissioning","Guidance that applies only during combat"], c:0, e:"The evolving set of laws, values, and beliefs embedded in the culture of the Army Profession. (ADP 1)"},
     ]
   },
   landnav: {
@@ -161,7 +172,7 @@ window.QUIZ_BANK = {
     ]
   },
   weapons: {
-    name: "Weapons (M4 / M9-M17 / M249)",
+    name: "Weapons (M4 / M17 / M249)",
     icon: "🔧",
     pass: 0.8,
     questions: [
@@ -175,6 +186,12 @@ window.QUIZ_BANK = {
       {q:"The M249 CYCLIC rate of fire is approximately:", a:["50 rounds/min","100 rounds/min","850 rounds/min, barrel change every minute","1,500 rounds/min"], c:2, e:"Cyclic ≈850 rds/min, barrel change every minute. (TC 3-22.249)"},
       {q:"The first rule of weapons safety is to treat every weapon as if it is:", a:["Unloaded","Loaded","Broken","Clean"], c:1, e:"Always treat every weapon as if it is loaded. (PMI / TC 3-22.9)"},
       {q:"M4 'Rapid Semiautomatic' fire is approximately:", a:["12-15 rounds/min","~45 rounds/min","100 rounds/min","850 rounds/min"], c:1, e:"Rapid semi ≈45 rds/min; slow semi is 12-15 rds/min. (TC 3-22.9)"},
+      {q:"The M17 pistol, the Army's current standard sidearm, is manufactured by:", a:["Beretta","Sig Sauer","Glock","Colt"], c:1, e:"The M17 (based on the Sig Sauer P320) replaced the M9 Beretta as the Army's standard-issue pistol. (TC 3-23.35)"},
+      {q:"The M17 pistol fires which caliber?", a:[".45 ACP","9mm",".40 S&W",".380 ACP"], c:1, e:"9mm, the standard NATO pistol caliber. (TC 3-23.35)"},
+      {q:"The M9 pistol, predecessor to the M17, was manufactured by:", a:["Sig Sauer","Beretta","Colt","Smith & Wesson"], c:1, e:"The Beretta M9 served as the Army's standard sidearm before being replaced by the M17. (TC 3-23.35)"},
+      {q:"A key feature of the M17 compared to the older M9 is:", a:["It's a revolver","A modular design with interchangeable grip sizes","It's fully automatic","It's chambered in .45 ACP"], c:1, e:"The M17's modular grip system lets it be fit to different hand sizes — a real ergonomics improvement over the M9. (TC 3-23.35)"},
+      {q:"The M18 is:", a:["A compact/subcompact variant of the M17","A designated marksman rifle","A light machine gun","An underbarrel grenade launcher"], c:0, e:"The M18 is the compact version of the same M17 pistol system, for roles needing a smaller sidearm. (TC 3-23.35)"},
+      {q:"A standard M17 magazine holds approximately:", a:["7 rounds","10 rounds","17 rounds","30 rounds"], c:2, e:"17 rounds — matching the model number, a common memory aid. (TC 3-23.35)"},
     ]
   },
   warfighting: {
@@ -215,6 +232,14 @@ window.QUIZ_BANK = {
       {q:"The turning-point victory credited with bringing France into the Revolution was:", a:["Trenton","Saratoga","Valley Forge","Camden"], c:1, e:"Saratoga (1777). (American Military History v1)"},
       {q:"Baron von Steuben is best known for:", a:["Funding the war","Training and drilling the Continental Army at Valley Forge","Negotiating with France","Commanding the British"], c:1, e:"Instilled discipline and drill at Valley Forge (1777-78). (American Military History v1)"},
       {q:"The Revolutionary War effectively ended with the British surrender at:", a:["Yorktown (1781)","Saratoga (1777)","Boston (1776)","Trenton (1776)"], c:0, e:"Cornwallis surrendered at Yorktown, 1781. (American Military History v1)"},
+      {q:"The United States entered World War I in:", a:["1914","1917","1918","1941"], c:1, e:"The U.S. declared war on Germany in April 1917. (American Military History v2)"},
+      {q:"The U.S. entered World War II following the attack on:", a:["Pearl Harbor","Normandy","Midway","Guadalcanal"], c:0, e:"The Japanese attack on Pearl Harbor, 7 December 1941. (American Military History v2)"},
+      {q:"D-Day, the Allied invasion of Normandy, occurred on:", a:["6 June 1944","8 May 1945","7 December 1941","1 September 1939"], c:0, e:"6 June 1944 — the largest amphibious invasion in history. (American Military History v2)"},
+      {q:"The Korean War began in:", a:["1945","1950","1955","1961"], c:1, e:"North Korea invaded South Korea in June 1950. (American Military History v2)"},
+      {q:"U.S. combat involvement in Vietnam effectively ended with the Paris Peace Accords in:", a:["1968","1973","1975","1980"], c:1, e:"Signed January 1973; Saigon fell in 1975. (American Military History v2)"},
+      {q:"The September 11 attacks that launched the Global War on Terror occurred in:", a:["1998","2001","2003","2005"], c:1, e:"11 September 2001. (American Military History v2)"},
+      {q:"Operation Enduring Freedom, the initial U.S. operation in Afghanistan, began in:", a:["2001","2002","2003","2004"], c:0, e:"October 2001, following the September 11 attacks. (American Military History v2)"},
+      {q:"Operation Iraqi Freedom began in:", a:["2001","2003","2006","2011"], c:1, e:"March 2003. (American Military History v2)"},
     ]
   },
   branches: {

@@ -1,4 +1,36 @@
 /* ---------------- QUIZZES ---------------- */
+// Board-readiness view: found by the v204-session quiz audit as a real
+// gap — history/records only showed a milestone tally ("X/N banks
+// passed"), no per-domain breakdown of ACTUAL readiness. A category can
+// show "passed" off an 80% first-attempt score while 20% of its content
+// was still genuinely missed — this surfaces those tracked weak spots
+// directly from the v206 SRS auto-feed's miss decks (feedQuizMissToSrs(),
+// answerQuiz()) instead of building a second, parallel weak-area tracker.
+function renderBoardReadiness(){
+  const el=document.getElementById("boardReadiness"); if(!el) return;
+  const bank=window.QUIZ_BANK||{};
+  const keys=Object.keys(bank);
+  if(!keys.length){ el.innerHTML=""; return; }
+  const passedCount=keys.filter(k=>S.quizzes[k]&&S.quizzes[k].passed).length;
+  const overallPct=Math.round(passedCount/keys.length*100);
+  const rows=keys.map(k=>{
+    const t=bank[k];
+    const st=S.quizzes[k]||{passed:false,bestPct:0,attempts:0};
+    const missDeck=(S.srsDecks||[]).find(d=>d.quizMissDeck===k);
+    const weakCount=missDeck?missDeck.cards.length:0;
+    const dueCount=missDeck&&typeof srsDue==="function"?srsDue(missDeck).length:0;
+    const statusIcon=!st.passed?"❌":(weakCount>0?"⚠️":"✅");
+    const statusNote=!st.passed ? `not yet passed (best ${st.bestPct}%)`
+      : weakCount>0 ? `passed, but ${weakCount} question${weakCount!==1?'s':''} tracked as missed${dueCount?` (${dueCount} due for review)`:''}`
+      : "passed, no tracked weak spots";
+    return `<div class="br-row"><span class="br-ic">${statusIcon}</span><span class="br-name">${esc(t.name)}</span><span class="br-note">${esc(statusNote)}</span></div>`;
+  }).join("");
+  el.innerHTML=`<div class="br-card">
+    <div class="br-h">🎯 Board Readiness — ${overallPct}% <span class="br-h-sub">(${passedCount}/${keys.length} categories passed)</span></div>
+    <div class="br-body">${rows}</div>
+    <div class="br-foot">A category can show passed but still carry tracked weak spots — questions missed on first attempt, sitting in your Memory Track SRS decks. Clear those for genuine readiness, not just a passing score.</div>
+  </div>`;
+}
 function renderQuizzes(){
   const el=document.getElementById("quizList");
   if(!el) return;
