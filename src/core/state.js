@@ -78,6 +78,9 @@ function load(){
     merged.gymAccess.default=Object.assign({1:true,3:true,5:true}, merged.gymAccess.default||{});
     merged.gymAccess.week=merged.gymAccess.week||{};
     merged.gymAccessLive=r.gymAccessLive||{};
+    merged.ptDays=Object.assign({default:{},weekOf:null,week:{}}, r.ptDays||{});
+    merged.ptDays.default=Object.assign({}, merged.ptDays.default||{});
+    merged.ptDays.week=merged.ptDays.week||{};
     // Equipment inventory (FM-2) — old saves get the two real default profiles;
     // an old save that already has profiles keeps them (never overwritten), and
     // any custom profile the user already added/edited survives untouched.
@@ -300,6 +303,7 @@ function render(){
   if(typeof renderRecoveryAdvisory==="function") renderRecoveryAdvisory();
   if(typeof renderSessionLists==="function") renderSessionLists();
   if(typeof renderGymAccessUI==="function") renderGymAccessUI();
+  if(typeof renderPtDayUI==="function") renderPtDayUI();
   if(typeof renderEquipProfileUI==="function") renderEquipProfileUI();
   if(typeof renderCoachToday==="function") renderCoachToday();
   if(typeof renderSkillsTab==="function") renderSkillsTab();

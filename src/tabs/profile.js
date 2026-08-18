@@ -390,6 +390,7 @@ function renderEmergencyAndBlood(){
     elig=`<div class="bl-elig ok">No donations logged yet. Whole blood can be given every ${WHOLE_BLOOD_DAYS} days.</div>`;
   }
   const count=(S.donations||[]).length;
+  const dsk=(S.lifeSkills||[]).find(s=>s.auto==="donation:count");
   bd.innerHTML=`<div class="blood-card">
     <div class="blood-type-big">${esc(p.bloodType)}</div>
     <div class="blood-compat">
@@ -399,6 +400,7 @@ function renderEmergencyAndBlood(){
     ${f.note?`<div class="blood-note">${f.note}</div>`:""}
     ${elig}
     ${count?`<div class="blood-count">🩸 ${count} donation${count!==1?'s':''} logged</div>`:""}
+    ${dsk?`<button class="wm-btn ghost" data-gototab="skills" style="margin-top:6px">🌳 Blood Donation skill — level ${skEffectiveLevel(dsk)} →</button>`:""}
   </div>`;
 }
 const _donAdd=document.getElementById("donAdd");
@@ -418,12 +420,6 @@ function bpClass(sys,dia){
   if(sys<140 || dia<90) return {label:"High (Stage 1)", cls:"warn"};
   if(sys<180 || dia<120) return {label:"High (Stage 2)", cls:"bad"};
   return {label:"Very high — seek care", cls:"bad"};
-}
-function spark(vals){ // tiny inline sparkline from numbers
-  const nums=vals.filter(v=>v!=null); if(nums.length<2) return "";
-  const min=Math.min(...nums), max=Math.max(...nums), rng=(max-min)||1, w=90, h=22, step=w/(nums.length-1);
-  const pts=nums.map((v,i)=>`${(i*step).toFixed(1)},${(h-((v-min)/rng)*h).toFixed(1)}`).join(" ");
-  return `<svg width="${w}" height="${h}" style="vertical-align:middle"><polyline points="${pts}" fill="none" stroke="var(--jade)" stroke-width="1.5"/></svg>`;
 }
 function renderVitals(){
   const el=document.getElementById("pfVitals"); if(!el) return;
@@ -445,11 +441,11 @@ function renderVitals(){
   }
   const last=v[v.length-1];
   const rows=[];
-  if(last.pulse!=null) rows.push(`<div class="r-row"><span>Resting pulse ${spark(v.map(x=>x.pulse))}</span><b>${last.pulse} bpm</b></div>`);
+  if(last.pulse!=null) rows.push(`<div class="r-row"><span>Resting pulse ${miniSparkline(v.filter(x=>x.pulse!=null).map(x=>x.pulse),90,22)}</span><b>${last.pulse} bpm</b></div>`);
   if(last.bpSys!=null&&last.bpDia!=null){ const c=bpClass(last.bpSys,last.bpDia); rows.push(`<div class="r-row"><span>Blood pressure</span><b>${last.bpSys}/${last.bpDia} <span class="vt-tag ${c.cls}">${c.label}</span></b></div>`); }
   if(last.hemoglobin!=null){
     const hgb=last.hemoglobin; const lowDonate = (S.profile.sex==="f"? hgb<12.5 : hgb<13.0);
-    rows.push(`<div class="r-row"><span>Hemoglobin ${spark(v.map(x=>x.hemoglobin))}</span><b>${hgb} g/dL${lowDonate?' <span class="vt-tag warn">donation may be deferred</span>':''}</b></div>`);
+    rows.push(`<div class="r-row"><span>Hemoglobin ${miniSparkline(v.filter(x=>x.hemoglobin!=null).map(x=>x.hemoglobin),90,22)}</span><b>${hgb} g/dL${lowDonate?' <span class="vt-tag warn">donation may be deferred</span>':''}</b></div>`);
   }
   rows.push(`<div class="r-row"><span>Readings logged</span><b>${v.length}</b></div>`);
   el.innerHTML=`<div class="bl-readout">${rows.join("")}<div style="margin-top:8px;color:var(--ink-faint);font-style:italic">Latest reading shown; sparkline is your trend. Informational only.</div></div>`+ahBlock;

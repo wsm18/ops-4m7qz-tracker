@@ -80,6 +80,7 @@ const DEFAULT = {
   // (the saved recurring pattern). Keyed by JS getDay() (0=Sun..6=Sat).
   gymAccess:{ default:{1:true,3:true,5:true}, weekOf:null, week:{} },
   gymAccessLive:{},       // {"YYYY-MM-DD": true|false} same-day ad-hoc overrides
+  ptDays:{ default:{}, weekOf:null, week:{} }, // declared unit-PT days — same 3-layer cascade as gymAccess; assignWeekSessions() skips assigning a duplicate hard FM session on these days
   // Equipment inventory (FM-2). Named, editable profiles built from EQUIP_TAGS
   // (constants.js) replace the old flat hasGym boolean for exercise SELECTION
   // (which specific exercise fills a slot); gymAccess above still separately
@@ -156,6 +157,7 @@ const DEFAULT = {
 const VALUES = {
   quest:{easy:{xp:15,g:5},med:{xp:35,g:12},hard:{xp:70,g:28}},
   daily:{easy:{xp:10,g:4},med:{xp:20,g:8},hard:{xp:40,g:16}},
+  board:{xp:20,g:10}, // board-prep tasks have no difficulty tiers — one flat reward
 };
 // ── Equipment taxonomy (FM-2) ────────────────────────────────────────────
 // A deliberately coarse tag set (machines is one umbrella tag, not per-machine)

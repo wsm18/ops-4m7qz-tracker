@@ -111,6 +111,13 @@ function dawnSessionHtml(){
     }
     return "";
   }
+  if(p.sessionKey==="pt"){
+    return `<div class="dawn-sess">
+      <div class="ds-top"><span class="ds-name">🪖 ${esc(dayName)} · ROTC PT (unit-led)</span><span class="ds-badges">🔴 Hard</span></div>
+      <div class="ds-note">${esc(p.dayPlan.note||"")}</div>
+      <div class="ds-actions"><button class="td-go ds-plan-btn" data-gototab="log">Log PT →</button></div>
+    </div>`;
+  }
   const sess=SESSIONS[p.sessionKey];
   const intensity=p.dayPlan.intensity;
   const intLabel={hard:"🔴 Hard",moderate:"🟠 Moderate",easy:"🟢 Easy"}[intensity]||"";
@@ -343,6 +350,10 @@ function renderCoachToday(){
   const y=p.yesterday; let yHtml="";
   if(y.wasRest){
     yHtml=`<div class="coach-yest rest">Yesterday was a scheduled <b>rest / recovery</b> day — nothing to make up. A tree grows in the dormant season too; rest is when the work takes root.</div>`;
+  } else if(y.ptDay){
+    yHtml = y.loggedPt
+      ? `<div class="coach-yest ok">✓ Yesterday was <b>ROTC PT</b> — logged. That counted as the day's session.</div>`
+      : `<div class="coach-yest miss">Yesterday was <b>ROTC PT</b> — log what you actually did in the PT box on the Log tab so it feeds your recovery signals.</div>`;
   } else if(y.onPlan){
     yHtml=`<div class="coach-yest ok">✓ Yesterday you did <b>${esc(SESSIONS[y.plan.session].name.split(" · ")[0])}</b> as planned. On track.</div>`;
   } else if(y.logged){
@@ -357,6 +368,10 @@ function renderCoachToday(){
       <p class="coach-intro">${esc(p.dayPlan.note||"")}</p>
       <ol class="coach-list">${sessionEx("s5").slice(0,9).map(e=>{const d=exHowto(e.n);return `<li><div class="coach-ex-n"><b>${esc(e.n)}</b></div>${d?`<div class="coach-ex-how">${esc(d)}</div>`:''}</li>`;}).join("")}</ol>
       <p class="coach-tip">No hard training today — a walk plus the stretch block keeps you loose without adding fatigue.</p></div>`;
+  } else if(p.sessionKey==="pt"){
+    tHtml=`<div class="coach-body"><div class="coach-day-h">${esc(dayName)} · ROTC PT (unit-led) <span class="coach-int">🔴 Hard day</span></div>
+      <p class="coach-intro">${esc(p.dayPlan.note||"")}</p>
+      <p class="coach-tip">Log what you actually did in the PT box on the Log tab — that feeds your recovery and overtraining signals the same as a normal session.</p></div>`;
   } else {
     const sess=SESSIONS[p.sessionKey];
     const intensity=p.dayPlan.intensity;
@@ -461,7 +476,7 @@ function renderGymAccessUI(){
 
   const mon=weekMonday(new Date());
   const assign=assignWeekSessions(mon);
-  const sessLabel={s1:"Str A",s2:"Run",s3:"Str B",s4:"AFT",s5:"Mobility"};
+  const sessLabel={s1:"Str A",s2:"Run",s3:"Str B",s4:"AFT",s5:"Mobility",pt:"ROTC PT"};
   const previewCells=[1,2,3,4,5,6].map(d=>{
     const skey=assign[d];
     const dt=new Date(mon); dt.setDate(mon.getDate()+(d-1));
@@ -486,6 +501,26 @@ function renderGymAccessUI(){
       <button class="gym-live-btn${todayGym?' on':''}" data-gymlive="1">🏋️ Have gym</button>
       <button class="gym-live-btn${!todayGym?' on':''}" data-gymlive="0">🤸 No gym</button>
       ${todayLive!=null?`<button class="gym-live-clear" data-gymlive="clear">↺ use the week's plan</button>`:''}
+    </div>
+  </div>`;
+}
+
+// In-progress edits to this week's declared PT-day pattern — same module-scope
+// draft pattern as _gymEditDraft above.
+let _ptEditDraft=null;
+function renderPtDayUI(){
+  const el=document.getElementById("ptDayArea"); if(!el) return;
+  if(!_ptEditDraft) _ptEditDraft=typeof weekPtPatternForEditing==="function"?weekPtPatternForEditing():{};
+  const confirmed=typeof weekPtPatternIsConfirmed==="function"&&weekPtPatternIsConfirmed();
+  const dayNames=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const dayToggles=[1,2,3,4,5,6].map(d=>`<button class="gym-day-tgl${_ptEditDraft[d]?' on':''}" data-ptday="${d}">${dayNames[d]}</button>`).join("");
+  el.innerHTML=`<div class="gym-access-card">
+    <div class="td-h fn-h">ROTC PT Days ${confirmed?'This Week':'— not yet confirmed for this week'}</div>
+    <div class="plan-intro" style="margin-bottom:8px">Toggle which days you have unit-led PT. Those days count as that day's session — the coach won't stack a separate hard FM session on top, and won't space a hard gym day into right next to one either.</div>
+    <div class="gym-day-toggles">${dayToggles}</div>
+    <div class="gym-access-actions">
+      <button class="hb-starter-btn" id="ptConfirmWeekBtn">${confirmed?'Update this week':'Confirm this week'}</button>
+      <button class="hb-starter-btn" id="ptSaveDefaultBtn" style="background:transparent;border:1px solid var(--line)">Save as my usual pattern</button>
     </div>
   </div>`;
 }

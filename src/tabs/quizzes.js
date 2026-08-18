@@ -81,12 +81,15 @@ function feedQuizMissToSrs(quizKey, quizName, qIndex, q){
   deck.cards.push({id:id(), front, back, quizKey, qIndex});
   save();
 }
-let QZ=null; // {key, idx, firstCorrect, retried, order}
+let QZ=null; // {key, idx, firstCorrect, retried, order, timed, qEndsAt, tick}
+let _qzTimedMode=false;
+const QZ_TIME_PER_Q=15; // seconds — real boards are rapid-fire verbal, not untimed multiple-choice
 function startQuiz(key){
   const t=window.QUIZ_BANK[key]; if(!t) return;
+  if(QZ&&QZ.tick) clearInterval(QZ.tick);
   // shuffle a copy of questions
   const order=t.questions.map((q,i)=>i).sort(()=>Math.random()-0.5);
-  QZ={key,idx:0,firstCorrect:0,retried:false,order};
+  QZ={key,idx:0,firstCorrect:0,retried:false,order,timed:_qzTimedMode};
   document.getElementById("qmTitle").textContent="🐿️ Climb the Tree — "+t.icon+" "+t.name;
   document.getElementById("quizModal").classList.add("show");
   showQuizQ();
@@ -104,6 +107,7 @@ function showQuizQ(){
   const total=QZ.order.length;
   document.getElementById("qmProg").style.width=(QZ.idx/total*100)+"%";
   if(QZ.idx>=total){ return finishQuiz(); }
+  if(QZ.tick){ clearInterval(QZ.tick); QZ.tick=null; }
   const q=t.questions[QZ.order[QZ.idx]];
   const body=document.getElementById("qmBody");
   // Shuffle DISPLAY order only — data-opt still carries the real original
@@ -119,8 +123,24 @@ function showQuizQ(){
     <div class="qm-q">${esc(q.q)}</div>
     <div id="qmOpts">${optOrder.map(i=>`<button class="qm-opt" data-opt="${i}">${esc(q.a[i])}</button>`).join("")}</div>`;
   body.scrollTop=0;
+  const timerEl=document.getElementById("qmTimer");
+  if(QZ.timed){
+    QZ.qEndsAt=Date.now()+QZ_TIME_PER_Q*1000;
+    timerEl.style.display="";
+    const tick=()=>{
+      const left=Math.max(0,Math.ceil((QZ.qEndsAt-Date.now())/1000));
+      timerEl.textContent="⏱ "+left+"s";
+      timerEl.classList.toggle("low",left<=5);
+      if(left<=0){ clearInterval(QZ.tick); QZ.tick=null; answerQuiz(-1,true); }
+    };
+    tick();
+    QZ.tick=setInterval(tick,250);
+  } else if(timerEl){
+    timerEl.style.display="none";
+  }
 }
-function answerQuiz(choice){
+function answerQuiz(choice, timedOut){
+  if(QZ.tick){ clearInterval(QZ.tick); QZ.tick=null; }
   const t=window.QUIZ_BANK[QZ.key];
   const qIndex=QZ.order[QZ.idx];
   const q=t.questions[qIndex];
@@ -141,7 +161,7 @@ function answerQuiz(choice){
   const body=document.getElementById("qmBody");
   const exp=document.createElement("div");
   exp.className="qm-exp";
-  exp.innerHTML=(correct?"✅ Correct — the path clears. ":"❌ Not quite — the branch holds. ")+esc(q.e);
+  exp.innerHTML=(correct?"✅ Correct — the path clears. ":timedOut?"⏰ Time's up — the branch holds. ":"❌ Not quite — the branch holds. ")+esc(q.e);
   body.appendChild(exp);
   const nx=document.createElement("button");
   nx.className="qm-next";
@@ -203,7 +223,7 @@ function finishQuiz(){
   </div>`;
   document.getElementById("qmDone").onclick=closeQuiz;
 }
-function closeQuiz(){document.getElementById("quizModal").classList.remove("show");QZ=null;render();}
+function closeQuiz(){if(QZ&&QZ.tick)clearInterval(QZ.tick);document.getElementById("quizModal").classList.remove("show");QZ=null;render();}
 document.getElementById("qmClose").onclick=closeQuiz;
 document.getElementById("qmBody").addEventListener("click",e=>{
   const o=e.target.closest(".qm-opt");
@@ -212,6 +232,8 @@ document.getElementById("qmBody").addEventListener("click",e=>{
 document.body.addEventListener("click",e=>{
   const qb=e.target.closest("[data-quiz]");
   if(qb){startQuiz(qb.dataset.quiz);}
+  const tt=e.target.closest("#quizTimedToggle");
+  if(tt){ _qzTimedMode=!_qzTimedMode; document.getElementById("quizTimedState").textContent=_qzTimedMode?"On":"Off"; tt.classList.toggle("on",_qzTimedMode); }
 });
 
 // Shared "m:ss"/"mm:ss" -> seconds parser, used by AFT event entry (aft.js) and

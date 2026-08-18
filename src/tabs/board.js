@@ -33,13 +33,13 @@ function renderBoard(){
   document.getElementById("boardProg").textContent=done+"/"+S.boardTasks.length+" complete";
   list.innerHTML=S.boardTasks.map(t=>`<li class="card board-item ${t.done?'done':''}">
     <div class="check" data-bt="${t.id}">${t.done?'✓':''}</div>
-    <div class="c-body"><div class="c-name">${esc(t.name)}</div></div>
+    <div class="c-body"><div class="c-name">${esc(t.name)}</div>${t.done?'':`<span class="tag xp">+${VALUES.board.xp} XP · ${VALUES.board.g} pts</span>`}</div>
     <button class="del" data-dbt="${t.id}">✕</button>
   </li>`).join("");
 }
 document.body.addEventListener("click",e=>{
   const t=e.target;
-  if(t.dataset.bt){const task=S.boardTasks.find(x=>x.id===t.dataset.bt);if(task){const was=task.done;task.done=!task.done;if(!was&&task.done){grant(20,10,"Board prep task done","academic");}else{save();render();}}return;}
+  if(t.dataset.bt){const task=S.boardTasks.find(x=>x.id===t.dataset.bt);if(task){const was=task.done;task.done=!task.done;if(!was&&task.done){grant(VALUES.board.xp,VALUES.board.g,"Board prep task done","academic");}else{save();render();}}return;}
   if(t.dataset.dbt){S.boardTasks=S.boardTasks.filter(x=>x.id!==t.dataset.dbt);save();render();return;}
 });
 const _btAdd=document.getElementById("btAdd");

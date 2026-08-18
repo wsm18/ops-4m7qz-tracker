@@ -976,14 +976,12 @@ function skProgressBlock(sk, eff){
           <div class="sdb-count">${pathStartedCount}/${totalLeaves} skill${totalLeaves!==1?'s':''}${fadingCount?` · <span class="sdb-fading">🍂${fadingCount}</span>`:''}${multiTag}</div>
         </div>
         <div class="sdb-corner br"><div class="sdb-rank">${Math.round(catProg*100)}%</div><div class="sdb-suit">${suit.sym}</div></div>
-        <button class="sc-toggle" data-sctoggle="${cat}">⛓ Chain</button>
       </div>
       <div class="sk-deck-body${isOpen?' open':''}">
         ${pyramidSectionHtml}
         ${bodyContent}
         ${sideDeckHtml}
       </div>
-      <div class="sc-wrap" id="sc-${cat}" style="display:none"></div>
     </div>`;
   });
   // Jokers deck — auto skills + user-tagged jokers from all paths
@@ -1088,19 +1086,6 @@ function skProgressBlock(sk, eff){
     if(_skWeeklyVisible) renderWeeklyQueue();
     wqBtn.onclick=()=>{ _skWeeklyVisible=!_skWeeklyVisible; wqBtn.classList.toggle("active",_skWeeklyVisible); if(wqEl){wqEl.style.display=_skWeeklyVisible?"block":"none"; if(_skWeeklyVisible)renderWeeklyQueue();} };
   }
-  // synthesis chain toggles — one button per path deck
-  listEl.querySelectorAll(".sc-toggle").forEach(btn=>{
-    btn.onclick=e=>{
-      e.stopPropagation();
-      const cat=btn.dataset.sctoggle;
-      const wrap=document.getElementById("sc-"+cat);
-      if(!wrap) return;
-      const vis=wrap.style.display==="none";
-      wrap.style.display=vis?"block":"none";
-      btn.classList.toggle("active",vis);
-      if(vis) wrap.innerHTML=renderSynthesisChain(cat);
-    };
-  });
   // populate the right-side category jump bar (only cats that have skills)
   const jb=document.getElementById("skJumpbar");
   if(jb){
@@ -1216,53 +1201,6 @@ function renderSkillGapMap(){
   </table>
   <div class="sk-gm-legend"><span style="color:var(--jade)">✓ on track</span> · <span style="color:var(--ember)">1–2 behind</span> · <span style="color:var(--blood)">3+ behind</span> · current stage highlighted</div>
   </div>`;
-}
-function renderSynthesisChain(cat){
-  const seeds=(typeof SEED_SKILLS!=="undefined"?SEED_SKILLS:[]).filter(s=>s.cat===cat&&(s.synthesizedFrom||s.setKey));
-  // A path can hold more than one Mythic tree (e.g. a legacy tree plus a later
-  // second-gen one) — render a chain block for every Mythic, not just the first.
-  const mythics=seeds.filter(s=>s.rarity==="mythic"&&s.synthesizedFrom);
-  if(!mythics.length) return '<div class="synth-chain-empty">No synthesis chain defined for this path yet.</div>';
-  const getLive=(name)=>(S.lifeSkills||[]).find(s=>s.name===name&&s.cat===cat);
-  const isMaxed=(name)=>{ const l=getLive(name); return l&&l.levels&&l.currentLevel>=l.levels.length; };
-  const isStarted=(name)=>{ const l=getLive(name); return l&&l.currentLevel>0; };
-  const setCount=(setKey)=>{
-    const members=seeds.filter(s=>s.setKey===setKey&&!s.group);
-    return {total:members.length, mastered:members.filter(s=>isMaxed(s.name)).length, started:members.filter(s=>isStarted(s.name)).length};
-  };
-  return mythics.map(mythic=>{
-    const legends=seeds.filter(s=>s.setKey===mythic.synthesizedFrom&&s.rarity==="legendary");
-    const rows=legends.map(leg=>{
-      const lc=setCount(leg.synthesizedFrom||"");
-      const rares=seeds.filter(s=>s.setKey===leg.synthesizedFrom&&s.rarity==="rare");
-      const rareRows=rares.map(r=>{
-        const rc=setCount(r.synthesizedFrom||"");
-        const status=isMaxed(r.name)?'maxed':isStarted(r.name)?'started':rc.mastered>=rc.total&&rc.total>0?'ready':'locked';
-        return `<div class="sc-rare sc-${status}">
-          <span class="sc-icon">${status==='maxed'?'★':status==='started'?'▶':status==='ready'?'⚡':'🔒'}</span>
-          <span class="sc-name">${esc(r.name)}</span>
-          <span class="sc-prog">${rc.mastered}/${rc.total} U</span>
-        </div>`;
-      }).join('');
-      const legStatus=isMaxed(leg.name)?'maxed':isStarted(leg.name)?'started':lc.mastered>=lc.total&&lc.total>0?'ready':'locked';
-      return `<details class="sc-legend sc-${legStatus}">
-        <summary>
-          <span class="sc-icon">${legStatus==='maxed'?'★':legStatus==='started'?'▶':legStatus==='ready'?'⚡':'🔒'}</span>
-          <span class="sc-name">${esc(leg.name)}</span>
-          <span class="sc-prog">${lc.mastered}/${lc.total} Rares mastered</span>
-        </summary>
-        <div class="sc-rares">${rareRows}</div>
-      </details>`;
-    }).join('');
-    const mythicStatus=isMaxed(mythic.name)?'maxed':isStarted(mythic.name)?'started':'locked';
-    return `<div class="synth-chain">
-      <div class="sc-mythic sc-${mythicStatus}">
-        <span class="sc-icon">✦</span><span class="sc-name">${esc(mythic.name)}</span>
-        <span class="sc-prog">${legends.filter(l=>isMaxed(l.name)).length}/${legends.length} Legendaries</span>
-      </div>
-      <div class="sc-legends">${rows}</div>
-    </div>`;
-  }).join('');
 }
 function renderSkillAssessment(){
   const el=document.getElementById("skAssessWrap"); if(!el) return;

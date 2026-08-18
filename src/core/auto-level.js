@@ -109,6 +109,15 @@ function syncSkillsFromActivity(){
       else if(lvl>0 && lvl>=msk.currentLevel && msk.lastQuestTs<now-864e5){ msk.lastQuestTs=now; changed=true; }
     }
   }
+  // Blood donation skill: levels from a plain donation count in S.donations —
+  // no fitted model, just the real gallon-donor milestones blood banks already
+  // use (1 gal = 8 donations), so the ladder is externally verifiable, not invented.
+  const dsk=S.lifeSkills.find(s=>s.auto==="donation:count");
+  if(dsk){
+    const n=(S.donations||[]).length;
+    const lvl=Math.min(donationLevel(n), dsk.levels.length);
+    if(lvl>dsk.currentLevel){ dsk.currentLevel=lvl; skUpdatePeak(dsk); dsk.lastQuestTs=now; dsk.history.push({ts:now,type:"auto-donation",level:lvl}); changed=true; }
+  }
   // Integrity skill: levels from the Weight ledger (read-only mirror). This is the
   // one auto skill that can move DOWN as well as up — broken vows cost integrity,
   // and a broken keystone/heavy vow costs far more than an ordinary one. Honest by
@@ -170,6 +179,10 @@ function integrityLevel(maxLevel){
 function rhrToLevel(rhr){
   if(rhr==null) return 0;
   return rhr<=40?10 : rhr<44?9 : rhr<48?8 : rhr<52?7 : rhr<56?6 : rhr<60?5 : rhr<65?4 : rhr<70?3 : rhr<75?2 : 1;
+}
+// Ladder mirrors real blood-bank gallon-donor milestones (1 gallon whole blood = 8 donations).
+function donationLevel(n){
+  return n>=32?8 : n>=24?7 : n>=16?6 : n>=12?5 : n>=8?4 : n>=4?3 : n>=2?2 : n>=1?1 : 0;
 }
 // Two-factor: deck scale (mature card count) gates the level, ease quality
 // (SM-2's own retention-difficulty signal, ~1.3 struggling to ~3.5+ retaining

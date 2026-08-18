@@ -1,4 +1,4 @@
-const SKILL_LADDER_VER=118;
+const SKILL_LADDER_VER=119;
 const PYRAMID_RESET_VER=1;
 // Returns the user's current ROTC/Army career stage based on S.rank.
 function careerStage(){

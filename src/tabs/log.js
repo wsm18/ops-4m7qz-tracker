@@ -215,16 +215,24 @@ function recoveryLoad(){
 function detectOvertrainingTrend(){
   const now=Date.now();
   const windowDays=21;
-  const recent=(S.workouts||[]).filter(w=>w.ts && (now-w.ts)/864e5<=windowDays).sort((a,b)=>a.ts-b.ts);
-  if(recent.length<4) return null; // too few logged sessions to see a real trend, not just noise
-  const struggled=w=>{
+  const wStruggled=w=>{
     if(w.rpe!=null && w.rpe>=9) return true;
     const exs=w.exercises||[];
     if(exs.some(e=>e.reduced)) return true;
     if(exs.filter(e=>e.effort!=null && e.effort>=9).length>=2) return true;
     return false;
   };
-  const strugglingCount=recent.filter(struggled).length;
+  // A cadet training mostly via logged unit PT (S.ptLog) instead of the gym
+  // Log could never trip this — ptLog only has a whole-session `intensity`
+  // (1-10, same self-rated-difficulty scale as a workout's rpe per
+  // ptIntensityWeight()'s own comment), so that's the one honest signal to
+  // reuse here rather than inventing a per-exercise equivalent it doesn't have.
+  const pStruggled=p=>typeof p.intensity==="number" && p.intensity>=9;
+  const recentW=(S.workouts||[]).filter(w=>w.ts && (now-w.ts)/864e5<=windowDays).map(w=>({ts:w.ts,struggled:wStruggled(w)}));
+  const recentP=(S.ptLog||[]).filter(p=>p.ts && (now-p.ts)/864e5<=windowDays).map(p=>({ts:p.ts,struggled:pStruggled(p)}));
+  const recent=[...recentW,...recentP].sort((a,b)=>a.ts-b.ts);
+  if(recent.length<4) return null; // too few logged sessions to see a real trend, not just noise
+  const strugglingCount=recent.filter(x=>x.struggled).length;
   const rate=strugglingCount/recent.length;
   if(rate<0.5) return null; // under half struggling — normal week-to-week variation, not a trend
   return {sessionsLogged:recent.length, strugglingCount, rate, windowDays};
@@ -584,6 +592,32 @@ function computeTarget(exArg, opts){
   const last=s[s.length-1];
   const ex=last.ex;
   const lowerBetter=(ex.type==="dist")||(ex.type==="time" && /run|sprint|drag|sdc|200m/i.test(name));
+  // ---- LAYOFF / DETRAINING (a missed week+ resets the starting point) ----
+  // plan.html's own copy promises "come back lighter" after a missed week or
+  // more — nothing enforced that. A plain flat-percentage reduction off the
+  // last logged set, not a fitted decay curve: this isn't claiming to model
+  // real detraining physiology, just refusing to hand back the same
+  // progressive-overload target as if no time had passed. Short-circuits the
+  // normal trend/stall math below since comparing across a real gap isn't a
+  // meaningful "trend" anyway.
+  const daysSinceLast=(Date.now()-last.ts)/864e5;
+  if(daysSinceLast>=7){
+    const layoffNote=` (${Math.floor(daysSinceLast)} days since your last logged set on this — easing back in, not picking up where you left off)`;
+    if(ex.type==="reps"){
+      const r=parseFloat(last.best.reps)||0, w=parseFloat(last.best.weight)||0;
+      if(w>0){
+        const w2=Math.max(5, Math.round((w*0.9)/5)*5);
+        return {target:`${Math.max(1,r-2)} reps × ${w2} lb (easing back in)`, hold:true, layoff:true, tier:"adaptive", note:"missed a week or more — dropped the load a notch"+layoffNote};
+      }
+      return {target:`${Math.max(1,r-2)} reps (easing back in)`, hold:true, layoff:true, tier:"adaptive", note:"missed a week or more — fewer reps, more left in the tank"+layoffNote};
+    }
+    if(ex.type==="time"){
+      const sec=parseTime(last.best.time)||parseFloat(last.best.time)||0;
+      if(lowerBetter) return {target:`${fmtSec(Math.round(sec*1.1))} (easing back in)`, hold:true, layoff:true, tier:"adaptive", note:"missed a week or more — pace it, don't chase your old time yet"+layoffNote};
+      return {target:`${fmtSec(Math.max(10,Math.round(sec*0.85)))} (easing back in)`, hold:true, layoff:true, tier:"adaptive", note:"missed a week or more — shorter hold, rebuild from here"+layoffNote};
+    }
+    if(ex.type==="dist") return {target:`log distance + time (easing back in)`, layoff:true, tier:"adaptive", note:"missed a week or more — go easier than your last effort"+layoffNote};
+  }
   // session trend over last up-to-3 entries
   let trend="first";
   if(s.length>=2){

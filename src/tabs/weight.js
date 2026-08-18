@@ -40,6 +40,13 @@ function renderWeight(){
   let grams=0; nonFavor.forEach(p=>{ if(p.status==="open")grams+=1; else if(p.status==="standing")grams+=3; });
   const carryEl=document.getElementById("weightCarry");
   carryEl.textContent = proms.length ? ("You carry "+grams+(grams===1?" gram":" grams")+" right now.") : "";
+  const ilEl=document.getElementById("weightIntegrityLink");
+  if(ilEl){
+    const isk=(S.lifeSkills||[]).find(s=>s.auto==="weight:integrity");
+    ilEl.innerHTML = isk
+      ? `<button class="wm-btn ghost" data-gototab="skills">🌳 This ledger drives your Integrity skill — level ${skEffectiveLevel(isk)} →</button>`
+      : "";
+  }
   // keystone
   const ks=wKeystone();
   const ksEl=document.getElementById("weightKeystone");

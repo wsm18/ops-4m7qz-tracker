@@ -101,8 +101,20 @@ function renderAcademicHonors(){
   const sorted=ah.slice().sort((a,b)=>(b.year||0)-(a.year||0));
   el.innerHTML=sorted.map(a=>{
     const meta=[a.year?String(a.year):null, a.org?esc(a.org):null].filter(Boolean).join(" · ");
-    return `<div class="aw-card"><button class="aw-del" data-daoh="${a.id}">✕</button><div class="aw-ic">📚</div><div class="aw-title">${esc(a.title)}</div>${meta?`<div class="aw-meta">${meta}</div>`:""}${a.note?`<div class="aw-note">${esc(a.note)}</div>`:""}<div class="aw-date">added ${esc(a.date||"")}</div></div>`;
+    return `<div class="aw-card"><button class="aw-del" data-daoh="${a.id}">✕</button><button class="aw-edit" data-ahedit="${a.id}">✎</button><div class="aw-ic">📚</div><div class="aw-title">${esc(a.title)}</div>${meta?`<div class="aw-meta">${meta}</div>`:""}${a.note?`<div class="aw-note">${esc(a.note)}</div>`:""}<div class="aw-date">added ${esc(a.date||"")}</div></div>`;
   }).join("");
+}
+let _ahEditId=null;
+function ahEdit(ahId){
+  const a=(S.academicHonors||[]).find(x=>x.id===ahId); if(!a) return;
+  document.getElementById("ahTitle").value=a.title||"";
+  document.getElementById("ahOrg").value=a.org||"";
+  document.getElementById("ahYear").value=a.year||"";
+  document.getElementById("ahNote").value=a.note||"";
+  _ahEditId=ahId;
+  const btn=document.getElementById("ahAdd"); if(btn) btn.textContent="Save changes";
+  document.getElementById("ahTitle").scrollIntoView({behavior:"smooth",block:"center"});
+  document.getElementById("ahTitle").focus();
 }
 {
   const ahSave=document.getElementById("ahAdd");
@@ -112,9 +124,17 @@ function renderAcademicHonors(){
     const yr=parseInt(document.getElementById("ahYear").value)||null;
     const note=(document.getElementById("ahNote").value||"").trim();
     if(!S.academicHonors) S.academicHonors=[];
-    S.academicHonors.push({id:id(),ts:Date.now(),date:new Date().toLocaleDateString(),title,org:org||undefined,year:yr,note:note||undefined});
+    if(_ahEditId){
+      const a=S.academicHonors.find(x=>x.id===_ahEditId);
+      if(a){ a.title=title; a.org=org||undefined; a.year=yr; a.note=note||undefined; }
+      _ahEditId=null; ahSave.textContent="Add academic honor";
+      toast("✎ Academic honor updated");
+    } else {
+      S.academicHonors.push({id:id(),ts:Date.now(),date:new Date().toLocaleDateString(),title,org:org||undefined,year:yr,note:note||undefined});
+      toast("📚 Academic honor added");
+    }
     ["ahTitle","ahOrg","ahYear","ahNote"].forEach(x=>{const el=document.getElementById(x);if(el)el.value="";});
-    save(); renderAcademicHonors(); toast("📚 Academic honor added");
+    save(); renderAcademicHonors();
   };
 }
 
@@ -122,9 +142,43 @@ function renderAcademicHonors(){
 function renderRotcRecord(){
   const rr=S.rotcRecord||{positions:[],competitions:[],campResults:[]};
   const posEl=document.getElementById("rpList"), compEl=document.getElementById("rcList"), campEl=document.getElementById("campList");
-  if(posEl) posEl.innerHTML=(rr.positions||[]).length?rr.positions.slice().sort((a,b)=>(b.startSem||"")>(a.startSem||"")?1:-1).map(p=>`<div class="rotc-item"><button class="aw-del" data-drotcpos="${p.id}">✕</button><div class="rotc-title">${esc(p.title)}</div><div class="rotc-meta">${p.startSem||""}${p.endSem?("–"+p.endSem):""}</div>${p.note?`<div class="aw-note">${esc(p.note)}</div>`:""}</div>`).join(""):`<div class="aw-empty" style="padding:10px">No positions yet.</div>`;
-  if(compEl) compEl.innerHTML=(rr.competitions||[]).length?rr.competitions.slice().sort((a,b)=>(b.year||0)-(a.year||0)).map(c=>`<div class="rotc-item"><button class="aw-del" data-drotccomp="${c.id}">✕</button><div class="rotc-title">${esc(c.name)}</div><div class="rotc-meta">${c.year||""}${c.placement?" · "+esc(c.placement):""}</div>${c.note?`<div class="aw-note">${esc(c.note)}</div>`:""}</div>`).join(""):`<div class="aw-empty" style="padding:10px">No competitions yet.</div>`;
-  if(campEl) campEl.innerHTML=(rr.campResults||[]).length?rr.campResults.slice().sort((a,b)=>(b.year||0)-(a.year||0)).map(c=>`<div class="rotc-item"><button class="aw-del" data-drotccamp="${c.id}">✕</button><div class="rotc-title">${esc(c.camp)}</div><div class="rotc-meta">${c.year||""}${c.rating?" · "+esc(c.rating):""}</div>${c.note?`<div class="aw-note">${esc(c.note)}</div>`:""}</div>`).join(""):`<div class="aw-empty" style="padding:10px">No camp results yet.</div>`;
+  if(posEl) posEl.innerHTML=(rr.positions||[]).length?rr.positions.slice().sort((a,b)=>(b.startSem||"")>(a.startSem||"")?1:-1).map(p=>`<div class="rotc-item"><button class="aw-del" data-drotcpos="${p.id}">✕</button><button class="aw-edit" data-rpedit="${p.id}">✎</button><div class="rotc-title">${esc(p.title)}</div><div class="rotc-meta">${p.startSem||""}${p.endSem?("–"+p.endSem):""}</div>${p.note?`<div class="aw-note">${esc(p.note)}</div>`:""}</div>`).join(""):`<div class="aw-empty" style="padding:10px">No positions yet.</div>`;
+  if(compEl) compEl.innerHTML=(rr.competitions||[]).length?rr.competitions.slice().sort((a,b)=>(b.year||0)-(a.year||0)).map(c=>`<div class="rotc-item"><button class="aw-del" data-drotccomp="${c.id}">✕</button><button class="aw-edit" data-rcedit="${c.id}">✎</button><div class="rotc-title">${esc(c.name)}</div><div class="rotc-meta">${c.year||""}${c.placement?" · "+esc(c.placement):""}</div>${c.note?`<div class="aw-note">${esc(c.note)}</div>`:""}</div>`).join(""):`<div class="aw-empty" style="padding:10px">No competitions yet.</div>`;
+  if(campEl) campEl.innerHTML=(rr.campResults||[]).length?rr.campResults.slice().sort((a,b)=>(b.year||0)-(a.year||0)).map(c=>`<div class="rotc-item"><button class="aw-del" data-drotccamp="${c.id}">✕</button><button class="aw-edit" data-campedit="${c.id}">✎</button><div class="rotc-title">${esc(c.camp)}</div><div class="rotc-meta">${c.year||""}${c.rating?" · "+esc(c.rating):""}</div>${c.note?`<div class="aw-note">${esc(c.note)}</div>`:""}</div>`).join(""):`<div class="aw-empty" style="padding:10px">No camp results yet.</div>`;
+}
+let _rpEditId=null,_rcEditId=null,_campEditId=null;
+function rpEdit(pId){
+  const rr=S.rotcRecord||{}; const p=(rr.positions||[]).find(x=>x.id===pId); if(!p) return;
+  document.getElementById("rpTitle").value=p.title||"";
+  document.getElementById("rpStart").value=p.startSem||"";
+  document.getElementById("rpEnd").value=p.endSem||"";
+  document.getElementById("rpNote").value=p.note||"";
+  _rpEditId=pId;
+  const btn=document.getElementById("rpSave"); if(btn) btn.textContent="Save changes";
+  document.getElementById("rpTitle").scrollIntoView({behavior:"smooth",block:"center"});
+  document.getElementById("rpTitle").focus();
+}
+function rcEdit(cId){
+  const rr=S.rotcRecord||{}; const c=(rr.competitions||[]).find(x=>x.id===cId); if(!c) return;
+  document.getElementById("rcName").value=c.name||"";
+  document.getElementById("rcYear").value=c.year||"";
+  document.getElementById("rcPlacement").value=c.placement||"";
+  document.getElementById("rcNote").value=c.note||"";
+  _rcEditId=cId;
+  const btn=document.getElementById("rcSave"); if(btn) btn.textContent="Save changes";
+  document.getElementById("rcName").scrollIntoView({behavior:"smooth",block:"center"});
+  document.getElementById("rcName").focus();
+}
+function campEdit(cId){
+  const rr=S.rotcRecord||{}; const c=(rr.campResults||[]).find(x=>x.id===cId); if(!c) return;
+  document.getElementById("campName").value=c.camp||"";
+  document.getElementById("campYear").value=c.year||"";
+  document.getElementById("campRating").value=c.rating||"";
+  document.getElementById("campNote").value=c.note||"";
+  _campEditId=cId;
+  const btn=document.getElementById("campSave"); if(btn) btn.textContent="Save changes";
+  document.getElementById("campName").scrollIntoView({behavior:"smooth",block:"center"});
+  document.getElementById("campName").focus();
 }
 {
   const rpSave=document.getElementById("rpSave");
@@ -135,9 +189,17 @@ function renderRotcRecord(){
     const note=(document.getElementById("rpNote").value||"").trim();
     if(!S.rotcRecord) S.rotcRecord={positions:[],competitions:[],campResults:[]};
     if(!S.rotcRecord.positions) S.rotcRecord.positions=[];
-    S.rotcRecord.positions.push({id:id(),title,startSem:start||undefined,endSem:end||undefined,note:note||undefined});
+    if(_rpEditId){
+      const p=S.rotcRecord.positions.find(x=>x.id===_rpEditId);
+      if(p){ p.title=title; p.startSem=start||undefined; p.endSem=end||undefined; p.note=note||undefined; }
+      _rpEditId=null; rpSave.textContent="Add position";
+      toast("✎ Position updated");
+    } else {
+      S.rotcRecord.positions.push({id:id(),title,startSem:start||undefined,endSem:end||undefined,note:note||undefined});
+      toast("⭐ Position added");
+    }
     ["rpTitle","rpStart","rpEnd","rpNote"].forEach(x=>{const el=document.getElementById(x);if(el)el.value="";});
-    save(); renderRotcRecord(); toast("⭐ Position added");
+    save(); renderRotcRecord();
   };
   const rcSave=document.getElementById("rcSave");
   if(rcSave) rcSave.onclick=()=>{
@@ -147,9 +209,17 @@ function renderRotcRecord(){
     const note=(document.getElementById("rcNote").value||"").trim();
     if(!S.rotcRecord) S.rotcRecord={positions:[],competitions:[],campResults:[]};
     if(!S.rotcRecord.competitions) S.rotcRecord.competitions=[];
-    S.rotcRecord.competitions.push({id:id(),name,year:yr,placement:placement||undefined,note:note||undefined});
+    if(_rcEditId){
+      const c=S.rotcRecord.competitions.find(x=>x.id===_rcEditId);
+      if(c){ c.name=name; c.year=yr; c.placement=placement||undefined; c.note=note||undefined; }
+      _rcEditId=null; rcSave.textContent="Add competition";
+      toast("✎ Competition updated");
+    } else {
+      S.rotcRecord.competitions.push({id:id(),name,year:yr,placement:placement||undefined,note:note||undefined});
+      toast("⭐ Competition added");
+    }
     ["rcName","rcYear","rcPlacement","rcNote"].forEach(x=>{const el=document.getElementById(x);if(el)el.value="";});
-    save(); renderRotcRecord(); toast("⭐ Competition added");
+    save(); renderRotcRecord();
   };
   const campSave=document.getElementById("campSave");
   if(campSave) campSave.onclick=()=>{
@@ -159,9 +229,17 @@ function renderRotcRecord(){
     const note=(document.getElementById("campNote").value||"").trim();
     if(!S.rotcRecord) S.rotcRecord={positions:[],competitions:[],campResults:[]};
     if(!S.rotcRecord.campResults) S.rotcRecord.campResults=[];
-    S.rotcRecord.campResults.push({id:id(),camp,year:yr,rating:rating||undefined,note:note||undefined});
+    if(_campEditId){
+      const c=S.rotcRecord.campResults.find(x=>x.id===_campEditId);
+      if(c){ c.camp=camp; c.year=yr; c.rating=rating||undefined; c.note=note||undefined; }
+      _campEditId=null; campSave.textContent="Add camp result";
+      toast("✎ Camp result updated");
+    } else {
+      S.rotcRecord.campResults.push({id:id(),camp,year:yr,rating:rating||undefined,note:note||undefined});
+      toast("⭐ Camp result added");
+    }
     ["campName","campYear","campRating","campNote"].forEach(x=>{const el=document.getElementById(x);if(el)el.value="";});
-    save(); renderRotcRecord(); toast("⭐ Camp result added");
+    save(); renderRotcRecord();
   };
 }
 
@@ -254,12 +332,20 @@ document.body.addEventListener("click",e=>{
   if(mbfilter){ _mbFilter=mbfilter.dataset.mbfilter; renderMemberships(); return; }
   const daoh=e.target.closest("[data-daoh]");
   if(daoh){if(confirm("Remove this academic honor?")){S.academicHonors=(S.academicHonors||[]).filter(a=>a.id!==daoh.dataset.daoh);save();renderAcademicHonors();}return;}
+  const ahedit=e.target.closest("[data-ahedit]");
+  if(ahedit){ahEdit(ahedit.dataset.ahedit);return;}
   const drotcpos=e.target.closest("[data-drotcpos]");
   if(drotcpos){if(!S.rotcRecord) return; S.rotcRecord.positions=(S.rotcRecord.positions||[]).filter(p=>p.id!==drotcpos.dataset.drotcpos);save();renderRotcRecord();return;}
+  const rpedit=e.target.closest("[data-rpedit]");
+  if(rpedit){rpEdit(rpedit.dataset.rpedit);return;}
   const drotccomp=e.target.closest("[data-drotccomp]");
   if(drotccomp){if(!S.rotcRecord) return; S.rotcRecord.competitions=(S.rotcRecord.competitions||[]).filter(c=>c.id!==drotccomp.dataset.drotccomp);save();renderRotcRecord();return;}
+  const rcedit=e.target.closest("[data-rcedit]");
+  if(rcedit){rcEdit(rcedit.dataset.rcedit);return;}
   const drotccamp=e.target.closest("[data-drotccamp]");
   if(drotccamp){if(!S.rotcRecord) return; S.rotcRecord.campResults=(S.rotcRecord.campResults||[]).filter(c=>c.id!==drotccamp.dataset.drotccamp);save();renderRotcRecord();return;}
+  const campedit=e.target.closest("[data-campedit]");
+  if(campedit){campEdit(campedit.dataset.campedit);return;}
 });
 
 /* ---------------- Qualifications ---------------- */
@@ -418,6 +504,9 @@ document.body.addEventListener("click",e=>{
   const gymConfirmBtn=e.target.closest("#gymConfirmWeekBtn"); if(gymConfirmBtn){ confirmWeekGymPattern(_gymEditDraft||weekGymPatternForEditing()); save(); render(); toast("✅ This week's gym access confirmed"); return; }
   const gymDefaultBtn=e.target.closest("#gymSaveDefaultBtn"); if(gymDefaultBtn){ saveDefaultGymPattern(_gymEditDraft||weekGymPatternForEditing()); save(); render(); toast("✅ Saved as your usual pattern"); return; }
   const gymLiveBtn=e.target.closest("[data-gymlive]"); if(gymLiveBtn){ const v=gymLiveBtn.dataset.gymlive; if(v==="clear"){ if(S.gymAccessLive) delete S.gymAccessLive[localYMD()]; } else { setGymAccessToday(v==="1"); } save(); render(); return; }
+  const ptDayBtn=e.target.closest("[data-ptday]"); if(ptDayBtn){ const d=+ptDayBtn.dataset.ptday; if(!_ptEditDraft) _ptEditDraft=weekPtPatternForEditing(); _ptEditDraft[d]=!_ptEditDraft[d]; renderPtDayUI(); return; }
+  const ptConfirmBtn=e.target.closest("#ptConfirmWeekBtn"); if(ptConfirmBtn){ confirmWeekPtPattern(_ptEditDraft||weekPtPatternForEditing()); save(); render(); toast("✅ This week's PT days confirmed"); return; }
+  const ptDefaultBtn=e.target.closest("#ptSaveDefaultBtn"); if(ptDefaultBtn){ saveDefaultPtPattern(_ptEditDraft||weekPtPatternForEditing()); save(); render(); toast("✅ Saved as your usual PT pattern"); return; }
   // ── Equipment profiles + optional sessions (FM-2) ──
   const equipEditBtn=e.target.closest("[data-equipedit]"); if(equipEditBtn){ _equipEditProfile=equipEditBtn.dataset.equipedit; renderEquipProfileUI(); return; }
   const equipActiveBtn=e.target.closest("[data-equipactive]"); if(equipActiveBtn){ S.activeEquipProfile=equipActiveBtn.dataset.equipactive; save(); render(); toast(`✅ Active profile: ${esc(S.activeEquipProfile)}`); return; }

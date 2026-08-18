@@ -156,6 +156,7 @@ function optionalSessionSuggestions(tags){
 // rest. Sunday stays a fixed rest day, same as before; only Mon-Sat rotate.
 // See assignWeekSessions()/gymAccessForDate() below.
 const REST_DAY_META = { session:null, intensity:"rest", label:"Active recovery", note:"20–40 min easy walk + the Session 5 stretch block. Rest is when you actually adapt — take it." };
+const PT_DAY_META = { session:"pt", intensity:"hard", label:"ROTC PT (unit-led)", note:"This counts as today's session — log it in the PT box on the Log tab. No separate FM session today, so you don't double up on a day already loaded by cadre." };
 // Per-session label/intensity — travels with the session type wherever it lands.
 // s2 (Run) is special-cased in resolveDayPlan(): the week's EARLIER run slot
 // reads as the moderate "quality" run, the LATER slot as the hard/long one —
@@ -206,6 +207,32 @@ function setGymAccessToday(val){
   if(!S.gymAccessLive) S.gymAccessLive={};
   S.gymAccessLive[localYMD()]=!!val;
 }
+// Declared unit-PT days — same cascade as gymAccessForDate() (no live-override
+// layer, since a same-day PT surprise is better handled by just logging PT and
+// letting the deload advisory see it, not a second toggle to remember).
+function ptDayForDate(dateObj){
+  const pd=S.ptDays||{};
+  const mon=localYMD(weekMonday(dateObj));
+  if(pd.weekOf===mon && pd.week && pd.week[dateObj.getDay()]!=null) return !!pd.week[dateObj.getDay()];
+  return !!((pd.default||{})[dateObj.getDay()]);
+}
+function weekPtPatternForEditing(){
+  const pd=S.ptDays||{}; const mon=localYMD(weekMonday(new Date()));
+  if(pd.weekOf===mon && pd.week) return Object.assign({}, pd.week);
+  return Object.assign({}, pd.default||{});
+}
+function weekPtPatternIsConfirmed(){
+  return (S.ptDays||{}).weekOf===localYMD(weekMonday(new Date()));
+}
+function confirmWeekPtPattern(pattern){
+  if(!S.ptDays) S.ptDays={default:{},weekOf:null,week:{}};
+  S.ptDays.weekOf=localYMD(weekMonday(new Date()));
+  S.ptDays.week=Object.assign({}, pattern);
+}
+function saveDefaultPtPattern(pattern){
+  if(!S.ptDays) S.ptDays={default:{},weekOf:null,week:{}};
+  S.ptDays.default=Object.assign({}, pattern);
+}
 // The pattern to show in the per-week confirm-or-adjust UI: this week's already-
 // confirmed pattern if one exists for the current week, else a copy of the
 // default (the starting point the user adjusts from).
@@ -246,21 +273,28 @@ const HARD_SESSIONS=new Set(["s1","s3","s4"]);
 // gym days at all. Doesn't account for s2's own hard/moderate split (which
 // SESSION_META_S2/runSlotFor only resolve chronologically, after this runs)
 // — a real, smaller residual gap, not silently claimed as solved.
+// A declared PT day counts as "hard" for spacing purposes too (avoids a hard
+// FM day landing right next to unit PT, same double-up plan.html already
+// warns against) — but it's fixed by the user's real schedule, so it can only
+// ever be the DONOR side that stays put; the FM-assigned neighbor is what moves.
 function spaceOutHardDays(assign, days){
+  const isHard=v=>HARD_SESSIONS.has(v)||v==="pt";
   let changed=true, guard=0;
   while(changed && guard++<12){
     changed=false;
     for(let i=0;i<days.length-1;i++){
       const next=days[i+1];
-      if(!HARD_SESSIONS.has(assign[days[i]]) || !HARD_SESSIONS.has(assign[next])) continue;
+      if(!isHard(assign[days[i]]) || !isHard(assign[next])) continue;
+      const movable = assign[next]!=="pt" ? next : (assign[days[i]]!=="pt" ? days[i] : null);
+      if(movable==null) continue; // both sides are fixed PT days — nothing to space out
       for(let off=1; off<days.length; off++){
         const afterIdx=i+1+off, beforeIdx=i-off;
         let swapIdx=-1;
-        if(afterIdx<days.length && !HARD_SESSIONS.has(assign[days[afterIdx]])) swapIdx=afterIdx;
-        else if(beforeIdx>=0 && !HARD_SESSIONS.has(assign[days[beforeIdx]])) swapIdx=beforeIdx;
+        if(afterIdx<days.length && !isHard(assign[days[afterIdx]])) swapIdx=afterIdx;
+        else if(beforeIdx>=0 && !isHard(assign[days[beforeIdx]])) swapIdx=beforeIdx;
         if(swapIdx>=0){
           const swapDay=days[swapIdx];
-          const tmp=assign[next]; assign[next]=assign[swapDay]; assign[swapDay]=tmp;
+          const tmp=assign[movable]; assign[movable]=assign[swapDay]; assign[swapDay]=tmp;
           changed=true;
           break;
         }
@@ -274,10 +308,16 @@ function spaceOutHardDays(assign, days){
 // gym-access pattern (no randomness), so it doesn't flicker across renders.
 function assignWeekSessions(mondayDate){
   const days=[1,2,3,4,5,6];
-  const gymDays=days.filter(d=>{ const dt=new Date(mondayDate); dt.setDate(mondayDate.getDate()+(d-1)); return gymAccessForDate(dt); });
-  const nonGymDays=days.filter(d=>!gymDays.includes(d));
+  const dateFor=d=>{ const dt=new Date(mondayDate); dt.setDate(mondayDate.getDate()+(d-1)); return dt; };
+  // Declared PT days are pre-occupied — "count it as that day's session and
+  // don't double up" (plan.html's own copy) — so they're claimed before either
+  // gym-access pool gets a chance to also assign a hard FM session there.
+  const ptDays=days.filter(d=>ptDayForDate(dateFor(d)));
+  const gymDays=days.filter(d=>!ptDays.includes(d) && gymAccessForDate(dateFor(d)));
+  const nonGymDays=days.filter(d=>!ptDays.includes(d) && !gymDays.includes(d));
   const poolA=GYM_PREFERRED.slice(), poolB=NO_GYM_PREFERRED.slice();
   const assign={};
+  ptDays.forEach(d=>{ assign[d]="pt"; });
   gymDays.forEach(d=>{ if(!assign[d] && poolA.length) assign[d]=poolA.shift(); });
   nonGymDays.forEach(d=>{ if(!assign[d] && poolB.length) assign[d]=poolB.shift(); });
   // leftovers: not enough gym days for all equipment-preferred sessions, or vice versa
@@ -438,6 +478,7 @@ function planForDay(dateObj){
   const assign=assignWeekSessions(weekMonday(dateObj));
   const skey=assign[day];
   if(!skey) return REST_DAY_META;
+  if(skey==="pt") return PT_DAY_META;
   let plan;
   if(skey==="s2"){
     const slot=runSlotFor(dateObj)||"first";
@@ -528,6 +569,10 @@ function workoutOnDay(dateObj){
   const ymd=localYMD(dateObj);
   return (S.workouts||[]).find(w=> (w.ts? localYMD(new Date(w.ts)) : null)===ymd || w.date===dateObj.toLocaleDateString());
 }
+function ptOnDay(dateObj){
+  const ymd=localYMD(dateObj);
+  return (S.ptLog||[]).find(p=> (p.ts? localYMD(new Date(p.ts)) : null)===ymd);
+}
 // Build a structured "today's plan": what session, the ordered exercises with prescriptions,
 // and a read on yesterday (what was scheduled vs. what was logged).
 function todaysPlan(){
@@ -536,15 +581,17 @@ function todaysPlan(){
   const yest=new Date(now); yest.setDate(now.getDate()-1);
   const yPlan=planForDay(yest);
   const yLogged=workoutOnDay(yest);
-  const tLogged=workoutOnDay(now);
+  const tLogged = dayPlan.session==="pt" ? ptOnDay(now) : workoutOnDay(now);
   return {
     now, dayPlan,
     sessionKey: dayPlan.session,
-    exercises: dayPlan.session ? sessionExForProfile(dayPlan.session, gymAccessForDate(now)?activeEquipTags():[], now) : [],
+    exercises: (dayPlan.session && dayPlan.session!=="pt") ? sessionExForProfile(dayPlan.session, gymAccessForDate(now)?activeEquipTags():[], now) : [],
     todayLogged: !!tLogged, todayLog: tLogged,
     yesterday: {
       plan: yPlan,
       wasRest: !yPlan.session,
+      ptDay: yPlan.session==="pt",
+      loggedPt: !!ptOnDay(yest),
       logged: !!yLogged,
       log: yLogged,
       // did yesterday's log match what was scheduled?
@@ -601,7 +648,8 @@ function trackMissedSessions(){
     if(!plan||!plan.session) continue;
     const dayStr=localYMD(d);
     if(S.missedTraining.some(m=>m.date===dayStr)) continue;
-    if(!workoutOnDay(d)) S.missedTraining.push({date:dayStr, session:plan.session});
+    const wasLogged = plan.session==="pt" ? !!ptOnDay(d) : !!workoutOnDay(d);
+    if(!wasLogged) S.missedTraining.push({date:dayStr, session:plan.session});
   }
   const cutoff=localYMD(new Date(now.getTime()-28*864e5));
   S.missedTraining=S.missedTraining.filter(m=>m.date>=cutoff);
@@ -618,7 +666,7 @@ function recentMissed(days){
 function getAdaptiveNote(){
   const missed=recentMissed(7);
   if(!missed.length) return null;
-  const names=[...new Set(missed.map(m=>(SESSIONS[m.session]?SESSIONS[m.session].name.split("·").slice(-1)[0].trim():"a session")))];
+  const names=[...new Set(missed.map(m=>m.session==="pt"?"ROTC PT":(SESSIONS[m.session]?SESSIONS[m.session].name.split("·").slice(-1)[0].trim():"a session")))];
   if(missed.length===1){
     return `You missed ${names[0]} last week. Don't double up to compensate — just don't let it happen twice in a row. One missed session means nothing; a habit of skipping one type of work shows up in your score.`;
   }
@@ -637,7 +685,8 @@ function weekTrainingStats(){
     if(!plan||!plan.session) continue;
     sched++;
     const dayEnd=new Date(d); dayEnd.setHours(23,59,59,999);
-    if(dayEnd<=now && workoutOnDay(d)) done++;
+    const wasLogged = plan.session==="pt" ? !!ptOnDay(d) : !!workoutOnDay(d);
+    if(dayEnd<=now && wasLogged) done++;
   }
   return {done,sched};
 }

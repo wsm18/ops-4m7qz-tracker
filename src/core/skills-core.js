@@ -389,6 +389,20 @@ function skQuest(sk){
   }
   return null; // fresh & maxed — no quest needed right now
 }
+// Paths have very unequal skill counts (~1565 in 6 Paths vs ~783 in the other 4,
+// since the Commons-layer expansion) — a flat XP grant per level-up made the
+// smaller Paths' Garden idols grow ~2x faster relative to actual % completion.
+// Normalize the grant against the average Path size so idol growth tracks
+// catProgressFraction() proportionally instead of raw skill count.
+function grantPathXP(cat){
+  if(!S.pathXP) S.pathXP={};
+  const counts=SK_CAT_ORDER.map(c=>(S.lifeSkills||[]).filter(s=>s.cat===c&&!s.group&&s.levels&&s.levels.length).length).filter(n=>n>0);
+  const avg=counts.length?counts.reduce((a,b)=>a+b,0)/counts.length:1;
+  const count=(S.lifeSkills||[]).filter(s=>s.cat===cat&&!s.group&&s.levels&&s.levels.length).length||avg;
+  const BASELINE=15;
+  const g=Math.max(1,Math.round(BASELINE*(avg/count)));
+  S.pathXP[cat]=(S.pathXP[cat]||0)+g;
+}
 function skPass(skId){
   const sk=S.lifeSkills.find(x=>x.id===skId); if(!sk) return;
   const q=skQuest(sk); if(!q) return;
@@ -401,7 +415,7 @@ function skPass(skId){
   sk.history.push({ts:Date.now(),type:q.type,level:q.level});
   // Skill growth feeds its OWN Path's Grove idol — every Path's idol should
   // actually reflect the skills leveled within it, not just Academic.
-  if(!S.pathXP) S.pathXP={}; S.pathXP[sk.cat]=(S.pathXP[sk.cat]||0)+15;
+  grantPathXP(sk.cat);
   save();render();
   toast(q.type==="promote"?`⬆️ Promoted to Level ${sk.currentLevel} — ${esc(sk.name)}`:q.type==="decay"?`Reclaimed Level ${sk.currentLevel}`:`Maintained — ${esc(sk.name)}`);
 }
@@ -423,7 +437,7 @@ function skReachLevel(skId, level, note){
   if(note&&note.trim()) entry.note=note.trim();
   sk.history.push(entry);
   // Same as skPass() — feeds the skill's OWN Path idol, not always Academic.
-  if(!S.pathXP) S.pathXP={}; S.pathXP[sk.cat]=(S.pathXP[sk.cat]||0)+15;
+  grantPathXP(sk.cat);
   save();render();
   if(typeof getTierLabelForLevel==="function"){
     const tierLabel=getTierLabelForLevel(sk,level);
@@ -484,6 +498,7 @@ function skWorkGuidance(sk){
   const testMap={"Reaction speed":"reaction","Cognitive / processing speed":"procspeed","Working memory (n-back)":"nback","Memory span":"digitspan","Attention / sustained focus":"gonogo","Mental math":"mathsprint","Pattern recognition":"patterns","Typing speed & accuracy":"typing"};
   if(testMap[sk.name]) return `<div class="sk-work-body">Train this directly in the Test tab — run the <b>${esc(sk.name)}</b> test, and your level updates from the result.${go("test","Open Test tab")}</div>${noteInput}${tgtBlock}`;
   if(sk.name==="Memory technique") return `<div class="sk-work-body">Use the <b>Memory Track</b> in the Test tab: build a memory palace and run spaced-repetition decks. Practicing either keeps this skill sharp.${go("test","Open Memory Track")}</div>${noteInput}${tgtBlock}`;
+  if(sk.auto==="weight:integrity") return `<div class="sk-work-body">This is read-only — it's driven entirely by your promise ledger in the Weight tab. Bind and keep promises there to raise it.${go("weight","Open the Weight ledger")}</div>${tgtBlock}`;
   if(sk.name==="ROTC knowledge (quizzes)") return `<div class="sk-work-body">Pass quiz banks in the Quiz tab — each one you pass raises this skill. Build a study plan there for any graded test.${go("quizzes","Open Quiz tab")}</div>${noteInput}${tgtBlock}`;
   if(sk.cat==="academic") return `<div class="sk-work-body">Study with active recall and spacing: make a spaced-repetition deck in the Test tab's Memory Track, and build a study plan in the Quiz tab if you have a graded test coming.${go("test","Memory Track")} ${go("quizzes","Study plans")}</div>${noteInput}${tgtBlock}`;
   if(sk.cat==="cognitive") return `<div class="sk-work-body">Practice in the Test tab — pick the closest trainer and run it regularly.${go("test","Open Test tab")}</div>${noteInput}${tgtBlock}`;
