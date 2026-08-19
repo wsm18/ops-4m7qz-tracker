@@ -92,6 +92,7 @@ const DEFAULT = {
   activeEquipProfile:"ROTC/Campus Gym",
   exChoice:{},   // per-day manual exercise-slot overrides: {"YYYY-MM-DD|skey|slotIdx": variantIndex} — suggestion still shown, this just wins when set
   optionalSessions:[], // opted-in optional session types beyond the core 5, e.g. ["swim","climb"] — coach may suggest, never auto-schedules without opt-in
+  avoidTags:[], // muscle-group tags (SESSIONS entries' m[]) to steer exercise selection away from — a nagging shoulder/back/etc., not a hard exclusion (see resolveSlot() in training.js: never lets a slot go empty)
   donations:[],           // blood donations: [{id, date, type}]
   weightLog:[],           // weight history for trend: [{date, lb}]
   vitals:[],              // health readings: [{id, date, pulse, bpSys, bpDia, hemoglobin, note}]

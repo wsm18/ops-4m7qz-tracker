@@ -356,6 +356,7 @@ function render(){
   if(typeof renderGymAccessUI==="function") renderGymAccessUI();
   if(typeof renderPtDayUI==="function") renderPtDayUI();
   if(typeof renderEquipProfileUI==="function") renderEquipProfileUI();
+  if(typeof renderAvoidTagsUI==="function") renderAvoidTagsUI();
   if(typeof renderCoachToday==="function") renderCoachToday();
   if(typeof renderSkillsTab==="function") renderSkillsTab();
   if(typeof renderBaseline==="function") renderBaseline();
@@ -475,7 +476,7 @@ function renderBosses(){
       </div>
       <div class="hpbar"><div class="hpfill" style="width:${pct}%"></div></div>
       <div class="hp-meta"><span>${b.hp} / ${b.maxhp} steps remaining${checksMeta}</span><span>+${b.maxhp*8} XP · ${b.maxhp*4} pts when conquered</span></div>
-      ${(()=>{if(!b.targetDate||b.hp<=0)return "";const daysLeft=Math.ceil((new Date(b.targetDate+"T12:00:00")-Date.now())/864e5);if(daysLeft<=0)return `<div class="boss-pace overdue">⚠ Target date passed — ${b.hp} steps remain</div>`;const needed=(b.hp/daysLeft).toFixed(1);const onPace=parseFloat(needed)<=1;return `<div class="boss-pace${onPace?' on-pace':''}">${onPace?"✓":"⚠"} ${needed} steps/day to finish by ${esc(b.targetDate)} · ${daysLeft}d left</div>`;})()}
+      ${(()=>{if(!b.targetDate||b.hp<=0)return "";const daysLeft=dayDiff(localYMD(),b.targetDate);if(daysLeft<=0)return `<div class="boss-pace overdue">⚠ Target date passed — ${b.hp} steps remain</div>`;const needed=(b.hp/daysLeft).toFixed(1);const onPace=parseFloat(needed)<=1;return `<div class="boss-pace${onPace?' on-pace':''}">${onPace?"✓":"⚠"} ${needed} steps/day to finish by ${esc(b.targetDate)} · ${daysLeft}d left</div>`;})()}
       ${checksHtml}
       <div class="boss-add-check">
         <input class="boss-check-input" data-baddcheck="${esc(b.id)}" placeholder="Add a milestone…" maxlength="80">

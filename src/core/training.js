@@ -17,6 +17,39 @@ function activeEquipTags(){
   return (p&&p.tags) || [];
 }
 function eqSubset(eq, tags){ return !eq || !eq.length || eq.every(t=>tags.includes(t)); }
+// Continuous week count since a fixed epoch (a Monday) so any week-based
+// cadence never resets at the New Year, and stays DST-safe (local-midnight
+// UTC day math). Originally inlined only in pickRunIndex(); extracted so
+// the deload cadence in planForDay() can share the exact same clock rather
+// than inventing a second one.
+const TRAINING_EPOCH=Date.UTC(2024,0,1); // Mon Jan 1 2024, an arbitrary stable anchor
+function weeksSinceEpoch(dateObj){
+  const dayUTC=Date.UTC(dateObj.getFullYear(),dateObj.getMonth(),dateObj.getDate());
+  return Math.floor((dayUTC-TRAINING_EPOCH)/(7*864e5));
+}
+// Every muscle-group tag actually in use across SESSIONS (bw/gym/alt slots),
+// derived live rather than hand-maintained as a second list — so the avoid-
+// tags UI (renderAvoidTagsUI(), plan.js) can never drift out of sync with
+// what exercises are really tagged.
+function allMuscleTags(){
+  const set=new Set();
+  Object.keys(SESSIONS).forEach(skey=>{
+    const s=SESSIONS[skey];
+    [...(s.bw||[]), ...(s.gym||[]), ...Object.values(s.alt||{}).flat()].forEach(e=>(e.m||[]).forEach(m=>set.add(m)));
+  });
+  return [...set].sort();
+}
+// Injury-aware avoidance is a SOFT preference, not a hard exclusion: if a
+// nagging shoulder/back/etc. is set (S.avoidTags) and the WHOLE pool loads
+// that area, filtering it out entirely would silently empty a slot (or, on
+// a run/AFT-circuit day with thin alt pools, could gut most of the session)
+// — worse than just suggesting the flagged move. Only narrows the pool when
+// a genuinely unflagged alternative actually exists within it.
+function applyAvoidTags(pool, avoidTags){
+  if(!avoidTags||!avoidTags.length) return pool;
+  const safe=pool.filter(e=>!(e.m||[]).some(m=>avoidTags.includes(m)));
+  return safe.length?safe:pool;
+}
 // All candidate variants for one slot of a session: the bw entry (always
 // eq:[]), the gym entry, and any extra pool members from `alt[slotIdx]` —
 // deduped by name so an identical bw/gym pair (e.g. a shared stretch) only
@@ -87,7 +120,8 @@ function sessionExForProfile(skey, tags, dateObj){
   const dt=dateObj||new Date();
   const dateKey=localYMD(dt);
   const resolveSlot=(i)=>{
-    const pool=sessionSlotPool(skey,i).filter(e=>eqSubset(e.eq,tags));
+    const eqPool=sessionSlotPool(skey,i).filter(e=>eqSubset(e.eq,tags));
+    const pool=applyAvoidTags(eqPool, S.avoidTags||[]);
     if(!pool.length) return null;
     const overrideKey=dateKey+"|"+skey+"|"+i;
     const overrideIdx=(S.exChoice||{})[overrideKey];
@@ -535,6 +569,20 @@ function planForDay(dateObj){
   if(nearestEvent && nearestEvent.daysAway<=6 && plan.intensity==="hard"){
     plan=Object.assign({}, plan, {intensity:"moderate", taper:true, taperFor:nearestEvent.key, label:plan.label+` — taper week, ease off (${nearestEvent.key})`});
   }
+  // Proactive deload cadence: absent an imminent test/LDAC date, the app's
+  // only other intensity-reducing mechanism was reactive — detectOvertrainingTrend()
+  // only fires AFTER 21 days of already-manifested struggle. Nothing scheduled
+  // a lighter week in advance; computeTarget()'s default is to keep escalating
+  // load indefinitely. The app's own Skills tree already teaches this as
+  // correct practice (the phys_c_deload set: "mark a deload week on the
+  // calendar every 4-6 weeks... before fatigue arrives") — the coach engine
+  // just never followed it. Reuses the exact epoch-anchored week counter
+  // pickRunIndex() already trusts (no new S field) and the same downgrade
+  // shape the taper uses. A taper always takes precedence — test/report-date
+  // proximity is more specific and more urgent than routine periodization.
+  if(!plan.taper && plan.intensity==="hard" && weeksSinceEpoch(dateObj)%4===3){
+    plan=Object.assign({}, plan, {intensity:"moderate", deload:true, label:plan.label+" — deload week, ease off"});
+  }
   return plan;
 }
 // For "pick one" sessions (the run), choose which variant to do today, with a
@@ -545,11 +593,7 @@ function planForDay(dateObj){
 // Every 3rd week, the later slot becomes a timed 2-mile test so progress gets measured.
 function pickRunIndex(dateObj){
   const slot=runSlotFor(dateObj)||"first";
-  // Continuous week count since a fixed epoch (a Monday) so the cadence never resets
-  // at the New Year. Using local midnight avoids DST drift.
-  const EPOCH=Date.UTC(2024,0,1); // Mon Jan 1 2024, an arbitrary stable anchor
-  const dayUTC=Date.UTC(dateObj.getFullYear(),dateObj.getMonth(),dateObj.getDate());
-  const week=Math.floor((dayUTC-EPOCH)/(7*864e5));
+  const week=weeksSinceEpoch(dateObj);
   if(slot==="second"){ // harder/longer slot
     if(week%3===2) return 3;   // timed 2-mile test every 3rd week (continuous cadence)
     return 2;                  // long easy run

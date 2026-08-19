@@ -10,7 +10,7 @@ You are continuing work on **Operations**, a gamified ROTC + life-tracker PWA. R
 - **`index.html` is generated output** — never edit it directly. Edit the source files in `src/`, then run `python scripts/build.py` to assemble.
 - Fully **offline**, no framework, no runtime dependencies. Data in `localStorage` (key `operations_v2`), optional cloud-JSON backup.
 - Everything measurable is a **skill** with a measurable level ladder, decay, peak, and progression, themed as a **Yggdrasil world-tree**.
-- Current version: **v216** (see `sw.js`).
+- Current version: **v217** (see `sw.js`).
 
 The user is an Army ROTC cadet building this for himself. He values **honesty, measurability, privacy, preserved progress, and symbolism** above all.
 

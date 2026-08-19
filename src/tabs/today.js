@@ -130,7 +130,10 @@ function renderUpcomingTimeline(){
   const show=upcoming.slice(0,8);
   const extra=upcoming.length-show.length;
   const rows=show.map(x=>{
-    const days=Math.ceil((new Date(x.date+"T12:00:00")-Date.now())/864e5);
+    // dayDiff() on calendar-date strings, not a noon-anchored ms diff — see
+    // the fix note on commissionHtml/ldacCountdownHtml above for why the
+    // latter mislabels a same-day item as "tomorrow" before noon local time.
+    const days=dayDiff(localYMD(),x.date);
     const dayStr=days<=0?"today":days===1?"tomorrow":`in ${days}d`;
     const urgentColor=days<=3?"var(--ember)":days<=7?"var(--gold)":"var(--ink-dim)";
     const goBtn=x.tab?`<button class="td-go-sm" data-gototab="${x.tab}">→</button>`:"";
@@ -166,7 +169,7 @@ function copyDailyBrief(){
   const lastAft=S.aft&&S.aft.length?S.aft[S.aft.length-1]:null;
   const aftLine=lastAft?`AFT: ${lastAft.total} pts (${lastAft.date})`:"AFT: not logged";
   const cd=S.profile&&S.profile.commissionDate;
-  const commissLine=cd?`Commission: ${Math.max(0,Math.ceil((new Date(cd+"T12:00:00")-Date.now())/864e5))} days`:"Commission: date not set";
+  const commissLine=cd?`Commission: ${Math.max(0,dayDiff(localYMD(),cd))} days`:"Commission: date not set";
   const done=(S.dailies||[]).filter(d=>d.kind==="order"&&d.done).length, total=(S.dailies||[]).filter(d=>d.kind==="order").length;
   const overdueCount=(S.quests||[]).filter(q=>!q.done&&q.due&&q.due<localYMD()).length;
   const activeQ=(S.quests||[]).filter(q=>!q.done).length;
@@ -295,7 +298,12 @@ function renderQuickLog(){
 // differs from the commissioning banner it otherwise mirrors.
 function ldacCountdownHtml(ld, firstNameEsc, stage){
   if(!ld) return "";
-  const daysLeft=Math.ceil((new Date(ld+`T12:00:00`)-Date.now())/864e5);
+  // dayDiff() on LOCAL CALENDAR DATE STRINGS (not a noon-anchored ms diff)
+  // — the noon-anchored version this was first written with rounded "today"
+  // up to "1 day away" for anyone checking before noon local time (Math.ceil
+  // of a same-day-but-still-positive ms diff is never 0). Found while adding
+  // this function's own unit test. Same fix applied to commissionHtml below.
+  const daysLeft=dayDiff(localYMD(),ld);
   if(daysLeft>0){
     const weeks=Math.floor(daysLeft/7);
     const sub=weeks>0?`${weeks} week${weeks!==1?"s":""} and ${daysLeft%7} day${daysLeft%7!==1?"s":""}`:
@@ -377,7 +385,12 @@ function renderToday(){
   let commissionHtml="";
   const cd=S.profile&&S.profile.commissionDate;
   if(cd){
-    const daysLeft=Math.ceil((new Date(cd+`T12:00:00`)-Date.now())/864e5);
+    // dayDiff() on local calendar-date strings, not a noon-anchored ms diff
+    // — the latter rounded "today" up to "1 day away" for anyone checking
+    // before noon local time (Math.ceil of a same-day-but-still-positive ms
+    // diff is never 0). Found via ldacCountdownHtml()'s own unit test, which
+    // shares this exact pattern; fixed here too since it's the same bug.
+    const daysLeft=dayDiff(localYMD(),cd);
     if(daysLeft>0){
       const weeks=Math.floor(daysLeft/7);
       const sub=weeks>0?`${weeks} week${weeks!==1?"s":""} and ${daysLeft%7} day${daysLeft%7!==1?"s":""}`:
@@ -486,7 +499,18 @@ function renderToday(){
   if(S.profile&&S.profile.gpa) notes.push(`<div class="fn-row"><span class="fn-dot">📊</span><span>GPA ${S.profile.gpa} · ${esc(S.branchGoal||"Branch TBD")}</span></div>`);
   if(S.profile&&S.profile.bloodType){
     const lastDon=(S.donations||[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
-    if(lastDon){const nxt=new Date(lastDon.date);nxt.setDate(nxt.getDate()+56);const d=Math.ceil((nxt-Date.now())/864e5);if(d<=7)notes.push(`<div class="fn-row"><span class="fn-dot">🩸</span><span>Blood donation: ${d<=0?"eligible now":`eligible in ${d} day${d!==1?"s":""}`}</span></div>`);}
+    if(lastDon){
+      // Two separate date bugs fixed here: `new Date(lastDon.date)` parses a
+      // date-only string as UTC midnight (shifts a day for anyone behind
+      // UTC, same class of bug localYMD()'s own doc comment warns about) —
+      // anchored at noon instead, matching events.js's quest-snooze pattern.
+      // The eligibility countdown itself then used the same noon-anchored-
+      // vs-Date.now() comparison fixed on commissionHtml/ldacCountdownHtml
+      // above — replaced with a calendar-date-string dayDiff() instead.
+      const nxt=new Date(lastDon.date+"T12:00:00"); nxt.setDate(nxt.getDate()+56);
+      const d=dayDiff(localYMD(),localYMD(nxt));
+      if(d<=7)notes.push(`<div class="fn-row"><span class="fn-dot">🩸</span><span>Blood donation: ${d<=0?"eligible now":`eligible in ${d} day${d!==1?"s":""}`}</span></div>`);
+    }
   }
   // Overdue oaths — deliberately NOT duplicated in the Upcoming card (forward-looking
   // only, by design) or Warrior's Focus (surfaces only the single most urgent one).
@@ -613,7 +637,7 @@ function renderToday(){
     }).sort((a,b)=>a.followUp<b.followUp?-1:1);
     if(overdueFU.length){
       const rows=overdueFU.map(c=>{
-        const diff=Math.abs(Math.ceil((new Date(c.followUp+"T12:00:00")-Date.now())/864e5));
+        const diff=Math.abs(dayDiff(localYMD(),c.followUp));
         return `<div class="cn-alert-row"><span class="cn-alert-date">${c.followUp} (${diff}d overdue)</span> — ${esc((c.summary||"").slice(0,60))}</div>`;
       }).join("");
       cnAlertHtml=`<div class="cn-alert"><div class="td-h fn-h">⚠️ Counseling Follow-Up Overdue</div>${rows}<button class="td-go-sm" data-gototab="records">Records →</button></div>`;

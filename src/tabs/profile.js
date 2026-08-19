@@ -141,7 +141,7 @@ function renderMilestones(){
   const today=localYMD();
   el.innerHTML=ms.slice().sort((a,b)=>a.date<b.date?-1:1).map(m=>{
     const past=m.date<today;
-    const days=Math.ceil((new Date(m.date+"T12:00:00")-Date.now())/864e5);
+    const days=dayDiff(today,m.date);
     const when=past?`${Math.abs(days)}d ago`:(days===0?"today":`in ${days}d`);
     return `<div class="milestone-row"><span class="milestone-date">${m.date}</span><span class="milestone-label">${esc(m.label)}</span><span class="milestone-when" style="color:${past?"var(--ink-faint)":"var(--jade)"}">${when}</span><button class="milestone-del" data-msdel="${m.id}">✕</button></div>`;
   }).join("");
@@ -509,6 +509,12 @@ function ahConvert(conv, val, unit){
 }
 // regex pulls a record's type, unit, value and the best available date
 const AH_REC_RE=/<Record\b[^>]*?\btype="([^"]+)"[^>]*?>/g;
+// Sleep is structurally different from every AH_METRICS entry: an INTERVAL
+// (startDate→endDate), not a point value, and its `value` attribute is a
+// string sleep-stage state, not a number — the point-value loop's own
+// parseFloat/isNaN guard already silently skips it, so it gets its own
+// match + its own accumulation (see parseAppleHealth()/bucketSleepIntervals()).
+const AH_ASLEEP_VALUE_RE=/Asleep(Core|Deep|REM|Unspecified)/;
 function ahAttr(tag, name){ const m=tag.match(new RegExp('\\b'+name+'="([^"]*)"')); return m?m[1]:null; }
 function ahDateOf(tag){ return ahAttr(tag,"endDate")||ahAttr(tag,"startDate")||ahAttr(tag,"creationDate")||null; }
 function ahParseDate(s){ if(!s) return 0; // "2026-02-05 08:00:00 -0500"
@@ -523,9 +529,16 @@ async function parseAppleHealth(file){
   // latest[ key ] = {value, ts}
   const latest={};
   const me={};  // <Me> characteristics
+  const sleepIntervals=[]; // [startTs,endTs] pairs, "asleep" stage records only
   const CHUNK=8*1024*1024; // 8MB chunks
   let offset=0, tail="", grabbedMe=false;
   const total=file.size;
+  // Bound how much sleep data ever gets kept — even a multi-year export's
+  // full interval list is memory-cheap (just number pairs), but there's no
+  // reason to accumulate years of it when only the last ~35 days ever get
+  // used (matching healthImport.history's own 30-day cap). Applied per-chunk
+  // rather than once at the end so a huge export can't balloon this list.
+  const SLEEP_CUTOFF=Date.now()-35*864e5;
   function handleChunk(text){
     // capture <Me .../> once (characteristics: DOB, sex, blood type)
     if(!grabbedMe){
@@ -538,8 +551,17 @@ async function parseAppleHealth(file){
     }
     AH_REC_RE.lastIndex=0; let m;
     while((m=AH_REC_RE.exec(text))){
-      const type=m[1]; const def=AH_METRICS[type]; if(!def) continue;
-      const tag=m[0];
+      const type=m[1]; const tag=m[0];
+      if(type==="HKCategoryTypeIdentifierSleepAnalysis"){
+        const vRaw=ahAttr(tag,"value")||"";
+        if(AH_ASLEEP_VALUE_RE.test(vRaw)){
+          const startTs=ahParseDate(ahAttr(tag,"startDate"));
+          const endTs=ahParseDate(ahAttr(tag,"endDate"));
+          if(startTs && endTs && endTs>startTs && endTs>=SLEEP_CUTOFF) sleepIntervals.push([startTs,endTs]);
+        }
+        continue;
+      }
+      const def=AH_METRICS[type]; if(!def) continue;
       const vRaw=ahAttr(tag,"value"); if(vRaw==null) continue;
       const v=parseFloat(vRaw); if(isNaN(v)) continue;
       const ts=ahParseDate(ahDateOf(tag));
@@ -572,11 +594,45 @@ async function parseAppleHealth(file){
       setS(`Reading… ${Math.min(99,Math.round(offset/total*100))}%`);
     }
     if(tail) handleChunk(tail);
-    applyAppleHealth(latest, me);
+    applyAppleHealth(latest, me, sleepIntervals);
   }catch(err){ setS("Couldn't read that file. Make sure it's the export.xml from your Health export."); }
 }
 
-function applyAppleHealth(latest, me){
+// Groups raw "asleep" intervals into per-night total-hours, honestly
+// approximating which calendar date a sleep session belongs to (Apple
+// Health doesn't label this) and merging overlapping intervals within a
+// night — multiple sources (e.g. Watch + iPhone) can each log their own
+// stage records for the same sleep, and naively summing every interval
+// would double-count that overlap.
+function bucketSleepIntervals(intervals){
+  const byNight={};
+  intervals.forEach(([startTs,endTs])=>{
+    const startD=new Date(startTs);
+    const nightDate=new Date(startD);
+    // A session starting before 14:00 local is assumed to be the tail end of
+    // the PREVIOUS night (covers sleep continuing past midnight); 14:00+ is
+    // assumed to start a new night (covers normal evening sleep onset and
+    // afternoon naps, which land on their own date rather than merging into
+    // the prior night's total).
+    if(startD.getHours()<14) nightDate.setDate(nightDate.getDate()-1);
+    const key=localYMD(nightDate);
+    (byNight[key]=byNight[key]||[]).push([startTs,endTs]);
+  });
+  const hoursByNight={};
+  Object.keys(byNight).forEach(key=>{
+    const sorted=byNight[key].slice().sort((a,b)=>a[0]-b[0]);
+    let mergedMs=0, curStart=null, curEnd=null;
+    sorted.forEach(([s,e])=>{
+      if(curStart===null){ curStart=s; curEnd=e; return; }
+      if(s<=curEnd){ curEnd=Math.max(curEnd,e); }
+      else { mergedMs+=(curEnd-curStart); curStart=s; curEnd=e; }
+    });
+    if(curStart!==null) mergedMs+=(curEnd-curStart);
+    hoursByNight[key]=mergedMs/36e5;
+  });
+  return hoursByNight;
+}
+function applyAppleHealth(latest, me, sleepIntervals){
   const today=todayStr();
   const imported=[]; // for the summary
   // 1) Profile characteristics
@@ -622,6 +678,20 @@ function applyAppleHealth(latest, me){
   if(latest.restingHR || latest.hrv || latest.vo2max){
     histMap[recDate]={ date:recDate, rhr: latest.restingHR?Math.round(latest.restingHR.value):null, hrv: latest.hrv?Math.round(latest.hrv.value):null, vo2: latest.vo2max?Math.round(mk("vo2max")*10)/10:null };
   }
+  // Sleep produces its own (usually much richer) set of dated entries —
+  // merged in via Object.assign, not overwritten, so it doesn't clobber
+  // whatever rhr/hrv/vo2 the block above just set for the same date.
+  let latestSleepHrs=null, latestSleepDate=null;
+  if(sleepIntervals && sleepIntervals.length){
+    const hoursByNight=bucketSleepIntervals(sleepIntervals);
+    Object.keys(hoursByNight).forEach(dateKey=>{
+      const hrs=Math.round(hoursByNight[dateKey]*10)/10;
+      const existing=histMap[dateKey]||{date:dateKey, rhr:null, hrv:null, vo2:null};
+      histMap[dateKey]=Object.assign({}, existing, {sleepHrs:hrs});
+      if(!latestSleepDate || dateKey>latestSleepDate){ latestSleepDate=dateKey; latestSleepHrs=hrs; }
+    });
+    if(latestSleepHrs!=null) imported.push("Sleep");
+  }
   const history=Object.values(histMap).sort((a,b)=>a.date<b.date?-1:1).slice(-30); // keep last 30
   S.healthImport={ lastImport:new Date().toISOString(), latest:extra, fields:imported.slice(), history };
   save(); render();
@@ -630,8 +700,9 @@ function applyAppleHealth(latest, me){
   const st=document.getElementById("vtImportStatus");
   if(st) st.textContent = imported.length ? `✓ Imported ${imported.length} metric${imported.length!==1?'s':''}` : "No matching metrics found in that file.";
   if(sumEl){
-    const rows=Object.keys(extra).map(k=>{ const d=AH_METRICS[Object.keys(AH_METRICS).find(t=>AH_METRICS[t].key===k)]; return d?`<div class="ah-row"><span>${esc(d.label)}</span><b>${extra[k].value}${d.u?' '+d.u:''}</b></div>`:""; }).join("");
-    sumEl.innerHTML = rows ? `<div class="ah-summary"><div class="ah-h">Latest readings from your export</div>${rows}<div class="ah-note">Resting heart rate and blood pressure were also added to your Vitals log. Hemoglobin isn't in a standard Health export — log it manually from donations.</div></div>` : "";
+    const rows=Object.keys(extra).map(k=>{ const d=AH_METRICS[Object.keys(AH_METRICS).find(t=>AH_METRICS[t].key===k)]; return d?`<div class="ah-row"><span>${esc(d.label)}</span><b>${extra[k].value}${d.u?' '+d.u:''}</b></div>`:""; }).join("")
+      + (latestSleepHrs!=null?`<div class="ah-row"><span>Sleep (night of ${esc(latestSleepDate)})</span><b>${latestSleepHrs}h</b></div>`:"");
+    sumEl.innerHTML = rows ? `<div class="ah-summary"><div class="ah-h">Latest readings from your export</div>${rows}<div class="ah-note">Resting heart rate and blood pressure were also added to your Vitals log. Hemoglobin isn't in a standard Health export — log it manually from donations. Sleep hours are approximated by merging overlapping "asleep" stage records per night — treat as directional, not a clinical measurement.</div></div>` : "";
   }
   toast(imported.length?`📥 Apple Health: imported ${imported.length} metrics`:"No matching metrics found");
 }

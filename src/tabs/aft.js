@@ -27,7 +27,7 @@ function aftPrCard(){
 function aftPrepCard(){
   if(!S.aftTestDate) return "";
   const last=(S.aft||[])[S.aft.length-1]; if(!last) return "";
-  const days=Math.ceil((new Date(S.aftTestDate+"T12:00:00")-Date.now())/864e5);
+  const days=dayDiff(localYMD(),S.aftTestDate);
   if(days<0) return "";
   const c=aftCtx();
   const minTotal=c.standard==="combat"?350:300;
@@ -218,6 +218,14 @@ function recoveryReadiness(){
     const pct=(latest.hrv-hrvBase)/hrvBase;
     if(pct<=-0.15) flags.push({dir:-1, txt:`HRV is ${Math.round(-pct*100)}% below your baseline`});
     else if(pct>=0.10) flags.push({dir:1, txt:`HRV is above baseline (well-recovered)`});
+  }
+  // Sleep uses a fixed 7-9h target rather than the user's own rolling
+  // average (unlike rhr/hrv above) — "1h below your average" doesn't mean
+  // the same thing for someone who averages 5h vs. someone who averages 8h,
+  // so a self-relative comparison would be less honest here, not more.
+  if(latest.sleepHrs!=null){
+    if(latest.sleepHrs<6) flags.push({dir:-1, txt:`only ${latest.sleepHrs}h of sleep last night`});
+    else if(latest.sleepHrs>=7.5) flags.push({dir:1, txt:`${latest.sleepHrs}h of sleep last night (well-recovered)`});
   }
   if(!flags.length) return {level:"ready", line:"Recovery markers look normal vs your baseline — train as planned.", detail:""};
   const neg=flags.filter(f=>f.dir<0), pos=flags.filter(f=>f.dir>0);

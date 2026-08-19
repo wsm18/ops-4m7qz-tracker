@@ -1090,4 +1090,7 @@ function renderStudy(){
     }).join("");
   });
 }
-function studyDaysLeft(pl){ return Math.ceil((new Date(pl.testDate+"T12:00:00")-Date.now())/864e5); } // see makeStudyPlan()'s comment on the UTC/local parsing mismatch
+// dayDiff() on calendar-date strings — the previous Date.now()-vs-noon-anchor
+// version rounded "today" up to "1 day left" for anyone checking before noon
+// local time (see the same fix on commissionHtml/ldacCountdownHtml in today.js).
+function studyDaysLeft(pl){ return dayDiff(localYMD(),pl.testDate); }

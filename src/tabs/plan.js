@@ -4,7 +4,7 @@ function renderPlanRec(){
   const lastAft=(S.aft||[])[S.aft.length-1];
   const testDate=S.aftTestDate;
   if(!lastAft||!testDate){el.innerHTML="";return;}
-  const weeksLeft=Math.max(1,Math.round((new Date(testDate+"T12:00:00")-Date.now())/(7*864e5)));
+  const weeksLeft=Math.max(1,Math.round(dayDiff(localYMD(),testDate)/7));
   // Was a hardcoded 380 regardless of S.aftStandard — every other AFT-standard-
   // aware surface (aftPrepCard, renderAftStandardBar) computes 300/350 from
   // aftCtx(). A user on the general (300) standard already meeting it could
@@ -573,6 +573,23 @@ function renderEquipProfileUI(){
     <div class="equip-edit-label">Editing: <b>${esc(_equipEditProfile)}</b>${_equipEditProfile!==active?` <button class="equip-edit-switch" data-equipactive="${esc(_equipEditProfile)}">make active</button>`:''}${canDelete?` <button class="equip-profile-del" data-equipdel="${esc(_equipEditProfile)}">delete</button>`:''} <button class="equip-profile-rename" data-equiprename="${esc(_equipEditProfile)}">rename</button></div>
     <div class="equip-tag-toggles">${tagBtns}</div>
     ${optToggles?`<div class="equip-opt-h">Optional sessions (coach suggests these on a day this profile's tags unlock them, once opted in):</div><div class="equip-opt-toggles">${optToggles}</div>`:''}
+  </div>`;
+}
+// Injury-aware exercise avoidance (soft preference — see resolveSlot() in
+// training.js for why a slot never goes empty over this). Tags are derived
+// live from what SESSIONS actually uses (allMuscleTags()), not a hand-
+// maintained second list.
+function renderAvoidTagsUI(){
+  const el=document.getElementById("avoidTagsArea"); if(!el) return;
+  const avoid=S.avoidTags||[];
+  const tagBtns=allMuscleTags().map(m=>{
+    const on=avoid.includes(m);
+    return `<button class="equip-tag-tgl${on?' on':''}" data-avoidtag="${esc(m)}">${esc(m)}</button>`;
+  }).join("");
+  el.innerHTML=`<div class="equip-profile-card">
+    <div class="td-h fn-h">Working Around Something?</div>
+    <div class="plan-intro" style="margin-bottom:8px">Tap any area that's bothering you and the coach steers new suggestions away from exercises that load it — a preference, not a hard rule: if avoiding it would leave a slot with nothing to suggest, it still shows you the flagged move rather than an empty session. Broad tags (legs, quads, cardio) touch more of the program than narrow ones (biceps, forearms), since running and the AFT circuit lean on legs either way.</div>
+    <div class="equip-tag-toggles">${tagBtns}</div>
   </div>`;
 }
 

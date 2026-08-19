@@ -240,6 +240,77 @@ function ok(fails, label, cond) {
   });
   ok(fails, "STAGE_INFO relocation: renderBoard() still renders the real LDAC blurb", stageRelocResult.includes("Camp OML score is a direct"));
 
+  // ---- applyAvoidTags(): injury-aware exercise avoidance is a SOFT
+  // preference — narrows the pool when a safe alternative exists, but never
+  // empties a slot outright.
+  const avoidResult = await page.evaluate(() => {
+    const pool = [ {n:"Push-up", m:["chest","triceps"]}, {n:"Incline row", m:["back","biceps"]} ];
+    return {
+      safeNames: applyAvoidTags(pool, ["chest"]).map(e => e.n),
+      allNames: applyAvoidTags(pool, ["chest","back"]).map(e => e.n),
+      noneNames: applyAvoidTags(pool, []).map(e => e.n),
+    };
+  });
+  eq(fails, "applyAvoidTags: drops the flagged exercise when a safe alternative exists", avoidResult.safeNames, ["Incline row"]);
+  eq(fails, "applyAvoidTags: falls back to the full pool rather than emptying a slot", avoidResult.allNames, ["Push-up","Incline row"]);
+  eq(fails, "applyAvoidTags: an empty avoid-list leaves the pool untouched", avoidResult.noneNames, ["Push-up","Incline row"]);
+
+  // ---- planForDay(): proactive deload cadence (every 4th week, reusing
+  // pickRunIndex()'s epoch-anchored week counter) and its precedence vs taper.
+  const deloadResult = await page.evaluate(() => {
+    S.aftTestDate=null; S.profile=S.profile||{}; S.profile.ldacDate=null;
+    const deloadWeekDates=[];
+    for(let i=1;i<=60;i++){ const d=new Date(); d.setDate(d.getDate()+i); if(weeksSinceEpoch(d)%4===3) deloadWeekDates.push(d); }
+    const anyHardSurvives=deloadWeekDates.some(d=>{ const p=planForDay(d); return p&&p.intensity==="hard"; });
+    const anyDeloadFlagged=deloadWeekDates.some(d=>{ const p=planForDay(d); return p&&p.deload===true; });
+    let precedence=null;
+    if(deloadWeekDates.length){
+      const candidate=deloadWeekDates[0];
+      S.aftTestDate=localYMD(candidate); // guaranteed within the taper window (daysAway=0)
+      const p=planForDay(candidate);
+      precedence={taper:p.taper, deload:p.deload};
+    }
+    return { sampleCount:deloadWeekDates.length, anyHardSurvives, anyDeloadFlagged, precedence };
+  });
+  ok(fails, "planForDay: no hard day survives a deload week (no taper active)", !deloadResult.anyHardSurvives);
+  ok(fails, "planForDay: the deload cadence actually fires at least once across the scan", deloadResult.anyDeloadFlagged);
+  if(deloadResult.precedence) ok(fails, "planForDay: taper and deload are never both true on the same day (taper wins)", !(deloadResult.precedence.taper && deloadResult.precedence.deload));
+
+  // ---- bucketSleepIntervals(): merges overlapping "asleep" records instead
+  // of double-counting, and buckets a post-midnight session to the PREVIOUS
+  // night rather than splitting it onto a new day.
+  const sleepBucketResult = await page.evaluate(() => {
+    const night1Start=new Date(2026,1,5,23,0,0).getTime();
+    const night1End=new Date(2026,1,6,3,0,0).getTime();
+    const overlapStart=new Date(2026,1,6,2,0,0).getTime(); // overlaps the last hour of night1
+    const overlapEnd=new Date(2026,1,6,6,30,0).getTime();
+    const merged=bucketSleepIntervals([[night1Start,night1End],[overlapStart,overlapEnd]]);
+    const nightKey=localYMD(new Date(2026,1,5));
+    const postMidStart=new Date(2026,1,6,1,0,0).getTime();
+    const postMidEnd=new Date(2026,1,6,5,0,0).getTime();
+    const mergedPostMid=bucketSleepIntervals([[postMidStart,postMidEnd]]);
+    const prevNightKey=localYMD(new Date(2026,1,5));
+    return { overlapHours: merged[nightKey], postMidHours: mergedPostMid[prevNightKey] };
+  });
+  eq(fails, "bucketSleepIntervals: overlapping intervals merge without double-counting (7.5h, not 11.5h)", Math.round((sleepBucketResult.overlapHours||0)*10)/10, 7.5);
+  eq(fails, "bucketSleepIntervals: a post-midnight session buckets to the previous night", Math.round((sleepBucketResult.postMidHours||0)*10)/10, 4);
+
+  // ---- recoveryReadiness(): sleep uses a fixed 7-9h target, not a self-
+  // relative baseline (unlike rhr/hrv) — see the comment at its call site.
+  const sleepFlagResult = await page.evaluate(() => {
+    S.healthImport={ history:[
+      {date:"2026-01-01", rhr:60, hrv:50, vo2:null, sleepHrs:7},
+      {date:"2026-01-02", rhr:60, hrv:50, vo2:null, sleepHrs:7},
+      {date:"2026-01-03", rhr:60, hrv:50, vo2:null, sleepHrs:5.5},
+    ]};
+    const low=recoveryReadiness();
+    S.healthImport.history[2].sleepHrs=8.5;
+    const high=recoveryReadiness();
+    return { low, high };
+  });
+  ok(fails, "recoveryReadiness: a short night (<6h) contributes a negative flag", !!(sleepFlagResult.low && sleepFlagResult.low.detail && sleepFlagResult.low.detail.includes("sleep")));
+  ok(fails, "recoveryReadiness: a long night (>=7.5h) still reads as ready", !!(sleepFlagResult.high && sleepFlagResult.high.level==="ready"));
+
   console.log("UNIT CHECKS", fails.length === 0 ? "PASS" : "FAIL");
   fails.forEach((f) => console.log("  FAIL: " + f));
   if (pageErrors.length) { console.log("PAGEERRORS DURING SETUP", pageErrors.length); pageErrors.forEach((e) => console.log("  " + e)); }
