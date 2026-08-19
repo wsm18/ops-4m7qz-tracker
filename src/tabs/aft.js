@@ -192,10 +192,31 @@ function renderAft(){
   const goalEl=document.getElementById("aftGoalWrap");
   if(goalEl) renderAftGoal(goalEl);
 }
+// A real multi-test declining TREND per AFT event — distinct from "your
+// weakest score right now" (a low-but-stable event isn't flagged here, but
+// an event that's gotten strictly worse on every test you've actually
+// logged is). Needs at least 3 logged scores for that event to call it a
+// trend, not noise. Returns the single worst-drop event, or null.
+function aftDecliningEvent(){
+  const hist=(S.aft||[]).slice(-4); // last up to 4 real tests, chronological
+  if(hist.length<3) return null;
+  const EVENTS=[{k:"dl",label:"Deadlift"},{k:"hrp",label:"push-ups"},{k:"sdc",label:"Sprint-Drag-Carry"},{k:"plank",label:"plank/core"},{k:"run",label:"2-mile run"}];
+  let worst=null;
+  EVENTS.forEach(({k,label})=>{
+    const scores=hist.map(a=>a.scores[k]).filter(s=>s!=null);
+    if(scores.length<3) return;
+    for(let i=1;i<scores.length;i++){ if(scores[i]>=scores[i-1]) return; } // any non-decrease breaks the streak
+    const drop=scores[0]-scores[scores.length-1];
+    if(!worst || drop>worst.drop) worst={k, label, drop, scores};
+  });
+  return worst;
+}
 function fmFocusLine(){
   const a=(S.aft||[])[S.aft.length-1]; if(!a) return null;
   const events=[{k:"dl",label:"Deadlift",s:a.scores.dl},{k:"hrp",label:"push-ups",s:a.scores.hrp},{k:"sdc",label:"Sprint-Drag-Carry",s:a.scores.sdc},{k:"plank",label:"plank/core",s:a.scores.plank},{k:"run",label:"2-mile run",s:a.scores.run}].filter(e=>e.s!=null);
   if(!events.length) return null;
+  const declining=typeof aftDecliningEvent==="function"?aftDecliningEvent():null;
+  if(declining) return `Your ${declining.label} has gotten worse on every AFT test you've logged (${declining.scores.join("→")} pts) — worth real attention, not just "currently weak."`;
   const weakest=events.reduce((m,e)=>e.s<m.s?e:m,events[0]);
   return `Prioritize your ${weakest.label} (${weakest.s} pts) — it's your weakest AFT event right now.`;
 }
@@ -247,6 +268,29 @@ function vo2Benchmark(){
   // display (which shows an explicit "set birthdate in Profile" warning).
   const ageNote=realAge?"":" (assuming age 20 — set your birthdate in Profile for an accurate band)";
   return {v, band, line:`VO₂ max ${v} — ${band} aerobic fitness for your age${ageNote}. This is the engine behind your 2-mile run; steady zone-2 work plus intervals raises it over weeks.`};
+}
+// VO2max -> estimated per-mile training paces. Real, published method
+// (Daniels & Gilbert, "Oxygen Power"): their VO2-velocity regression
+// (VO2 = -4.60 + 0.182258·v + 0.000104·v², v in m/min) is solved for the
+// velocity AT VO2max, then the standard easy/threshold/interval zone
+// ratios (~70%/88%/98% of that velocity) give each zone's pace — not an
+// invented formula, but still an ESTIMATE: VO2max here is a watch/ring
+// estimate, not a lab test, and the zone ratios are approximate, so this is
+// framed as "estimated" everywhere it's shown (same honesty framing as
+// vo2Benchmark()'s own age-assumption caveat above).
+function vdotPaceZones(){
+  const hi=S.healthImport||{}; const v=hi.latest&&hi.latest.vo2max?hi.latest.vo2max.value:null;
+  if(v==null) return null;
+  const a=0.000104, b=0.182258, c=-(4.60+v);
+  const vVO2max=(-b+Math.sqrt(b*b-4*a*c))/(2*a); // velocity at VO2max, m/min
+  if(!isFinite(vVO2max) || vVO2max<=0) return null;
+  const paceFor=(pctOfVVO2max)=>{
+    const velocity=vVO2max*pctOfVVO2max;
+    const minPerMile=1609.34/velocity;
+    const m=Math.floor(minPerMile), s=Math.round((minPerMile-m)*60);
+    return `${m}:${String(s).padStart(2,"0")}/mi`;
+  };
+  return {easy:paceFor(0.70), threshold:paceFor(0.88), interval:paceFor(0.98), v};
 }
 function showAftResult(a){
   const el=document.getElementById("aftResult");

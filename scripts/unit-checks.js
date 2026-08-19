@@ -371,6 +371,103 @@ function ok(fails, label, cond) {
   eq(fails, "planForDay: every day in a 28-day pull has a valid intensity", monthResult.badIntensity, 0);
   eq(fails, "planForDay: a 28-day month-ahead pull covers all 28 days", monthResult.count, 28);
 
+  // ---- planForDay(): the recovery-readiness downgrade only ever applies to
+  // the REAL current calendar day (recoveryReadiness() has no way to know a
+  // future day's recovery) — stub assignWeekSessions so every weekday is
+  // forced "hard", regardless of what real weekday the test happens to run
+  // on, then compare a "ready" vs. an "easy" readiness reading for today.
+  const readinessDowngradeResult = await page.evaluate(() => {
+    S.aftTestDate = null;
+    if (!S.profile) S.profile = {};
+    S.profile.ldacDate = null;
+    const todayDate = new Date();
+    const todayDow = todayDate.getDay(); // 0 = Sunday = a fixed rest day, unaffected by the stub
+    const origAssign = assignWeekSessions;
+    assignWeekSessions = function () { const a = {}; for (let d = 1; d <= 6; d++) a[d] = "s1"; return a; };
+    S.healthImport = { history: [
+      {date:"2026-01-01", rhr:60, hrv:50, sleepHrs:8},
+      {date:"2026-01-02", rhr:60, hrv:50, sleepHrs:8},
+      {date:"2026-01-03", rhr:60, hrv:50, sleepHrs:8},
+    ]};
+    const readyPlan = todayDow === 0 ? null : planForDay(todayDate);
+    S.healthImport.history.push({date:"2026-01-04", rhr:70, hrv:38, sleepHrs:8}); // 2 negative flags -> "easy"
+    const easyPlan = todayDow === 0 ? null : planForDay(todayDate);
+    assignWeekSessions = origAssign;
+    return {
+      todayDow,
+      readyIntensity: readyPlan && readyPlan.intensity,
+      readyFlag: !!(readyPlan && readyPlan.readinessEase),
+      easyIntensity: easyPlan && easyPlan.intensity,
+      easyFlag: !!(easyPlan && easyPlan.readinessEase),
+    };
+  });
+  if (readinessDowngradeResult.todayDow === 0) {
+    ok(fails, "planForDay: readiness downgrade correctly skipped on a fixed Sunday rest day (test happened to run on a Sunday)", true);
+  } else {
+    eq(fails, "planForDay: a normal ('ready') recovery reading leaves a hard day hard", readinessDowngradeResult.readyIntensity, "hard");
+    ok(fails, "planForDay: no readiness-ease flag when recovery reads normal", !readinessDowngradeResult.readyFlag);
+    eq(fails, "planForDay: a real ('easy') recovery reading downgrades today's hard session", readinessDowngradeResult.easyIntensity, "moderate");
+    ok(fails, "planForDay: the readiness-ease flag is set when the downgrade fires", readinessDowngradeResult.easyFlag);
+  }
+
+  // ---- checkDailyReset(): a manually-set weather flag auto-expires once a
+  // new calendar day starts, instead of silently staying in effect forever.
+  const weatherExpiryResult = await page.evaluate(() => {
+    const t = today();
+    S.weather = "rain"; S.weatherSetDate = "Mon Jan 01 2024"; S.lastDaily = "Mon Jan 01 2024";
+    checkDailyReset();
+    const staleCleared = S.weather === "clear" && S.weatherSetDate === null;
+    S.weather = "rain"; S.weatherSetDate = t; S.lastDaily = "Mon Jan 01 2024";
+    checkDailyReset();
+    const freshKept = S.weather === "rain";
+    return { staleCleared, freshKept };
+  });
+  ok(fails, "checkDailyReset: a weather flag set on a prior day auto-clears to 'clear'", weatherExpiryResult.staleCleared);
+  ok(fails, "checkDailyReset: a weather flag set TODAY survives the same day-boundary check", weatherExpiryResult.freshKept);
+
+  // ---- aftDecliningEvent()/fmFocusLine(): a real multi-test declining
+  // trend on one event is distinct from (and preferred over) "currently
+  // weakest score" framing — and a flat/stable history is never flagged.
+  const declineResult = await page.evaluate(() => {
+    const mk = (dl,hrp,sdc,plank,run) => ({scores:{dl,hrp,sdc,plank,run}});
+    S.aft = [ mk(70,70,79,70,70), mk(70,70,74,70,70), mk(70,70,69,70,70), mk(70,70,65,70,70) ];
+    const declining = aftDecliningEvent();
+    const focus = fmFocusLine();
+    S.aft = [ mk(70,70,70,70,70), mk(70,70,70,70,70), mk(70,70,70,70,70) ];
+    const stableDeclining = aftDecliningEvent();
+    return { decliningKey: declining && declining.k, decliningScores: declining && declining.scores, focus, stableDeclining };
+  });
+  eq(fails, "aftDecliningEvent: flags SDC as the declining event across a real 4-test slide", declineResult.decliningKey, "sdc");
+  eq(fails, "aftDecliningEvent: reports the real score sequence, not a computed summary", declineResult.decliningScores, [79,74,69,65]);
+  ok(fails, "fmFocusLine: prefers the declining-trend framing over plain weakest-score", !!(declineResult.focus && declineResult.focus.includes("Sprint-Drag-Carry") && declineResult.focus.includes("gotten worse on every AFT test")));
+  eq(fails, "aftDecliningEvent: a flat/stable history is never flagged as declining", declineResult.stableDeclining, null);
+
+  // ---- vdotPaceZones()/exercisePaceZone(): a real, published VO2max->pace
+  // method (Daniels & Gilbert), not an invented formula — and it must win
+  // over BEGINNER_RX's vague qualitative run cues once real VO2max data
+  // exists, while a bare computeTarget(name) call (no opts) still returns
+  // null exactly as documented, never silently gaining a new return value.
+  const vdotResult = await page.evaluate(() => {
+    S.healthImport = { latest: { vo2max: { value: 45 } }, history: [] };
+    const zones = vdotPaceZones();
+    const zoneForTempo = exercisePaceZone("Tempo run");
+    const zoneForNonRun = exercisePaceZone("Loaded backpack carry (books/household items)");
+    const savedHi = S.healthImport;
+    S.healthImport = { latest: {}, history: [] };
+    const noVo2 = vdotPaceZones();
+    S.healthImport = savedHi;
+    const withOpts = computeTarget({n:"Tempo run", t:"dist"}, {skey:"s2", intensity:"hard"});
+    const bareCall = computeTarget({n:"Tempo run", t:"dist"});
+    return { zones, zoneForTempo, zoneForNonRun, noVo2, withOptsTarget: withOpts && withOpts.target, withOptsTier: withOpts && withOpts.tier, bareCall };
+  });
+  eq(fails, "exercisePaceZone: 'Tempo run' resolves to the threshold zone", vdotResult.zoneForTempo, "threshold");
+  eq(fails, "exercisePaceZone: a non-running exercise has no pace zone", vdotResult.zoneForNonRun, null);
+  ok(fails, "vdotPaceZones: returns a real per-mile pace string for a real VO2max", !!(vdotResult.zones && /^\d+:\d{2}\/mi$/.test(vdotResult.zones.threshold)));
+  ok(fails, "vdotPaceZones: interval pace is faster than easy pace (higher %vVO2max)", (() => { const toSec=s=>{const [m,ss]=s.replace("/mi","").split(":").map(Number); return m*60+ss;}; return toSec(vdotResult.zones.interval) < toSec(vdotResult.zones.easy); })());
+  eq(fails, "vdotPaceZones: returns null with no imported VO2max", vdotResult.noVo2, null);
+  ok(fails, "computeTarget: a real VO2max pace wins over BEGINNER_RX's vague run cue when opts.skey is given", !!(vdotResult.withOptsTarget && vdotResult.withOptsTarget.includes("target pace") && vdotResult.withOptsTier === "vdot-pace"));
+  eq(fails, "computeTarget: a bare call with no opts still returns null (tier 3/4 stay strictly opt-in)", vdotResult.bareCall, null);
+
   console.log("UNIT CHECKS", fails.length === 0 ? "PASS" : "FAIL");
   fails.forEach((f) => console.log("  FAIL: " + f));
   if (pageErrors.length) { console.log("PAGEERRORS DURING SETUP", pageErrors.length); pageErrors.forEach((e) => console.log("  " + e)); }

@@ -235,6 +235,13 @@ function checkDailyReset(){
   }
   if(S.streak>=3) S.streakBrokenDate=null; // recovery complete
   if(S.streak>S.bestStreak) S.bestStreak=S.streak;
+  // Auto-expire a manually-set weather flag once a new calendar day starts —
+  // previously a single "rain" tap silently stayed in effect (swapping every
+  // outdoor FM session indoors, including in the month-ahead forecast) until
+  // the user remembered to flip it back, with no nudge that it was stale.
+  if(S.weather && S.weather!=="clear" && S.weatherSetDate && S.weatherSetDate!==t){
+    S.weather="clear"; S.weatherSetDate=null;
+  }
   S.dailies.forEach(d=>d.done=false);
   S.lastDaily=t;
   save();

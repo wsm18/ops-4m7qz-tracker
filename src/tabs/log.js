@@ -722,7 +722,10 @@ function computeTarget(exArg, opts){
     }
   }
   if(ex.type==="dist"){
-    return {target:`log distance + time`, tier:"adaptive", note:(trend==="up"?"trending faster — keep pushing":trend==="down"?"slower last run — focus the next one":"build consistency")+baselineNote};
+    const zone=typeof exercisePaceZone==="function"?exercisePaceZone(name):null;
+    const pz=zone && typeof vdotPaceZones==="function" ? vdotPaceZones() : null;
+    const paceStr = pz && pz[zone] ? ` — target pace ~${pz[zone]} (estimated from your imported VO2max)` : "";
+    return {target:`log distance + time${paceStr}`, tier:"adaptive", note:(trend==="up"?"trending faster — keep pushing":trend==="down"?"slower last run — focus the next one":"build consistency")+baselineNote};
   }
   return computeTargetFallback(exArg, name, opts);
 }
@@ -738,6 +741,18 @@ function computeTargetFallback(exArg, name, opts){
   // 300/350 standard bands, never a per-exercise invented formula.
   const phase=typeof exArg==="object" && exArg ? exArg._phase : null;
   const isWarmCool=phase==="warmup"||phase==="cooldown"||phase==="flex";
+  // Tier "vdot-pace": checked BEFORE the starter tier below. A real
+  // VO2max-derived pace (see vdotPaceZones(), aft.js) is MORE specific real
+  // data than BEGINNER_RX's qualitative run cues ("conversational", "only-
+  // a-few-words pace") for the exact same exercise, so it wins when both are
+  // available. Still gated on opts.skey exactly like the starter tier below
+  // — a bare computeTarget(name) call with no opts must keep returning tier
+  // 1-2 or null, per this function's own header comment.
+  if(!isWarmCool && opts.skey && typeof exArg==="object" && exArg && (exArg.type||exArg.t)==="dist" && typeof exercisePaceZone==="function"){
+    const zone=exercisePaceZone(name);
+    const pz=zone && typeof vdotPaceZones==="function" ? vdotPaceZones() : null;
+    if(pz && pz[zone]) return {target:`target pace ~${pz[zone]} (estimated from your imported VO2max)`, note:"pace estimate from your imported VO2max — not a lab test, treat it as a range", tier:"vdot-pace"};
+  }
   if(!isWarmCool && opts.skey && typeof BEGINNER_RX!=="undefined" && typeof cgFindRxRow==="function"){
     const rx=BEGINNER_RX[opts.skey];
     // A session's work list mixes bodyweight-only accessory moves (glute

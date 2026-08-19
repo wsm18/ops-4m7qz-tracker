@@ -39,6 +39,18 @@ function allMuscleTags(){
   });
   return [...set].sort();
 }
+// Which VDOT pace zone (see vdotPaceZones(), aft.js) a given run exercise
+// NAME targets — "easy"/"threshold"/"interval" — or null for exercises that
+// aren't a real running pace (rower/bike cross-training, the beginner
+// run-walk alt, or "Timed 2-mile" itself, which IS the benchmark test, not
+// a pace-zone target). Tagged directly on the specific SESSIONS.s2 entries
+// (paceZone field) rather than a separate name-string lookup table, so a
+// future rename can't silently desync the two.
+function exercisePaceZone(name){
+  const s2=SESSIONS.s2; if(!s2) return null;
+  const hit=[...(s2.bw||[]), ...(s2.gym||[])].find(e=>e.n===name);
+  return (hit && hit.paceZone) || null;
+}
 // Injury-aware avoidance is a SOFT preference, not a hard exclusion: if a
 // nagging shoulder/back/etc. is set (S.avoidTags) and the WHOLE pool loads
 // that area, filtering it out entirely would silently empty a slot (or, on
@@ -609,6 +621,22 @@ function planForDay(dateObj){
   // proximity is more specific and more urgent than routine periodization.
   if(!plan.taper && plan.intensity==="hard" && weeksSinceEpoch(dateObj)%4===3){
     plan=Object.assign({}, plan, {intensity:"moderate", deload:true, label:plan.label+" — deload week, ease off"});
+  }
+  // Daily recovery-readiness downgrade (v218-coaching-improvements pass):
+  // recoveryReadiness() (aft.js) had computed a real RHR/HRV/sleep-based
+  // easy/caution/ready flag since v217 but nothing ever fed it back into the
+  // actual prescribed session — it only ever printed as an advisory card the
+  // user had to read and manually decide to act on. It reads TODAY's
+  // imported health snapshot, so it has no way to know what a FUTURE day's
+  // recovery will look like — this only fires when dateObj IS the real
+  // current calendar day, never for a month-ahead lookup. Scoped to an
+  // otherwise-untouched hard day (taper/deload already downgrade for their
+  // own scheduled reasons) so this is purely closing the gap, not stacking.
+  if(!plan.taper && !plan.deload && plan.intensity==="hard" && localYMD(dateObj)===localYMD(new Date()) && typeof recoveryReadiness==="function"){
+    const rr=recoveryReadiness();
+    if(rr && rr.level==="easy"){
+      plan=Object.assign({}, plan, {intensity:"moderate", readinessEase:true, label:plan.label+" — recovery markers are down, easing off today"});
+    }
   }
   return plan;
 }

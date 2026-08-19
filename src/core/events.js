@@ -378,7 +378,7 @@ if(_luCloseBtn) _luCloseBtn.onclick=()=>document.getElementById("levelup").class
 /* ---------------- Weather toggle ---------------- */
 {
   const wb=document.getElementById("weatherBtns");
-  if(wb) wb.onclick=(e)=>{ const b=e.target.closest("[data-weather]"); if(!b) return; S.weather=b.getAttribute("data-weather"); save(); render(); const w=WEATHER[S.weather]; toast(weatherBad()?`${w.icon} ${w.label} — outdoor work moved indoors`:"☀️ Clear — outdoor work restored"); };
+  if(wb) wb.onclick=(e)=>{ const b=e.target.closest("[data-weather]"); if(!b) return; S.weather=b.getAttribute("data-weather"); S.weatherSetDate=today(); save(); render(); const w=WEATHER[S.weather]; toast(weatherBad()?`${w.icon} ${w.label} — outdoor work moved indoors`:"☀️ Clear — outdoor work restored"); };
 }
 
 /* ---------------- Backup / reset ---------------- */

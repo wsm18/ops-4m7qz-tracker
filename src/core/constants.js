@@ -73,6 +73,7 @@ const DEFAULT = {
   aftGoal:null,           // target total AFT score (e.g. 500); shown as a gap line on the score display
   hasGym:false,           // legacy (pre-FM-2) equipment toggle — superseded by equipProfiles/activeEquipProfile below; kept only so old saves still validate
   weather:"clear",        // manual weather: clear|rain|snow|heat|cold|wind|air|dark — bad conditions swap outdoor work indoors
+  weatherSetDate:null,     // today()-format date string weather was last changed — checkDailyReset() (state.js) auto-clears a stale non-clear flag once a new day starts, so a single "rain" tap can't silently stay in effect for days
   // Gym-access-aware weekly planning (FM-1). Three layers, checked in this order
   // by gymAccessForDate() in training.js: gymAccessLive (today-only override) ->
   // gymAccess.week (this week's confirmed/adjusted pattern, only valid while
@@ -359,14 +360,14 @@ const SESSIONS = {
     alt:{2:[{n:"Knee push-ups", t:"reps", m:["chest","triceps"]}], 4:[{n:"Kettlebell goblet squat", t:"reps", w:true, eq:["kettlebell"], m:["quads","glutes"]}]}},
   s2:{name:"Session 2 · Run", areas:["cardio","legs"], pickOne:true,
     bw:[
-      {n:"Intervals (sprint reps, any open ground)", t:"dist", out:true, m:["cardio","legs"], indoor:{n:"Indoor intervals — 30s hard / 60s easy ×8, rotating burpees → high-knees → mountain-climbers → squat jumps", t:"time"}},
-      {n:"Tempo run", t:"dist", out:true, m:["cardio"], indoor:{n:"Indoor tempo — 20 min continuous, cycling jumping jacks → shadow boxing → step-ups → jog-in-place", t:"time"}},
-      {n:"Long easy run", t:"dist", out:true, m:["cardio"], indoor:{n:"Indoor steady cardio — 40 min easy, cycling march/jog-in-place → step-ups → jacks → shadow boxing (10 min each)", t:"time"}},
+      {n:"Intervals (sprint reps, any open ground)", t:"dist", out:true, m:["cardio","legs"], paceZone:"interval", indoor:{n:"Indoor intervals — 30s hard / 60s easy ×8, rotating burpees → high-knees → mountain-climbers → squat jumps", t:"time"}},
+      {n:"Tempo run", t:"dist", out:true, m:["cardio"], paceZone:"threshold", indoor:{n:"Indoor tempo — 20 min continuous, cycling jumping jacks → shadow boxing → step-ups → jog-in-place", t:"time"}},
+      {n:"Long easy run", t:"dist", out:true, m:["cardio"], paceZone:"easy", indoor:{n:"Indoor steady cardio — 40 min easy, cycling march/jog-in-place → step-ups → jacks → shadow boxing (10 min each)", t:"time"}},
       {n:"Timed 2-mile", t:"dist", out:true, m:["cardio"], indoor:{n:"Indoor cardio test — 20 min, max jog-in-place / burpee reps (log the count as your benchmark)", t:"reps"}},
     ],
     gym:[
-      {n:"Treadmill intervals (incline)", t:"dist", w:true, eq:["treadmill"], m:["cardio","legs"]},
-      {n:"Treadmill tempo run", t:"dist", w:true, eq:["treadmill"], m:["cardio"]},
+      {n:"Treadmill intervals (incline)", t:"dist", w:true, eq:["treadmill"], m:["cardio","legs"], paceZone:"interval"},
+      {n:"Treadmill tempo run", t:"dist", w:true, eq:["treadmill"], m:["cardio"], paceZone:"threshold"},
       {n:"Rower intervals", t:"time", w:true, eq:["rower"], m:["cardio","back"]},
       {n:"Timed 2-mile (treadmill)", t:"dist", w:true, eq:["treadmill"], m:["cardio"]},
     ],
