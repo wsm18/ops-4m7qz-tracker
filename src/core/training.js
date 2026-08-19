@@ -445,7 +445,7 @@ const EX_HOWTO=[
   // --- no-equipment lower/push ---
   ["reverse lunge","From standing, step one foot straight back and lower until both knees are ~90°, then drive through the front heel back up. Alternate legs."],
   ["single-leg glute bridge","Lie on your back, one knee bent with that foot flat, other leg straight out. Push through the planted heel to lift your hips into a line, squeeze, lower."],
-  ["hand-release push-up","A push-up where, at the bottom, you lower fully to the floor and lift your hands off for a moment, then place them and press up."],
+  ["hand-release push-up","A push-up where, at the bottom, you lower fully to the floor and lift your hands off for a moment, then place them and press up. Match your breath to the reps early (exhale up, inhale down); once your rate climbs, shift to a rhythm spanning a few reps per breath instead of forcing one breath per rep — that's what keeps you from gassing out before your arms do."],
   ["knee push-up","A push-up with your knees on the floor instead of your toes — same hand position and chest-to-floor range of motion, just less bodyweight to press. The real regression if a full push-up isn't there yet: build reps here first, then move to toes."],
   ["pike push-up","From a push-up position, walk your feet in and raise your hips into an upside-down V. Bend your elbows to lower your head toward the floor, then press up."],
   ["shrimp","A single-leg squat on the floor: stand on one leg, hold the other foot behind you (or just keep it lifted), and lower under control as far as you can, then stand. Hold a wall to balance."],
@@ -459,16 +459,16 @@ const EX_HOWTO=[
   ["leg press","Push the weighted platform away with your legs on the machine, then return under control without locking the knees hard."],
   ["goblet squat","Hold a dumbbell or kettlebell at your chest and squat down to at least parallel, chest tall, then stand."],
   ["machine crunch","Loaded core flexion on a cable or ab machine — curl your ribs toward your hips against the resistance."],
-  ["deadlift","Bar over mid-foot; hinge with a flat back and grip it, then stand tall driving your hips forward, bar close to your body. Never round the lower back."],
+  ["deadlift","Bar over mid-foot; hinge with a flat back and grip it, then stand tall driving your hips forward, bar close to your body. Never round the lower back. On a heavy set, brace and take a breath before each rep, holding it through the pull, then exhale at the top — standard practice for a near-max lift, and it measurably stiffens your trunk. Skip the breath-hold (just breathe through the rep instead) if you have high blood pressure or any cardiovascular concern."],
   // --- runs / cardio (outdoor) ---
-  ["intervals (sprint","Short fast efforts with rest between: sprint ~400m or 60–90s hard, then walk/jog 90s, and repeat for the set count. Builds speed."],
-  ["tempo run","A sustained 'comfortably hard' pace you can only say a few words at — hold it for 15–25 minutes."],
-  ["long easy run","A slow, conversational-pace run, longer than usual (30–50 min). Builds the aerobic base behind the 2-mile."],
-  ["timed 2-mile","Run 2 miles as fast as you can sustain and record the time — the AFT run, used as a test, not every week."],
+  ["intervals (sprint","Short fast efforts with rest between: sprint ~400m or 60–90s hard, then walk/jog 90s, and repeat for the set count. Builds speed. Keep your arm swing relaxed and close to your body — swinging your arms across your midline burns extra energy for no speed gain."],
+  ["tempo run","A sustained 'comfortably hard' pace you can only say a few words at — hold it for 15–25 minutes. Relaxed arm swing (no crossing your arms in front of you) and a cadence a touch quicker than feels natural both measurably improve running economy."],
+  ["long easy run","A slow, conversational-pace run, longer than usual (30–50 min). Builds the aerobic base behind the 2-mile. A good pace to actually practice form at: relaxed arm swing, staying upright rather than leaning from the hips, and a cadence a touch quicker than feels natural — all measurably improve economy, and this pace is calm enough to think about them."],
+  ["timed 2-mile","Run 2 miles as fast as you can sustain and record the time — the AFT run, used as a test, not every week. Pace it even or a slight negative split (second half a touch faster) — 2 miles is long enough to be aerobic-dominant, so a fast start you can't hold usually costs more than it gains."],
   ["run-walk build-up","The real on-ramp if continuous running isn't there yet: run 1 minute, walk 2 minutes, repeat for the session. As it gets easier over a few weeks, stretch the run minute and shrink the walk — that's the whole progression, no app tracking needed. Swap to this on any run day."],
   // --- gym cardio ---
-  ["treadmill interval","Run hard/easy bursts on a treadmill; add incline to build power and spare your joints."],
-  ["treadmill tempo","Hold a comfortably-hard pace on the treadmill for 15–25 min."],
+  ["treadmill interval","Run hard/easy bursts on a treadmill; add incline to build power and spare your joints. Same form cues as an outdoor interval: relaxed arm swing, close to your body."],
+  ["treadmill tempo","Hold a comfortably-hard pace on the treadmill for 15–25 min. Relaxed arm swing and a cadence a touch quicker than feels natural both measurably improve running economy."],
   ["rower interval","Hard/easy bursts on a rowing machine — cardio that spares your legs for lifting days."],
   ["stationary bike","Hard/easy bursts on a stationary bike — cardio that spares your legs for lifting days."],
   // --- indoor weather swaps ---
@@ -485,7 +485,7 @@ const EX_HOWTO=[
   ["diamond push-up","Push-ups with your hands close together under your chest (thumbs and index fingers forming a diamond). Hits the triceps."],
   ["side plank","On one forearm, body turned sideways in a straight line, hips lifted and stacked. Hold, then switch sides. Trains the obliques."],
   ["superman","Lie face-down, arms extended ahead. Lift your arms, chest, and legs off the floor together (like flying), hold a moment, lower. Strengthens the lower back."],
-  ["plank","Forearms under your shoulders, body in a straight line from head to heels, abs and glutes tight. Hold without letting your hips sag or pike up."],
+  ["plank","Forearms under your shoulders, body in a straight line from head to heels, abs and glutes tight. Hold without letting your hips sag or pike up. Breathe with a controlled, continuous exhale rather than holding your breath — staying braced while you exhale keeps your core engaged longer than white-knuckling a held breath."],
   ["grip squeeze","Squeeze a grip trainer or a rolled towel hard for the time, then rest and repeat. Builds the grip that carries the Sprint-Drag-Carry."],
   // --- upper / core (gym) ---
   ["pull-up","Hang from a bar (palms away), arms straight, and pull until your chin clears the bar, then lower all the way. Use a band or the lat-pulldown machine if you can't do one yet."],

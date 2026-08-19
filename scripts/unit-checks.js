@@ -468,6 +468,37 @@ function ok(fails, label, cond) {
   ok(fails, "computeTarget: a real VO2max pace wins over BEGINNER_RX's vague run cue when opts.skey is given", !!(vdotResult.withOptsTarget && vdotResult.withOptsTarget.includes("target pace") && vdotResult.withOptsTier === "vdot-pace"));
   eq(fails, "computeTarget: a bare call with no opts still returns null (tier 3/4 stay strictly opt-in)", vdotResult.bareCall, null);
 
+  // ---- EX_HOWTO technique/breathing content (round-3 FM content pass): real,
+  // cite-able cues (bracing, breathing rhythm, arm swing, pacing) actually
+  // reach exHowto()'s output for the specific exercises they were added to.
+  const howtoResult = await page.evaluate(() => ({
+    deadlift: exHowto("Deadlift"),
+    plank: exHowto("Plank"),
+    hrp: exHowto("Hand-release push-ups"),
+    tempo: exHowto("Tempo run"),
+    longEasy: exHowto("Long easy run"),
+    timed2mi: exHowto("Timed 2-mile"),
+  }));
+  ok(fails, "exHowto: deadlift includes bracing cue + a real safety caveat", howtoResult.deadlift.includes("brace") && howtoResult.deadlift.includes("blood pressure"));
+  ok(fails, "exHowto: plank includes the controlled-exhale breathing cue", howtoResult.plank.includes("exhale"));
+  ok(fails, "exHowto: hand-release push-up includes the fatigue-breathing cue", howtoResult.hrp.includes("breath"));
+  ok(fails, "exHowto: tempo run includes the arm-swing/cadence cue", howtoResult.tempo.includes("arm swing") && howtoResult.tempo.includes("cadence"));
+  ok(fails, "exHowto: long easy run includes the arm-swing/cadence/posture cue", howtoResult.longEasy.includes("arm swing") && howtoResult.longEasy.includes("cadence"));
+  ok(fails, "exHowto: timed 2-mile includes the even-pacing cue", howtoResult.timed2mi.includes("negative split") || howtoResult.timed2mi.includes("even"));
+
+  // ---- EVENT_TECHNIQUE / showAftResult(): a real per-event form-check callout
+  // renders for the weakest event, distinct from EVENT_FOCUS's training-volume
+  // advice — sourced content, not invented, and only shown when real.
+  const techniqueResult = await page.evaluate(() => {
+    const mk = (dl,hrp,sdc,plank,run,ts) => ({date:new Date(ts).toLocaleDateString(), ts, raw:{dl:200,hrp:60,sdc:120,plank:90,run:800}, scores:{dl,hrp,sdc,plank,run}, total:dl+hrp+sdc+plank+run});
+    S.aft = [ mk(70,70,55,70,70,1) ]; // sdc is weakest -> should get the SDC technique note
+    showAftResult(S.aft[0]);
+    const html = document.getElementById("aftResult") ? document.getElementById("aftResult").innerHTML : "";
+    return { hasTechniqueBlock: html.includes("aft-technique"), mentionsLineTouch: html.includes("line") };
+  });
+  ok(fails, "showAftResult: renders a Form-check technique block for the weakest event", techniqueResult.hasTechniqueBlock);
+  ok(fails, "showAftResult: the SDC technique note's real content (line touches) actually reaches the DOM", techniqueResult.mentionsLineTouch);
+
   console.log("UNIT CHECKS", fails.length === 0 ? "PASS" : "FAIL");
   fails.forEach((f) => console.log("  FAIL: " + f));
   if (pageErrors.length) { console.log("PAGEERRORS DURING SETUP", pageErrors.length); pageErrors.forEach((e) => console.log("  " + e)); }

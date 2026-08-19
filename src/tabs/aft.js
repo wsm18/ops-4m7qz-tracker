@@ -329,6 +329,7 @@ function showAftResult(a){
     ${events.map(e=>{const tgt=S.aftEventTargets&&S.aftEventTargets[e.k]; const tgtHtml=tgt&&e.s!=null?`<span class="aft-tgt-gap" style="color:${e.s>=tgt?'var(--jade)':'var(--ember)'}">${e.s>=tgt?"✓ target":"↑ "+(tgt-e.s)+" to target"}</span>`:""; const evVals=S.aft.slice().sort((a,b)=>a.date<b.date?-1:1).map(a=>a.scores&&a.scores[e.k]||0).filter(v=>v>0); const evSpark=evVals.length>=2?`<span class="aft-event-spark">${miniSparkline(evVals,60,16)}</span>`:""; return `<div class="aft-event ${e.k===weakest.k?'weak':''}"><span>${e.label}${e.k===weakest.k?' ← weakest':''}</span><span class="ev-score">${e.s} pts${trend(e)}${e.s<60?' ⚠️':''}</span>${evSpark}${tgtHtml}</div>`;}).join("")}
     <div class="aft-focus">📍 <b>Plan focus:</b> ${focus} ${failing.length?`<br><br>⚠️ ${failing.length} event(s) below the 60-pt minimum — fix immediately to avoid a no-go.`:nearMin.length?`<br><br>⚠️ ${nearMin.map(e=>e.label).join(", ")} sitting near the 60-pt floor — keep a buffer.`:''}
     <div class="aft-coach-link"><button class="hb-starter-btn" data-gototab="plan">🎯 See your real adaptive targets for this →</button></div></div>
+    ${EVENT_TECHNIQUE[weakest.k]?`<div class="aft-focus aft-technique">🛠️ <b>Form check — ${weakest.label}:</b> ${EVENT_TECHNIQUE[weakest.k]}</div>`:''}
   </div>`;
 }
 const EVENT_FOCUS={
@@ -344,6 +345,19 @@ const EVENT_FOCUS_SHORT={
   sdc:"hit the AFT circuit for speed under load",
   plank:"keep up daily max-hold planks",
   run:"add a weekly run",
+};
+// Real technique cues, distinct from EVENT_FOCUS above (which prescribes
+// TRAINING VOLUME — "do more of this"). This is HOW to execute the event
+// itself — sourced from real evidence/doctrine (NSCA bracing guidance,
+// Army's own SDC/HRP scoring-criteria coaching notes, a real small study on
+// plank breathing), not invented. Shown only for the weakest event, same
+// "focus where it matters" precedent as EVENT_FOCUS.
+const EVENT_TECHNIQUE={
+  dl:"Brace and take a breath before each rep, holding it through the pull, then exhale at the top — standard practice for a near-max lift, and it measurably stiffens your trunk. Skip the breath-hold (just breathe through the rep instead) if you have high blood pressure or any cardiovascular concern — ask a doctor first if you're unsure.",
+  hrp:"The reps that don't count are the ones that cost you: a full hand-release (hands actually off the ground, not just unweighted) and no hip sag or pike. As reps climb, shift your breathing from one breath per rep to a rhythm that spans a few reps — trying to hold one-breath-per-rep to failure gasses you out before your arms do.",
+  sdc:"Most lost time isn't raw speed — it's the transitions: a full hand-touch at each line (a missed touch means going back), staying low and driving with your legs on the drag instead of standing tall and pulling with your back, and controlling the kettlebells on the carry instead of letting them swing you off balance.",
+  plank:"Breathe with a controlled, continuous exhale instead of holding your breath — staying braced while you exhale keeps your core engaged longer than white-knuckling a held breath, and is a real difference-maker between a short hold and a long one.",
+  run:"Pace it even or a slight negative split (second half a touch faster) — 2 miles is long enough to be aerobic-dominant, so a fast start you can't hold usually costs more than it gains. A relaxed arm swing (don't cross your arms in front of your body) is a free few seconds most people leave on the table.",
 };
 /* ---------------- Guided mock AFT walkthrough (FM-1 / idea #2b) ----------------
    Walks the 5 scored events in order with a simple start/stop stopwatch,

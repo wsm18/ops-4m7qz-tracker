@@ -1,4 +1,4 @@
-const CACHE="operations-v219";
+const CACHE="operations-v220";
 const ASSETS=["index.html","manifest.json","icon-192.png","icon-512.png","quizbank.js","fonts/oswald.woff2","fonts/roboto-condensed.woff2"];
 self.addEventListener("install",e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));

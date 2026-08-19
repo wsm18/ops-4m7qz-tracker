@@ -456,6 +456,8 @@
   .aft-tgt-inp{width:58px;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);padding:3px 6px;border-radius:5px;font-family:inherit;text-align:center}
   .aft-focus{background:rgba(var(--ember-rgb),.1);border:1px solid #6e4520;border-radius:9px;padding:12px;margin-top:12px;font-size:13.5px;color:var(--ink-dim);line-height:1.5}
   .aft-focus b{color:var(--ember)}
+  .aft-technique{background:rgba(var(--gold-rgb),.1);border-color:#6e5a20}
+  .aft-technique b{color:var(--gold)}
   .aft-hist-row{display:flex;justify-content:space-between;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:11px 13px;margin-bottom:7px;font-size:13.5px}
   .aft-hist-row .ttl{font-weight:700;color:var(--gold)}
   /* AFT Goal setter */
