@@ -2604,6 +2604,14 @@
 .equip-opt-toggles{display:flex;gap:6px;flex-wrap:wrap}
 .equip-opt-tgl{background:#0e0f09;border:1px solid var(--line);color:var(--ink-dim);padding:6px 10px;border-radius:14px;font-family:inherit;font-size:12px;cursor:pointer}
 .equip-opt-tgl.on{border-color:var(--jade);color:var(--jade);background:rgba(var(--jade-rgb),.1)}
+.ma-card{background:#0e0f09;border:1px solid var(--line);border-radius:10px;padding:12px}
+.ma-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--ink-faint);margin-bottom:10px}
+.ma-legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:middle}
+.ma-grid{display:grid;grid-template-columns:48px repeat(7,1fr);gap:4px;align-items:center}
+.ma-dow{font-size:10px;color:var(--ink-faint);text-align:center}
+.ma-week-label{font-size:10px;color:var(--ink-faint);white-space:nowrap}
+.ma-sq{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#1a1208;cursor:default}
+.ma-sq.ma-past{opacity:.35}
 .equip-opt-tgl.locked{opacity:.4;cursor:not-allowed}
 
 .ex-swap-btn{background:none;border:none;color:var(--gold);font-size:11px;cursor:pointer;margin-left:8px;padding:0;vertical-align:middle}

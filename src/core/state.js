@@ -357,6 +357,7 @@ function render(){
   if(typeof renderPtDayUI==="function") renderPtDayUI();
   if(typeof renderEquipProfileUI==="function") renderEquipProfileUI();
   if(typeof renderAvoidTagsUI==="function") renderAvoidTagsUI();
+  if(typeof renderMonthAheadHtml==="function") renderMonthAheadHtml();
   if(typeof renderCoachToday==="function") renderCoachToday();
   if(typeof renderSkillsTab==="function") renderSkillsTab();
   if(typeof renderBaseline==="function") renderBaseline();

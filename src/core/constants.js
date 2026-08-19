@@ -475,23 +475,31 @@ const SESSIONS = {
   other:{name:"Other / Custom", areas:[],
     bw:[{n:"Custom exercise", t:"reps", w:true, custom:true}],
     gym:[{n:"Custom exercise", t:"reps", w:true, custom:true}]},
-  // Optional session types (FM-2): the weekly scheduler never auto-assigns
-  // these — they only appear as a coach suggestion on a day whose active
-  // equipment profile carries the matching tag, and only once opted in via
-  // S.optionalSessions. Single-tier pool (no bw/gym split — access is binary:
-  // you either have the pool/wall that day, or the session isn't offered).
+  // Optional session types (FM-2). v217-session career-arc/coaching pass:
+  // when the active equipment profile carries the matching tag, these now
+  // ALSO get automatically woven into the real weekly rotation on a bounded
+  // cadence (see assignWeekSessions()'s weave step, training.js) — the
+  // manual "feel like a change today?" chip + S.optionalSessions opt-in
+  // (optionalSessionSuggestions(), still below) remain as a SEPARATE,
+  // secondary way to get one on a day it wasn't auto-scheduled.
+  // Single-slot pool (bw[0] + the other 2 variants in alt[0]) rather than 3
+  // separate bw[] slot-indices — reuses sessionSlotPool()/resolveSlot()'s
+  // existing single-slot pick-one-of-N rotation (same mechanism every non-
+  // pickOne session's individual exercise slots already use) instead of
+  // needing pickOne's dispatch, which is hardcoded to pickRunIndex() and
+  // would resolve the wrong index semantics for these.
   swim:{name:"Swim (optional)", areas:["cardio"], optional:true, eq:["pool"],
-    bw:[
-      {n:"Easy continuous swim, 20–30 min", t:"time", m:["cardio","full-body"]},
+    bw:[{n:"Easy continuous swim, 20–30 min", t:"time", m:["cardio","full-body"]}],
+    alt:{0:[
       {n:"Swim intervals — 50m hard / 30s rest ×8–10", t:"time", m:["cardio","full-body"]},
       {n:"Kickboard + pull-buoy technique set, 20 min", t:"time", m:["legs","back"]},
-    ]},
+    ]}},
   climb:{name:"Rock Climbing (optional)", areas:["pull","core","legs"], optional:true, eq:["climbwall"],
-    bw:[
-      {n:"Bouldering — top-out problems, moderate grade, 45–60 min", t:"time", m:["back","forearms","core"]},
+    bw:[{n:"Bouldering — top-out problems, moderate grade, 45–60 min", t:"time", m:["back","forearms","core"]}],
+    alt:{0:[
       {n:"Top-rope climbing, 45–60 min", t:"time", m:["back","forearms","legs"]},
       {n:"Traverse laps for grip/pull endurance, 30–40 min", t:"time", m:["forearms","back"]},
-    ]},
+    ]}},
 };
 // resolve a session's exercise list for the current equipment mode
 // Weather conditions. "outdoorBad" = conditions where you'd skip outdoor work.

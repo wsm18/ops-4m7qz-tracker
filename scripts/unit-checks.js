@@ -311,6 +311,66 @@ function ok(fails, label, cond) {
   ok(fails, "recoveryReadiness: a short night (<6h) contributes a negative flag", !!(sleepFlagResult.low && sleepFlagResult.low.detail && sleepFlagResult.low.detail.includes("sleep")));
   ok(fails, "recoveryReadiness: a long night (>=7.5h) still reads as ready", !!(sleepFlagResult.high && sleepFlagResult.high.level==="ready"));
 
+  // ---- weaveOptionalSessions() (via assignWeekSessions): automatic
+  // pool/rock-climbing days only fire on their assigned 4-week cadence AND
+  // only when the active equipment profile actually carries the matching
+  // tag — a same-day relabel, so it should never touch more than one day.
+  const weaveResult = await page.evaluate(() => {
+    S.activeEquipProfile = "ROTC/Campus Gym"; // has both pool + climbwall tags
+    const swimWeek = assignWeekSessions(new Date(2024,0,1));   // week 0 (swim cadence)
+    const normalWeek = assignWeekSessions(new Date(2024,0,8)); // week 1 (off cadence)
+    const climbWeek = assignWeekSessions(new Date(2024,0,15)); // week 2 (climb cadence)
+    const countOf = (assign, val) => Object.values(assign).filter(v => v === val).length;
+    S.activeEquipProfile = "Dorm"; // tags:[] — no pool/climbwall
+    const untaggedSwimWeek = assignWeekSessions(new Date(2024,0,1));
+    S.activeEquipProfile = "ROTC/Campus Gym";
+    return {
+      swimCount: countOf(swimWeek, "swim"),
+      climbCountOnSwimWeek: countOf(swimWeek, "climb"),
+      normalOffCadenceCount: countOf(normalWeek, "swim") + countOf(normalWeek, "climb"),
+      climbCount: countOf(climbWeek, "climb"),
+      untaggedSwimCount: countOf(untaggedSwimWeek, "swim"),
+    };
+  });
+  eq(fails, "weaveOptionalSessions: a qualifying week gets exactly one swim day", weaveResult.swimCount, 1);
+  eq(fails, "weaveOptionalSessions: swim week doesn't also weave in a climb day", weaveResult.climbCountOnSwimWeek, 0);
+  eq(fails, "weaveOptionalSessions: an off-cadence week gets neither swim nor climb", weaveResult.normalOffCadenceCount, 0);
+  eq(fails, "weaveOptionalSessions: the climb-cadence week gets exactly one climb day", weaveResult.climbCount, 1);
+  eq(fails, "weaveOptionalSessions: a profile without the pool tag never gets a swim day", weaveResult.untaggedSwimCount, 0);
+
+  // ---- sessionExForProfile("swim"/"climb"): the content reshape (single-
+  // slot bw+alt pool, replacing 3 separate bw[] slots) must resolve to
+  // exactly ONE worked exercise, not all 3 variants merged together.
+  const swimClimbExResult = await page.evaluate(() => {
+    const tags = activeEquipTags();
+    const swimWork = sessionExForProfile("swim", tags, new Date(2024,0,1)).filter(e => e._phase === "work");
+    const climbWork = sessionExForProfile("climb", tags, new Date(2024,0,1)).filter(e => e._phase === "work");
+    return { swimCount: swimWork.length, climbCount: climbWork.length };
+  });
+  eq(fails, "sessionExForProfile('swim'): resolves to exactly one worked exercise", swimClimbExResult.swimCount, 1);
+  eq(fails, "sessionExForProfile('climb'): resolves to exactly one worked exercise", swimClimbExResult.climbCount, 1);
+
+  // ---- Month-ahead view data integrity: a 28-day planForDay() pull (the
+  // exact loop renderMonthAheadHtml() runs) must never throw and every
+  // returned plan needs a valid intensity to color its square.
+  const monthResult = await page.evaluate(() => {
+    const VALID = ["hard","moderate","easy","rest"];
+    let threw = false, badIntensity = 0, count = 0;
+    const start = new Date(); start.setHours(0,0,0,0);
+    for (let i = 0; i < 28; i++) {
+      const d = new Date(start); d.setDate(start.getDate() + i);
+      try {
+        const p = planForDay(d);
+        count++;
+        if (!p || !VALID.includes(p.intensity)) badIntensity++;
+      } catch (e) { threw = true; }
+    }
+    return { threw, badIntensity, count };
+  });
+  ok(fails, "planForDay: a 28-day month-ahead pull never throws", !monthResult.threw);
+  eq(fails, "planForDay: every day in a 28-day pull has a valid intensity", monthResult.badIntensity, 0);
+  eq(fails, "planForDay: a 28-day month-ahead pull covers all 28 days", monthResult.count, 28);
+
   console.log("UNIT CHECKS", fails.length === 0 ? "PASS" : "FAIL");
   fails.forEach((f) => console.log("  FAIL: " + f));
   if (pageErrors.length) { console.log("PAGEERRORS DURING SETUP", pageErrors.length); pageErrors.forEach((e) => console.log("  " + e)); }

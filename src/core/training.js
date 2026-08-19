@@ -225,6 +225,8 @@ const SESSION_META = {
   s3:{ intensity:"hard",     label:"Strength B — Upper + Core" },
   s4:{ intensity:"hard",     label:"AFT Circuit — your weak events" },
   s5:{ intensity:"easy",     label:"Mobility + Balance (recovery)" },
+  swim:{ intensity:"moderate", label:"Swim (cross-training)" },
+  climb:{ intensity:"hard",    label:"Rock Climbing (cross-training)" },
 };
 const SESSION_META_S2 = {
   first:  { intensity:"moderate", label:"Run (keep it easy/tempo, not all-out)" },
@@ -383,7 +385,32 @@ function assignWeekSessions(mondayDate){
   nonGymDays.forEach(d=>{ if(!assign[d] && poolA.length) assign[d]=poolA.shift(); });
   gymDays.forEach(d=>{ if(!assign[d] && poolB.length) assign[d]=poolB.shift(); });
   days.forEach(d=>{ if(!assign[d]) assign[d]=null; });
-  return spaceOutHardDays(assign, days);
+  const spaced=spaceOutHardDays(assign, days);
+  return weaveOptionalSessions(spaced, days, mondayDate);
+}
+// Automatic pool/rock-climbing days (v218 coaching-improvements pass): a
+// same-day RELABEL of an already-spaced week, never a day-move — so it can't
+// disturb the hard-day-spacing guarantee spaceOutHardDays() just established
+// on the original s1/s3/s4 keys. Fully backward-compatible/zero-effect for
+// anyone whose active equipment profile doesn't carry the pool/climbwall
+// tag. Spread across the existing 4-week cadence so it doesn't collide with
+// the deload week (week%4===3, planForDay()): week 0 = swim variety, week 1
+// = normal, week 2 = climb variety, week 3 = deload. The manual "feel like a
+// change today?" chip (optionalSessionSuggestionHtml(), plan.js) and its
+// S.optionalSessions opt-in are unrelated and untouched by this — still
+// available for spontaneous variety on a week this doesn't fire.
+function weaveOptionalSessions(assign, days, mondayDate){
+  const tags=typeof activeEquipTags==="function"?activeEquipTags():[];
+  const week=weeksSinceEpoch(mondayDate);
+  if(tags.includes("pool") && week%4===0){
+    const d=days.find(d=>assign[d]==="s2");
+    if(d!=null) assign[d]="swim";
+  }
+  if(tags.includes("climbwall") && week%4===2){
+    const d=days.find(d=>assign[d]==="s3");
+    if(d!=null) assign[d]="climb";
+  }
+  return assign;
 }
 // Which of this week's two s2 (Run) slots a given day is — "first" (earlier,
 // the quality/moderate run) or "second" (later, the hard/long one) — or null

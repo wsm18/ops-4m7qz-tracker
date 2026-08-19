@@ -29,6 +29,38 @@ function renderPlanPriorities(){
   const solid=evts.filter(e=>last.scores[e.k]!=null&&last.scores[e.k]>=70).map(e=>e.label);
   el.innerHTML=`<div class="phase">🎯 <b>Your priorities (from your AFT history):</b> ${esc(focus)}${solid.length?` The rest (${esc(solid.join(", "))}) are solid — maintain them.`:''}</div>`;
 }
+// v218 — a live 28-day forecast built by calling planForDay() fresh each render.
+// No stored schedule to go stale: gymAccessForDate()/ptDayForDate() already fall
+// back to the saved default pattern for any week beyond the current one, so this
+// automatically reflects pattern or test-date changes with zero extra storage.
+function renderMonthAheadHtml(){
+  const el=document.getElementById("monthAhead"); if(!el) return;
+  if(typeof planForDay!=="function" || typeof weekMonday!=="function"){ el.innerHTML=""; return; }
+  const today=new Date(); today.setHours(0,0,0,0);
+  const startMon=weekMonday(today);
+  const DOW=["M","T","W","T","F","S","S"];
+  const intensityColor={hard:"var(--ember)",moderate:"var(--gold)",easy:"var(--jade)",rest:"var(--ink-faint)"};
+  let cells=`<div></div>`+DOW.map(d=>`<div class="ma-dow">${d}</div>`).join("");
+  for(let w=0; w<4; w++){
+    const first=new Date(startMon); first.setDate(startMon.getDate()+w*7);
+    const last=new Date(startMon); last.setDate(startMon.getDate()+w*7+6);
+    const rangeLabel=`${first.toLocaleDateString(undefined,{month:"short",day:"numeric"})}–${last.toLocaleDateString(undefined,{month:"short",day:"numeric"})}`;
+    cells+=`<div class="ma-week-label">${esc(rangeLabel)}</div>`;
+    for(let i=0;i<7;i++){
+      const d=new Date(startMon); d.setDate(startMon.getDate()+w*7+i);
+      let plan=null; try{ plan=planForDay(d); }catch(e){}
+      const isPast=d<today;
+      const color=plan?(intensityColor[plan.intensity]||"var(--ink-faint)"):"var(--ink-faint)";
+      const mark=plan&&(plan.taper||plan.deload)?"◆":(plan&&(plan.session==="swim"||plan.session==="climb")?"●":"");
+      const title=`${localYMD(d)} — ${plan?(plan.label||plan.intensity):"rest"}`;
+      cells+=`<div class="ma-sq${isPast?' ma-past':''}" style="background:${color}" title="${esc(title)}">${mark}</div>`;
+    }
+  }
+  el.innerHTML=`<div class="ma-card">
+    <div class="ma-legend"><span><i style="background:var(--ember)"></i>hard</span><span><i style="background:var(--gold)"></i>moderate</span><span><i style="background:var(--jade)"></i>easy</span><span><i style="background:var(--ink-faint)"></i>rest</span><span>◆ taper/deload</span><span>● swim/climb</span></div>
+    <div class="ma-grid">${cells}</div>
+  </div>`;
+}
 // Beginner starting prescriptions — sets/reps/weight/rest for each session
 // Bodyweight (bw) and gym variants match SESSIONS s1-s4
 const BEGINNER_RX = {
